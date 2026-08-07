@@ -1,0 +1,1815 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mağaza Performans Raporu</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<style>
+  :root{ --accent:#C8A066; --dark:#2d2d2d; --bg:#f6f4f1; --line:#e2ddd4; --pasif:#aaa;
+         --grey:#d9d9d9; --yellow:#fff2a8; --green:#2e7d32; --red:#a34141; }
+  *{box-sizing:border-box;}
+  body{ margin:0; font-family:'Segoe UI', system-ui, sans-serif; background:var(--bg); color:#222; font-size:12.5px; }
+  header{
+    background:#fff; padding:8px 14px; border-bottom:1px solid var(--line);
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;
+    position:sticky; top:0; z-index:10;
+  }
+  header h1{ font-size:.95rem; margin:0; }
+  header .sub{ font-size:.7rem; color:#888; }
+  .tab-bar{ display:flex; gap:4px; }
+  .header-center{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+  .tab-btn{
+    background:#f1efe9; color:#666; border:none; padding:8px 16px; border-radius:8px 8px 0 0;
+    cursor:pointer; font-size:.82rem; font-weight:600; border-bottom:3px solid transparent;
+  }
+  .tab-btn.active{ background:#fff; color:var(--dark); border-bottom:3px solid var(--accent); }
+  .tab-btn:hover:not(.active){ background:#e8e5dd; }
+
+  .araclar-page{ margin:0; padding:16px; }
+  .tools-grid{ display:grid; grid-template-columns:repeat(4, 110px); gap:14px; justify-content:center; max-width:1300px; margin:0 auto; }
+  .tool-tile{
+    width:110px; height:110px; background:#fff; border-radius:12px; box-shadow:0 1px 3px rgba(0,0,0,.08);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
+    cursor:pointer; position:relative; padding:8px; text-align:center;
+  }
+  .tool-tile:hover{ box-shadow:0 3px 8px rgba(0,0,0,.15); }
+  .tool-tile .tool-icon{ font-size:1.8rem; }
+  .tool-tile .tool-name{ font-size:.68rem; font-weight:600; color:#444; word-break:break-word; line-height:1.2; }
+  .tool-tile .tool-del{
+    position:absolute; top:4px; right:6px; background:none; border:none; color:#bbb; font-size:.8rem; cursor:pointer;
+  }
+  .tool-tile .tool-del:hover{ color:var(--red); }
+  .tool-tile .tool-dl{
+    position:absolute; top:4px; left:6px; background:none; border:none; color:#bbb; font-size:.8rem; cursor:pointer;
+  }
+  .tool-tile .tool-dl:hover{ color:var(--accent); }
+  .tool-tile.add-tile{ border:2px dashed #ccc; background:transparent; box-shadow:none; color:#999; }
+  .tool-tile.add-tile:hover{ border-color:var(--accent); color:var(--accent); }
+
+  .tool-viewer-bar{ position:relative; display:flex; align-items:center; padding:6px 0 14px; min-height:34px; }
+  .tool-viewer-title{
+    position:absolute; left:50%; top:6px; transform:translateX(-50%);
+    font-size:1rem; font-weight:700; color:var(--dark);
+  }
+  #toolFrameHolder{ background:#fff; border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,.08); overflow:hidden; width:100%; height:calc(100vh - 150px); }
+  #toolFrameHolder iframe{ border:none; display:block; }
+
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(0,0,0,.4); display:flex; align-items:center; justify-content:center; z-index:100;
+  }
+  .modal-box{ background:#fff; border-radius:12px; padding:20px; width:520px; max-width:92vw; }
+  .modal-box h3{ margin:0 0 12px; font-size:1rem; }
+  .modal-box label{ display:block; font-size:.75rem; color:#666; margin:8px 0 4px; }
+  .modal-box input[type=text]{ width:100%; padding:8px 10px; border-radius:7px; border:1px solid #ddd; }
+  .modal-box textarea{ width:100%; height:220px; padding:8px 10px; border-radius:7px; border:1px solid #ddd; font-family:monospace; font-size:.75rem; }
+  .dropzone{
+    border:2px dashed #ccc; border-radius:10px; padding:18px 10px; text-align:center; font-size:.8rem;
+    color:#777; cursor:pointer; margin-bottom:6px; transition:background .2s, border-color .2s;
+  }
+  .dropzone.dragover{ background:#fdf6ea; border-color:var(--accent); color:var(--accent); }
+  .dropzone.loaded{ border-color:var(--green); color:var(--green); background:#f3fbf3; }
+  .modal-actions{ display:flex; justify-content:flex-end; gap:8px; margin-top:14px; }
+
+  .top-controls{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+  .top-controls input[type=month]{ padding:5px 8px; border-radius:7px; border:1px solid #ddd; font-size:.75rem; }
+  .paste-box{
+    padding:5px 8px; border-radius:7px; border:1px dashed var(--accent); font-size:.72rem;
+    width:180px; background:#fffdf8; color:#a08a5e; resize:none; font-family:inherit;
+  }
+  .btn{ background:var(--dark); color:#fff; border:none; padding:6px 11px; border-radius:16px; cursor:pointer; font-size:.72rem; }
+  .btn.undo{ background:var(--red); }
+  .btn:disabled{ opacity:.4; cursor:default; }
+
+  .page-layout{ display:flex; gap:14px; align-items:flex-start; padding:14px; margin:0; }
+  .left-col{ flex:1 1 auto; min-width:0; }
+  .right-col{ flex:0 0 300px; }
+
+  .month-grid{ display:grid; grid-template-columns:1fr 1fr; grid-template-rows:repeat(3, auto); grid-auto-flow:column; gap:10px; }
+  @media (max-width: 900px){ .page-layout{ flex-direction:column; } .month-grid{ grid-template-columns:1fr; grid-auto-flow:row; } .right-col{ flex:1 1 auto; width:100%; } }
+
+  .month-year-picker{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+  .my-months{ display:flex; gap:3px; flex-wrap:wrap; }
+  .my-month-btn{
+    background:#f1efe9; color:#555; border:none; padding:4px 9px 5px; border-radius:6px; cursor:pointer; font-size:.72rem;
+    display:flex; flex-direction:column; align-items:center; gap:0;
+  }
+  .my-month-btn .cur-arrow{ font-size:.5rem; line-height:1; height:7px; color:var(--accent); }
+  .my-month-btn.active .cur-arrow{ color:#ffd98a; }
+  .my-month-btn .month-label{ line-height:1.1; }
+  .my-month-btn.active{ background:var(--dark); color:#fff; font-weight:600; }
+  .my-month-btn:hover:not(.active){ background:#e6e2d8; }
+  #yearSel{ padding:5px 8px; border-radius:6px; border:1px solid #ddd; font-size:.75rem; }
+
+  .week-photo-picker{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .wpp-label{ font-size:.72rem; color:#666; }
+  .wpp-tiles{ display:flex; gap:4px; }
+  .wpp-tile{
+    width:26px; height:30px; border-radius:6px; border:1px solid #ccc; background:#fff; color:#777;
+    font-size:.72rem; font-weight:600; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0; padding:0;
+  }
+  .wpp-cur-arrow{ font-size:.5rem; line-height:1; height:7px; color:var(--accent); }
+  .wpp-tile.selected .wpp-cur-arrow{ color:#ffd98a; }
+  .wpp-tile.selected{ background:var(--accent); color:#fff; border-color:var(--accent); }
+  .wpp-tile:hover:not(.selected){ background:#f5f0e8; }
+
+  .sim-date-picker{ display:flex; align-items:center; gap:6px; }
+  .sim-date-picker input[type=date]{ padding:4px 7px; border-radius:6px; border:1px solid #ddd; font-size:.72rem; }
+  .sim-date-picker.active input[type=date]{ border-color:var(--accent); background:#fffbf3; }
+
+  .week-block{ background:#fff; border-radius:8px; padding:8px 9px; box-shadow:0 1px 3px rgba(0,0,0,.06); }
+  .week-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; flex-wrap:wrap; gap:5px; }
+  .week-head .title{ font-weight:600; font-size:.75rem; }
+  .hedef-badge{ font-size:.68rem; padding:2px 8px; border-radius:10px; background:#eee; font-weight:600; }
+  .hedef-badge.good{ background:#c8e6c9; color:var(--green); }
+  .btn-mini{ border:none; background:#eee; border-radius:50%; width:22px; height:22px; cursor:pointer; font-size:.7rem; line-height:1; }
+  .btn-mini:hover{ background:#ddd; }
+  .weekgoal-input{ width:64px; font-size:.62rem; padding:2px 5px; border-radius:6px; border:1px solid #ccc; text-align:right; }
+
+  table.grid{ width:100%; border-collapse:collapse; font-size:.6rem; table-layout:fixed; }
+  table.grid th, table.grid td{ padding:3px 2px; border:1px solid var(--line); text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  table.grid th:first-child, table.grid td:first-child{ width:52px; }
+  table.grid th:not(:first-child), table.grid td:not(:first-child){ width:44px; }
+  table.grid thead th{ background:var(--dark); color:#fff; font-weight:600; font-size:.58rem; }
+  table.grid thead th.gh{ background:var(--accent); }
+  table.grid tbody th{ text-align:left; background:#faf8f5; font-weight:600; white-space:nowrap; font-size:.6rem; padding-left:5px; }
+  table.grid td.gh-cell{ background:#fbf3e6; font-weight:600; }
+  table.grid td.computed{ background:#f5f5f0; font-weight:600; color:#555; }
+  table.grid td.today-col{ box-shadow: inset 0 0 0 1.5px rgba(178,122,58,.55); font-weight:700; }
+  table.grid th.today-col{ background:#a97c4f !important; color:#fff; }
+  td.editable{ cursor:text; min-width:30px; }
+  td.editable:hover{ background:#f5f0e8; }
+  td.editable:focus{ outline:2px solid var(--accent); background:#fffbf3; }
+  td.editable:empty::before{ content:'-'; color:var(--pasif); font-style:italic; }
+
+  .status-msg{ font-size:.7rem; color:#888; margin-top:8px; padding:7px 9px; background:#fff; border-radius:8px; }
+  .status-msg.error{ color:var(--red); font-weight:600; }
+
+  @keyframes flashPulse{
+    0%{ background-color:#fff59d; box-shadow:0 0 0 2px #f4b400 inset; }
+    75%{ background-color:#fff59d; box-shadow:0 0 0 2px #f4b400 inset; }
+    100%{ background-color:inherit; box-shadow:none; }
+  }
+  .flash-highlight{ animation: flashPulse 6s ease-out; }
+  @keyframes flashBoxPulse{
+    0%{ box-shadow:0 0 0 3px #f4b400; }
+    75%{ box-shadow:0 0 0 3px #f4b400; }
+    100%{ box-shadow:0 0 0 0 transparent; }
+  }
+  .flash-highlight-box{ animation: flashBoxPulse 6s ease-out; }
+
+  .rt-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+  .rt-title{ font-weight:800; font-size:1.1rem; letter-spacing:1px; color:var(--dark); }
+
+  .employee-targets-row{ display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; }
+  .employee-targets-row .targets-box{ flex:1 1 200px; }
+  .targets-box{ background:#fff; border-radius:7px; padding:5px 7px; margin-bottom:0; box-shadow:0 1px 3px rgba(0,0,0,.06); }
+  .targets-title{ font-size:.6rem; font-weight:700; color:#555; margin-bottom:3px; display:flex; align-items:center; gap:3px; }
+  .emp-name-input{ border:none; background:transparent; color:#999; font-weight:600; font-size:.64rem; width:70px; padding:0; }
+  .emp-name-input:focus{ outline:none; color:#666; border-bottom:1px dashed #ccc; }
+  .targets-row{ display:flex; gap:4px; flex-wrap:wrap; }
+  .target-field{ display:flex; flex-direction:column; gap:1px; flex:1 1 46px; }
+  .target-field label{ font-size:.52rem; color:#888; }
+  .target-field input{ width:100%; padding:2px 3px; border-radius:4px; border:1px solid #ddd; font-size:.6rem; text-align:right; }
+
+  .month-compare-box{ background:#fff; border-radius:8px; padding:8px 10px; margin:6px 0; box-shadow:0 1px 3px rgba(0,0,0,.06); }
+  .mcb-title{ font-size:.65rem; font-weight:700; color:#555; margin-bottom:6px; }
+  table.mcb-table{ width:100%; border-collapse:collapse; font-size:.62rem; }
+  table.mcb-table th{ text-align:right; color:#888; font-weight:600; font-size:.58rem; padding:3px 4px; border-bottom:1px solid var(--line); }
+  table.mcb-table th:first-child{ text-align:left; }
+  table.mcb-table td{ text-align:right; padding:4px; border-bottom:1px solid #f0ede6; }
+  table.mcb-table td.mcb-label{ text-align:left; font-weight:600; color:#444; }
+  table.mcb-table td.up{ color:var(--green); font-weight:700; }
+  table.mcb-table td.down{ color:var(--red); font-weight:700; }
+
+  .month-summary-box{ background:#fff; border-radius:8px; padding:8px 10px; margin:6px 0; box-shadow:0 1px 3px rgba(0,0,0,.06); }
+  .ms-title{ font-size:.65rem; font-weight:700; color:#555; margin-bottom:5px; }
+  .ms-grid{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:5px; }
+  .ms-grid > div{ background:#f7f5f0; border-radius:5px; padding:4px 5px; font-size:.55rem; color:#666; text-align:center; }
+  .ms-grid > div b{ display:block; font-size:.62rem; color:#222; margin-top:2px; }
+
+  /* Right panel - spreadsheet-style table matching reference image */
+  .report-panel{ background:#fff; border-radius:6px; padding:0; box-shadow:0 1px 3px rgba(0,0,0,.06); overflow:hidden; }
+  table.rt-table{ width:100%; border-collapse:collapse; font-size:.5rem; }
+  table.rt-table td, table.rt-table th{ border:1px solid #bbb; padding:2px 3px; }
+  table.rt-table .rt-date{ font-weight:700; }
+  table.rt-table .rt-store{ font-weight:800; }
+  table.rt-table .rt-formul-head{ font-weight:700; text-align:center; font-size:.48rem; }
+  table.rt-table td.rt-label{ text-align:left; padding-right:3px; white-space:nowrap; }
+  table.rt-table td.rt-label.rt-red{ color:#c0392b; font-weight:600; }
+  table.rt-table td.rt-grey{ background:var(--grey); text-align:center; font-weight:700; width:40px; padding-left:2px; }
+  table.rt-table td.rt-grey[contenteditable="true"]{ cursor:text; }
+  table.rt-table td.rt-grey[contenteditable="true"]:focus{ outline:2px solid var(--accent); background:#fffbf3; }
+  table.rt-table td.rt-yellow{ background:var(--yellow); text-align:center; font-weight:700; vertical-align:middle; width:38px; }
+  table.rt-table td.rt-yellow.up{ color:var(--green); }
+  table.rt-table td.rt-yellow.down{ color:var(--red); }
+  table.rt-table td.rt-spacer{ border:none; height:4px; background:#fff; }
+  .rt-triangle{ font-size:.6rem; margin-left:3px; }
+  .rt-triangle.down{ color:var(--red); }
+  .rt-triangle.up{ color:var(--green); }
+  table.rt-table td.rt-comment{ text-align:left; vertical-align:top; }
+
+  .send-btn{ width:100%; margin-top:10px; background:#2b579a; color:#fff; border:none; padding:9px; border-radius:8px; cursor:pointer; font-size:.78rem; font-weight:600; transition:background .3s; }
+  .send-btn.success{ background:var(--green); }
+  .send-btn.error{ background:var(--red); }
+  .send-btn:disabled{ opacity:.75; cursor:default; }
+  .send-btn-row{ display:flex; gap:6px; margin-top:10px; }
+  .send-btn-row .send-btn.small{ margin-top:0; padding:8px 4px; font-size:.66rem; flex:1; }
+  .send-btn-row .send-btn.small:disabled{ background:#ccc; color:#888; }
+
+  .login-screen{
+    position:fixed; inset:0; background:var(--bg); display:flex; align-items:center; justify-content:center; z-index:1000;
+  }
+  .login-box{
+    background:#fff; border-radius:16px; padding:36px 32px; width:320px; max-width:90vw; text-align:center;
+    box-shadow:0 6px 24px rgba(0,0,0,.12);
+  }
+  .login-logo{ font-size:2.2rem; margin-bottom:6px; }
+  .login-box h2{ font-size:1.05rem; margin:0 0 4px; color:var(--dark); }
+  .login-sub{ font-size:.78rem; color:#888; margin:0 0 18px; }
+  .login-box input{
+    width:100%; padding:11px 12px; border-radius:8px; border:1.5px solid #ddd; font-size:.9rem;
+    margin-bottom:12px; text-align:center;
+  }
+  .login-box input:focus{ outline:none; border-color:var(--accent); }
+  .login-btn{
+    width:100%; padding:11px; border-radius:8px; border:none; background:var(--dark); color:#fff;
+    font-size:.88rem; font-weight:600; cursor:pointer;
+  }
+  .login-btn:hover{ opacity:.9; }
+  .login-btn:disabled{ opacity:.5; cursor:default; }
+  .login-status{ font-size:.75rem; color:var(--red); margin-top:10px; min-height:14px; }
+  .login-loading{ font-size:.75rem; color:#888; margin-top:10px; }
+</style>
+</head>
+<body>
+
+<div id="loginScreen" class="login-screen">
+  <div class="login-box">
+    <div class="login-logo">🏪</div>
+    <h2>Mağaza Performans Raporu</h2>
+    <p class="login-sub">Devam etmek için şifreyi girin</p>
+    <input type="password" id="loginPassword" placeholder="Şifre" autocomplete="current-password">
+    <button class="login-btn" id="loginBtn" onclick="tryLogin()">Giriş Yap</button>
+    <div class="login-status" id="loginStatus"></div>
+    <div class="login-loading" id="loginLoading" style="display:none;">Veriler yükleniyor...</div>
+  </div>
+</div>
+
+<div id="appRoot" style="display:none;">
+
+<header>
+  <div class="tab-bar">
+    <button class="tab-btn active" id="tabRaporBtn" onclick="showTab('rapor')">📊 Rapor</button>
+    <button class="tab-btn" id="tabAraclarBtn" onclick="showTab('araclar')">🧰 Araçlar</button>
+  </div>
+  <div class="header-center" id="headerCenter">
+    <div class="month-year-picker" id="monthYearPicker"></div>
+    <div class="week-photo-picker">
+      <span class="wpp-label">📷 Hafta Fotoğrafı:</span>
+      <div class="wpp-tiles" id="wppTiles"></div>
+      <button class="btn accent" id="wppCaptureBtn" type="button">Çek</button>
+    </div>
+    <div class="sim-date-picker">
+      <span class="wpp-label">🕒 Simüle Tarih:</span>
+      <input type="date" id="simDateInput">
+      <button class="btn-mini" id="simResetBtn" type="button" title="Gerçek güne dön">↺</button>
+    </div>
+  </div>
+  <div class="top-controls" id="raporControls">
+    <button class="btn" id="exportBtn" type="button">⬇ Dışa Aktar</button>
+    <button class="btn undo" id="undoBtn" disabled onclick="undoLast()">↩ Geri Al</button>
+    <button class="btn accent" id="addDataBtn" type="button">➕ Veri Ekle</button>
+  </div>
+</header>
+
+<div class="page-layout" id="raporPage">
+  <div class="left-col">
+    <div class="month-grid" id="monthContainer"></div>
+    <div class="employee-targets-row" id="employeeTargetsRow"></div>
+    <div class="status-msg" id="statusMsg">Buraya yapıştırın, otomatik işlenir.</div>
+  </div>
+
+  <div class="right-col">
+    <div class="report-panel" id="reportPanel"></div>
+  </div>
+</div>
+
+<div class="araclar-page" id="araclarPage" style="display:none;">
+  <div id="toolsGridView">
+    <div class="tools-grid" id="toolsGrid"></div>
+  </div>
+  <div id="toolViewerView" style="display:none;">
+    <div class="tool-viewer-bar">
+      <button class="btn" onclick="closeToolViewer()">← Araçlara Dön</button>
+      <span id="toolViewerName" class="tool-viewer-title"></span>
+    </div>
+    <div id="toolFrameHolder"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="addToolModal" style="display:none;">
+  <div class="modal-box">
+    <h3>Yeni Araç Ekle</h3>
+    <div class="dropzone" id="toolDropzone">
+      📁 Bir .html dosyasını buraya sürükleyin<br><span style="font-size:.68rem;color:#999;">(veya tıklayıp seçin)</span>
+      <input type="file" id="toolFileInput" accept=".html,.htm" style="display:none;">
+    </div>
+    <div style="text-align:center;font-size:.7rem;color:#aaa;margin:6px 0;">— veya elle doldurun —</div>
+    <label>Araç Adı</label>
+    <input type="text" id="newToolName" placeholder="ör. Vardiya Yardımcısı">
+    <label>HTML Kodu</label>
+    <textarea id="newToolCode" placeholder="Buraya tam HTML kodunu yapıştırın..."></textarea>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeAddToolModal()">İptal</button>
+      <button class="btn accent" onclick="saveNewTool()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<script>
+
+const GUN_ADLARI = ['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar'];
+const GUN_KISA = ['Pzt','Sal','Çar','Per','Cum','Cmt','Paz'];
+const NUMERIC_FIELDS = ['ciro','mgs','fbu','fbs','toplu_satis','hedef'];
+const EXTRA_NUMERIC_FIELDS = ['yildiz_urun_adet','deterjan','leke','sivi_sabun','mendil','koli'];
+const undoStack = [];
+
+function setStatus(msg, isError){
+  const el = document.getElementById('statusMsg');
+  el.textContent = msg;
+  el.className = 'status-msg' + (isError ? ' error' : '');
+}
+
+let simulatedToday = null; // null = gerçek gün; aksi halde 'YYYY-MM-DD' formatında simüle edilen gün
+function getNow(){
+  return simulatedToday ? new Date(simulatedToday + 'T12:00:00') : new Date();
+}
+
+function pad(n){ return n<10 ? '0'+n : ''+n; }
+function dateStr(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+function shortDate(d){ return pad(d.getDate())+'.'+pad(d.getMonth()+1)+'.'+d.getFullYear().toString().slice(2); }
+function todayStr(offset=0){ const d=getNow(); d.setDate(d.getDate()+offset); return dateStr(d); }
+
+function isoWeekInfo(date){
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNum = (d.getUTCDay()+6)%7;
+  d.setUTCDate(d.getUTCDate()-dayNum+3);
+  const firstThursday = new Date(Date.UTC(d.getUTCFullYear(),0,4));
+  const week = 1 + Math.round(((d-firstThursday)/86400000 - 3 + ((firstThursday.getUTCDay()+6)%7))/7);
+  return {year:d.getUTCFullYear(), week};
+}
+function mondayOf(date){
+  const day = (date.getDay()+6)%7;
+  const m = new Date(date); m.setDate(date.getDate()-day); m.setHours(0,0,0,0);
+  return m;
+}
+function weeksInMonth(monthVal){
+  // Her ay için sabit kural: ayın 1'ini içeren doğal ilk hafta - 1 hafta önceki (geçen ayın son haftası)
+  // ile başlayıp, o haftadan sonraki 5 hafta ile devam ederek toplam 6 hafta üretir.
+  const [y,m] = monthVal.split('-').map(Number);
+  const first = new Date(y, m-1, 1);
+  const firstWeekMonday = mondayOf(first);
+  const weeks = [];
+  for(let i=-1;i<=4;i++){
+    const d = new Date(firstWeekMonday);
+    d.setDate(d.getDate() + i*7);
+    weeks.push(d);
+  }
+  return weeks;
+}
+
+function fmtTL(n){ if(n===undefined||n===null||n===''||isNaN(n)) return null; return Number(n).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})+' TL'; }
+function fmtK(n){ if(n===undefined||n===null||n===''||isNaN(n)) return null; return Number(n).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})+' K'; }
+function fmtNum(n){ if(n===undefined||n===null||n===''||isNaN(n)) return null; return Number(n).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function fmtInt(n){ if(n===undefined||n===null||n===''||isNaN(n)) return null; return Number(n).toLocaleString('tr-TR'); }
+function fmtPct(n){ if(n===undefined||n===null||isNaN(n)) return null; return Number(n).toFixed(1).replace('.',',')+'%'; }
+function fmtPctInt(n){ if(n===undefined||n===null||isNaN(n)) return null; return Math.round(n)+'%'; }
+function effectiveHedef(rec){
+  if(rec && rec.hedef!==undefined && rec.hedef!==null) return Number(rec.hedef);
+  return 35000;
+}
+function parseNumberInput(str){
+  if(str===null||str===undefined) return null;
+  str = String(str).replace(/TL/gi,'').trim();
+  if(str==='' || str==='-') return null;
+  str = str.replace(/\./g,'').replace(',', '.').replace(/[^\d.\-]/g,'');
+  const n = parseFloat(str);
+  return isNaN(n) ? null : n;
+}
+function mdoToNumber(str){
+  if(!str) return null;
+  const n = parseNumberInput(String(str).replace('%',''));
+  return n;
+}
+function avgOf(records, field, parser){
+  const vals = records
+    .map(r=>{
+      if(!r) return null;
+      const raw = r[field];
+      if(raw===null || raw===undefined || raw==='') return null;
+      return parser(raw);
+    })
+    .filter(v=>v!==null && v!==undefined && !isNaN(v));
+  if(!vals.length) return null;
+  return vals.reduce((a,b)=>a+b,0)/vals.length;
+}
+function sumOf(records, field){
+  const vals = records.filter(r=> r && r[field]!==null && r[field]!==undefined && r[field]!=='' && !isNaN(r[field]));
+  if(!vals.length) return null;
+  return vals.reduce((s,r)=> s + Number(r[field]), 0);
+}
+function selectAllOnFocus(el){
+  const range = document.createRange();
+  range.selectNodeContents(el);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+}
+
+function flashSelector(sel, boxMode){
+  requestAnimationFrame(()=>{
+    document.querySelectorAll(sel).forEach(el=>{
+      const cls = boxMode ? 'flash-highlight-box' : 'flash-highlight';
+      el.classList.remove(cls);
+      void el.offsetWidth; // reflow, animasyonu tekrar tetikler
+      el.classList.add(cls);
+      setTimeout(()=> el.classList.remove(cls), 6000);
+    });
+  });
+}
+function exportAllData(){
+  const data = {};
+  const entryRows = [];
+  Object.keys(cloudCache).forEach(k=>{
+    if(k.startsWith('entry:') || k.startsWith('weekgoal:') || k === 'gunlukHedef'){
+      data[k] = cloudCache[k];
+    }
+    if(k.startsWith('entry:')){
+      try{
+        const rec = JSON.parse(cloudCache[k]);
+        entryRows.push({
+          Tarih: rec.date || k.replace('entry:',''),
+          Ciro: rec.ciro ?? '',
+          Mdo: rec.mdo ?? '',
+          Fbü: rec.fbu ?? '',
+          Mgs: rec.mgs ?? '',
+          Fbs: rec.fbs ?? '',
+          Hedef: rec.hedef ?? '',
+          'Toplu S. (K)': rec.toplu_satis ?? '',
+          'Kesin mi': rec.final ? 'Evet' : 'Hayır'
+        });
+      }catch(e){ /* bozuk kayıt, atla */ }
+    }
+  });
+  entryRows.sort((a,b)=> a.Tarih.localeCompare(b.Tarih));
+
+  // 1) JSON yedek
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'magaza-veri-yedek-' + todayStr(0) + '.json';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+
+  // 2) Excel yedek
+  try{
+    const ws = XLSX.utils.json_to_sheet(entryRows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Günlük Veriler');
+    XLSX.writeFile(wb, 'magaza-veri-yedek-' + todayStr(0) + '.xlsx');
+  }catch(e){
+    setStatus('Excel dosyası oluşturulamadı: ' + e.message, true);
+  }
+
+  setStatus('Tüm veriler indirildi: magaza-veri-yedek-' + todayStr(0) + '.json ve .xlsx');
+}
+document.getElementById('exportBtn').addEventListener('click', exportAllData);
+function formatMdoInput(text){
+  text = (text||'').trim();
+  if(text === '' || text === '-') return null;
+  let n = mdoToNumber(text);
+  if(n===null) return text;
+  return '% ' + n.toFixed(2).replace('.', ',');
+}
+
+// ==================== FIREBASE / BULUT SENKRONİZASYONU ====================
+// AŞAĞIDAKİ firebaseConfig'i kendi Firebase projenizin bilgileriyle değiştirin.
+const firebaseConfig = {
+  apiKey: "AIzaSyCHkuLl0l90xXjEoeUnbCgxJsi4iIbjmK0",
+  authDomain: "mcrapor-e97aa.firebaseapp.com",
+  projectId: "mcrapor-e97aa",
+  storageBucket: "mcrapor-e97aa.firebasestorage.app",
+  messagingSenderId: "788228140989",
+  appId: "1:788228140989:web:106c9057fb8f27fe86ecd4",
+  measurementId: "G-FHDQ2FFPF1"
+};
+const LOGIN_EMAIL = "magaza@rapor.local"; // Firebase Authentication'da bu e-postayla TEK bir kullanıcı oluşturun, şifresi = ortak şifreniz
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let cloudCache = {}; // 'entry:YYYY-MM-DD', 'weekgoal:YYYY-Www', 'gunlukHedef' anahtarlarını localStorage gibi tutar
+let cloudReady = false;
+
+async function loadCloudCache(){
+  const snap = await db.collection('entries').get();
+  snap.forEach(doc => { cloudCache['entry:'+doc.id] = JSON.stringify(doc.data()); });
+
+  const wgSnap = await db.collection('weekgoals').get();
+  wgSnap.forEach(doc => { cloudCache['weekgoal:'+doc.id] = String(doc.data().value); });
+
+  const settingsDoc = await db.collection('settings').doc('general').get();
+  if(settingsDoc.exists && settingsDoc.data().gunlukHedef !== undefined){
+    cloudCache['gunlukHedef'] = String(settingsDoc.data().gunlukHedef);
+  }
+  cloudReady = true;
+}
+
+function listenCloudChanges(){
+  db.collection('entries').onSnapshot(snap=>{
+    let changed = false;
+    snap.docChanges().forEach(change=>{
+      if(change.type === 'removed'){ delete cloudCache['entry:'+change.doc.id]; }
+      else { cloudCache['entry:'+change.doc.id] = JSON.stringify(change.doc.data()); }
+      changed = true;
+    });
+    if(changed && cloudReady) renderAll();
+  });
+  db.collection('weekgoals').onSnapshot(snap=>{
+    let changed = false;
+    snap.docChanges().forEach(change=>{
+      if(change.type === 'removed'){ delete cloudCache['weekgoal:'+change.doc.id]; }
+      else { cloudCache['weekgoal:'+change.doc.id] = String(change.doc.data().value); }
+      changed = true;
+    });
+    if(changed && cloudReady) renderAll();
+  });
+  db.collection('settings').doc('general').onSnapshot(doc=>{
+    if(doc.exists && doc.data().gunlukHedef !== undefined){
+      cloudCache['gunlukHedef'] = String(doc.data().gunlukHedef);
+      if(cloudReady) renderAll();
+    }
+  });
+}
+
+function tryLogin(){
+  const pw = document.getElementById('loginPassword').value;
+  if(!pw){ document.getElementById('loginStatus').textContent = 'Lütfen şifreyi girin.'; return; }
+  document.getElementById('loginBtn').disabled = true;
+  document.getElementById('loginStatus').textContent = '';
+  auth.signInWithEmailAndPassword(LOGIN_EMAIL, pw)
+    .catch(err=>{
+      document.getElementById('loginBtn').disabled = false;
+      document.getElementById('loginStatus').textContent = '❌ Şifre yanlış veya bağlantı sorunu.';
+    });
+}
+document.getElementById('loginPassword').addEventListener('keydown', function(e){
+  if(e.key === 'Enter') tryLogin();
+});
+
+auth.onAuthStateChanged(async function(user){
+  if(user){
+    document.getElementById('loginLoading').style.display = 'block';
+    try{
+      await loadCloudCache();
+      listenCloudChanges();
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('appRoot').style.display = '';
+      startAppAfterLogin();
+    }catch(e){
+      document.getElementById('loginLoading').style.display = 'none';
+      document.getElementById('loginBtn').disabled = false;
+      document.getElementById('loginStatus').textContent = '❌ Veri yüklenemedi: ' + e.message;
+    }
+  } else {
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('appRoot').style.display = 'none';
+  }
+});
+
+// ==================== Rapor verisi (bulut tabanlı) ====================
+function getRecord(dateKey){
+  try{ const v = cloudCache['entry:'+dateKey]; return v ? JSON.parse(v) : null; }
+  catch(e){ setStatus('Kayıt okunamadı: '+e.message, true); return null; }
+}
+function setRecord(dateKey,obj){
+  cloudCache['entry:'+dateKey] = JSON.stringify(obj);
+  db.collection('entries').doc(dateKey).set(obj).catch(e=>{
+    setStatus('Buluta kaydedilemedi: '+e.message, true);
+  });
+}
+function getGunlukHedef(){
+  const v = cloudCache['gunlukHedef'];
+  return v ? Number(v) : 35000;
+}
+function setGunlukHedef(v){
+  cloudCache['gunlukHedef'] = String(v);
+  db.collection('settings').doc('general').set({gunlukHedef:v}, {merge:true}).catch(e=>{
+    setStatus('Buluta kaydedilemedi: '+e.message, true);
+  });
+}
+const EMP_FIELDS = ['ciro','fbu','fbs','instore'];
+function getEmpData(empKey, defaultName){
+  const name = localStorage.getItem(empKey+'_name');
+  const data = { name: name!==null ? name : defaultName };
+  EMP_FIELDS.forEach(f=>{
+    const v = localStorage.getItem(empKey+'_'+f);
+    data[f] = (v===null || v==='') ? '' : v;
+  });
+  return data;
+}
+function setEmpField(empKey, field, value){
+  localStorage.setItem(empKey+'_'+field, value);
+}
+
+function employeeTargetBoxHtml(empKey, defaultName){
+  const d = getEmpData(empKey, defaultName);
+  return `
+    <div class="targets-box">
+      <div class="targets-title">
+        🎯 <input type="text" class="emp-name-input" data-emp="${empKey}" value="${escapeHtml(d.name)}">
+      </div>
+      <div class="targets-row">
+        <div class="target-field"><label>Ciro</label><input type="number" class="emp-field-input" data-emp="${empKey}" data-field="ciro" value="${d.ciro}"></div>
+        <div class="target-field"><label>Fbü</label><input type="number" class="emp-field-input" data-emp="${empKey}" data-field="fbu" value="${d.fbu}"></div>
+        <div class="target-field"><label>Fbs</label><input type="number" class="emp-field-input" data-emp="${empKey}" data-field="fbs" value="${d.fbs}"></div>
+        <div class="target-field"><label>Instore Satış</label><input type="number" class="emp-field-input" data-emp="${empKey}" data-field="instore" value="${d.instore}"></div>
+      </div>
+    </div>`;
+}
+
+function attachEmployeeTargetHandlers(){
+  document.querySelectorAll('.emp-name-input').forEach(inp=>{
+    inp.addEventListener('change', function(){
+      setEmpField(this.dataset.emp, 'name', this.value.trim() || 'Çalışan');
+      flashSelector(`.emp-name-input[data-emp="${this.dataset.emp}"]`);
+    });
+  });
+  document.querySelectorAll('.emp-field-input').forEach(inp=>{
+    inp.addEventListener('change', function(){
+      setEmpField(this.dataset.emp, this.dataset.field, this.value);
+      flashSelector(`.emp-field-input[data-emp="${this.dataset.emp}"][data-field="${this.dataset.field}"]`);
+    });
+  });
+}
+
+function daysInMonth(year, month){ return new Date(year, month, 0).getDate(); } // month: 1-12
+function monthToDateTotal(year, month, uptoDay){
+  let total = 0, hasAny = false;
+  for(let d=1; d<=uptoDay; d++){
+    const rec = getRecord(`${year}-${pad(month)}-${pad(d)}`);
+    if(rec && rec.ciro){ total += Number(rec.ciro); hasAny = true; }
+  }
+  return hasAny ? total : null;
+}
+function monthAggregate(year, month, uptoDay){
+  let ciroSum=0, anyCiro=false;
+  let mdoVals=[], fbuVals=[], fbsVals=[], mgsVals=[], topluVals=[];
+  for(let d=1; d<=uptoDay; d++){
+    const rec = getRecord(`${year}-${pad(month)}-${pad(d)}`);
+    if(!rec) continue;
+    if(rec.ciro){ ciroSum += Number(rec.ciro); anyCiro = true; }
+    if(rec.mdo){ const n = mdoToNumber(rec.mdo); if(n!==null) mdoVals.push(n); }
+    if(rec.fbu!==undefined && rec.fbu!==null && rec.fbu!==''){ fbuVals.push(Number(rec.fbu)); }
+    if(rec.fbs!==undefined && rec.fbs!==null && rec.fbs!==''){ fbsVals.push(Number(rec.fbs)); }
+    if(rec.mgs!==undefined && rec.mgs!==null && rec.mgs!==''){ mgsVals.push(Number(rec.mgs)); }
+    if(rec.toplu_satis!==undefined && rec.toplu_satis!==null && rec.toplu_satis!==''){ topluVals.push(Number(rec.toplu_satis)); }
+  }
+  const sum = arr => arr.reduce((a,b)=>a+b,0);
+  const avg = arr => arr.length ? sum(arr)/arr.length : null;
+  return {
+    ciroSum: anyCiro ? ciroSum : null,
+    mdoAvg: avg(mdoVals),
+    fbuAvg: avg(fbuVals),
+    fbsAvg: avg(fbsVals),
+    mgsSum: mgsVals.length ? sum(mgsVals) : null,
+    mgsAvg: avg(mgsVals),
+    topluSum: topluVals.length ? sum(topluVals) : null,
+    topluAvg: avg(topluVals)
+  };
+}
+
+function getWeekGoal(weekKey){
+  const v = cloudCache['weekgoal:'+weekKey];
+  return (v===undefined || v===null || v==='') ? null : Number(v);
+}
+function setWeekGoal(weekKey, val){
+  const isEmpty = (val===null||val===undefined||isNaN(val));
+  cloudCache['weekgoal:'+weekKey] = isEmpty ? '' : String(val);
+  if(isEmpty){
+    db.collection('weekgoals').doc(weekKey).delete().catch(()=>{});
+  } else {
+    db.collection('weekgoals').doc(weekKey).set({value:val}).catch(e=>{
+      setStatus('Buluta kaydedilemedi: '+e.message, true);
+    });
+  }
+}
+
+function pushUndo(entry){ undoStack.push(entry); document.getElementById('undoBtn').disabled = false; }
+
+function undoLast(){
+  const entry = undoStack.pop();
+  if(!entry) return;
+  if(entry.type === 'cell'){
+    const rec = getRecord(entry.date) || {date: entry.date};
+    rec[entry.field] = entry.oldValue;
+    setRecord(entry.date, rec);
+  } else if(entry.type === 'guncelle'){
+    setRecord(entry.today, entry.oldToday);
+    setRecord(entry.yest, entry.oldYest);
+  } else if(entry.type === 'hedef'){
+    setGunlukHedef(entry.oldValue);
+  }
+  document.getElementById('undoBtn').disabled = undoStack.length===0;
+  setStatus('Son işlem geri alındı.');
+  renderAll();
+}
+
+function processClipboardText(text){
+  let data;
+  try{ data = JSON.parse(text); }
+  catch(e){ setStatus('Yapıştırılan veri JSON formatında değil, tekrar deneyin.', true); return; }
+  if(!data.ciro_bugun && data.ciro_bugun !== 0){
+    setStatus('Beklenen alanlar bulunamadı, bookmarklet çıktısını kontrol edin.', true); return;
+  }
+
+  const today = todayStr(0);
+  const yest = todayStr(-1);
+  const oldToday = getRecord(today);
+  const oldYest = getRecord(yest);
+
+  let t = oldToday ? {...oldToday} : {date: today};
+  t.ciro = data.ciro_bugun;
+  t.mdo = data.mdo_bugun;
+  t.mgs = data.mgs_bugun;
+  t.fbu = data.fbu_bugun;
+  t.fbs = data.fbs_bugun;
+  t.ciro_hafta_gecen = data.ciro_hafta_gecen;
+  t.ciro_hafta_bu = data.ciro_hafta_bu;
+  // ciro_gecenhafta_aynigun artık kaynak siteden değil, kendi arşivimizden hesaplanıyor (bkz. renderReportPanel)
+  t.final = false;
+
+  // Bugünkü toplu satış: bookmarklet'in tespit ettiği 2200 TL üzeri faturaların toplamı, "K" (bin) birimine çevrilerek otomatik yazılır.
+  if(data.buyuk_faturalar && Array.isArray(data.buyuk_faturalar)){
+    const topluSumTL = data.buyuk_faturalar.reduce((s,f)=> s + (Number(f.tutar)||0), 0);
+    t.toplu_satis = data.buyuk_faturalar.length ? Math.floor(topluSumTL/1000) : null;
+  } else if(t.toplu_satis===undefined){
+    t.toplu_satis = null;
+  }
+
+  setRecord(today, t);
+
+  let y = oldYest ? {...oldYest} : {date: yest};
+  y.ciro = data.ciro_dun;
+  y.mdo = data.mdo_dun;
+  y.final = true;
+  setRecord(yest, y);
+
+  pushUndo({type:'guncelle', today, yest, oldToday: oldToday || {date:today}, oldYest: oldYest || {date:yest}});
+  const faturaBilgisi = (data.buyuk_faturalar && data.buyuk_faturalar.length)
+    ? ` — ${data.buyuk_faturalar.length} büyük fatura, toplam ${t.toplu_satis} K`
+    : '';
+  setStatus('Güncellendi: '+today+' (bugün) ve '+yest+' (dün, kesin) — kaynak tarih: '+ (data.tarih||'-') + faturaBilgisi);
+  renderAll();
+  flashSelector(`[data-date="${today}"]`);
+  flashSelector(`[data-date="${yest}"]`);
+  flashSelector('#rtCaptureArea', true);
+}
+
+document.getElementById('addDataBtn').addEventListener('click', async function(){
+  let text = null;
+  try{
+    text = await navigator.clipboard.readText();
+  }catch(e){
+    setStatus('Pano okunamadı. Tarayıcınız izin istemiş olabilir, tekrar deneyin veya izin verin.', true);
+    return;
+  }
+  if(!text || !text.trim()){
+    setStatus('Pano boş görünüyor. Önce bookmarklet ile veri kopyalayın.', true);
+    return;
+  }
+  processClipboardText(text.trim());
+});
+
+// ---------------- SOL: Haftalık tablo ----------------
+
+function weeklyCiroTotal(monday){
+  let total = 0;
+  let hasAny = false;
+  for(let i=0;i<7;i++){
+    const d = new Date(monday); d.setDate(monday.getDate()+i);
+    const r = getRecord(dateStr(d));
+    if(r && r.ciro){ total += Number(r.ciro); hasAny = true; }
+  }
+  return hasAny ? total : null;
+}
+
+function weeklyCiroToDateTotal(monday, dayCount){
+  let total = 0;
+  let hasAny = false;
+  for(let i=0;i<dayCount;i++){
+    const d = new Date(monday); d.setDate(monday.getDate()+i);
+    const r = getRecord(dateStr(d));
+    if(r && r.ciro){ total += Number(r.ciro); hasAny = true; }
+  }
+  return hasAny ? total : null;
+}
+
+function computeWeekDerived(monday){
+  const days = [];
+  for(let i=0;i<7;i++){ const d=new Date(monday); d.setDate(monday.getDate()+i); days.push(d); }
+  const records = days.map(d => getRecord(dateStr(d)));
+
+  const {year, week} = isoWeekInfo(monday);
+  const weekKey = year+'-W'+pad(week);
+
+  const ciroToplam = records.reduce((s,r)=> s + (r && r.ciro ? Number(r.ciro) : 0), 0);
+  const prevMonday = new Date(monday); prevMonday.setDate(prevMonday.getDate()-7);
+
+  // Adil kıyas: sadece bu haftada GERÇEKTEN veri girilmiş gün sayısı kadar kıyasla (boş günler hesaba katılmaz)
+  const filledCount = records.filter(r => r && r.ciro !== null && r.ciro !== undefined).length;
+  const thisWeekToDateTotal = weeklyCiroToDateTotal(monday, filledCount);
+  const prevWeekToDateTotal = weeklyCiroToDateTotal(prevMonday, filledCount);
+  const ciroKiyasPct = (thisWeekToDateTotal && prevWeekToDateTotal) ? (thisWeekToDateTotal/prevWeekToDateTotal*100) : null;
+
+  const weekGoal = getWeekGoal(weekKey);
+  const haftaOranPct = weekGoal ? (ciroToplam/weekGoal*100) : null;
+
+  const mdoAvg = avgOf(records,'mdo', mdoToNumber);
+  const fbuAvg = avgOf(records,'fbu', v=>Number(v));
+  const fbsAvg = avgOf(records,'fbs', v=>Number(v));
+  const mgsAvg = avgOf(records,'mgs', v=>Number(v));
+  const mgsTotal = sumOf(records,'mgs');
+  const hedefToplam = records.reduce((s,r)=> s + effectiveHedef(r), 0);
+  const topluToplam = sumOf(records,'toplu_satis');
+
+  return { days, records, year, week, weekKey, ciroToplam, ciroKiyasPct, weekGoal, haftaOranPct,
+           mdoAvg, fbuAvg, fbsAvg, mgsAvg, mgsTotal, hedefToplam, topluToplam };
+}
+
+function isToday(date){
+  const t = getNow(); t.setHours(0,0,0,0);
+  const d = new Date(date); d.setHours(0,0,0,0);
+  return t.getTime() === d.getTime();
+}
+
+function cellHtml(date, field, value, kind){
+  const dk = dateStr(date);
+  let display;
+  if(value===null||value===undefined||value===''){ display = ''; }
+  else if(kind==='TL') display = fmtTL(value)||value;
+  else if(kind==='K') display = fmtK(value)||value;
+  else if(kind==='NUM') display = fmtNum(value)||value;
+  else display = value;
+  const cls = 'editable' + (isToday(date) ? ' today-col' : '');
+  return `<td class="${cls}" contenteditable="true" data-date="${dk}" data-field="${field}" data-kind="${kind}">${display}</td>`;
+}
+
+function buildWeekBlock(monday){
+  const d0 = computeWeekDerived(monday);
+  const { days, records, week, weekKey, ciroToplam, ciroKiyasPct, weekGoal, haftaOranPct,
+          mdoAvg, fbuAvg, fbsAvg, mgsAvg, mgsTotal, hedefToplam, topluToplam } = d0;
+
+  const block = document.createElement('div');
+  block.className = 'week-block';
+  block.dataset.weekkey = weekKey;
+  block.dataset.monday = dateStr(monday);
+  const sunday = days[6];
+  const badgeClass = (haftaOranPct!==null && haftaOranPct>=85) ? 'hedef-badge good' : 'hedef-badge';
+  block.innerHTML = `
+    <div class="week-head">
+      <div class="title">${shortDate(monday)} – ${shortDate(sunday)} (Hafta ${week})</div>
+      <div style="display:flex;gap:5px;align-items:center;">
+        <div class="${badgeClass}" id="badge-${weekKey}">Oran: ${haftaOranPct!==null?fmtPctInt(haftaOranPct):'-'}</div>
+        <input type="number" class="weekgoal-input" data-weekkey="${weekKey}" value="${weekGoal!==null?weekGoal:''}" placeholder="Hedef" title="Bu haftanın hedefini yazın">
+      </div>
+    </div>
+    <table class="grid">
+      <thead><tr id="head-${weekKey}"></tr></thead>
+      <tbody id="body-${weekKey}"></tbody>
+    </table>
+  `;
+
+  block.querySelector('.weekgoal-input').addEventListener('change', function(){
+    const wk = this.dataset.weekkey;
+    setWeekGoal(wk, this.value === '' ? null : Number(this.value));
+    refreshWeekBlockByKey(wk);
+    flashSelector(`.week-block[data-weekkey="${wk}"] .hedef-badge`, true);
+  });
+
+  const headRow = block.querySelector(`#head-${weekKey}`);
+  headRow.innerHTML = '<th>KPI</th>' +
+    days.map((d,i)=>`<th class="${isToday(d)?'today-col':''}">${GUN_KISA[i]}<br><span style="font-weight:400;opacity:.75;">${shortDate(d)}</span></th>`).join('') +
+    `<th class="gh">Formüller<br><span id="fml-total-${weekKey}" style="font-weight:400;">${ciroToplam?fmtTL(ciroToplam):'-'}</span></th>`;
+
+  function row(label, field, kind, ghValueHtml, ghId){
+    const cells = days.map((d,i) => cellHtml(d, field, records[i] ? records[i][field] : null, kind)).join('');
+    return `<tr><th>${label}</th>${cells}<td class="gh-cell" id="${ghId}">${ghValueHtml}</td></tr>`;
+  }
+
+  const hedefCells = days.map((d,i)=>{
+    const r = records[i];
+    const dk = dateStr(d);
+    const val = effectiveHedef(r);
+    const cls = 'editable' + (isToday(d) ? ' today-col' : '');
+    return `<td class="${cls}" contenteditable="true" data-date="${dk}" data-field="hedef" data-kind="TL">${fmtTL(val)}</td>`;
+  }).join('');
+
+  const oranCells = days.map((d,i)=>{
+    const r = records[i];
+    const cls = 'computed' + (isToday(d) ? ' today-col' : '');
+    if(r && r.ciro){
+      return `<td class="${cls}">${fmtPct(r.ciro/effectiveHedef(r)*100)}</td>`;
+    }
+    return `<td class="${cls}">-</td>`;
+  }).join('');
+
+  const mgsGhHtml = `<div style="font-size:.5rem;line-height:1.2;">O:${mgsAvg!==null?fmtNum(mgsAvg):'-'}</div><div style="font-size:.5rem;line-height:1.2;">T:${mgsTotal!==null?fmtNum(mgsTotal):'-'}</div>`;
+
+  const rowsHtml = [
+    row('Ciro','ciro', 'TL', ciroKiyasPct!==null ? fmtPct(ciroKiyasPct) : '-', `gh-ciro-${weekKey}`),
+    row('Mdo','mdo', 'TXT', mdoAvg!==null ? ('% '+mdoAvg.toFixed(2).replace('.',',')) : '-', `gh-mdo-${weekKey}`),
+    row('Fbü','fbu', 'NUM', fbuAvg!==null ? fmtNum(fbuAvg) : '-', `gh-fbu-${weekKey}`),
+    row('Mgs','mgs', 'NUM', mgsGhHtml, `gh-mgs-${weekKey}`),
+    row('Fbs','fbs', 'TL', fbsAvg!==null ? fmtTL(fbsAvg) : '-', `gh-fbs-${weekKey}`),
+    `<tr><th>Hedef</th>${hedefCells}<td class="gh-cell" id="gh-hedef-${weekKey}">${hedefToplam?fmtTL(hedefToplam):'-'}</td></tr>`,
+    `<tr id="oranrow-${weekKey}"><th>Oran</th>${oranCells}<td class="gh-cell">${haftaOranPct!==null?fmtPctInt(haftaOranPct):'-'}</td></tr>`,
+    row('Toplu S.','toplu_satis', 'K', topluToplam!==null?fmtK(topluToplam):'-', `gh-toplu-${weekKey}`)
+  ].join('');
+
+  block.querySelector(`#body-${weekKey}`).innerHTML = rowsHtml;
+  return block;
+}
+
+function refreshWeekBlockByKey(weekKey){
+  const blockEl = document.querySelector(`.week-block[data-weekkey="${weekKey}"]`);
+  if(!blockEl) return;
+  const monday = new Date(blockEl.dataset.monday);
+  const d = computeWeekDerived(monday);
+
+  const fmlEl = document.getElementById(`fml-total-${weekKey}`);
+  if(fmlEl) fmlEl.textContent = d.ciroToplam ? fmtTL(d.ciroToplam) : '-';
+
+  const badgeEl = document.getElementById(`badge-${weekKey}`);
+  if(badgeEl){
+    badgeEl.textContent = 'Oran: ' + (d.haftaOranPct!==null?fmtPctInt(d.haftaOranPct):'-');
+    badgeEl.className = 'hedef-badge' + (d.haftaOranPct!==null && d.haftaOranPct>=85 ? ' good' : '');
+  }
+
+  const ghCiro = document.getElementById(`gh-ciro-${weekKey}`);
+  if(ghCiro) ghCiro.textContent = d.ciroKiyasPct!==null ? fmtPct(d.ciroKiyasPct) : '-';
+
+  const ghMdo = document.getElementById(`gh-mdo-${weekKey}`);
+  if(ghMdo) ghMdo.textContent = d.mdoAvg!==null ? ('% '+d.mdoAvg.toFixed(2).replace('.',',')) : '-';
+
+  const ghFbu = document.getElementById(`gh-fbu-${weekKey}`);
+  if(ghFbu) ghFbu.textContent = d.fbuAvg!==null ? fmtNum(d.fbuAvg) : '-';
+
+  const ghMgs = document.getElementById(`gh-mgs-${weekKey}`);
+  if(ghMgs){
+    ghMgs.innerHTML = `<div style="font-size:.5rem;line-height:1.2;">O:${d.mgsAvg!==null?fmtNum(d.mgsAvg):'-'}</div><div style="font-size:.5rem;line-height:1.2;">T:${d.mgsTotal!==null?fmtNum(d.mgsTotal):'-'}</div>`;
+  }
+
+  const ghFbs = document.getElementById(`gh-fbs-${weekKey}`);
+  if(ghFbs) ghFbs.textContent = d.fbsAvg!==null ? fmtTL(d.fbsAvg) : '-';
+
+  const ghHedef = document.getElementById(`gh-hedef-${weekKey}`);
+  if(ghHedef) ghHedef.textContent = d.hedefToplam ? fmtTL(d.hedefToplam) : '-';
+
+  const ghToplu = document.getElementById(`gh-toplu-${weekKey}`);
+  if(ghToplu) ghToplu.textContent = d.topluToplam!==null ? fmtK(d.topluToplam) : '-';
+
+  const oranRow = document.getElementById(`oranrow-${weekKey}`);
+  if(oranRow){
+    const cells = oranRow.querySelectorAll('td.computed');
+    d.records.forEach((r,i)=>{
+      const cell = cells[i];
+      if(!cell) return;
+      cell.textContent = (r && r.ciro) ? fmtPct(r.ciro/effectiveHedef(r)*100) : '-';
+    });
+    const ghCell = oranRow.querySelector('td.gh-cell');
+    if(ghCell) ghCell.textContent = d.haftaOranPct!==null?fmtPctInt(d.haftaOranPct):'-';
+  }
+}
+
+function refreshWeekAndNeighbors(monday){
+  const {year, week} = isoWeekInfo(monday);
+  refreshWeekBlockByKey(year+'-W'+pad(week));
+  const nextMonday = new Date(monday); nextMonday.setDate(nextMonday.getDate()+7);
+  const nx = isoWeekInfo(nextMonday);
+  refreshWeekBlockByKey(nx.year+'-W'+pad(nx.week));
+}
+
+function renderMonth(){
+  const monthVal = getMonthVal();
+  const weeks = weeksInMonth(monthVal);
+  const container = document.getElementById('monthContainer');
+  container.innerHTML = '';
+  for(const monday of weeks){
+    container.appendChild(buildWeekBlock(monday));
+  }
+  attachEditHandlers();
+  renderWeekPhotoTiles();
+}
+
+function attachEditHandlers(){
+  document.querySelectorAll('td.editable').forEach(td=>{
+    td.addEventListener('focus', function(){ this.dataset.oldText = this.textContent; selectAllOnFocus(this); });
+    td.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); this.blur(); } });
+    td.addEventListener('blur', function(){
+      const dateKey = this.dataset.date;
+      const field = this.dataset.field;
+      const kind = this.dataset.kind;
+      const newText = this.textContent.trim();
+      const oldText = this.dataset.oldText;
+      if(newText === oldText) return;
+
+      const rec = getRecord(dateKey) || {date: dateKey};
+      const oldValue = rec[field] !== undefined ? rec[field] : null;
+
+      let newValue;
+      if(field === 'mdo'){
+        newValue = formatMdoInput(newText);
+      } else if(NUMERIC_FIELDS.includes(field)){
+        newValue = parseNumberInput(newText);
+      } else {
+        newValue = (newText === '' || newText === '-') ? null : newText;
+      }
+      rec[field] = newValue;
+      setRecord(dateKey, rec);
+      pushUndo({type:'cell', date: dateKey, field, oldValue});
+      setStatus(dateKey + ' → ' + field + ' güncellendi.');
+
+      const weekBlockEl = this.closest('.week-block');
+      const monday = weekBlockEl ? new Date(weekBlockEl.dataset.monday) : mondayOf(new Date(dateKey));
+      refreshWeekAndNeighbors(monday);
+      renderReportPanel();
+      flashSelector(`[data-date="${dateKey}"][data-field="${field}"]`);
+    });
+  });
+}
+
+// ---------------- SAĞ: Günlük rapor paneli ----------------
+
+function deltaBox(oldVal, newVal){
+  if(oldVal===null||oldVal===undefined||newVal===null||newVal===undefined||!oldVal){
+    return `<div class="delta-box">-</div>`;
+  }
+  const pct = (newVal - oldVal) / oldVal * 100;
+  const cls = pct >= 0 ? 'up' : 'down';
+  const arrow = pct >= 0 ? '▲' : '▼';
+  return `<div class="delta-box ${cls}">${arrow}<br>${fmtPct(pct)}</div>`;
+}
+
+function renderReportPanel(){
+  const today = todayStr(0);
+  const yest = todayStr(-1);
+  const t = getRecord(today) || {};
+  const y = getRecord(yest) || {};
+  const ghAyniGun = (function(){
+    if(t.ciro_gecenhafta_aynigun !== undefined && t.ciro_gecenhafta_aynigun !== null) return t.ciro_gecenhafta_aynigun;
+    const d = getNow(); d.setDate(d.getDate()-7);
+    const r = getRecord(dateStr(d));
+    return r ? r.ciro : null;
+  })();
+  const gunlukHedef = getGunlukHedef();
+  const oran = (t.ciro && gunlukHedef) ? (t.ciro/gunlukHedef*100) : null;
+
+  const ghToplu = (function(){
+    const d = getNow(); d.setDate(d.getDate()-7);
+    const r = getRecord(dateStr(d));
+    return r ? r.toplu_satis : null;
+  })();
+
+  function pct(oldVal, newVal){
+    if(oldVal===null||oldVal===undefined||newVal===null||newVal===undefined||!oldVal) return null;
+    return (newVal-oldVal)/oldVal*100;
+  }
+  function triangle(p){
+    if(p===null) return '';
+    return p>=0 ? '<span class="rt-triangle up">▲</span>' : '<span class="rt-triangle down">▼</span>';
+  }
+  function yellowCell(p, rowspan){
+    const cls = (p===null) ? '' : (p>=0?'up':'down');
+    return `<td class="rt-yellow ${cls}" rowspan="${rowspan}">${p!==null?fmtPct(p):'-'}${triangle(p)}</td>`;
+  }
+
+  const pCiroHafta = pct(ghAyniGun, t.ciro);
+  const pCiroGun = pct(y.ciro, t.ciro);
+  const pMdo = pct(mdoToNumber(y.mdo), mdoToNumber(t.mdo));
+
+  const panel = document.getElementById('reportPanel');
+  panel.innerHTML = `
+  <div id="rtCaptureArea">
+  <table class="rt-table">
+    <tr>
+      <td class="rt-label">G.HAFTA CİRO</td>
+      <td class="rt-grey" contenteditable="true" data-field="ciro_gecenhafta_aynigun" data-kind="NUM">${ghAyniGun!==undefined&&ghAyniGun!==null?fmtInt(ghAyniGun):''}</td>
+      ${yellowCell(pCiroHafta, 2)}
+    </tr>
+    <tr>
+      <td class="rt-label">BU HAFTA CİRO</td>
+      <td class="rt-grey">${fmtInt(t.ciro)||'-'}</td>
+    </tr>
+
+    <tr><td class="rt-spacer" colspan="3"></td></tr>
+
+    <tr>
+      <td class="rt-label">DÜN CİRO</td>
+      <td class="rt-grey">${fmtInt(y.ciro)||'-'}</td>
+      ${yellowCell(pCiroGun, 2)}
+    </tr>
+    <tr>
+      <td class="rt-label">BUGÜN CİRO</td>
+      <td class="rt-grey">${fmtInt(t.ciro)||'-'}</td>
+    </tr>
+
+    <tr><td class="rt-spacer" colspan="3"></td></tr>
+
+    <tr>
+      <td class="rt-label">DÜN MDO</td>
+      <td class="rt-grey">${y.mdo||'-'}</td>
+      ${yellowCell(pMdo, 2)}
+    </tr>
+    <tr>
+      <td class="rt-label">BUGÜN MDO</td>
+      <td class="rt-grey">${t.mdo||'-'}</td>
+    </tr>
+
+    <tr><td class="rt-spacer" colspan="3"></td></tr>
+
+    <tr>
+      <td class="rt-label">GÜNLÜK HEDEF &amp; ORANI</td>
+      <td class="rt-grey" contenteditable="true" data-field="gunlukHedef" data-kind="NUM">${fmtInt(gunlukHedef)}</td>
+      ${yellowCell(oran, 1)}
+    </tr>
+
+    <tr><td class="rt-spacer" colspan="3"></td></tr>
+
+    <tr><td class="rt-label" colspan="2">G.HAFTA AYNI GÜN TOPLU SATIŞ TUTARLARI</td><td class="rt-grey" style="border-left:none;">${fmtK(ghToplu)||'-'}</td></tr>
+    <tr><td class="rt-label" colspan="2">DÜN TOPLU SATIŞ TUTARLARI</td><td class="rt-grey" style="border-left:none;">${fmtK(y.toplu_satis)||'-'}</td></tr>
+    <tr><td class="rt-label" colspan="2">BUGÜN TOPLU SATIŞ TUTARLARI</td>
+      <td class="rt-grey" style="border-left:none;">${t.toplu_satis!==undefined&&t.toplu_satis!==null?fmtK(t.toplu_satis):'-'}</td>
+    </tr>
+    <tr><td class="rt-label rt-red" colspan="2">GÜNÜN YILDIZI ÜRÜN SATIŞ ADEDİ</td>
+      <td class="rt-grey" style="border-left:none;" contenteditable="true" data-field="yildiz_urun_adet" data-kind="NUM">${t.yildiz_urun_adet!==undefined&&t.yildiz_urun_adet!==null?fmtInt(t.yildiz_urun_adet):''}</td>
+    </tr>
+    <tr><td class="rt-label rt-red" colspan="2">DETERJAN SATIŞ ADEDİ</td>
+      <td class="rt-grey" style="border-left:none;" contenteditable="true" data-field="deterjan" data-kind="NUM">${t.deterjan!==undefined&&t.deterjan!==null?fmtInt(t.deterjan):''}</td>
+    </tr>
+    <tr><td class="rt-label rt-red" colspan="2">LEKE ÇIKARICI SATIŞ ADEDİ</td>
+      <td class="rt-grey" style="border-left:none;" contenteditable="true" data-field="leke" data-kind="NUM">${t.leke!==undefined&&t.leke!==null?fmtInt(t.leke):''}</td>
+    </tr>
+    <tr><td class="rt-label rt-red" colspan="2">SIVI SABUN &amp; DUŞ JELİ SATIŞ ADEDİ</td>
+      <td class="rt-grey" style="border-left:none;" contenteditable="true" data-field="sivi_sabun" data-kind="NUM">${t.sivi_sabun!==undefined&&t.sivi_sabun!==null?fmtInt(t.sivi_sabun):''}</td>
+    </tr>
+    <tr><td class="rt-label" colspan="2">TEMİZLİK MENDİLİ SATIŞ ADEDİ</td>
+      <td class="rt-grey" style="border-left:none;" contenteditable="true" data-field="mendil" data-kind="NUM">${t.mendil!==undefined&&t.mendil!==null?fmtInt(t.mendil):''}</td>
+    </tr>
+
+    <tr><td class="rt-spacer" colspan="3"></td></tr>
+
+    <tr>
+      <td class="rt-label">GELEN KOLİ SAYISI</td>
+      <td class="rt-grey" contenteditable="true" data-field="koli" data-kind="NUM">${t.koli!==undefined&&t.koli!==null?fmtInt(t.koli):''}</td>
+      <td></td>
+    </tr>
+  </table>
+  </div>
+  ${getNow().getDay()===0 ? `
+  <div class="send-btn-row">
+    <button class="send-btn small" id="sendBtnCombo" title="Bu hafta + geçen hafta">📷 Hafta İkilisi</button>
+    <button class="send-btn small" id="sendBtnRt" title="Sadece RT tablosu">📷 RT Tablosu</button>
+    <button class="send-btn small" id="sendBtnEmpty" disabled title="Yakında">— Boş —</button>
+  </div>
+  ` : `
+  <button class="send-btn" id="sendBtn">📷 Fotoğrafını Al</button>
+  `}
+  ${(function(){
+    const now = getNow();
+    const thisYear = now.getFullYear(), thisMonth = now.getMonth()+1, todayDay = now.getDate();
+    let prevMonth = thisMonth - 1, prevYear = thisYear;
+    if(prevMonth === 0){ prevMonth = 12; prevYear -= 1; }
+    const prevMonthDays = daysInMonth(prevYear, prevMonth);
+    const cmpDay = Math.min(todayDay, prevMonthDays);
+
+    const aggThis = monthAggregate(thisYear, thisMonth, todayDay);
+    const aggPrev = monthAggregate(prevYear, prevMonth, cmpDay);
+    const aggPrevFull = monthAggregate(prevYear, prevMonth, prevMonthDays);
+
+    function cmpPct(a,b){ return (a!==null && a!==undefined && b) ? ((a-b)/b*100) : null; }
+    function cmpRow(label, thisVal, prevVal, fmt){
+      const p = cmpPct(thisVal, prevVal);
+      const cls = p===null ? '' : (p>=0?'up':'down');
+      return `<tr>
+        <td class="mcb-label">${label}</td>
+        <td>${(thisVal!==null&&thisVal!==undefined)?(fmt(thisVal)||'-'):'-'}</td>
+        <td>${(prevVal!==null&&prevVal!==undefined)?(fmt(prevVal)||'-'):'-'}</td>
+        <td class="${cls}">${p!==null?fmtPct(p):'-'}${triangle(p)}</td>
+      </tr>`;
+    }
+
+    const rowsHtml = [
+      cmpRow('Ciro', aggThis.ciroSum, aggPrev.ciroSum, fmtTL),
+      cmpRow('Mdo', aggThis.mdoAvg, aggPrev.mdoAvg, v => '% '+v.toFixed(2).replace('.',',')),
+      cmpRow('Mgs', aggThis.mgsSum, aggPrev.mgsSum, fmtNum),
+      cmpRow('Fbü', aggThis.fbuAvg, aggPrev.fbuAvg, fmtNum),
+      cmpRow('Fbs', aggThis.fbsAvg, aggPrev.fbsAvg, fmtTL),
+      cmpRow('T.Satış', aggThis.topluSum, aggPrev.topluSum, fmtK)
+    ].join('');
+
+    return `
+    <div class="month-compare-box">
+      <div class="mcb-title">📊 Ay Kıyası (bu ay ${todayDay}. gün / geçen ay ${cmpDay}. gün)</div>
+      <table class="mcb-table">
+        <thead><tr><th>Metrik</th><th>Bu Ay</th><th>Geçen Ay</th><th>Kıyas</th></tr></thead>
+        <tbody>${rowsHtml}</tbody>
+      </table>
+    </div>
+    <div class="month-summary-box">
+      <div class="ms-title">📅 Ay Özeti (bugüne kadar)</div>
+      <div class="ms-grid">
+        <div>Toplam Ciro<b>${fmtTL(aggThis.ciroSum)||'-'}</b></div>
+        <div>Ort. Mdo<b>${aggThis.mdoAvg!==null?('% '+aggThis.mdoAvg.toFixed(2).replace('.',',')):'-'}</b></div>
+        <div>Ort. Fbü<b>${aggThis.fbuAvg!==null?fmtNum(aggThis.fbuAvg):'-'}</b></div>
+        <div>Ort. Fbs<b>${aggThis.fbsAvg!==null?fmtTL(aggThis.fbsAvg):'-'}</b></div>
+        <div>Mgs T./Ort.<b>${aggThis.mgsSum!==null?fmtNum(aggThis.mgsSum):'-'} / ${aggThis.mgsAvg!==null?fmtNum(aggThis.mgsAvg):'-'}</b></div>
+        <div>T.Satış T./Ort.<b>${aggThis.topluSum!==null?fmtK(aggThis.topluSum):'-'} / ${aggThis.topluAvg!==null?fmtK(aggThis.topluAvg):'-'}</b></div>
+      </div>
+    </div>
+    <div class="month-summary-box">
+      <div class="ms-title">📅 Geçen Ay Özeti (${prevMonthDays} gün, baştan sona)</div>
+      <div class="ms-grid">
+        <div>Toplam Ciro<b>${fmtTL(aggPrevFull.ciroSum)||'-'}</b></div>
+        <div>Ort. Mdo<b>${aggPrevFull.mdoAvg!==null?('% '+aggPrevFull.mdoAvg.toFixed(2).replace('.',',')):'-'}</b></div>
+        <div>Ort. Fbü<b>${aggPrevFull.fbuAvg!==null?fmtNum(aggPrevFull.fbuAvg):'-'}</b></div>
+        <div>Ort. Fbs<b>${aggPrevFull.fbsAvg!==null?fmtTL(aggPrevFull.fbsAvg):'-'}</b></div>
+        <div>Mgs T./Ort.<b>${aggPrevFull.mgsSum!==null?fmtNum(aggPrevFull.mgsSum):'-'} / ${aggPrevFull.mgsAvg!==null?fmtNum(aggPrevFull.mgsAvg):'-'}</b></div>
+        <div>T.Satış T./Ort.<b>${aggPrevFull.topluSum!==null?fmtK(aggPrevFull.topluSum):'-'} / ${aggPrevFull.topluAvg!==null?fmtK(aggPrevFull.topluAvg):'-'}</b></div>
+      </div>
+    </div>`;
+  })()}
+  `;
+
+  panel.querySelectorAll('[contenteditable="true"]').forEach(el=>{
+    el.addEventListener('focus', function(){
+      this.dataset.oldText = this.textContent;
+      selectAllOnFocus(this);
+    });
+    el.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); this.blur(); } });
+    el.addEventListener('blur', function(){
+      const field = this.dataset.field;
+      const kind = this.dataset.kind;
+      const newText = this.textContent.trim();
+      const oldText = this.dataset.oldText;
+      if(newText === oldText) return;
+
+      if(field === 'gunlukHedef'){
+        const oldValue = getGunlukHedef();
+        const v = parseNumberInput(newText);
+        if(v!==null){ setGunlukHedef(v); pushUndo({type:'hedef', oldValue}); }
+      } else {
+        const rec = getRecord(today) || {date: today};
+        const oldValue = rec[field] !== undefined ? rec[field] : null;
+        const val = (kind==='TXT') ? ((newText===''||newText==='-')?null:newText) : parseNumberInput(newText);
+        rec[field] = val;
+        setRecord(today, rec);
+        pushUndo({type:'cell', date: today, field, oldValue});
+      }
+      setStatus(field + ' güncellendi.');
+      renderReportPanel();
+      flashSelector(`#reportPanel [data-field="${field}"]`);
+    });
+  });
+
+  async function runCapture(btn, captureFn, successMsg){
+    if(!btn) return;
+    const originalText = btn.textContent;
+    btn.classList.remove('success','error');
+    btn.textContent = '...';
+    btn.disabled = true;
+    try{
+      const canvas = await captureFn();
+      await copyCanvasToClipboard(canvas);
+      setStatus(successMsg);
+      btn.classList.add('success');
+      btn.textContent = '✅';
+      setTimeout(()=>{ btn.classList.remove('success'); btn.textContent = originalText; btn.disabled = false; }, 2500);
+    }catch(e){
+      setStatus('Görsel panoya kopyalanamadı (' + e.message + ').', true);
+      btn.classList.add('error');
+      btn.textContent = '❌';
+      setTimeout(()=>{ btn.classList.remove('error'); btn.textContent = originalText; btn.disabled = false; }, 2500);
+    }
+  }
+
+  const sendBtnCombo = document.getElementById('sendBtnCombo');
+  if(sendBtnCombo){
+    sendBtnCombo.addEventListener('click', function(){
+      runCapture(sendBtnCombo, captureWeekPairCombined, 'Bu hafta + geçen hafta görseli panoya kopyalandı.');
+    });
+  }
+  const sendBtnRt = document.getElementById('sendBtnRt');
+  if(sendBtnRt){
+    sendBtnRt.addEventListener('click', function(){
+      runCapture(sendBtnRt, generateReportCanvas, 'RT görseli panoya kopyalandı.');
+    });
+  }
+
+  const sendBtn = document.getElementById('sendBtn');
+  if(sendBtn){
+    sendBtn.addEventListener('click', function(){
+      runCapture(sendBtn, generateReportCanvas, 'RT görseli panoya kopyalandı — istediğiniz yere (mail, Word vb.) Ctrl+V ile yapıştırabilirsiniz.');
+    });
+  }
+}
+
+async function captureElementWithPadding(el, padding=18){
+  const prevPadding = el.style.padding;
+  const prevBg = el.style.background;
+  el.style.padding = padding + 'px';
+  el.style.background = '#ffffff';
+  const canvas = await html2canvas(el, {backgroundColor:'#ffffff', scale:2});
+  el.style.padding = prevPadding;
+  el.style.background = prevBg;
+  return canvas;
+}
+
+function cleanBlockClone(srcBlock){
+  const clone = srcBlock.cloneNode(true);
+  clone.querySelectorAll('[contenteditable]').forEach(el=>el.removeAttribute('contenteditable'));
+  const goalInput = clone.querySelector('.weekgoal-input');
+  if(goalInput){
+    const span = document.createElement('span');
+    span.textContent = goalInput.value || '-';
+    span.style.fontSize = '.62rem';
+    goalInput.replaceWith(span);
+  }
+  return clone;
+}
+
+// ---- Hafta fotoğrafı kutucuk seçici (1-6, ızgara pozisyonlarıyla birebir eşleşir) ----
+const selectedWeekTiles = new Set();
+
+function renderWeekPhotoTiles(){
+  const container = document.getElementById('wppTiles');
+  container.innerHTML = '';
+
+  const weeks = weeksInMonth(getMonthVal());
+  const today = getNow(); today.setHours(0,0,0,0);
+  let currentWeekIdx = null;
+  weeks.forEach((monday,i)=>{
+    const weekEnd = new Date(monday); weekEnd.setDate(weekEnd.getDate()+6); weekEnd.setHours(23,59,59,999);
+    const m = new Date(monday); m.setHours(0,0,0,0);
+    if(today >= m && today <= weekEnd) currentWeekIdx = i+1;
+  });
+
+  for(let i=1;i<=6;i++){
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'wpp-tile' + (selectedWeekTiles.has(i) ? ' selected' : '');
+    btn.innerHTML = `<span class="wpp-cur-arrow">${i===currentWeekIdx?'▼':''}</span><span>${i}</span>`;
+    btn.addEventListener('click', function(){
+      if(selectedWeekTiles.has(i)) selectedWeekTiles.delete(i);
+      else selectedWeekTiles.add(i);
+      renderWeekPhotoTiles();
+    });
+    container.appendChild(btn);
+  }
+}
+
+document.getElementById('wppCaptureBtn').addEventListener('click', async function(){
+  if(selectedWeekTiles.size === 0){
+    setStatus('Lütfen en az bir hafta kutucuğu seçin (1-6).', true);
+    return;
+  }
+  const monthVal = getMonthVal();
+  const weeks = weeksInMonth(monthVal);
+  const indices = Array.from(selectedWeekTiles).sort((a,b)=>a-b);
+
+  const wrapper = document.createElement('div');
+  wrapper.style.position = 'fixed';
+  wrapper.style.left = '-9999px';
+  wrapper.style.top = '0';
+  wrapper.style.background = '#ffffff';
+  wrapper.style.padding = '18px';
+  wrapper.style.display = 'flex';
+  wrapper.style.flexDirection = 'column';
+  wrapper.style.gap = '14px';
+  wrapper.style.width = '900px';
+
+  indices.forEach(i=>{
+    const rawBlock = buildWeekBlock(weeks[i-1]);
+    wrapper.appendChild(cleanBlockClone(rawBlock));
+  });
+  document.body.appendChild(wrapper);
+
+  try{
+    const canvas = await html2canvas(wrapper, {backgroundColor:'#ffffff', scale:2});
+    document.body.removeChild(wrapper);
+    await copyCanvasToClipboard(canvas);
+    setStatus((indices.length===1 ? ('Hafta ' + indices[0]) : (indices.length + ' hafta')) + ' görseli panoya kopyalandı.');
+  }catch(e){
+    document.body.removeChild(wrapper);
+    setStatus('Görsel kopyalanamadı: ' + e.message, true);
+  }
+});
+
+async function captureWeekPairCombined(){
+  const thisMonday = mondayOf(getNow());
+  const lastMonday = new Date(thisMonday); lastMonday.setDate(lastMonday.getDate()-7);
+
+  const wrapper = document.createElement('div');
+  wrapper.style.position = 'fixed';
+  wrapper.style.left = '-9999px';
+  wrapper.style.top = '0';
+  wrapper.style.background = '#ffffff';
+  wrapper.style.padding = '18px';
+  wrapper.style.display = 'flex';
+  wrapper.style.flexDirection = 'column';
+  wrapper.style.gap = '14px';
+  wrapper.style.width = '900px';
+
+  const lastWeekBlock = buildWeekBlock(lastMonday);
+  const thisWeekBlock = buildWeekBlock(thisMonday);
+  [lastWeekBlock, thisWeekBlock].forEach(b=>{
+    b.querySelectorAll('[contenteditable]').forEach(el=>el.removeAttribute('contenteditable'));
+    const goalInput = b.querySelector('.weekgoal-input');
+    if(goalInput){ const span = document.createElement('span'); span.textContent = goalInput.value || '-'; span.style.fontSize='.62rem'; goalInput.replaceWith(span); }
+  });
+
+  wrapper.appendChild(lastWeekBlock);
+  wrapper.appendChild(thisWeekBlock);
+  document.body.appendChild(wrapper);
+
+  const canvas = await html2canvas(wrapper, {backgroundColor:'#ffffff', scale:2});
+  document.body.removeChild(wrapper);
+  return canvas;
+}
+
+async function captureCombinedIfSunday(){
+  const thisMonday = mondayOf(getNow());
+  const lastMonday = new Date(thisMonday); lastMonday.setDate(lastMonday.getDate()-7);
+
+  const wrapper = document.createElement('div');
+  wrapper.style.position = 'fixed';
+  wrapper.style.left = '-9999px';
+  wrapper.style.top = '0';
+  wrapper.style.background = '#ffffff';
+  wrapper.style.padding = '18px';
+  wrapper.style.display = 'flex';
+  wrapper.style.flexDirection = 'column';
+  wrapper.style.gap = '14px';
+  wrapper.style.width = '900px';
+
+  const rtClone = document.getElementById('rtCaptureArea').cloneNode(true);
+  rtClone.querySelectorAll('[contenteditable]').forEach(el=>el.removeAttribute('contenteditable'));
+
+  const lastWeekBlock = buildWeekBlock(lastMonday);
+  const thisWeekBlock = buildWeekBlock(thisMonday);
+  [lastWeekBlock, thisWeekBlock].forEach(b=>{
+    b.querySelectorAll('[contenteditable]').forEach(el=>el.removeAttribute('contenteditable'));
+    const cam = b.querySelector('.camera-btn'); if(cam) cam.remove();
+    const goalInput = b.querySelector('.weekgoal-input');
+    if(goalInput){ const span = document.createElement('span'); span.textContent = goalInput.value || '-'; span.style.fontSize='.62rem'; goalInput.replaceWith(span); }
+  });
+
+  wrapper.appendChild(rtClone);
+  wrapper.appendChild(lastWeekBlock);
+  wrapper.appendChild(thisWeekBlock);
+  document.body.appendChild(wrapper);
+
+  const canvas = await html2canvas(wrapper, {backgroundColor:'#ffffff', scale:2});
+  document.body.removeChild(wrapper);
+  return canvas;
+}
+
+async function generateReportCanvas(){
+  const panelEl = document.getElementById('rtCaptureArea');
+  const canvas = await captureElementWithPadding(panelEl);
+  return canvas;
+}
+
+function downloadCanvasAsPng(canvas, filename){
+  const link = document.createElement('a');
+  link.href = canvas.toDataURL('image/png');
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+function copyCanvasToClipboard(canvas){
+  return new Promise((resolve, reject)=>{
+    canvas.toBlob(async (blob)=>{
+      try{
+        await navigator.clipboard.write([new ClipboardItem({'image/png': blob})]);
+        resolve(true);
+      }catch(e){ reject(e); }
+    }, 'image/png');
+  });
+}
+
+async function autoDownloadIfNeeded(){
+  const dow = getNow().getDay(); // 0=Paz,1=Pzt,2=Sal,3=Çar
+  if(dow !== 1 && dow !== 3) return;
+  const key = 'autoExported:' + todayStr(0);
+  if(localStorage.getItem(key)) return;
+  exportAllData();
+  localStorage.setItem(key, '1');
+  setStatus('Bugün Pazartesi/Çarşamba olduğu için tüm veriler otomatik dışa aktarıldı.');
+}
+
+function renderEmployeeTargetsRow(){
+  const el = document.getElementById('employeeTargetsRow');
+  if(!el) return;
+  el.innerHTML = employeeTargetBoxHtml('emp1','Fatma') + employeeTargetBoxHtml('emp2','Zeynep');
+  attachEmployeeTargetHandlers();
+}
+
+function renderAll(){
+  renderMonth();
+  renderReportPanel();
+  renderEmployeeTargetsRow();
+}
+
+const AY_ADLARI = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
+let pickerYear = getNow().getFullYear();
+let pickerMonth = getNow().getMonth() + 1; // 1-12
+
+function getMonthVal(){
+  return pickerYear + '-' + pad(pickerMonth);
+}
+
+function renderMonthYearPicker(){
+  const el = document.getElementById('monthYearPicker');
+  const now = getNow();
+  const nowYear = now.getFullYear();
+  const realMonth = now.getMonth() + 1;
+  let yearsHtml = '<select id="yearSel">';
+  for(let y = nowYear-2; y <= nowYear+2; y++){
+    yearsHtml += `<option value="${y}" ${y===pickerYear?'selected':''}>${y}</option>`;
+  }
+  yearsHtml += '</select>';
+
+  const monthsHtml = AY_ADLARI.map((name,i)=>{
+    const m = i+1;
+    const isRealCurrent = (m === realMonth && pickerYear === nowYear);
+    return `<button type="button" class="my-month-btn${m===pickerMonth?' active':''}" data-month="${m}">
+      <span class="cur-arrow">${isRealCurrent ? '▼' : ''}</span>
+      <span class="month-label">${name}</span>
+    </button>`;
+  }).join('');
+
+  el.innerHTML = `<div class="my-months">${monthsHtml}</div>${yearsHtml}`;
+
+  el.querySelectorAll('.my-month-btn').forEach(btn=>{
+    btn.addEventListener('click', function(){
+      pickerMonth = Number(this.dataset.month);
+      renderMonthYearPicker();
+      renderMonth();
+    });
+  });
+  document.getElementById('yearSel').addEventListener('change', function(){
+    pickerYear = Number(this.value);
+    renderMonthYearPicker();
+    renderMonth();
+  });
+}
+
+function initSimDatePicker(){
+  const input = document.getElementById('simDateInput');
+  const wrap = input.closest('.sim-date-picker');
+  input.value = todayStr(0);
+
+  function applySimChange(newVal){
+    simulatedToday = newVal || null;
+    wrap.classList.toggle('active', !!simulatedToday);
+    pickerYear = getNow().getFullYear();
+    pickerMonth = getNow().getMonth() + 1;
+    renderMonthYearPicker();
+    renderAll();
+    setStatus(simulatedToday ? ('Simüle tarih aktif: ' + simulatedToday) : 'Gerçek güne dönüldü.');
+  }
+
+  input.addEventListener('change', function(){ applySimChange(this.value); });
+  document.getElementById('simResetBtn').addEventListener('click', function(){
+    input.value = (function(){ const real = new Date(); return real.getFullYear()+'-'+pad(real.getMonth()+1)+'-'+pad(real.getDate()); })();
+    applySimChange(null);
+  });
+}
+
+async function seedTemmuz2026IfNeeded(){
+  const flagDoc = await db.collection('settings').doc('general').get();
+  if(flagDoc.exists && flagDoc.data().seededTemmuz2026) return;
+  var seedData = {"2026-07-13":{"date":"2026-07-13","final":true,"ciro":20053.0,"mdo":"% 29,00","fbu":4.82,"mgs":58.0,"fbs":1179.0,"toplu_satis":4.0},"2026-07-14":{"date":"2026-07-14","final":true,"ciro":44611.0,"mdo":"% 35,00","fbu":6.48,"mgs":77.0,"fbs":1652.0,"toplu_satis":17.0},"2026-07-15":{"date":"2026-07-15","final":true,"ciro":24726.06,"mdo":"% 31,08","fbu":5.61,"mgs":74.0,"fbs":1075.05,"toplu_satis":13.0},"2026-07-16":{"date":"2026-07-16","final":true,"ciro":20387.0,"mdo":"% 46,00","fbu":4.13,"mgs":50.0,"fbs":886.0,"toplu_satis":0.0},"2026-07-17":{"date":"2026-07-17","final":true,"ciro":32023.81,"mdo":"% 45,90","fbu":5.5,"mgs":61.0,"fbs":1143.71,"toplu_satis":11.0},"2026-07-18":{"date":"2026-07-18","final":true,"ciro":31077.0,"mdo":"% 43,00","fbu":3.64,"mgs":57.0,"fbs":1243.0,"toplu_satis":3.0},"2026-07-19":{"date":"2026-07-19","final":true,"ciro":23488.43,"mdo":"% 54,29","fbu":4.11,"mgs":35.0,"fbs":1236.23,"toplu_satis":3.0},"2026-07-01":{"date":"2026-07-01","final":true,"ciro":40597.0,"mdo":"% 34,00","fbu":5.54,"mgs":70.0,"fbs":1709.0,"toplu_satis":19.0},"2026-07-02":{"date":"2026-07-02","final":true,"ciro":34011.0,"mdo":"% 54,10","fbu":4.48,"mgs":61.0,"fbs":1041.25,"toplu_satis":9.0},"2026-07-03":{"date":"2026-07-03","final":true,"ciro":30889.0,"mdo":"% 43,00","fbu":4.56,"mgs":79.0,"fbs":926.0,"toplu_satis":6.0},"2026-07-04":{"date":"2026-07-04","final":true,"ciro":32948.0,"mdo":"% 36,00","fbu":5.07,"mgs":73.0,"fbs":1237.0,"toplu_satis":6.0},"2026-07-05":{"date":"2026-07-05","final":true,"ciro":26098.0,"mdo":"% 38,00","fbu":5.32,"mgs":50.0,"fbs":1373.0,"toplu_satis":13.0},"2026-07-20":{"date":"2026-07-20","final":true,"ciro":18485.0,"mdo":"% 44,00","fbu":4.1,"mgs":47.0,"fbs":880.0,"toplu_satis":0.0},"2026-07-21":{"date":"2026-07-21","final":true,"ciro":33780.0,"mdo":"% 49,00","fbu":5.23,"mgs":71.0,"fbs":965.0,"toplu_satis":4.0},"2026-07-22":{"date":"2026-07-22","final":true,"ciro":33731.48,"mdo":"% 49,21","fbu":6.03,"mgs":63.0,"fbs":1088.11,"toplu_satis":6.0},"2026-07-23":{"date":"2026-07-23","final":true,"ciro":17630.0,"mdo":"% 33,00","fbu":5.6,"mgs":56.0,"fbs":927.0,"toplu_satis":3.0},"2026-07-24":{"date":"2026-07-24","final":true,"ciro":39470.0,"mdo":"% 41,00","fbu":4.88,"mgs":78.0,"fbs":1233.0,"toplu_satis":10.0},"2026-07-25":{"date":"2026-07-25","final":true,"ciro":31001.0,"mdo":"% 56,00","fbu":4.53,"mgs":53.0,"fbs":1033.0,"toplu_satis":3.0},"2026-07-26":{"date":"2026-07-26","final":true,"ciro":19617.16,"mdo":"% 57,69","fbu":5.73,"mgs":26.0,"fbs":1307.81,"toplu_satis":3.0},"2026-07-06":{"date":"2026-07-06","final":true,"ciro":29310.0,"mdo":"% 45,45","fbu":4.6,"mgs":55.0,"fbs":1172.43,"toplu_satis":8.0},"2026-07-07":{"date":"2026-07-07","final":true,"ciro":23139.0,"mdo":"% 32,43","fbu":3.5,"mgs":74.0,"fbs":964.0,"toplu_satis":5.0},"2026-07-08":{"date":"2026-07-08","final":true,"ciro":27742.0,"mdo":"% 37,00","fbu":4.26,"mgs":62.0,"fbs":1206.0,"toplu_satis":8.0},"2026-07-09":{"date":"2026-07-09","final":true,"ciro":26040.0,"mdo":"% 40,00","fbu":5.04,"mgs":57.0,"fbs":1132.0,"toplu_satis":4.0},"2026-07-10":{"date":"2026-07-10","final":true,"ciro":29134.0,"mdo":"% 37,50","fbu":3.83,"mgs":80.0,"fbs":977.0,"toplu_satis":5.0},"2026-07-11":{"date":"2026-07-11","final":true,"ciro":29170.0,"mdo":"% 33,00","fbu":4.76,"mgs":62.0,"fbs":1363.0,"toplu_satis":18.0},"2026-07-12":{"date":"2026-07-12","final":true,"ciro":15821.0,"mdo":"% 32,00","fbu":3.56,"mgs":56.0,"fbs":878.0,"toplu_satis":4.0}};
+  const batch = db.batch();
+  Object.keys(seedData).forEach(function(dateKey){
+    cloudCache['entry:' + dateKey] = JSON.stringify(seedData[dateKey]);
+    batch.set(db.collection('entries').doc(dateKey), seedData[dateKey]);
+  });
+  batch.set(db.collection('settings').doc('general'), {seededTemmuz2026:true}, {merge:true});
+  await batch.commit();
+  console.log('Temmuz 2026 verisi (Excelden) arşive işlendi: ' + Object.keys(seedData).length + ' gün.');
+}
+
+async function startAppAfterLogin(){
+  document.getElementById('loginLoading').style.display = 'none';
+  renderMonthYearPicker();
+  renderWeekPhotoTiles();
+  initSimDatePicker();
+  await seedTemmuz2026IfNeeded();
+  renderAll();
+  renderEmployeeTargetsRow();
+  setTimeout(autoDownloadIfNeeded, 800);
+}
+
+// ==================== SEKMELER (Rapor / Araçlar) ====================
+
+function showTab(tab){
+  const raporPage = document.getElementById('raporPage');
+  const araclarPage = document.getElementById('araclarPage');
+  const raporControls = document.getElementById('raporControls');
+  const headerCenter = document.getElementById('headerCenter');
+  const tabRaporBtn = document.getElementById('tabRaporBtn');
+  const tabAraclarBtn = document.getElementById('tabAraclarBtn');
+
+  if(tab === 'rapor'){
+    raporPage.style.display = '';
+    raporControls.style.display = '';
+    headerCenter.style.display = '';
+    araclarPage.style.display = 'none';
+    tabRaporBtn.classList.add('active');
+    tabAraclarBtn.classList.remove('active');
+  } else {
+    raporPage.style.display = 'none';
+    raporControls.style.display = 'none';
+    headerCenter.style.display = 'none';
+    araclarPage.style.display = '';
+    tabRaporBtn.classList.remove('active');
+    tabAraclarBtn.classList.add('active');
+    closeToolViewer();
+    renderToolsGrid();
+  }
+}
+
+// ==================== ARAÇLAR (Widget Sistemi) ====================
+
+function getTools(){
+  try{ return JSON.parse(localStorage.getItem('tools') || '[]'); }
+  catch(e){ return []; }
+}
+function saveTools(tools){
+  localStorage.setItem('tools', JSON.stringify(tools));
+}
+
+let currentToolId = null;
+
+function renderToolsGrid(){
+  const tools = getTools();
+  const grid = document.getElementById('toolsGrid');
+  grid.innerHTML = tools.map(t => `
+    <div class="tool-tile" onclick="openTool('${t.id}')">
+      <button class="tool-del" onclick="event.stopPropagation(); deleteTool('${t.id}')" title="Sil">✕</button>
+      <button class="tool-dl" onclick="event.stopPropagation(); downloadToolFile('${t.id}')" title="Dosya olarak indir">⬇</button>
+      <div class="tool-icon">🧩</div>
+      <div class="tool-name">${escapeHtml(t.name)}</div>
+    </div>
+  `).join('') + `
+    <div class="tool-tile add-tile" onclick="openAddToolModal()">
+      <div class="tool-icon">➕</div>
+      <div class="tool-name">Yeni Araç</div>
+    </div>
+  `;
+}
+
+function escapeHtml(s){
+  const div = document.createElement('div');
+  div.textContent = s;
+  return div.innerHTML;
+}
+
+function openAddToolModal(){
+  document.getElementById('newToolName').value = '';
+  document.getElementById('newToolCode').value = '';
+  const dz = document.getElementById('toolDropzone');
+  dz.classList.remove('loaded','dragover');
+  dz.innerHTML = '📁 Bir .html dosyasını buraya sürükleyin<br><span style="font-size:.68rem;color:#999;">(veya tıklayıp seçin)</span><input type="file" id="toolFileInput" accept=".html,.htm" style="display:none;">';
+  attachDropzoneHandlers();
+  document.getElementById('addToolModal').style.display = 'flex';
+}
+function closeAddToolModal(){
+  document.getElementById('addToolModal').style.display = 'none';
+}
+
+function loadToolFile(file){
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    document.getElementById('newToolCode').value = e.target.result;
+    if(!document.getElementById('newToolName').value.trim()){
+      const base = file.name.replace(/\.(html?|htm)$/i, '').replace(/[_-]+/g, ' ').trim();
+      document.getElementById('newToolName').value = base || 'Yeni Araç';
+    }
+    const dz = document.getElementById('toolDropzone');
+    dz.classList.add('loaded');
+    dz.innerHTML = '✅ Yüklendi: ' + file.name;
+  };
+  reader.readAsText(file);
+}
+
+function attachDropzoneHandlers(){
+  const dz = document.getElementById('toolDropzone');
+  const fileInput = document.getElementById('toolFileInput');
+  dz.addEventListener('click', function(){ fileInput.click(); });
+  fileInput.addEventListener('change', function(){ if(this.files[0]) loadToolFile(this.files[0]); });
+  dz.addEventListener('dragover', function(e){ e.preventDefault(); dz.classList.add('dragover'); });
+  dz.addEventListener('dragleave', function(){ dz.classList.remove('dragover'); });
+  dz.addEventListener('drop', function(e){
+    e.preventDefault();
+    dz.classList.remove('dragover');
+    if(e.dataTransfer.files && e.dataTransfer.files[0]) loadToolFile(e.dataTransfer.files[0]);
+  });
+}
+
+function downloadToolFile(id){
+  const tools = getTools();
+  const tool = tools.find(t => t.id === id);
+  if(!tool) return;
+  const blob = new Blob([tool.code], {type:'text/html'});
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = tool.name.replace(/[^\wğüşiöçĞÜŞİÖÇ \-]/g,'').trim().replace(/\s+/g,'-') + '.html';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
+function saveNewTool(){
+  const name = document.getElementById('newToolName').value.trim();
+  const code = document.getElementById('newToolCode').value;
+  if(!name){ alert('Lütfen araç için bir isim yazın.'); return; }
+  if(!code.trim()){ alert('Lütfen HTML kodunu yapıştırın veya bir dosya sürükleyin.'); return; }
+  const tools = getTools();
+  tools.push({
+    id: 'tool_' + Date.now(),
+    name: name,
+    code: code
+  });
+  saveTools(tools);
+  closeAddToolModal();
+  renderToolsGrid();
+}
+
+function deleteTool(id){
+  if(!confirm('Bu aracı silmek istediğinize emin misiniz?')) return;
+  let tools = getTools();
+  tools = tools.filter(t => t.id !== id);
+  saveTools(tools);
+  renderToolsGrid();
+}
+
+function openTool(id){
+  const tools = getTools();
+  const tool = tools.find(t => t.id === id);
+  if(!tool) return;
+  currentToolId = id;
+
+  document.getElementById('toolsGridView').style.display = 'none';
+  document.getElementById('toolViewerView').style.display = '';
+  document.getElementById('toolViewerName').textContent = tool.name;
+
+  const holder = document.getElementById('toolFrameHolder');
+  holder.innerHTML = '';
+  const iframe = document.createElement('iframe');
+  iframe.id = 'activeToolFrame';
+  iframe.style.width = '100%';
+  iframe.style.height = '100%';
+  iframe.srcdoc = tool.code;
+  holder.appendChild(iframe);
+}
+
+function closeToolViewer(){
+  document.getElementById('toolsGridView').style.display = '';
+  document.getElementById('toolViewerView').style.display = 'none';
+  document.getElementById('toolFrameHolder').innerHTML = '';
+  currentToolId = null;
+  renderToolsGrid();
+}
+</script>
+
+</div>
+
+</body>
+</html>
