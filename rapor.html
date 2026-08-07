@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=1300, user-scalable=yes">
 <title>Mağaza Performans Raporu</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -282,6 +282,7 @@
   </div>
   <div class="top-controls" id="raporControls">
     <button class="btn" id="exportBtn" type="button">⬇ Dışa Aktar</button>
+    <button class="btn undo" id="migrateBtn" type="button" onclick="migrateLocalDataToCloud()">☁️ Yerel Veriyi Buluta Yükle</button>
     <button class="btn undo" id="undoBtn" disabled onclick="undoLast()">↩ Geri Al</button>
     <button class="btn accent" id="addDataBtn" type="button">➕ Veri Ekle</button>
   </div>
@@ -442,6 +443,58 @@ function flashSelector(sel, boxMode){
     });
   });
 }
+async function migrateLocalDataToCloud(){
+  const localKeys = [];
+  for(let i=0;i<localStorage.length;i++){
+    const k = localStorage.key(i);
+    if(k.startsWith('entry:') || k.startsWith('weekgoal:') || k === 'gunlukHedef') localKeys.push(k);
+  }
+  if(!localKeys.length){
+    setStatus('Bu tarayıcıda yerel (eski) veri bulunamadı. Bu butonu, verinin kayıp olduğu ORİJİNAL bilgisayarda/dosyada çalıştırmanız gerekiyor.', true);
+    return;
+  }
+  if(!confirm(localKeys.length + ' yerel kayıt bulundu. Bunlar buluta yüklenecek (mevcut bulut verisinin üzerine yazabilir, en güncel/dolu veri kazanır). Devam edilsin mi?')) return;
+
+  const btn = document.getElementById('migrateBtn');
+  btn.disabled = true;
+  btn.textContent = 'Yükleniyor...';
+
+  let count = 0;
+  try{
+    const batch = db.batch();
+    let batchCount = 0;
+    for(const k of localKeys){
+      if(k.startsWith('entry:')){
+        const dateKey = k.replace('entry:','');
+        const rec = JSON.parse(localStorage.getItem(k));
+        batch.set(db.collection('entries').doc(dateKey), rec, {merge:true});
+        cloudCache[k] = JSON.stringify(rec);
+      } else if(k.startsWith('weekgoal:')){
+        const weekKey = k.replace('weekgoal:','');
+        const val = localStorage.getItem(k);
+        if(val !== ''){
+          batch.set(db.collection('weekgoals').doc(weekKey), {value:Number(val)});
+          cloudCache[k] = val;
+        }
+      } else if(k === 'gunlukHedef'){
+        const val = localStorage.getItem(k);
+        batch.set(db.collection('settings').doc('general'), {gunlukHedef:Number(val)}, {merge:true});
+        cloudCache[k] = val;
+      }
+      count++;
+      batchCount++;
+      if(batchCount >= 400){ await batch.commit(); batchCount = 0; }
+    }
+    await batch.commit();
+    setStatus('✅ ' + count + ' yerel kayıt buluta yüklendi.');
+    renderAll();
+  }catch(e){
+    setStatus('Yükleme sırasında hata: ' + e.message, true);
+  }
+  btn.disabled = false;
+  btn.textContent = '☁️ Yerel Veriyi Buluta Yükle';
+}
+
 function exportAllData(){
   const data = {};
   const entryRows = [];
