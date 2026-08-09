@@ -130,6 +130,19 @@
   .btn-mini:hover{ background:#ddd; }
   .weekgoal-input{ width:64px; font-size:.62rem; padding:2px 5px; border-radius:6px; border:1px solid #ccc; text-align:right; }
 
+  .ghbhr-mini{ display:flex; gap:3px; }
+  .ghbhr-icon{
+    width:20px; height:20px; border-radius:4px; font-size:.46rem; font-weight:800; color:#fff;
+    display:flex; align-items:center; justify-content:center; cursor:pointer; user-select:none;
+  }
+  .ghbhr-icon.gh{ background:#a34141; }
+  .ghbhr-icon.gh.loaded{ background:var(--green); }
+  .ghbhr-icon.bh{ background:#C8A066; }
+  .ghbhr-icon.bh.loaded{ background:var(--green); }
+  .ghbhr-icon.r{ background:#2d2d2d; }
+  .ghbhr-icon.r.disabled{ background:#ccc; cursor:default; }
+  .ghbhr-icon.r.copied{ background:var(--green); }
+
   table.grid{ width:100%; border-collapse:collapse; font-size:.6rem; table-layout:fixed; }
   table.grid th, table.grid td{ padding:3px 2px; border:1px solid var(--line); text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   table.grid th:first-child, table.grid td:first-child{ width:52px; }
@@ -312,6 +325,9 @@
     <div id="toolFrameHolder"></div>
   </div>
 </div>
+
+<input type="file" id="ghbhrGhFile" accept=".xlsx,.xls" style="display:none;">
+<input type="file" id="ghbhrBhFile" accept=".xlsx,.xls" style="display:none;">
 
 <div class="modal-overlay" id="addToolModal" style="display:none;">
   <div class="modal-box">
@@ -944,6 +960,11 @@ function buildWeekBlock(monday){
       <div style="display:flex;gap:5px;align-items:center;">
         <div class="${badgeClass}" id="badge-${weekKey}">Oran: ${haftaOranPct!==null?fmtPctInt(haftaOranPct):'-'}</div>
         <input type="number" class="weekgoal-input" data-weekkey="${weekKey}" value="${weekGoal!==null?weekGoal:''}" placeholder="Hedef" title="Bu haftanın hedefini yazın">
+        <div class="ghbhr-mini">
+          <div class="ghbhr-icon gh" onclick="document.getElementById('ghbhrGhFile').click()" title="GH: geçen hafta kategori verisi">GH</div>
+          <div class="ghbhr-icon bh" onclick="document.getElementById('ghbhrBhFile').click()" title="BH: bu hafta kategori verisi">BH</div>
+          <div class="ghbhr-icon r disabled" onclick="ghbhrCopyReport()" title="Kıyas raporunu panoya kopyala">R</div>
+        </div>
       </div>
     </div>
     <table class="grid">
@@ -1072,6 +1093,131 @@ function renderMonth(){
   }
   attachEditHandlers();
   renderWeekPhotoTiles();
+  refreshGhBhrIcons();
+}
+
+// ==================== GH / BH KATEGORİ KIYASLAMA ====================
+let ghbhrGhData = null;
+let ghbhrBhData = null;
+let ghbhrComparisonRows = [];
+const GHBHR_CARRY_KEY = 'ghbhr_carried_bh_v1';
+
+function ghbhrLoadCarriedGH(){
+  try{
+    const raw = localStorage.getItem(GHBHR_CARRY_KEY);
+    if(!raw) return;
+    const saved = JSON.parse(raw);
+    ghbhrGhData = saved.data;
+  }catch(e){ /* yoksay */ }
+}
+
+function refreshGhBhrIcons(){
+  document.querySelectorAll('.ghbhr-icon.gh').forEach(el=> el.classList.toggle('loaded', !!ghbhrGhData));
+  document.querySelectorAll('.ghbhr-icon.bh').forEach(el=> el.classList.toggle('loaded', !!ghbhrBhData));
+  document.querySelectorAll('.ghbhr-icon.r').forEach(el=> el.classList.toggle('disabled', !(ghbhrGhData && ghbhrBhData)));
+}
+
+function ghbhrParseCategoryExcel(file, callback){
+  const reader = new FileReader();
+  reader.onload = function(e){
+    const wb = XLSX.read(e.target.result, {type:'array'});
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:null});
+
+    let totalRowIdx = -1;
+    for(let i=0;i<rows.length;i++){
+      if(rows[i] && rows[i][0] && String(rows[i][0]).trim() === 'Genel Toplam'){ totalRowIdx = i; break; }
+    }
+    if(totalRowIdx === -1){ callback(null, 'Bu dosyada "Genel Toplam" satırı bulunamadı.'); return; }
+
+    function amountOf(row){
+      if(row[2] !== null && row[2] !== undefined && typeof row[2] === 'number') return row[2];
+      if(row[1] !== null && row[1] !== undefined && typeof row[1] === 'number') return row[1];
+      return null;
+    }
+    const total = amountOf(rows[totalRowIdx]);
+    if(!total){ callback(null, 'Genel Toplam tutarı okunamadı.'); return; }
+
+    const data = {};
+    for(let i=0;i<totalRowIdx;i++){
+      const row = rows[i];
+      if(!row || !row[0]) continue;
+      const name = String(row[0]).trim();
+      if(name === '' || name.toLowerCase().includes('sorgu') || name.includes('Tarihi')) continue;
+      const amt = amountOf(row);
+      if(amt === null) continue;
+      data[name] = (amt / total) * 100;
+    }
+    callback(data, null);
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+document.getElementById('ghbhrGhFile').addEventListener('change', function(){
+  if(!this.files[0]) return;
+  ghbhrParseCategoryExcel(this.files[0], function(data, err){
+    if(err){ setStatus('GH okunamadı: ' + err, true); return; }
+    ghbhrGhData = data;
+    setStatus('GH elle yüklendi (' + Object.keys(data).length + ' kategori).');
+    refreshGhBhrIcons();
+  });
+  this.value = '';
+});
+
+document.getElementById('ghbhrBhFile').addEventListener('change', function(){
+  if(!this.files[0]) return;
+  ghbhrParseCategoryExcel(this.files[0], function(data, err){
+    if(err){ setStatus('BH okunamadı: ' + err, true); return; }
+    ghbhrBhData = data;
+    setStatus('BH yüklendi (' + Object.keys(data).length + ' kategori).');
+    try{
+      localStorage.setItem(GHBHR_CARRY_KEY, JSON.stringify({date: todayStr(0), data: data}));
+    }catch(e){}
+    refreshGhBhrIcons();
+  });
+  this.value = '';
+});
+
+function ghbhrCopyReport(){
+  if(!ghbhrGhData || !ghbhrBhData){
+    setStatus('Önce GH ve BH kategori Excel dosyalarını yükleyin.', true);
+    return;
+  }
+  ghbhrComparisonRows = [];
+  Object.keys(ghbhrBhData).forEach(name=>{
+    if(!ghbhrGhData.hasOwnProperty(name)) return;
+    const bhPct = ghbhrBhData[name];
+    const ghPct = ghbhrGhData[name];
+    if(ghPct > 5 || bhPct > 5){
+      ghbhrComparisonRows.push({ name, ghPct, bhPct });
+    }
+  });
+  ghbhrComparisonRows.sort((a,b)=> Math.max(b.ghPct,b.bhPct) - Math.max(a.ghPct,a.bhPct));
+
+  if(!ghbhrComparisonRows.length){
+    setStatus('Kopyalanacak %5 üzeri paya sahip kategori yok.', true);
+    return;
+  }
+  const text = ghbhrComparisonRows.map(r =>
+    r.name.toLowerCase() + ' gh %' + Math.round(r.ghPct) + ' bh %' + Math.round(r.bhPct)
+  ).join('\n');
+
+  function done(){
+    setStatus(ghbhrComparisonRows.length + ' kategori panoya kopyalandı.');
+    document.querySelectorAll('.ghbhr-icon.r').forEach(el=>{
+      el.classList.add('copied');
+      setTimeout(()=> el.classList.remove('copied'), 2000);
+    });
+  }
+  navigator.clipboard.writeText(text).then(done, ()=>{
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed'; ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    try{ document.execCommand('copy'); done(); }catch(e){ setStatus('Kopyalanamadı: ' + e.message, true); }
+    document.body.removeChild(ta);
+  });
 }
 
 function attachEditHandlers(){
@@ -1677,6 +1823,7 @@ async function seedTemmuz2026IfNeeded(){
 
 async function startAppAfterLogin(){
   document.getElementById('loginLoading').style.display = 'none';
+  ghbhrLoadCarriedGH();
   renderMonthYearPicker();
   renderWeekPhotoTiles();
   initSimDatePicker();
