@@ -600,6 +600,10 @@ async function loadCloudCache(){
   if(settingsDoc.exists && settingsDoc.data().gunlukHedef !== undefined){
     cloudCache['gunlukHedef'] = String(settingsDoc.data().gunlukHedef);
   }
+
+  const reportsSnap = await db.collection('ghbhrReports').get();
+  reportsSnap.forEach(doc => { ghbhrReportsCache[doc.id] = doc.data().text; });
+
   cloudReady = true;
 }
 
@@ -961,9 +965,9 @@ function buildWeekBlock(monday){
         <div class="${badgeClass}" id="badge-${weekKey}">Oran: ${haftaOranPct!==null?fmtPctInt(haftaOranPct):'-'}</div>
         <input type="number" class="weekgoal-input" data-weekkey="${weekKey}" value="${weekGoal!==null?weekGoal:''}" placeholder="Hedef" title="Bu haftanın hedefini yazın">
         <div class="ghbhr-mini">
-          <div class="ghbhr-icon gh" onclick="document.getElementById('ghbhrGhFile').click()" title="GH: geçen hafta kategori verisi">GH</div>
-          <div class="ghbhr-icon bh" onclick="document.getElementById('ghbhrBhFile').click()" title="BH: bu hafta kategori verisi">BH</div>
-          <div class="ghbhr-icon r disabled" onclick="ghbhrCopyReport()" title="Kıyas raporunu panoya kopyala">R</div>
+          <div class="ghbhr-icon gh" onclick="ghbhrPendingWeekKey='${weekKey}'; document.getElementById('ghbhrGhFile').click()" title="GH: bu haftanın geçen hafta referansı">GH</div>
+          <div class="ghbhr-icon bh" onclick="ghbhrPendingWeekKey='${weekKey}'; document.getElementById('ghbhrBhFile').click()" title="BH: bu haftanın kategori verisi">BH</div>
+          <div class="ghbhr-icon r disabled" onclick="ghbhrCopyReport('${weekKey}')" title="Bu haftanın kıyas raporunu panoya kopyala">R</div>
         </div>
       </div>
     </div>
@@ -1096,25 +1100,52 @@ function renderMonth(){
   refreshGhBhrIcons();
 }
 
-// ==================== GH / BH KATEGORİ KIYASLAMA ====================
-let ghbhrGhData = null;
-let ghbhrBhData = null;
-let ghbhrComparisonRows = [];
-const GHBHR_CARRY_KEY = 'ghbhr_carried_bh_v1';
+// ==================== GH / BH KATEGORİ KIYASLAMA (haftaya özel, yerel; sadece rapor buluta) ====================
+let ghbhrPendingWeekKey = null;
+let ghbhrReportsCache = {}; // weekKey -> rapor metni (buluttan)
+const GHBHR_LOCAL_KEY = 'ghbhr_weekly_v2'; // { weekKey: {gh:{...}|null, bh:{...}|null} }
 
-function ghbhrLoadCarriedGH(){
+function ghbhrGetWeekly(weekKey){
   try{
-    const raw = localStorage.getItem(GHBHR_CARRY_KEY);
-    if(!raw) return;
-    const saved = JSON.parse(raw);
-    ghbhrGhData = saved.data;
-  }catch(e){ /* yoksay */ }
+    const all = JSON.parse(localStorage.getItem(GHBHR_LOCAL_KEY) || '{}');
+    return all[weekKey] || {gh:null, bh:null};
+  }catch(e){ return {gh:null, bh:null}; }
+}
+function ghbhrSetWeekly(weekKey, entry){
+  try{
+    const all = JSON.parse(localStorage.getItem(GHBHR_LOCAL_KEY) || '{}');
+    all[weekKey] = entry;
+    localStorage.setItem(GHBHR_LOCAL_KEY, JSON.stringify(all));
+  }catch(e){}
+}
+function ghbhrMondayFromWeekKey(weekKey){
+  const [yearStr, weekStr] = weekKey.split('-W');
+  const year = Number(yearStr), week = Number(weekStr);
+  const simple = new Date(year,0,1+(week-1)*7);
+  const dow = simple.getDay();
+  const isoWeekStart = new Date(simple);
+  const diff = (dow<=4 ? dow-1 : dow-8);
+  isoWeekStart.setDate(simple.getDate()-diff);
+  return isoWeekStart;
+}
+function ghbhrNextWeekKey(weekKey){
+  const monday = ghbhrMondayFromWeekKey(weekKey);
+  const nextMonday = new Date(monday); nextMonday.setDate(nextMonday.getDate()+7);
+  const info = isoWeekInfo(nextMonday);
+  return info.year + '-W' + pad(info.week);
 }
 
 function refreshGhBhrIcons(){
-  document.querySelectorAll('.ghbhr-icon.gh').forEach(el=> el.classList.toggle('loaded', !!ghbhrGhData));
-  document.querySelectorAll('.ghbhr-icon.bh').forEach(el=> el.classList.toggle('loaded', !!ghbhrBhData));
-  document.querySelectorAll('.ghbhr-icon.r').forEach(el=> el.classList.toggle('disabled', !(ghbhrGhData && ghbhrBhData)));
+  document.querySelectorAll('.week-block').forEach(block=>{
+    const wk = block.dataset.weekkey;
+    const entry = ghbhrGetWeekly(wk);
+    const ghIcon = block.querySelector('.ghbhr-icon.gh');
+    const bhIcon = block.querySelector('.ghbhr-icon.bh');
+    const rIcon = block.querySelector('.ghbhr-icon.r');
+    if(ghIcon) ghIcon.classList.toggle('loaded', !!entry.gh);
+    if(bhIcon) bhIcon.classList.toggle('loaded', !!entry.bh);
+    if(rIcon) rIcon.classList.toggle('disabled', !((entry.gh && entry.bh) || ghbhrReportsCache[wk]));
+  });
 }
 
 function ghbhrParseCategoryExcel(file, callback){
@@ -1154,60 +1185,93 @@ function ghbhrParseCategoryExcel(file, callback){
 }
 
 document.getElementById('ghbhrGhFile').addEventListener('change', function(){
-  if(!this.files[0]) return;
+  if(!this.files[0] || !ghbhrPendingWeekKey) return;
+  const wk = ghbhrPendingWeekKey;
   ghbhrParseCategoryExcel(this.files[0], function(data, err){
     if(err){ setStatus('GH okunamadı: ' + err, true); return; }
-    ghbhrGhData = data;
-    setStatus('GH elle yüklendi (' + Object.keys(data).length + ' kategori).');
+    const entry = ghbhrGetWeekly(wk);
+    entry.gh = data;
+    ghbhrSetWeekly(wk, entry);
+    setStatus('Hafta ' + wk + ' için GH yüklendi (' + Object.keys(data).length + ' kategori).');
     refreshGhBhrIcons();
   });
   this.value = '';
 });
 
 document.getElementById('ghbhrBhFile').addEventListener('change', function(){
-  if(!this.files[0]) return;
-  ghbhrParseCategoryExcel(this.files[0], function(data, err){
+  if(!this.files[0] || !ghbhrPendingWeekKey) return;
+  const wk = ghbhrPendingWeekKey;
+  const fileObj = this.files[0];
+  ghbhrParseCategoryExcel(fileObj, function(data, err){
     if(err){ setStatus('BH okunamadı: ' + err, true); return; }
-    ghbhrBhData = data;
-    setStatus('BH yüklendi (' + Object.keys(data).length + ' kategori).');
     try{
-      localStorage.setItem(GHBHR_CARRY_KEY, JSON.stringify({date: todayStr(0), data: data}));
-    }catch(e){}
-    refreshGhBhrIcons();
+      // 1) Bu haftanın BH'sini kaydet
+      const entry = ghbhrGetWeekly(wk);
+      entry.bh = data;
+      ghbhrSetWeekly(wk, entry);
+
+      // 2) Bir sonraki haftayı hesapla ve GH'sini bu veriyle doldur
+      const nextWk = ghbhrNextWeekKey(wk);
+      const nextEntry = ghbhrGetWeekly(nextWk);
+      nextEntry.gh = data;
+      ghbhrSetWeekly(nextWk, nextEntry);
+
+      // 3) Doğrulama: gerçekten yazıldı mı diye geri oku
+      const verify = ghbhrGetWeekly(nextWk);
+      const wrote = !!(verify && verify.gh && Object.keys(verify.gh).length === Object.keys(data).length);
+
+      setStatus(
+        'Hafta ' + wk + ' için BH yüklendi (' + Object.keys(data).length + ' kategori). ' +
+        (wrote
+          ? ('Hafta ' + nextWk + '\'in GH\'si otomatik dolduruldu ✓.')
+          : ('⚠ Hafta ' + nextWk + '\'in GH\'si YAZILAMADI, tekrar deneyin.'))
+      , !wrote);
+
+      refreshGhBhrIcons();
+    }catch(ex){
+      setStatus('Taşıma sırasında hata: ' + ex.message, true);
+    }
   });
   this.value = '';
 });
 
-function ghbhrCopyReport(){
-  if(!ghbhrGhData || !ghbhrBhData){
-    setStatus('Önce GH ve BH kategori Excel dosyalarını yükleyin.', true);
-    return;
-  }
-  ghbhrComparisonRows = [];
-  Object.keys(ghbhrBhData).forEach(name=>{
-    if(!ghbhrGhData.hasOwnProperty(name)) return;
-    const bhPct = ghbhrBhData[name];
-    const ghPct = ghbhrGhData[name];
-    if(ghPct > 5 || bhPct > 5){
-      ghbhrComparisonRows.push({ name, ghPct, bhPct });
-    }
-  });
-  ghbhrComparisonRows.sort((a,b)=> Math.max(b.ghPct,b.bhPct) - Math.max(a.ghPct,a.bhPct));
+function ghbhrCopyReport(weekKey){
+  const entry = ghbhrGetWeekly(weekKey);
+  let text = null;
 
-  if(!ghbhrComparisonRows.length){
-    setStatus('Kopyalanacak %5 üzeri paya sahip kategori yok.', true);
+  if(entry.gh && entry.bh){
+    const rows = [];
+    Object.keys(entry.bh).forEach(name=>{
+      if(!entry.gh.hasOwnProperty(name)) return;
+      const bhPct = entry.bh[name], ghPct = entry.gh[name];
+      if(ghPct > 5 || bhPct > 5) rows.push({ name, ghPct, bhPct });
+    });
+    rows.sort((a,b)=> Math.max(b.ghPct,b.bhPct) - Math.max(a.ghPct,a.bhPct));
+    if(!rows.length){
+      setStatus('Hafta ' + weekKey + ' için %5 üzeri paya sahip kategori yok.', true);
+      return;
+    }
+    text = rows.map(r => r.name.toLowerCase() + ' gh %' + Math.round(r.ghPct) + ' bh %' + Math.round(r.bhPct)).join('\n');
+
+    ghbhrReportsCache[weekKey] = text;
+    db.collection('ghbhrReports').doc(weekKey).set({text: text, updatedAt: new Date().toISOString()}).catch(e=>{
+      setStatus('Rapor buluta kaydedilemedi: ' + e.message, true);
+    });
+  } else if(ghbhrReportsCache[weekKey]){
+    // Yerelde GH/BH yok (ör. evdesiniz) — daha önce buluta kaydedilmiş raporu kullan
+    text = ghbhrReportsCache[weekKey];
+  } else {
+    setStatus('Hafta ' + weekKey + ' için ne yerel veri ne kayıtlı bir rapor var.', true);
     return;
   }
-  const text = ghbhrComparisonRows.map(r =>
-    r.name.toLowerCase() + ' gh %' + Math.round(r.ghPct) + ' bh %' + Math.round(r.bhPct)
-  ).join('\n');
 
   function done(){
-    setStatus(ghbhrComparisonRows.length + ' kategori panoya kopyalandı.');
-    document.querySelectorAll('.ghbhr-icon.r').forEach(el=>{
-      el.classList.add('copied');
-      setTimeout(()=> el.classList.remove('copied'), 2000);
-    });
+    setStatus('Hafta ' + weekKey + ' raporu panoya kopyalandı.');
+    const block = document.querySelector('.week-block[data-weekkey="' + weekKey + '"]');
+    if(block){
+      const rIcon = block.querySelector('.ghbhr-icon.r');
+      if(rIcon){ rIcon.classList.add('copied'); setTimeout(()=> rIcon.classList.remove('copied'), 2000); }
+    }
   }
   navigator.clipboard.writeText(text).then(done, ()=>{
     const ta = document.createElement('textarea');
@@ -1823,7 +1887,6 @@ async function seedTemmuz2026IfNeeded(){
 
 async function startAppAfterLogin(){
   document.getElementById('loginLoading').style.display = 'none';
-  ghbhrLoadCarriedGH();
   renderMonthYearPicker();
   renderWeekPhotoTiles();
   initSimDatePicker();
