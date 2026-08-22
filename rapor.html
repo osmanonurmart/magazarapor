@@ -250,9 +250,6 @@
   .send-btn.success{ background:var(--green); }
   .send-btn.error{ background:var(--red); }
   .send-btn:disabled{ opacity:.75; cursor:default; }
-  .send-btn-row{ display:flex; gap:6px; margin-top:10px; }
-  .send-btn-row .send-btn.small{ margin-top:0; padding:8px 4px; font-size:.66rem; flex:1; }
-  .send-btn-row .send-btn.small:disabled{ background:#ccc; color:#888; }
 
   table.grid thead th{ overflow:visible; }
   .izinli-sel{
@@ -271,42 +268,26 @@
   }
   .msg-area textarea:focus{ outline:none; border-color:var(--accent); }
 
-  .login-screen{
+  .boot-screen{
     position:fixed; inset:0; background:var(--bg); display:flex; align-items:center; justify-content:center; z-index:1000;
   }
-  .login-box{
-    background:#fff; border-radius:16px; padding:36px 32px; width:320px; max-width:90vw; text-align:center;
+  .boot-box{
+    background:#fff; border-radius:16px; padding:34px 32px; width:320px; max-width:90vw; text-align:center;
     box-shadow:0 6px 24px rgba(0,0,0,.12);
   }
-  .login-logo{ font-size:2.2rem; margin-bottom:6px; }
-  .login-box h2{ font-size:1.05rem; margin:0 0 4px; color:var(--dark); }
-  .login-sub{ font-size:.78rem; color:#888; margin:0 0 18px; }
-  .login-box input{
-    width:100%; padding:11px 12px; border-radius:8px; border:1.5px solid #ddd; font-size:.9rem;
-    margin-bottom:12px; text-align:center;
-  }
-  .login-box input:focus{ outline:none; border-color:var(--accent); }
-  .login-btn{
-    width:100%; padding:11px; border-radius:8px; border:none; background:var(--dark); color:#fff;
-    font-size:.88rem; font-weight:600; cursor:pointer;
-  }
-  .login-btn:hover{ opacity:.9; }
-  .login-btn:disabled{ opacity:.5; cursor:default; }
-  .login-status{ font-size:.75rem; color:var(--red); margin-top:10px; min-height:14px; }
-  .login-loading{ font-size:.75rem; color:#888; margin-top:10px; }
+  .boot-logo{ font-size:2.2rem; margin-bottom:6px; }
+  .boot-box h2{ font-size:1.05rem; margin:0 0 10px; color:var(--dark); }
+  .boot-msg{ font-size:.78rem; color:#888; line-height:1.45; white-space:pre-line; }
+  .boot-msg.error{ color:var(--red); }
 </style>
 </head>
 <body>
 
-<div id="loginScreen" class="login-screen">
-  <div class="login-box">
-    <div class="login-logo">🏪</div>
+<div id="bootScreen" class="boot-screen">
+  <div class="boot-box">
+    <div class="boot-logo">🏪</div>
     <h2>Mağaza Performans Raporu</h2>
-    <p class="login-sub">Devam etmek için şifreyi girin</p>
-    <input type="password" id="loginPassword" placeholder="Şifre" autocomplete="current-password">
-    <button class="login-btn" id="loginBtn" onclick="tryLogin()">Giriş Yap</button>
-    <div class="login-status" id="loginStatus"></div>
-    <div class="login-loading" id="loginLoading" style="display:none;">Veriler yükleniyor...</div>
+    <div class="boot-msg" id="bootMsg">Veriler yükleniyor...</div>
   </div>
 </div>
 
@@ -631,7 +612,6 @@ const firebaseConfig = {
   appId: "1:788228140989:web:106c9057fb8f27fe86ecd4",
   measurementId: "G-FHDQ2FFPF1"
 };
-const LOGIN_EMAIL = "magaza@rapor.local"; // Firebase Authentication'da bu e-postayla TEK bir kullanıcı oluşturun, şifresi = ortak şifreniz
 
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
@@ -685,38 +665,33 @@ function listenCloudChanges(){
   });
 }
 
-function tryLogin(){
-  const pw = document.getElementById('loginPassword').value;
-  if(!pw){ document.getElementById('loginStatus').textContent = 'Lütfen şifreyi girin.'; return; }
-  document.getElementById('loginBtn').disabled = true;
-  document.getElementById('loginStatus').textContent = '';
-  auth.signInWithEmailAndPassword(LOGIN_EMAIL, pw)
-    .catch(err=>{
-      document.getElementById('loginBtn').disabled = false;
-      document.getElementById('loginStatus').textContent = '❌ Şifre yanlış veya bağlantı sorunu.';
-    });
+function bootStatus(msg, isError){
+  const el = document.getElementById('bootMsg');
+  if(!el) return;
+  el.textContent = msg;
+  el.classList.toggle('error', !!isError);
 }
-document.getElementById('loginPassword').addEventListener('keydown', function(e){
-  if(e.key === 'Enter') tryLogin();
-});
 
+// Şifre ekranı yok: sayfa açılır açılmaz arka planda anonim oturum açılır.
 auth.onAuthStateChanged(async function(user){
-  if(user){
-    document.getElementById('loginLoading').style.display = 'block';
-    try{
-      await loadCloudCache();
-      listenCloudChanges();
-      document.getElementById('loginScreen').style.display = 'none';
-      document.getElementById('appRoot').style.display = '';
-      startAppAfterLogin();
-    }catch(e){
-      document.getElementById('loginLoading').style.display = 'none';
-      document.getElementById('loginBtn').disabled = false;
-      document.getElementById('loginStatus').textContent = '❌ Veri yüklenemedi: ' + e.message;
-    }
-  } else {
-    document.getElementById('loginScreen').style.display = 'flex';
-    document.getElementById('appRoot').style.display = 'none';
+  if(!user){
+    auth.signInAnonymously().catch(err=>{
+      bootStatus(
+        err.code === 'auth/operation-not-allowed'
+          ? 'Firebase\'de anonim giriş kapalı görünüyor.\nConsole → Authentication → Sign-in method → Anonymous → Enable.'
+          : ('Bağlantı kurulamadı: ' + err.message)
+      , true);
+    });
+    return;
+  }
+  try{
+    await loadCloudCache();
+    listenCloudChanges();
+    document.getElementById('bootScreen').style.display = 'none';
+    document.getElementById('appRoot').style.display = '';
+    startAppAfterLogin();
+  }catch(e){
+    bootStatus('Veriler yüklenemedi: ' + e.message, true);
   }
 });
 
@@ -1682,15 +1657,7 @@ function renderReportPanel(){
     </tr>
   </table>
   </div>
-  ${getNow().getDay()===0 ? `
-  <div class="send-btn-row">
-    <button class="send-btn small" id="sendBtnCombo" title="Bu hafta + geçen hafta">📷 Hafta İkilisi</button>
-    <button class="send-btn small" id="sendBtnRt" title="Sadece RT tablosu">📷 RT Tablosu</button>
-    <button class="send-btn small" id="sendBtnEmpty" disabled title="Yakında">— Boş —</button>
-  </div>
-  ` : `
   <button class="send-btn" id="sendBtn">📷 Fotoğrafını Al</button>
-  `}
   <div class="msg-area">
     <span class="msg-label">Yorum (mesaja eklenecek):</span>
     <textarea id="yorumBox" placeholder="Yorumunuzu buraya yazın..."></textarea>
@@ -1814,19 +1781,6 @@ function renderReportPanel(){
     }
   }
 
-  const sendBtnCombo = document.getElementById('sendBtnCombo');
-  if(sendBtnCombo){
-    sendBtnCombo.addEventListener('click', function(){
-      runCapture(sendBtnCombo, captureWeekPairCombined, 'Bu hafta + geçen hafta görseli panoya kopyalandı.');
-    });
-  }
-  const sendBtnRt = document.getElementById('sendBtnRt');
-  if(sendBtnRt){
-    sendBtnRt.addEventListener('click', function(){
-      runCapture(sendBtnRt, generateReportCanvas, 'RT görseli panoya kopyalandı.');
-    });
-  }
-
   const sendBtn = document.getElementById('sendBtn');
   if(sendBtn){
     sendBtn.addEventListener('click', function(){
@@ -1873,88 +1827,6 @@ async function captureElementWithPadding(el, padding=18){
   const canvas = await html2canvas(el, {backgroundColor:'#ffffff', scale:2});
   el.style.padding = prevPadding;
   el.style.background = prevBg;
-  return canvas;
-}
-
-function cleanBlockClone(srcBlock){
-  const clone = srcBlock.cloneNode(true);
-  clone.querySelectorAll('[contenteditable]').forEach(el=>el.removeAttribute('contenteditable'));
-  const goalInput = clone.querySelector('.weekgoal-input');
-  if(goalInput){
-    const span = document.createElement('span');
-    span.textContent = goalInput.value || '-';
-    span.style.fontSize = '.62rem';
-    goalInput.replaceWith(span);
-  }
-  return clone;
-}
-
-async function captureWeekPairCombined(){
-  const thisMonday = mondayOf(getNow());
-  const lastMonday = new Date(thisMonday); lastMonday.setDate(lastMonday.getDate()-7);
-
-  const wrapper = document.createElement('div');
-  wrapper.style.position = 'fixed';
-  wrapper.style.left = '-9999px';
-  wrapper.style.top = '0';
-  wrapper.style.background = '#ffffff';
-  wrapper.style.padding = '18px';
-  wrapper.style.display = 'flex';
-  wrapper.style.flexDirection = 'column';
-  wrapper.style.gap = '14px';
-  wrapper.style.width = '900px';
-
-  const lastWeekBlock = buildWeekBlock(lastMonday);
-  const thisWeekBlock = buildWeekBlock(thisMonday);
-  [lastWeekBlock, thisWeekBlock].forEach(b=>{
-    b.querySelectorAll('[contenteditable]').forEach(el=>el.removeAttribute('contenteditable'));
-    const goalInput = b.querySelector('.weekgoal-input');
-    if(goalInput){ const span = document.createElement('span'); span.textContent = goalInput.value || '-'; span.style.fontSize='.62rem'; goalInput.replaceWith(span); }
-  });
-
-  wrapper.appendChild(lastWeekBlock);
-  wrapper.appendChild(thisWeekBlock);
-  document.body.appendChild(wrapper);
-
-  const canvas = await html2canvas(wrapper, {backgroundColor:'#ffffff', scale:2});
-  document.body.removeChild(wrapper);
-  return canvas;
-}
-
-async function captureCombinedIfSunday(){
-  const thisMonday = mondayOf(getNow());
-  const lastMonday = new Date(thisMonday); lastMonday.setDate(lastMonday.getDate()-7);
-
-  const wrapper = document.createElement('div');
-  wrapper.style.position = 'fixed';
-  wrapper.style.left = '-9999px';
-  wrapper.style.top = '0';
-  wrapper.style.background = '#ffffff';
-  wrapper.style.padding = '18px';
-  wrapper.style.display = 'flex';
-  wrapper.style.flexDirection = 'column';
-  wrapper.style.gap = '14px';
-  wrapper.style.width = '900px';
-
-  const rtClone = document.getElementById('rtCaptureArea').cloneNode(true);
-  rtClone.querySelectorAll('[contenteditable]').forEach(el=>el.removeAttribute('contenteditable'));
-
-  const lastWeekBlock = buildWeekBlock(lastMonday);
-  const thisWeekBlock = buildWeekBlock(thisMonday);
-  [lastWeekBlock, thisWeekBlock].forEach(b=>{
-    b.querySelectorAll('[contenteditable]').forEach(el=>el.removeAttribute('contenteditable'));
-    const cam = b.querySelector('.camera-btn'); if(cam) cam.remove();
-    const goalInput = b.querySelector('.weekgoal-input');
-    if(goalInput){ const span = document.createElement('span'); span.textContent = goalInput.value || '-'; span.style.fontSize='.62rem'; goalInput.replaceWith(span); }
-  });
-
-  wrapper.appendChild(rtClone);
-  wrapper.appendChild(lastWeekBlock);
-  wrapper.appendChild(thisWeekBlock);
-  document.body.appendChild(wrapper);
-
-  const canvas = await html2canvas(wrapper, {backgroundColor:'#ffffff', scale:2});
-  document.body.removeChild(wrapper);
   return canvas;
 }
 
@@ -2088,7 +1960,6 @@ async function seedTemmuz2026IfNeeded(){
 }
 
 async function startAppAfterLogin(){
-  document.getElementById('loginLoading').style.display = 'none';
   renderMonthYearPicker();
   initSimDatePicker();
   await seedTemmuz2026IfNeeded();
