@@ -31,25 +31,47 @@
   .tab-btn:hover:not(.active){ background:#e8e5dd; }
 
   .araclar-page{ margin:0; padding:16px; }
-  .tools-grid{ display:grid; grid-template-columns:repeat(4, 110px); gap:14px; justify-content:center; max-width:1300px; margin:0 auto; }
+  .tools-grid{
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(142px, 1fr)); gap:14px;
+    max-width:1000px; margin:0 auto;
+  }
   .tool-tile{
-    width:110px; height:110px; background:#fff; border-radius:12px; box-shadow:0 1px 3px rgba(0,0,0,.08);
-    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
-    cursor:pointer; position:relative; padding:8px; text-align:center;
+    background:#fff; border:1px solid var(--line); border-radius:14px; overflow:hidden;
+    cursor:pointer; position:relative; transition:transform .15s, box-shadow .15s;
   }
-  .tool-tile:hover{ box-shadow:0 3px 8px rgba(0,0,0,.15); }
-  .tool-tile .tool-icon{ font-size:1.8rem; }
-  .tool-tile .tool-name{ font-size:.68rem; font-weight:600; color:#444; word-break:break-word; line-height:1.2; }
-  .tool-tile .tool-del{
-    position:absolute; top:4px; right:6px; background:none; border:none; color:#bbb; font-size:.8rem; cursor:pointer;
+  .tool-tile:hover{ transform:translateY(-3px); box-shadow:0 6px 16px rgba(0,0,0,.12); }
+  .tool-tile .tool-cap{
+    height:74px; display:flex; align-items:center; justify-content:center; font-size:1.9rem; position:relative;
   }
-  .tool-tile .tool-del:hover{ color:var(--red); }
-  .tool-tile .tool-dl{
-    position:absolute; top:4px; left:6px; background:none; border:none; color:#bbb; font-size:.8rem; cursor:pointer;
+  .tool-tile .tool-foot{ padding:7px 9px; border-top:1px solid var(--line); text-align:center; }
+  .tool-tile .tool-name{
+    display:block; font-size:.7rem; font-weight:600; color:#3d3d3d; line-height:1.2;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
-  .tool-tile .tool-dl:hover{ color:var(--accent); }
-  .tool-tile.add-tile{ border:2px dashed #ccc; background:transparent; box-shadow:none; color:#999; }
-  .tool-tile.add-tile:hover{ border-color:var(--accent); color:var(--accent); }
+  .tool-tile .tool-acts{
+    position:absolute; top:5px; right:5px; display:flex; gap:2px;
+    opacity:0; transition:opacity .15s;
+  }
+  .tool-tile:hover .tool-acts{ opacity:1; }
+  .tool-tile .tool-acts button{
+    background:rgba(255,255,255,.85); border:none; color:#5c5c5c; font-size:.62rem; cursor:pointer;
+    width:17px; height:17px; border-radius:5px; padding:0; line-height:1;
+  }
+  .tool-tile .tool-acts .tool-edit:hover{ background:#fff; color:var(--accent); }
+  .tool-tile .tool-acts .tool-dl:hover{ background:#fff; color:var(--accent); }
+  .tool-tile .tool-acts .tool-del:hover{ background:#fff; color:var(--red); }
+  .tool-tile.add-tile{ border:2px dashed #ccc; background:transparent; }
+  .tool-tile.add-tile:hover{ border-color:var(--accent); }
+  .tool-tile.add-tile .tool-cap{ color:#bbb; font-size:1.6rem; }
+  .tool-tile.add-tile .tool-foot{ border-top:none; color:#aaa; justify-content:center; }
+  .tool-tile.add-tile .tool-name{ color:#aaa; }
+
+  .icon-picker{ display:flex; flex-wrap:wrap; gap:7px; margin-top:2px; }
+  .icon-picker .ip-item{
+    width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+    font-size:1.15rem; border:2px solid transparent; cursor:pointer;
+  }
+  .icon-picker .ip-item.sel{ border-color:var(--accent); box-shadow:0 0 0 3px rgba(200,160,102,.18); }
 
   .tool-viewer-bar{ position:relative; display:flex; align-items:center; padding:6px 0 14px; min-height:34px; }
   .tool-viewer-title{
@@ -105,17 +127,7 @@
   .my-month-btn:hover:not(.active){ background:#e6e2d8; }
   #yearSel{ padding:5px 8px; border-radius:6px; border:1px solid #ddd; font-size:.75rem; }
 
-  .week-photo-picker{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
   .wpp-label{ font-size:.72rem; color:#666; }
-  .wpp-tiles{ display:flex; gap:4px; }
-  .wpp-tile{
-    width:26px; height:30px; border-radius:6px; border:1px solid #ccc; background:#fff; color:#777;
-    font-size:.72rem; font-weight:600; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0; padding:0;
-  }
-  .wpp-cur-arrow{ font-size:.5rem; line-height:1; height:7px; color:var(--accent); }
-  .wpp-tile.selected .wpp-cur-arrow{ color:#ffd98a; }
-  .wpp-tile.selected{ background:var(--accent); color:#fff; border-color:var(--accent); }
-  .wpp-tile:hover:not(.selected){ background:#f5f0e8; }
 
   .sim-date-picker{ display:flex; align-items:center; gap:6px; }
   .sim-date-picker input[type=date]{ padding:4px 7px; border-radius:6px; border:1px solid #ddd; font-size:.72rem; }
@@ -142,6 +154,14 @@
   .ghbhr-icon.r{ background:#2d2d2d; }
   .ghbhr-icon.r.disabled{ background:#ccc; cursor:default; }
   .ghbhr-icon.r.copied{ background:var(--green); }
+  .ghbhr-icon{ position:relative; }
+  .ghbhr-del{
+    display:none; position:absolute; top:-5px; right:-5px; width:12px; height:12px; border-radius:50%;
+    background:#fff; color:var(--red); border:1px solid var(--red); font-size:.5rem; line-height:10px;
+    text-align:center; cursor:pointer; padding:0; font-weight:800;
+  }
+  .ghbhr-icon.loaded .ghbhr-del, .ghbhr-icon.silinebilir .ghbhr-del{ display:block; }
+  .ghbhr-del:hover{ background:var(--red); color:#fff; }
 
   table.grid{ width:100%; border-collapse:collapse; font-size:.6rem; table-layout:fixed; }
   table.grid th, table.grid td{ padding:3px 2px; border:1px solid var(--line); text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
@@ -241,7 +261,7 @@
     background:rgba(255,255,255,.12); color:#fff; cursor:pointer;
   }
   .izinli-sel option{ color:#222; background:#fff; }
-  .izinli-sel.dolu{ background:var(--yellow); color:#222; border-color:#e6d98a; font-weight:700; }
+  .izinli-sel.dolu{ background:var(--accent); color:#fff; border-color:var(--accent); font-weight:700; }
 
   .msg-area{ margin-top:10px; }
   .msg-area .msg-label{ display:block; font-size:.66rem; color:#777; margin-bottom:3px; }
@@ -299,11 +319,6 @@
   </div>
   <div class="header-center" id="headerCenter">
     <div class="month-year-picker" id="monthYearPicker"></div>
-    <div class="week-photo-picker">
-      <span class="wpp-label">📷 Hafta Fotoğrafı:</span>
-      <div class="wpp-tiles" id="wppTiles"></div>
-      <button class="btn accent" id="wppCaptureBtn" type="button">Çek</button>
-    </div>
     <div class="sim-date-picker">
       <span class="wpp-label">🕒 Simüle Tarih:</span>
       <input type="date" id="simDateInput">
@@ -356,11 +371,27 @@
     <div style="text-align:center;font-size:.7rem;color:#aaa;margin:6px 0;">— veya elle doldurun —</div>
     <label>Araç Adı</label>
     <input type="text" id="newToolName" placeholder="ör. Vardiya Yardımcısı">
+    <label>Simge</label>
+    <div class="icon-picker" id="newToolIcons"></div>
     <label>HTML Kodu</label>
     <textarea id="newToolCode" placeholder="Buraya tam HTML kodunu yapıştırın..."></textarea>
     <div class="modal-actions">
       <button class="btn" onclick="closeAddToolModal()">İptal</button>
       <button class="btn accent" onclick="saveNewTool()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="editToolModal" style="display:none;">
+  <div class="modal-box" style="width:420px;">
+    <h3>Aracı Düzenle</h3>
+    <label>Araç Adı</label>
+    <input type="text" id="editToolName">
+    <label>Simge</label>
+    <div class="icon-picker" id="editToolIcons"></div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeEditToolModal()">İptal</button>
+      <button class="btn accent" onclick="saveToolEdit()">Kaydet</button>
     </div>
   </div>
 </div>
@@ -985,8 +1016,8 @@ function buildWeekBlock(monday){
         <div class="${badgeClass}" id="badge-${weekKey}">Oran: ${haftaOranPct!==null?fmtPctInt(haftaOranPct):'-'}</div>
         <input type="number" class="weekgoal-input" data-weekkey="${weekKey}" value="${weekGoal!==null?weekGoal:''}" placeholder="Hedef" title="Bu haftanın hedefini yazın">
         <div class="ghbhr-mini">
-          <div class="ghbhr-icon gh" onclick="ghbhrPendingWeekKey='${weekKey}'; document.getElementById('ghbhrGhFile').click()" title="GH: bu haftanın geçen hafta referansı">GH</div>
-          <div class="ghbhr-icon bh" onclick="ghbhrPendingWeekKey='${weekKey}'; document.getElementById('ghbhrBhFile').click()" title="BH: bu haftanın kategori verisi">BH</div>
+          <div class="ghbhr-icon gh" onclick="ghbhrPendingWeekKey='${weekKey}'; document.getElementById('ghbhrGhFile').click()" title="GH: bu haftanın geçen hafta referansı">GH<button class="ghbhr-del" onclick="event.stopPropagation(); ghbhrDelete('${weekKey}','gh')" title="GH verisini sil">✕</button></div>
+          <div class="ghbhr-icon bh" onclick="ghbhrPendingWeekKey='${weekKey}'; document.getElementById('ghbhrBhFile').click()" title="BH: bu haftanın kategori verisi">BH<button class="ghbhr-del" onclick="event.stopPropagation(); ghbhrDelete('${weekKey}','bh')" title="BH verisini sil">✕</button></div>
           <div class="ghbhr-icon r disabled" onclick="ghbhrCopyReport('${weekKey}')" title="Bu haftanın kıyas raporunu panoya kopyala">R</div>
         </div>
       </div>
@@ -1140,7 +1171,6 @@ function renderMonth(){
     container.appendChild(buildWeekBlock(monday));
   }
   attachEditHandlers();
-  renderWeekPhotoTiles();
   refreshGhBhrIcons();
 }
 
@@ -1186,8 +1216,9 @@ function refreshGhBhrIcons(){
     const ghIcon = block.querySelector('.ghbhr-icon.gh');
     const bhIcon = block.querySelector('.ghbhr-icon.bh');
     const rIcon = block.querySelector('.ghbhr-icon.r');
-    if(ghIcon) ghIcon.classList.toggle('loaded', !!entry.gh);
-    if(bhIcon) bhIcon.classList.toggle('loaded', !!entry.bh);
+    const raporVar = !!ghbhrReportsCache[wk];
+    if(ghIcon){ ghIcon.classList.toggle('loaded', !!entry.gh); ghIcon.classList.toggle('silinebilir', raporVar); }
+    if(bhIcon){ bhIcon.classList.toggle('loaded', !!entry.bh); bhIcon.classList.toggle('silinebilir', raporVar); }
     if(rIcon) rIcon.classList.toggle('disabled', !((entry.gh && entry.bh) || ghbhrReportsCache[wk]));
   });
 }
@@ -1279,9 +1310,10 @@ document.getElementById('ghbhrBhFile').addEventListener('change', function(){
   this.value = '';
 });
 
-function ghbhrCopyReport(weekKey){
+// Haftanın kategori kıyas metnini üretir. Yerelde GH+BH varsa hesaplar (save ise buluta yazar),
+// yoksa daha önce buluta kaydedilmiş rapora düşer. Üretilemezse null döner.
+function ghbhrBuildReportText(weekKey, save){
   const entry = ghbhrGetWeekly(weekKey);
-  let text = null;
 
   if(entry.gh && entry.bh){
     const rows = [];
@@ -1291,21 +1323,56 @@ function ghbhrCopyReport(weekKey){
       if(ghPct > 5 || bhPct > 5) rows.push({ name, ghPct, bhPct });
     });
     rows.sort((a,b)=> Math.max(b.ghPct,b.bhPct) - Math.max(a.ghPct,a.bhPct));
-    if(!rows.length){
-      setStatus('Hafta ' + weekKey + ' için %5 üzeri paya sahip kategori yok.', true);
-      return;
-    }
-    text = rows.map(r => r.name.toLowerCase() + ' gh %' + Math.round(r.ghPct) + ' bh %' + Math.round(r.bhPct)).join('\n');
+    if(!rows.length) return null;
 
-    ghbhrReportsCache[weekKey] = text;
-    db.collection('ghbhrReports').doc(weekKey).set({text: text, updatedAt: new Date().toISOString()}).catch(e=>{
-      setStatus('Rapor buluta kaydedilemedi: ' + e.message, true);
+    const text = rows.map(r => r.name.toLowerCase() + ' gh %' + Math.round(r.ghPct) + ' bh %' + Math.round(r.bhPct)).join('\n');
+    if(save){
+      ghbhrReportsCache[weekKey] = text;
+      db.collection('ghbhrReports').doc(weekKey).set({text: text, updatedAt: new Date().toISOString()}).catch(e=>{
+        setStatus('Rapor buluta kaydedilemedi: ' + e.message, true);
+      });
+    }
+    return text;
+  }
+  // Yerelde GH/BH yok (ör. evdesiniz) — daha önce buluta kaydedilmiş raporu kullan
+  return ghbhrReportsCache[weekKey] || null;
+}
+
+// GH veya BH verisini (ve o haftanın buluttaki kayıtlı raporunu) siler.
+function ghbhrDelete(weekKey, kind){
+  const etiket = kind.toUpperCase();
+  const entry = ghbhrGetWeekly(weekKey);
+  const raporVar = !!ghbhrReportsCache[weekKey];
+  if(!entry[kind] && !raporVar){
+    setStatus('Hafta ' + weekKey + ' için silinecek ' + etiket + ' verisi yok.', true);
+    return;
+  }
+  if(!confirm('Hafta ' + weekKey + ' ' + etiket + ' verisi silinecek.' +
+              (raporVar ? '\nBu haftanın kayıtlı kıyas raporu da silinecek.' : '') +
+              '\nDevam edilsin mi?')) return;
+
+  entry[kind] = null;
+  ghbhrSetWeekly(weekKey, entry);
+
+  if(raporVar){
+    delete ghbhrReportsCache[weekKey];
+    db.collection('ghbhrReports').doc(weekKey).delete().catch(e=>{
+      setStatus('Kayıtlı rapor buluttan silinemedi: ' + e.message, true);
     });
-  } else if(ghbhrReportsCache[weekKey]){
-    // Yerelde GH/BH yok (ör. evdesiniz) — daha önce buluta kaydedilmiş raporu kullan
-    text = ghbhrReportsCache[weekKey];
-  } else {
-    setStatus('Hafta ' + weekKey + ' için ne yerel veri ne kayıtlı bir rapor var.', true);
+  }
+  refreshGhBhrIcons();
+  setStatus('Hafta ' + weekKey + ' ' + etiket + ' verisi silindi.');
+}
+
+function ghbhrCopyReport(weekKey){
+  const entry = ghbhrGetWeekly(weekKey);
+  const text = ghbhrBuildReportText(weekKey, true);
+  if(!text){
+    setStatus(
+      (entry.gh && entry.bh)
+        ? ('Hafta ' + weekKey + ' için %5 üzeri paya sahip kategori yok.')
+        : ('Hafta ' + weekKey + ' için ne yerel veri ne kayıtlı bir rapor var.')
+    , true);
     return;
   }
 
@@ -1460,6 +1527,12 @@ function buildDailyMessage(){
     satirlar.push('Toplu satışlarda ' + topluEtiket[0] + ' ' + topluOnce + ' iken ' + topluEtiket[1] + ' ' + topluSimdi + ' oldu.');
   } else if(topluSimdi !== null){
     satirlar.push('Toplu satışımız ' + topluSimdi + ' oldu.');
+  }
+
+  // Pazar günü: haftanın GH/BH kategori kıyas raporu toplu satışın altına eklenir.
+  if(dow === 0){
+    const rapor = ghbhrBuildReportText(computeWeekDerived(mondayOf(now)).weekKey, false);
+    if(rapor) rapor.split('\n').forEach(satir=> satirlar.push(satir));
   }
 
   const yorum = getYorumDraft().trim();
@@ -1816,73 +1889,6 @@ function cleanBlockClone(srcBlock){
   return clone;
 }
 
-// ---- Hafta fotoğrafı kutucuk seçici (1-6, ızgara pozisyonlarıyla birebir eşleşir) ----
-const selectedWeekTiles = new Set();
-
-function renderWeekPhotoTiles(){
-  const container = document.getElementById('wppTiles');
-  container.innerHTML = '';
-
-  const weeks = weeksInMonth(getMonthVal());
-  const today = getNow(); today.setHours(0,0,0,0);
-  let currentWeekIdx = null;
-  weeks.forEach((monday,i)=>{
-    const weekEnd = new Date(monday); weekEnd.setDate(weekEnd.getDate()+6); weekEnd.setHours(23,59,59,999);
-    const m = new Date(monday); m.setHours(0,0,0,0);
-    if(today >= m && today <= weekEnd) currentWeekIdx = i+1;
-  });
-
-  for(let i=1;i<=6;i++){
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'wpp-tile' + (selectedWeekTiles.has(i) ? ' selected' : '');
-    btn.innerHTML = `<span class="wpp-cur-arrow">${i===currentWeekIdx?'▼':''}</span><span>${i}</span>`;
-    btn.addEventListener('click', function(){
-      if(selectedWeekTiles.has(i)) selectedWeekTiles.delete(i);
-      else selectedWeekTiles.add(i);
-      renderWeekPhotoTiles();
-    });
-    container.appendChild(btn);
-  }
-}
-
-document.getElementById('wppCaptureBtn').addEventListener('click', async function(){
-  if(selectedWeekTiles.size === 0){
-    setStatus('Lütfen en az bir hafta kutucuğu seçin (1-6).', true);
-    return;
-  }
-  const monthVal = getMonthVal();
-  const weeks = weeksInMonth(monthVal);
-  const indices = Array.from(selectedWeekTiles).sort((a,b)=>a-b);
-
-  const wrapper = document.createElement('div');
-  wrapper.style.position = 'fixed';
-  wrapper.style.left = '-9999px';
-  wrapper.style.top = '0';
-  wrapper.style.background = '#ffffff';
-  wrapper.style.padding = '18px';
-  wrapper.style.display = 'flex';
-  wrapper.style.flexDirection = 'column';
-  wrapper.style.gap = '14px';
-  wrapper.style.width = '900px';
-
-  indices.forEach(i=>{
-    const rawBlock = buildWeekBlock(weeks[i-1]);
-    wrapper.appendChild(cleanBlockClone(rawBlock));
-  });
-  document.body.appendChild(wrapper);
-
-  try{
-    const canvas = await html2canvas(wrapper, {backgroundColor:'#ffffff', scale:2});
-    document.body.removeChild(wrapper);
-    await copyCanvasToClipboard(canvas);
-    setStatus((indices.length===1 ? ('Hafta ' + indices[0]) : (indices.length + ' hafta')) + ' görseli panoya kopyalandı.');
-  }catch(e){
-    document.body.removeChild(wrapper);
-    setStatus('Görsel kopyalanamadı: ' + e.message, true);
-  }
-});
-
 async function captureWeekPairCombined(){
   const thisMonday = mondayOf(getNow());
   const lastMonday = new Date(thisMonday); lastMonday.setDate(lastMonday.getDate()-7);
@@ -2084,7 +2090,6 @@ async function seedTemmuz2026IfNeeded(){
 async function startAppAfterLogin(){
   document.getElementById('loginLoading').style.display = 'none';
   renderMonthYearPicker();
-  renderWeekPhotoTiles();
   initSimDatePicker();
   await seedTemmuz2026IfNeeded();
   renderAll();
@@ -2133,22 +2138,103 @@ function saveTools(tools){
 
 let currentToolId = null;
 
+// Hazır simge seti: simge + kapak rengi (koyu/açık ton).
+const TOOL_ICONS = [
+  {icon:'📊', c1:'#C8A066', c2:'#a97c4f'},
+  {icon:'📦', c1:'#5f9668', c2:'#3d7a44'},
+  {icon:'🏷️', c1:'#c07070', c2:'#a34141'},
+  {icon:'📅', c1:'#6f88ad', c2:'#4a6285'},
+  {icon:'🎯', c1:'#8d74a6', c2:'#6b4f86'},
+  {icon:'🧮', c1:'#54525a', c2:'#2d2d2d'},
+  {icon:'💰', c1:'#d3b071', c2:'#b4813c'},
+  {icon:'🧾', c1:'#7d9c86', c2:'#54755d'},
+  {icon:'📈', c1:'#5f9db0', c2:'#3c7688'},
+  {icon:'👕', c1:'#b98a9c', c2:'#8e5f72'},
+  {icon:'📋', c1:'#a3946f', c2:'#7c6e4c'},
+  {icon:'⏱️', c1:'#7a8b9c', c2:'#556777'},
+  {icon:'🧹', c1:'#c39a6b', c2:'#9b7444'},
+  {icon:'🗂️', c1:'#8f8d86', c2:'#66645e'},
+  {icon:'⭐', c1:'#d0a94e', c2:'#a8842c'}
+];
+const TOOL_ICON_DEFAULT = {icon:'🧩', c1:'#9b9b9b', c2:'#6f6f6f'};
+
+function toolIconInfo(icon){
+  return TOOL_ICONS.find(t => t.icon === icon) || TOOL_ICON_DEFAULT;
+}
+function toolCapStyle(icon){
+  const info = toolIconInfo(icon);
+  return 'background:linear-gradient(140deg,' + info.c1 + ',' + info.c2 + ');';
+}
+
+// Simge seçici ızgarasını çizer; seçilen simgeyi hedef nesnenin .value alanında tutar.
+function renderIconPicker(containerId, selected, onPick){
+  const el = document.getElementById(containerId);
+  if(!el) return;
+  el.innerHTML = TOOL_ICONS.map(t =>
+    `<div class="ip-item${t.icon===selected?' sel':''}" data-icon="${t.icon}" style="background:${t.c1}22;">${t.icon}</div>`
+  ).join('');
+  el.querySelectorAll('.ip-item').forEach(item=>{
+    item.addEventListener('click', function(){
+      el.querySelectorAll('.ip-item').forEach(x=> x.classList.remove('sel'));
+      this.classList.add('sel');
+      onPick(this.dataset.icon);
+    });
+  });
+}
+
 function renderToolsGrid(){
   const tools = getTools();
   const grid = document.getElementById('toolsGrid');
   grid.innerHTML = tools.map(t => `
     <div class="tool-tile" onclick="openTool('${t.id}')">
-      <button class="tool-del" onclick="event.stopPropagation(); deleteTool('${t.id}')" title="Sil">✕</button>
-      <button class="tool-dl" onclick="event.stopPropagation(); downloadToolFile('${t.id}')" title="Dosya olarak indir">⬇</button>
-      <div class="tool-icon">🧩</div>
-      <div class="tool-name">${escapeHtml(t.name)}</div>
+      <div class="tool-cap" style="${toolCapStyle(t.icon)}">${toolIconInfo(t.icon).icon}
+        <span class="tool-acts">
+          <button class="tool-edit" onclick="event.stopPropagation(); openEditToolModal('${t.id}')" title="İsmi ve simgeyi düzenle">✎</button>
+          <button class="tool-dl" onclick="event.stopPropagation(); downloadToolFile('${t.id}')" title="Dosya olarak indir">⬇</button>
+          <button class="tool-del" onclick="event.stopPropagation(); deleteTool('${t.id}')" title="Sil">✕</button>
+        </span>
+      </div>
+      <div class="tool-foot"><span class="tool-name" title="${escapeHtml(t.name)}">${escapeHtml(t.name)}</span></div>
     </div>
   `).join('') + `
     <div class="tool-tile add-tile" onclick="openAddToolModal()">
-      <div class="tool-icon">➕</div>
-      <div class="tool-name">Yeni Araç</div>
+      <div class="tool-cap">＋</div>
+      <div class="tool-foot"><span class="tool-name">Yeni Araç</span></div>
     </div>
   `;
+}
+
+let newToolIcon = TOOL_ICONS[0].icon;
+let editToolId = null;
+let editToolIcon = TOOL_ICONS[0].icon;
+
+function openEditToolModal(id){
+  const tool = getTools().find(t => t.id === id);
+  if(!tool) return;
+  editToolId = id;
+  editToolIcon = toolIconInfo(tool.icon).icon;
+  document.getElementById('editToolName').value = tool.name;
+  renderIconPicker('editToolIcons', editToolIcon, function(icon){ editToolIcon = icon; });
+  document.getElementById('editToolModal').style.display = 'flex';
+}
+function closeEditToolModal(){
+  document.getElementById('editToolModal').style.display = 'none';
+  editToolId = null;
+}
+function saveToolEdit(){
+  const name = document.getElementById('editToolName').value.trim();
+  if(!name){ alert('Lütfen araç için bir isim yazın.'); return; }
+  const tools = getTools();
+  const tool = tools.find(t => t.id === editToolId);
+  if(!tool){ closeEditToolModal(); return; }
+  tool.name = name;
+  tool.icon = editToolIcon;
+  saveTools(tools);
+  closeEditToolModal();
+  renderToolsGrid();
+  if(currentToolId === tool.id){
+    document.getElementById('toolViewerName').textContent = tool.name;
+  }
 }
 
 function escapeHtml(s){
@@ -2160,6 +2246,8 @@ function escapeHtml(s){
 function openAddToolModal(){
   document.getElementById('newToolName').value = '';
   document.getElementById('newToolCode').value = '';
+  newToolIcon = TOOL_ICONS[0].icon;
+  renderIconPicker('newToolIcons', newToolIcon, function(icon){ newToolIcon = icon; });
   const dz = document.getElementById('toolDropzone');
   dz.classList.remove('loaded','dragover');
   dz.innerHTML = '📁 Bir .html dosyasını buraya sürükleyin<br><span style="font-size:.68rem;color:#999;">(veya tıklayıp seçin)</span><input type="file" id="toolFileInput" accept=".html,.htm" style="display:none;">';
@@ -2224,6 +2312,7 @@ function saveNewTool(){
   tools.push({
     id: 'tool_' + Date.now(),
     name: name,
+    icon: newToolIcon,
     code: code
   });
   saveTools(tools);
