@@ -234,6 +234,23 @@
   .send-btn-row .send-btn.small{ margin-top:0; padding:8px 4px; font-size:.66rem; flex:1; }
   .send-btn-row .send-btn.small:disabled{ background:#ccc; color:#888; }
 
+  table.grid thead th{ overflow:visible; }
+  .izinli-sel{
+    display:block; width:100%; margin-top:2px; font-size:.5rem; line-height:1.1; padding:1px 0;
+    border:1px solid rgba(255,255,255,.35); border-radius:4px;
+    background:rgba(255,255,255,.12); color:#fff; cursor:pointer;
+  }
+  .izinli-sel option{ color:#222; background:#fff; }
+  .izinli-sel.dolu{ background:var(--yellow); color:#222; border-color:#e6d98a; font-weight:700; }
+
+  .msg-area{ margin-top:10px; }
+  .msg-area .msg-label{ display:block; font-size:.66rem; color:#777; margin-bottom:3px; }
+  .msg-area textarea{
+    width:100%; height:84px; padding:7px 9px; border:1px solid #ddd; border-radius:8px;
+    font-family:inherit; font-size:.74rem; line-height:1.35; resize:vertical; background:#fff; color:#222;
+  }
+  .msg-area textarea:focus{ outline:none; border-color:var(--accent); }
+
   .login-screen{
     position:fixed; inset:0; background:var(--bg); display:flex; align-items:center; justify-content:center; z-index:1000;
   }
@@ -351,6 +368,8 @@
 <script>
 
 const GUN_ADLARI = ['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar'];
+const IZINLI_SECENEKLER = ['','Onur','Fatma','Zeynep'];
+let yorumDraft = '';
 const GUN_KISA = ['Pzt','Sal','Çar','Per','Cum','Cmt','Paz'];
 const NUMERIC_FIELDS = ['ciro','mgs','fbu','fbs','toplu_satis','hedef'];
 const EXTRA_NUMERIC_FIELDS = ['yildiz_urun_adet','deterjan','leke','sivi_sabun','mendil','koli'];
@@ -530,6 +549,7 @@ function exportAllData(){
           Fbs: rec.fbs ?? '',
           Hedef: rec.hedef ?? '',
           'Toplu S. (K)': rec.toplu_satis ?? '',
+          'İzinli': rec.izinli ?? '',
           'Kesin mi': rec.final ? 'Evet' : 'Hayır'
         });
       }catch(e){ /* bozuk kayıt, atla */ }
@@ -986,8 +1006,32 @@ function buildWeekBlock(monday){
 
   const headRow = block.querySelector(`#head-${weekKey}`);
   headRow.innerHTML = '<th>KPI</th>' +
-    days.map((d,i)=>`<th class="${isToday(d)?'today-col':''}">${GUN_KISA[i]}<br><span style="font-weight:400;opacity:.75;">${shortDate(d)}</span></th>`).join('') +
+    days.map((d,i)=>{
+      const dk = dateStr(d);
+      const izinli = izinliOf(records[i]);
+      const opts = IZINLI_SECENEKLER
+        .map(kisi=>`<option value="${kisi}"${kisi===izinli?' selected':''}>${kisi===''?'—':kisi}</option>`)
+        .join('');
+      return `<th class="${isToday(d)?'today-col':''}">${GUN_KISA[i]}<br>` +
+             `<span style="font-weight:400;opacity:.75;">${shortDate(d)}</span>` +
+             `<select class="izinli-sel${izinli?' dolu':''}" data-date="${dk}" title="İzinli personel">${opts}</select>` +
+             `</th>`;
+    }).join('') +
     `<th class="gh">Formüller<br><span id="fml-total-${weekKey}" style="font-weight:400;">${ciroToplam?fmtTL(ciroToplam):'-'}</span></th>`;
+
+  headRow.querySelectorAll('.izinli-sel').forEach(sel=>{
+    sel.addEventListener('change', function(){
+      const dateKey = this.dataset.date;
+      const rec = getRecord(dateKey) || {date: dateKey};
+      const oldValue = rec.izinli !== undefined ? rec.izinli : null;
+      rec.izinli = this.value === '' ? null : this.value;
+      setRecord(dateKey, rec);
+      pushUndo({type:'cell', date: dateKey, field:'izinli', oldValue});
+      this.classList.toggle('dolu', this.value !== '');
+      setStatus(dateKey + ' → izinli personel: ' + (this.value || 'yok'));
+      renderReportPanel();
+    });
+  });
 
   function row(label, field, kind, ghValueHtml, ghId){
     const cells = days.map((d,i) => cellHtml(d, field, records[i] ? records[i][field] : null, kind)).join('');
@@ -1333,6 +1377,123 @@ function deltaBox(oldVal, newVal){
   return `<div class="delta-box ${cls}">${arrow}<br>${fmtPct(pct)}</div>`;
 }
 
+// ---------------- Günlük mesaj metni ----------------
+function izinliOf(rec){
+  return (rec && rec.izinli) ? rec.izinli : '';
+}
+function izinliMetni(kisi){
+  if(!kisi) return 'yoktur';
+  if(kisi === 'Onur') return 'ben izinliyim';
+  return kisi;
+}
+function fmtKShort(n){
+  if(n===undefined||n===null||n===''||isNaN(n)) return null;
+  const v = Number(n);
+  const govde = (Math.abs(v - Math.round(v)) < 0.005)
+    ? String(Math.round(v))
+    : v.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  return govde + ' K';
+}
+function msgPctLine(baslik, onceki, simdi, kiyas, artFiil, azFiil){
+  if(onceki===null||onceki===undefined||onceki===''||simdi===null||simdi===undefined||simdi==='') return null;
+  const o = Number(onceki), y = Number(simdi);
+  if(isNaN(o) || isNaN(y) || !o) return null;
+  const oran = (y - o) / o * 100;
+  const yuvarlak = Math.round(Math.abs(oran));
+  if(yuvarlak === 0) return baslik + ' ' + kiyas + ' neredeyse aynı kalmıştır.';
+  return baslik + ' ' + kiyas + ' %' + yuvarlak + ' ' + (oran > 0 ? artFiil : azFiil);
+}
+
+function yorumKey(){ return 'yorum:' + todayStr(0); }
+function getYorumDraft(){
+  if(yorumDraft) return yorumDraft;
+  const v = localStorage.getItem(yorumKey());
+  return v === null ? '' : v;
+}
+function setYorumDraft(v){
+  yorumDraft = v;
+  try{ localStorage.setItem(yorumKey(), v); }catch(e){ /* kota dolu olabilir, sorun değil */ }
+}
+
+// Pazartesi: geçen hafta aynı gün ile, Pazar: hafta geneli ile, diğer günler: dün ile kıyas.
+function buildDailyMessage(){
+  const now = getNow();
+  const dow = now.getDay(); // 0=Pazar, 1=Pazartesi
+  const today = todayStr(0);
+  const t = getRecord(today) || {};
+
+  let kiyas, topluEtiket, onceki, simdi;
+
+  if(dow === 0){
+    kiyas = 'geçen haftaya göre';
+    topluEtiket = ['geçen hafta', 'bu hafta'];
+    const buPzt = mondayOf(now);
+    const gecenPzt = new Date(buPzt); gecenPzt.setDate(gecenPzt.getDate() - 7);
+    const bu = computeWeekDerived(buPzt);
+    const gecen = computeWeekDerived(gecenPzt);
+    simdi  = {ciro: bu.ciroToplam,    mdo: bu.mdoAvg,    mgs: bu.mgsTotal,    fbu: bu.fbuAvg,    fbs: bu.fbsAvg,    toplu: bu.topluToplam};
+    onceki = {ciro: gecen.ciroToplam, mdo: gecen.mdoAvg, mgs: gecen.mgsTotal, fbu: gecen.fbuAvg, fbs: gecen.fbsAvg, toplu: gecen.topluToplam};
+  } else {
+    const pazartesiMi = (dow === 1);
+    const ref = getRecord(todayStr(pazartesiMi ? -7 : -1)) || {};
+    kiyas = pazartesiMi ? 'geçen hafta aynı güne göre' : 'düne göre';
+    topluEtiket = pazartesiMi ? ['geçen hafta aynı gün', 'bugün'] : ['dün', 'bugün'];
+    // Pazartesi cirosunda RT tablosundaki G.HAFTA satırı esas alınır (elle girilmişse o).
+    const refCiro = (pazartesiMi && t.ciro_gecenhafta_aynigun !== undefined && t.ciro_gecenhafta_aynigun !== null)
+      ? t.ciro_gecenhafta_aynigun : ref.ciro;
+    simdi  = {ciro: t.ciro,   mdo: mdoToNumber(t.mdo),   mgs: t.mgs,   fbu: t.fbu,   fbs: t.fbs,   toplu: t.toplu_satis};
+    onceki = {ciro: refCiro,  mdo: mdoToNumber(ref.mdo), mgs: ref.mgs, fbu: ref.fbu, fbs: ref.fbs, toplu: ref.toplu_satis};
+  }
+
+  const satirlar = ['Merhaba Adnan Bey.'];
+  [
+    msgPctLine('Ciroda',        onceki.ciro, simdi.ciro, kiyas, 'artış olmuştur.', 'düşüş olmuştur.'),
+    msgPctLine('Mdoda',         onceki.mdo,  simdi.mdo,  kiyas, 'artış olmuştur.', 'düşüş olmuştur.'),
+    msgPctLine('Mgs değerimiz', onceki.mgs,  simdi.mgs,  kiyas, 'artmıştır.',      'azalmıştır.'),
+    msgPctLine('Fbü değerimiz', onceki.fbu,  simdi.fbu,  kiyas, 'artmıştır.',      'azalmıştır.'),
+    msgPctLine('Fbs değerimiz', onceki.fbs,  simdi.fbs,  kiyas, 'artmıştır.',      'azalmıştır.')
+  ].forEach(satir=>{ if(satir) satirlar.push(satir); });
+
+  const topluOnce = fmtKShort(onceki.toplu);
+  const topluSimdi = fmtKShort(simdi.toplu);
+  if(topluOnce !== null && topluSimdi !== null){
+    satirlar.push('Toplu satışlarda ' + topluEtiket[0] + ' ' + topluOnce + ' iken ' + topluEtiket[1] + ' ' + topluSimdi + ' oldu.');
+  } else if(topluSimdi !== null){
+    satirlar.push('Toplu satışımız ' + topluSimdi + ' oldu.');
+  }
+
+  const yorum = getYorumDraft().trim();
+  satirlar.push('');
+  satirlar.push('Yorum:');
+  if(yorum) satirlar.push(yorum);
+  satirlar.push('Olumsuz durum (yağmur vb) yoktur.');
+  satirlar.push('Gelen koli sayısı: ' + ((t.koli!==undefined && t.koli!==null) ? fmtInt(t.koli) : '0'));
+  satirlar.push('İzinli personel: ' + izinliMetni(izinliOf(t)));
+  satirlar.push('İyi akşamlar dilerim.');
+  return satirlar.join('\n');
+}
+
+function copyTextToClipboard(text){
+  return new Promise(resolve=>{
+    function fallback(){
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed'; ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.focus(); ta.select();
+      let ok = false;
+      try{ ok = document.execCommand('copy'); }catch(e){ ok = false; }
+      document.body.removeChild(ta);
+      resolve(ok);
+    }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(()=>resolve(true), fallback);
+    } else {
+      fallback();
+    }
+  });
+}
+
 function renderReportPanel(){
   const today = todayStr(0);
   const yest = todayStr(-1);
@@ -1457,6 +1618,11 @@ function renderReportPanel(){
   ` : `
   <button class="send-btn" id="sendBtn">📷 Fotoğrafını Al</button>
   `}
+  <div class="msg-area">
+    <span class="msg-label">Yorum (mesaja eklenecek):</span>
+    <textarea id="yorumBox" placeholder="Yorumunuzu buraya yazın..."></textarea>
+    <button class="send-btn" id="copyMsgBtn">📋 Mesajı Kopyala</button>
+  </div>
   ${(function(){
     const now = getNow();
     const thisYear = now.getFullYear(), thisMonth = now.getMonth()+1, todayDay = now.getDate();
@@ -1592,6 +1758,36 @@ function renderReportPanel(){
   if(sendBtn){
     sendBtn.addEventListener('click', function(){
       runCapture(sendBtn, generateReportCanvas, 'RT görseli panoya kopyalandı — istediğiniz yere (mail, Word vb.) Ctrl+V ile yapıştırabilirsiniz.');
+    });
+  }
+
+  const yorumBox = document.getElementById('yorumBox');
+  if(yorumBox){
+    yorumBox.value = getYorumDraft();
+    yorumBox.addEventListener('input', function(){ setYorumDraft(this.value); });
+  }
+
+  const copyMsgBtn = document.getElementById('copyMsgBtn');
+  if(copyMsgBtn){
+    copyMsgBtn.addEventListener('click', async function(){
+      const originalText = copyMsgBtn.textContent;
+      copyMsgBtn.classList.remove('success','error');
+      copyMsgBtn.disabled = true;
+      const ok = await copyTextToClipboard(buildDailyMessage());
+      if(ok){
+        setStatus('Mesaj panoya kopyalandı — WhatsApp\'a Ctrl+V / uzun basıp yapıştır ile gönderebilirsiniz.');
+        copyMsgBtn.classList.add('success');
+        copyMsgBtn.textContent = '✅ Kopyalandı';
+      } else {
+        setStatus('Mesaj panoya kopyalanamadı, metni elle seçip kopyalayın.', true);
+        copyMsgBtn.classList.add('error');
+        copyMsgBtn.textContent = '❌ Kopyalanamadı';
+      }
+      setTimeout(()=>{
+        copyMsgBtn.classList.remove('success','error');
+        copyMsgBtn.textContent = originalText;
+        copyMsgBtn.disabled = false;
+      }, 2500);
     });
   }
 }
