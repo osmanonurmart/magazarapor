@@ -569,6 +569,12 @@ function exportAllData(){
   });
   entryRows.sort((a,b)=> a.Tarih.localeCompare(b.Tarih));
 
+  // Bulutta tutulan diğer her şey de yedeğe girsin.
+  data['tools'] = JSON.stringify(getTools());
+  data['employees'] = JSON.stringify(empCache || {});
+  data['ghbhrWeekly'] = JSON.stringify(ghbhrWeeklyCache || {});
+  data['ghbhrReports'] = JSON.stringify(ghbhrReportsCache || {});
+
   // 1) JSON yedek
   const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
@@ -620,6 +626,14 @@ const db = firebase.firestore();
 let cloudCache = {}; // 'entry:YYYY-MM-DD', 'weekgoal:YYYY-Www', 'gunlukHedef' anahtarlarını localStorage gibi tutar
 let cloudReady = false;
 
+// Eskiden yalnızca tarayıcıda duran veriler artık buluttan geliyor.
+// localStorage yedek olarak yazılmaya devam ediyor (bulut erişilemezse elde kalsın).
+let toolsCache = null;          // [{id,name,icon,code}]
+let toolDocJson = {};           // id -> son buluta yazılan JSON (gereksiz yazmayı önler)
+let empCache = null;            // { emp1:{name,ciro,...}, emp2:{...} }
+let ghbhrWeeklyCache = null;    // { weekKey: {gh,bh} }
+const CLOUD_MIGRATION_KEY = 'cloudMigratedV1';
+
 async function loadCloudCache(){
   const snap = await db.collection('entries').get();
   snap.forEach(doc => { cloudCache['entry:'+doc.id] = JSON.stringify(doc.data()); });
@@ -635,7 +649,88 @@ async function loadCloudCache(){
   const reportsSnap = await db.collection('ghbhrReports').get();
   reportsSnap.forEach(doc => { ghbhrReportsCache[doc.id] = doc.data().text; });
 
+  const toolsSnap = await db.collection('tools').get();
+  const toolList = [];
+  toolsSnap.forEach(doc => {
+    const d = doc.data();
+    toolList.push({id: doc.id, name: d.name, icon: d.icon || undefined, code: d.code, _order: d.order || 0});
+    toolDocJson[doc.id] = JSON.stringify({name:d.name, icon:d.icon||null, code:d.code, order:d.order || 0});
+  });
+  toolList.sort((a,b)=> a._order - b._order);
+  toolList.forEach(t=> delete t._order);
+  toolsCache = toolList;
+
+  const empDoc = await db.collection('settings').doc('employees').get();
+  empCache = empDoc.exists ? (empDoc.data() || {}) : {};
+
+  const weeklySnap = await db.collection('ghbhrWeekly').get();
+  ghbhrWeeklyCache = {};
+  weeklySnap.forEach(doc => {
+    const d = doc.data();
+    ghbhrWeeklyCache[doc.id] = {gh: d.gh || null, bh: d.bh || null};
+  });
+
+  await migrateBrowserDataToCloud();
+
   cloudReady = true;
+}
+
+// Bu tarayıcıda duran eski verileri (araçlar, personel hedefleri, GH/BH ham verisi)
+// bir kereye mahsus buluta taşır. Buluttaki kaydın üzerine yazmaz, sadece eksikleri ekler.
+async function migrateBrowserDataToCloud(){
+  if(localStorage.getItem(CLOUD_MIGRATION_KEY)) return;
+  let tasinan = [];
+
+  try{
+    const yerelTools = JSON.parse(localStorage.getItem('tools') || '[]');
+    const bulutIds = toolsCache.map(t=>t.id);
+    const eksik = yerelTools.filter(t => t && t.id && !bulutIds.includes(t.id));
+    if(eksik.length){
+      for(const t of eksik){
+        await db.collection('tools').doc(t.id).set({
+          name: t.name || 'Araç', icon: t.icon || null, code: t.code || '', order: toolsCache.length
+        });
+        toolsCache.push(t);
+      }
+      tasinan.push(eksik.length + ' araç');
+    }
+  }catch(e){ /* bozuk yerel kayıt, atla */ }
+
+  try{
+    const empYerel = {};
+    ['emp1','emp2'].forEach(empKey=>{
+      const kayit = {};
+      const ad = localStorage.getItem(empKey+'_name');
+      if(ad !== null) kayit.name = ad;
+      EMP_FIELDS.forEach(f=>{
+        const v = localStorage.getItem(empKey+'_'+f);
+        if(v !== null && v !== '') kayit[f] = v;
+      });
+      if(Object.keys(kayit).length && !empCache[empKey]) empYerel[empKey] = kayit;
+    });
+    if(Object.keys(empYerel).length){
+      await db.collection('settings').doc('employees').set(empYerel, {merge:true});
+      Object.assign(empCache, empYerel);
+      tasinan.push('personel hedefleri');
+    }
+  }catch(e){ /* atla */ }
+
+  try{
+    const yerelWeekly = JSON.parse(localStorage.getItem(GHBHR_LOCAL_KEY) || '{}');
+    const eksikHaftalar = Object.keys(yerelWeekly).filter(wk => !ghbhrWeeklyCache[wk]);
+    for(const wk of eksikHaftalar){
+      const e = yerelWeekly[wk] || {};
+      if(!e.gh && !e.bh) continue;
+      await db.collection('ghbhrWeekly').doc(wk).set({gh: e.gh || null, bh: e.bh || null});
+      ghbhrWeeklyCache[wk] = {gh: e.gh || null, bh: e.bh || null};
+    }
+    if(eksikHaftalar.length) tasinan.push(eksikHaftalar.length + ' haftanın GH/BH verisi');
+  }catch(e){ /* atla */ }
+
+  localStorage.setItem(CLOUD_MIGRATION_KEY, '1');
+  if(tasinan.length){
+    setTimeout(()=> setStatus('Bu tarayıcıdaki ' + tasinan.join(', ') + ' buluta yedeklendi ✓'), 1200);
+  }
 }
 
 function listenCloudChanges(){
@@ -718,16 +813,27 @@ function setGunlukHedef(v){
 }
 const EMP_FIELDS = ['ciro','fbu','fbs','instore'];
 function getEmpData(empKey, defaultName){
-  const name = localStorage.getItem(empKey+'_name');
-  const data = { name: name!==null ? name : defaultName };
+  const bulut = (empCache && empCache[empKey]) ? empCache[empKey] : null;
+  const oku = f => {
+    if(bulut && bulut[f] !== undefined && bulut[f] !== null) return bulut[f];
+    return localStorage.getItem(empKey+'_'+f);
+  };
+  const name = oku('name');
+  const data = { name: (name!==null && name!==undefined) ? name : defaultName };
   EMP_FIELDS.forEach(f=>{
-    const v = localStorage.getItem(empKey+'_'+f);
-    data[f] = (v===null || v==='') ? '' : v;
+    const v = oku(f);
+    data[f] = (v===null || v===undefined || v==='') ? '' : v;
   });
   return data;
 }
 function setEmpField(empKey, field, value){
-  localStorage.setItem(empKey+'_'+field, value);
+  try{ localStorage.setItem(empKey+'_'+field, value); }catch(e){ /* kota dolu olabilir */ }
+  if(!empCache) empCache = {};
+  if(!empCache[empKey]) empCache[empKey] = {};
+  empCache[empKey][field] = value;
+  db.collection('settings').doc('employees').set({[empKey]: {[field]: value}}, {merge:true}).catch(e=>{
+    setStatus('Personel hedefi buluta kaydedilemedi: ' + e.message, true);
+  });
 }
 
 function employeeTargetBoxHtml(empKey, defaultName){
@@ -1155,17 +1261,23 @@ let ghbhrReportsCache = {}; // weekKey -> rapor metni (buluttan)
 const GHBHR_LOCAL_KEY = 'ghbhr_weekly_v2'; // { weekKey: {gh:{...}|null, bh:{...}|null} }
 
 function ghbhrGetWeekly(weekKey){
+  if(ghbhrWeeklyCache && ghbhrWeeklyCache[weekKey]) return ghbhrWeeklyCache[weekKey];
   try{
     const all = JSON.parse(localStorage.getItem(GHBHR_LOCAL_KEY) || '{}');
     return all[weekKey] || {gh:null, bh:null};
   }catch(e){ return {gh:null, bh:null}; }
 }
 function ghbhrSetWeekly(weekKey, entry){
+  if(!ghbhrWeeklyCache) ghbhrWeeklyCache = {};
+  ghbhrWeeklyCache[weekKey] = {gh: entry.gh || null, bh: entry.bh || null};
   try{
     const all = JSON.parse(localStorage.getItem(GHBHR_LOCAL_KEY) || '{}');
     all[weekKey] = entry;
     localStorage.setItem(GHBHR_LOCAL_KEY, JSON.stringify(all));
-  }catch(e){}
+  }catch(e){ /* kota dolu olabilir, bulut kaydı esas */ }
+  db.collection('ghbhrWeekly').doc(weekKey).set({gh: entry.gh || null, bh: entry.bh || null}).catch(e=>{
+    setStatus('GH/BH verisi buluta kaydedilemedi: ' + e.message, true);
+  });
 }
 function ghbhrMondayFromWeekKey(weekKey){
   const [yearStr, weekStr] = weekKey.split('-W');
@@ -2000,11 +2112,32 @@ function showTab(tab){
 // ==================== ARAÇLAR (Widget Sistemi) ====================
 
 function getTools(){
+  if(toolsCache) return toolsCache;
   try{ return JSON.parse(localStorage.getItem('tools') || '[]'); }
   catch(e){ return []; }
 }
 function saveTools(tools){
-  localStorage.setItem('tools', JSON.stringify(tools));
+  toolsCache = tools;
+  try{ localStorage.setItem('tools', JSON.stringify(tools)); }catch(e){ /* kota dolu olabilir */ }
+
+  // Buluta yaz: silinenleri sil, değişenleri güncelle.
+  const ids = tools.map(t=>t.id);
+  Object.keys(toolDocJson).forEach(id=>{
+    if(ids.includes(id)) return;
+    delete toolDocJson[id];
+    db.collection('tools').doc(id).delete().catch(e=>{
+      setStatus('Araç buluttan silinemedi: ' + e.message, true);
+    });
+  });
+  tools.forEach((t,i)=>{
+    const veri = {name: t.name, icon: t.icon || null, code: t.code, order: i};
+    const json = JSON.stringify(veri);
+    if(toolDocJson[t.id] === json) return;
+    toolDocJson[t.id] = json;
+    db.collection('tools').doc(t.id).set(veri).catch(e=>{
+      setStatus('Araç buluta kaydedilemedi: ' + e.message, true);
+    });
+  });
 }
 
 let currentToolId = null;
