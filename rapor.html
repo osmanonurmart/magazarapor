@@ -268,6 +268,62 @@
   }
   .msg-area textarea:focus{ outline:none; border-color:var(--accent); }
 
+  /* ---------- Profil (oturum) ekranı ---------- */
+  .profile-screen{
+    position:fixed; inset:0; background:#141414; z-index:1100;
+    display:flex; align-items:center; justify-content:center; padding:24px;
+  }
+  .profile-screen h2{
+    color:#fff; font-weight:400; font-size:1.65rem; margin:0 0 30px; text-align:center; letter-spacing:.3px;
+  }
+  .profile-list{ display:flex; gap:26px; flex-wrap:wrap; justify-content:center; }
+  .profile-card{ background:none; border:none; cursor:pointer; padding:0; width:132px; }
+  .profile-av{
+    width:132px; height:132px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+    font-size:3.2rem; color:#fff; border:3px solid transparent;
+    transition:border-color .15s, transform .15s;
+  }
+  .profile-card:hover .profile-av{ border-color:#fff; transform:scale(1.04); }
+  .profile-name{ display:block; margin-top:10px; color:#8b8b8b; font-size:.95rem; }
+  .profile-card:hover .profile-name{ color:#fff; }
+  .profile-name small{ display:block; font-size:.66rem; color:#6d6d6d; margin-top:2px; }
+  .profile-card.reset-mode .profile-av{ border-color:#a34141; }
+  .profile-foot{ text-align:center; margin-top:32px; }
+  .profile-back{
+    background:none; border:1px solid #4a4a4a; color:#b3b3b3; padding:7px 18px;
+    border-radius:6px; cursor:pointer; font-size:.78rem;
+  }
+  .profile-back:hover{ border-color:#fff; color:#fff; }
+  .profile-note{ color:#e0a94a; font-size:.78rem; margin-top:14px; min-height:16px; }
+
+  .pin-box{ text-align:center; color:#fff; }
+  .pin-box .profile-av{ margin:0 auto; }
+  .pin-title{ font-size:1.15rem; margin-top:14px; }
+  .pin-hint{ color:#9a9a9a; font-size:.8rem; margin-top:5px; }
+  .pin-dots{ display:flex; gap:15px; justify-content:center; margin:20px 0 24px; }
+  .pin-dot{ width:15px; height:15px; border-radius:50%; border:2px solid #6e6e6e; }
+  .pin-dot.on{ background:#fff; border-color:#fff; }
+  .pin-pad{ display:grid; grid-template-columns:repeat(3,74px); gap:12px; justify-content:center; }
+  .pin-pad button{
+    height:58px; border-radius:10px; border:1px solid #3a3a3a; background:#232323; color:#fff;
+    font-size:1.25rem; cursor:pointer; font-family:inherit;
+  }
+  .pin-pad button:hover{ background:#333; }
+  .pin-pad button.wide{ font-size:.85rem; color:#b3b3b3; }
+  .pin-err{ color:#e07b7b; font-size:.8rem; min-height:18px; margin-top:14px; }
+
+  .profile-chip{
+    display:flex; align-items:center; gap:7px; margin-left:10px; align-self:center;
+    background:#f1efe9; border:1px solid var(--line); border-radius:20px; padding:3px 12px 3px 4px;
+    cursor:pointer; font-size:.76rem; font-weight:600; color:#555; font-family:inherit;
+  }
+  .profile-chip:hover{ background:#e8e5dd; color:var(--dark); }
+  .profile-chip .pc-av{
+    width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    color:#fff; font-size:.85rem;
+  }
+  .last-edit-info{ font-size:.67rem; color:#9a9a9a; margin-top:4px; }
+
   .boot-screen{
     position:fixed; inset:0; background:var(--bg); display:flex; align-items:center; justify-content:center; z-index:1000;
   }
@@ -291,12 +347,40 @@
   </div>
 </div>
 
+<div id="profileScreen" class="profile-screen" style="display:none;">
+  <div id="profilePickView">
+    <h2 id="profilePickTitle">Kim kullanıyor?</h2>
+    <div class="profile-list" id="profileList"></div>
+    <div class="profile-note" id="profileNote"></div>
+    <div class="profile-foot">
+      <button class="profile-back" id="profileResetBtn" type="button">PIN sıfırla</button>
+    </div>
+  </div>
+
+  <div id="pinView" style="display:none;">
+    <div class="pin-box">
+      <div class="profile-av" id="pinAvatar"></div>
+      <div class="pin-title" id="pinName"></div>
+      <div class="pin-hint" id="pinHint"></div>
+      <div class="pin-dots" id="pinDots"></div>
+      <div class="pin-pad" id="pinPad"></div>
+      <div class="pin-err" id="pinErr"></div>
+      <div class="profile-foot" style="margin-top:16px;">
+        <button class="profile-back" id="pinBackBtn" type="button">← Geri</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="appRoot" style="display:none;">
 
 <header>
   <div class="tab-bar">
     <button class="tab-btn active" id="tabRaporBtn" onclick="showTab('rapor')">📊 Rapor</button>
     <button class="tab-btn" id="tabAraclarBtn" onclick="showTab('araclar')">🧰 Araçlar</button>
+    <button class="profile-chip" id="profileChip" type="button" title="Profil değiştir">
+      <span class="pc-av" id="profileChipAv"></span><span id="profileChipName"></span>
+    </button>
   </div>
   <div class="header-center" id="headerCenter">
     <div class="month-year-picker" id="monthYearPicker"></div>
@@ -319,6 +403,7 @@
     <div class="month-grid" id="monthContainer"></div>
     <div class="employee-targets-row" id="employeeTargetsRow"></div>
     <div class="status-msg" id="statusMsg">Buraya yapıştırın, otomatik işlenir.</div>
+    <div class="last-edit-info" id="lastEditInfo"></div>
   </div>
 
   <div class="right-col">
@@ -767,7 +852,338 @@ function bootStatus(msg, isError){
   el.classList.toggle('error', !!isError);
 }
 
-// Şifre ekranı yok: sayfa açılır açılmaz arka planda anonim oturum açılır.
+// ==================== PROFİL / OTURUM (Netflix tarzı) ====================
+// Firebase tarafında yine tek bir anonim oturum var; buradaki profil seçimi
+// "bu raporu kim kullanıyor" sorusunu cevaplar ve kaydı yapan kişiyi damgalar.
+// PIN gerçek bir güvenlik katmanı değil, yanlış kişinin yanlışlıkla veri
+// değiştirmesini engelleyen bir kapıdır.
+const PROFILE_SESSION_KEY = 'aktifProfilOturum';
+const PROFILE_SESSION_GUN = 7;      // PIN bu cihazda kaç gün sorulmaz
+const PIN_UZUNLUK = 4;
+const PIN_MAX_DENEME = 5;
+const VARSAYILAN_PROFILLER = [
+  {key:'onur',   name:'Onur',   emoji:'🧑‍💼', color:'#C8A066', admin:true},
+  {key:'fatma',  name:'Fatma',  emoji:'👩',    color:'#5f8d6a'},
+  {key:'zeynep', name:'Zeynep', emoji:'👩‍🦰', color:'#6f6494'}
+];
+
+let profilesCache = null;   // key -> {name,emoji,color,admin,order,pinS,pinF}
+let aktifProfil = null;     // {key,name,emoji,color,...}
+let pinState = null;        // {key, mod, girilen, ilkPin, kalanDeneme}
+let sifirlamaModu = false;
+
+async function loadProfiles(){
+  const doc = await db.collection('settings').doc('profiles').get();
+  const data = (doc.exists ? doc.data() : null) || {};
+  if(!Object.keys(data).length){
+    const seed = {};
+    VARSAYILAN_PROFILLER.forEach((p,i)=>{
+      seed[p.key] = {name:p.name, emoji:p.emoji, color:p.color, admin:!!p.admin, order:i, pinS:null, pinF:null};
+    });
+    await db.collection('settings').doc('profiles').set(seed);
+    profilesCache = seed;
+  } else {
+    profilesCache = data;
+  }
+  return profilesCache;
+}
+
+function profilListesi(){
+  return Object.keys(profilesCache || {})
+    .map(k => Object.assign({key:k}, profilesCache[k]))
+    .sort((a,b)=> (a.order||0) - (b.order||0));
+}
+function profilPinliMi(p){ return !!(p && (p.pinS || p.pinF)); }
+
+// PIN'in kendisi buluta yazılmaz, iki ayrı özetle saklanır.
+// SHA-256 güvenli olmayan kökenlerde (bazı tarayıcılarda file://) çalışmayabilir,
+// o yüzden her zaman ikinci bir yedek özet de üretilir.
+function fnvOzet(veri){
+  let h1 = 0x811c9dc5, h2 = 0x01000193;
+  for(let i=0;i<veri.length;i++){
+    h1 = Math.imul(h1 ^ veri.charCodeAt(i), 16777619) >>> 0;
+    h2 = Math.imul(h2 + veri.charCodeAt(i) * (i+7), 2246822519) >>> 0;
+  }
+  return h1.toString(16).padStart(8,'0') + h2.toString(16).padStart(8,'0');
+}
+async function pinOzetleri(pin, key){
+  const veri = 'mcrapor:' + key + ':' + pin;
+  let s256 = null;
+  if(window.crypto && crypto.subtle && crypto.subtle.digest){
+    try{
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(veri));
+      s256 = Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+    }catch(e){ s256 = null; }
+  }
+  return {s: s256, f: fnvOzet(veri)};
+}
+async function pinDogruMu(pin, profil){
+  const o = await pinOzetleri(pin, profil.key);
+  if(profil.pinS && o.s) return profil.pinS === o.s;
+  if(profil.pinF) return profil.pinF === o.f;
+  return false;
+}
+async function pinKaydet(pin, key){
+  const o = await pinOzetleri(pin, key);
+  await db.collection('settings').doc('profiles').set({[key]: {pinS:o.s, pinF:o.f}}, {merge:true});
+  profilesCache[key].pinS = o.s;
+  profilesCache[key].pinF = o.f;
+}
+async function pinSil(key){
+  await db.collection('settings').doc('profiles').set({[key]: {pinS:null, pinF:null}}, {merge:true});
+  profilesCache[key].pinS = null;
+  profilesCache[key].pinF = null;
+}
+
+function kayitliOturum(){
+  try{
+    const o = JSON.parse(localStorage.getItem(PROFILE_SESSION_KEY) || 'null');
+    if(!o || !o.key || !o.ts) return null;
+    if(Date.now() - o.ts > PROFILE_SESSION_GUN * 86400000) return null;
+    return o;
+  }catch(e){ return null; }
+}
+function oturumKaydet(key){
+  try{ localStorage.setItem(PROFILE_SESSION_KEY, JSON.stringify({key, ts:Date.now()})); }catch(e){ /* kota */ }
+}
+function oturumSil(){
+  try{ localStorage.removeItem(PROFILE_SESSION_KEY); }catch(e){ /* sorun değil */ }
+}
+
+function showProfileScreen(){
+  document.getElementById('bootScreen').style.display = 'none';
+  document.getElementById('appRoot').style.display = 'none';
+  document.getElementById('profileScreen').style.display = '';
+  showProfilePick();
+}
+function showProfilePick(){
+  document.getElementById('pinView').style.display = 'none';
+  document.getElementById('profilePickView').style.display = '';
+  pinState = null;
+  renderProfileList();
+}
+
+function renderProfileList(){
+  const el = document.getElementById('profileList');
+  el.innerHTML = profilListesi().map(p=>{
+    const alt = sifirlamaModu
+      ? '<small>PIN sıfırlamak için tıkla</small>'
+      : (profilPinliMi(p) ? '' : '<small>PIN belirlenmedi</small>');
+    return '<button class="profile-card' + (sifirlamaModu ? ' reset-mode' : '') + '" type="button" data-key="' + p.key + '">'
+      + '<span class="profile-av" style="background:' + (p.color || '#444') + '">' + (p.emoji || '👤') + '</span>'
+      + '<span class="profile-name">' + escapeHtml(p.name || p.key) + alt + '</span>'
+      + '</button>';
+  }).join('');
+  el.querySelectorAll('.profile-card').forEach(btn=>{
+    btn.addEventListener('click', ()=> profilKartiTiklandi(btn.dataset.key));
+  });
+  document.getElementById('profilePickTitle').textContent = sifirlamaModu ? 'Hangi profilin PIN\'i sıfırlansın?' : 'Kim kullanıyor?';
+  document.getElementById('profileResetBtn').textContent = sifirlamaModu ? 'Vazgeç' : 'PIN sıfırla';
+}
+function profilNotu(msg){
+  document.getElementById('profileNote').textContent = msg || '';
+}
+
+async function profilKartiTiklandi(key){
+  const p = Object.assign({key}, profilesCache[key]);
+  if(sifirlamaModu){
+    if(!confirm(p.name + ' profilinin PIN\'i silinecek. Bir sonraki girişte yeni PIN belirlenir. Onaylıyor musun?')) return;
+    try{
+      await pinSil(key);
+      sifirlamaModu = false;
+      renderProfileList();
+      profilNotu(p.name + ' profilinin PIN\'i sıfırlandı.');
+    }catch(e){ profilNotu('Sıfırlanamadı: ' + e.message); }
+    return;
+  }
+  profilNotu('');
+  openPinView(key, profilPinliMi(p) ? 'giris' : 'kur');
+}
+
+function openPinView(key, mod){
+  const p = Object.assign({key}, profilesCache[key]);
+  pinState = {key, mod, girilen:'', ilkPin:null, kalanDeneme:PIN_MAX_DENEME};
+  document.getElementById('profilePickView').style.display = 'none';
+  document.getElementById('pinView').style.display = '';
+  const av = document.getElementById('pinAvatar');
+  av.textContent = p.emoji || '👤';
+  av.style.background = p.color || '#444';
+  document.getElementById('pinName').textContent = p.name || key;
+  document.getElementById('pinErr').textContent = '';
+  renderPinPad();
+  updatePinView();
+}
+function pinIpucu(){
+  if(!pinState) return '';
+  if(pinState.mod === 'kur')      return PIN_UZUNLUK + ' haneli yeni PIN belirle';
+  if(pinState.mod === 'kurTekrar')return 'PIN\'i tekrar gir';
+  if(pinState.mod === 'yonetici') return 'Yönetici PIN\'i';
+  return 'PIN gir';
+}
+function updatePinView(){
+  document.getElementById('pinHint').textContent = pinIpucu();
+  const dots = [];
+  for(let i=0;i<PIN_UZUNLUK;i++){
+    dots.push('<span class="pin-dot' + (i < (pinState ? pinState.girilen.length : 0) ? ' on' : '') + '"></span>');
+  }
+  document.getElementById('pinDots').innerHTML = dots.join('');
+}
+function renderPinPad(){
+  const pad = document.getElementById('pinPad');
+  const tuslar = ['1','2','3','4','5','6','7','8','9','temizle','0','sil'];
+  pad.innerHTML = tuslar.map(t=>{
+    if(t === 'temizle') return '<button type="button" class="wide" data-key="C">Temizle</button>';
+    if(t === 'sil')     return '<button type="button" class="wide" data-key="B">← Sil</button>';
+    return '<button type="button" data-key="' + t + '">' + t + '</button>';
+  }).join('');
+  pad.querySelectorAll('button').forEach(b=>{
+    b.addEventListener('click', ()=> pinTus(b.dataset.key));
+  });
+}
+function pinTus(k){
+  if(!pinState) return;
+  document.getElementById('pinErr').textContent = '';
+  if(k === 'C'){ pinState.girilen = ''; updatePinView(); return; }
+  if(k === 'B'){ pinState.girilen = pinState.girilen.slice(0,-1); updatePinView(); return; }
+  if(pinState.girilen.length >= PIN_UZUNLUK) return;
+  pinState.girilen += k;
+  updatePinView();
+  if(pinState.girilen.length === PIN_UZUNLUK) setTimeout(pinTamamlandi, 120);
+}
+async function pinTamamlandi(){
+  if(!pinState) return;
+  const pin = pinState.girilen;
+  const key = pinState.key;
+  const p = Object.assign({key}, profilesCache[key]);
+  const hata = document.getElementById('pinErr');
+
+  if(pinState.mod === 'kur'){
+    pinState.ilkPin = pin;
+    pinState.mod = 'kurTekrar';
+    pinState.girilen = '';
+    updatePinView();
+    return;
+  }
+  if(pinState.mod === 'kurTekrar'){
+    if(pin !== pinState.ilkPin){
+      hata.textContent = 'İki PIN aynı değil, baştan alalım.';
+      pinState.mod = 'kur';
+      pinState.ilkPin = null;
+      pinState.girilen = '';
+      updatePinView();
+      return;
+    }
+    try{
+      await pinKaydet(pin, key);
+      await profilOnayla(key, true);
+    }catch(e){
+      hata.textContent = 'PIN kaydedilemedi: ' + e.message;
+      pinState.girilen = ''; updatePinView();
+    }
+    return;
+  }
+
+  const dogru = await pinDogruMu(pin, p);
+  if(!dogru){
+    pinState.kalanDeneme--;
+    pinState.girilen = '';
+    updatePinView();
+    if(pinState.kalanDeneme <= 0){
+      hata.textContent = 'Çok fazla yanlış deneme. Profil ekranına dönülüyor.';
+      setTimeout(showProfilePick, 1400);
+    } else {
+      hata.textContent = 'PIN yanlış. Kalan deneme: ' + pinState.kalanDeneme;
+    }
+    return;
+  }
+
+  if(pinState.mod === 'yonetici'){
+    sifirlamaModu = true;
+    showProfilePick();
+    profilNotu('Sıfırlanacak profili seç.');
+    return;
+  }
+  await profilOnayla(key, true);
+}
+
+async function profilOnayla(key, oturumuHatirla){
+  aktifProfil = Object.assign({key}, profilesCache[key]);
+  if(oturumuHatirla) oturumKaydet(key);
+  document.getElementById('profileScreen').style.display = 'none';
+
+  if(cloudReady){
+    document.getElementById('appRoot').style.display = '';
+    renderProfileChip();
+    renderAll();
+    return;
+  }
+
+  document.getElementById('bootScreen').style.display = '';
+  bootStatus('Veriler yükleniyor...');
+  try{
+    await loadCloudCache();
+    listenCloudChanges();
+    document.getElementById('bootScreen').style.display = 'none';
+    document.getElementById('appRoot').style.display = '';
+    renderProfileChip();
+    startAppAfterLogin();
+  }catch(e){
+    bootStatus('Veriler yüklenemedi: ' + e.message, true);
+  }
+}
+
+function profilDegistir(){
+  oturumSil();
+  aktifProfil = null;
+  sifirlamaModu = false;
+  document.getElementById('appRoot').style.display = 'none';
+  showProfileScreen();
+}
+
+function renderProfileChip(){
+  const chip = document.getElementById('profileChip');
+  if(!chip) return;
+  if(!aktifProfil){ chip.style.display = 'none'; return; }
+  chip.style.display = '';
+  const av = document.getElementById('profileChipAv');
+  av.textContent = aktifProfil.emoji || '👤';
+  av.style.background = aktifProfil.color || '#444';
+  document.getElementById('profileChipName').textContent = aktifProfil.name || aktifProfil.key;
+}
+
+function renderLastEditInfo(){
+  const el = document.getElementById('lastEditInfo');
+  if(!el) return;
+  const rec = getRecord(todayStr(0));
+  if(!rec || !rec.updatedBy){ el.textContent = ''; return; }
+  let saat = '';
+  try{
+    const d = new Date(rec.updatedAt);
+    if(!isNaN(d)) saat = ' · ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+  }catch(e){ /* tarih bozuksa saati atla */ }
+  el.textContent = 'Bugünkü kaydı en son güncelleyen: ' + rec.updatedBy + saat;
+}
+
+document.getElementById('profileChip').addEventListener('click', profilDegistir);
+document.getElementById('pinBackBtn').addEventListener('click', showProfilePick);
+document.getElementById('profileResetBtn').addEventListener('click', ()=>{
+  if(sifirlamaModu){ sifirlamaModu = false; renderProfileList(); profilNotu(''); return; }
+  const yonetici = profilListesi().find(p=> p.admin && profilPinliMi(p));
+  if(!yonetici){
+    profilNotu('Sıfırlama için önce yönetici profilinin (Onur) PIN\'i belirlenmeli.');
+    return;
+  }
+  openPinView(yonetici.key, 'yonetici');
+});
+document.addEventListener('keydown', e=>{
+  if(!pinState || document.getElementById('pinView').style.display === 'none') return;
+  if(e.key >= '0' && e.key <= '9'){ pinTus(e.key); e.preventDefault(); }
+  else if(e.key === 'Backspace'){ pinTus('B'); e.preventDefault(); }
+  else if(e.key === 'Escape'){ showProfilePick(); e.preventDefault(); }
+});
+
+// Firebase'de şifre ekranı yok: arka planda anonim oturum açılır,
+// kullanıcıyı asıl karşılayan ekran yukarıdaki profil seçimidir.
 auth.onAuthStateChanged(async function(user){
   if(!user){
     auth.signInAnonymously().catch(err=>{
@@ -780,13 +1196,16 @@ auth.onAuthStateChanged(async function(user){
     return;
   }
   try{
-    await loadCloudCache();
-    listenCloudChanges();
-    document.getElementById('bootScreen').style.display = 'none';
-    document.getElementById('appRoot').style.display = '';
-    startAppAfterLogin();
+    bootStatus('Profiller yükleniyor...');
+    await loadProfiles();
+    const oturum = kayitliOturum();
+    if(oturum && profilesCache[oturum.key] && profilPinliMi(profilesCache[oturum.key])){
+      await profilOnayla(oturum.key, true);
+    } else {
+      showProfileScreen();
+    }
   }catch(e){
-    bootStatus('Veriler yüklenemedi: ' + e.message, true);
+    bootStatus('Profiller yüklenemedi: ' + e.message, true);
   }
 });
 
@@ -796,6 +1215,12 @@ function getRecord(dateKey){
   catch(e){ setStatus('Kayıt okunamadı: '+e.message, true); return null; }
 }
 function setRecord(dateKey,obj){
+  if(aktifProfil){
+    obj = Object.assign({}, obj, {
+      updatedBy: aktifProfil.name || aktifProfil.key,
+      updatedAt: new Date().toISOString()
+    });
+  }
   cloudCache['entry:'+dateKey] = JSON.stringify(obj);
   db.collection('entries').doc(dateKey).set(obj).catch(e=>{
     setStatus('Buluta kaydedilemedi: '+e.message, true);
@@ -1989,6 +2414,7 @@ function renderAll(){
   renderMonth();
   renderReportPanel();
   renderEmployeeTargetsRow();
+  renderLastEditInfo();
 }
 
 const AY_ADLARI = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
