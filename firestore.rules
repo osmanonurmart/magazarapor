@@ -1,0 +1,61 @@
+rules_version = '2';
+
+// Mağaza Raporu — Firestore güvenlik kuralları
+//
+// Kural özeti:
+//   - Giriş yapmamış hiç kimse hiçbir şey okuyamaz/yazamaz.
+//   - Her kullanıcı yalnızca kendi mağazasının verisine erişir.
+//   - Yönetici bütün mağazaları görür, mağaza ve kullanıcı eşlemesi açar.
+//
+// Yöneticiyi belirleyen tek yer aşağıdaki e-posta listesidir.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function girisli(){
+      return request.auth != null;
+    }
+    function kullaniciVar(){
+      return girisli() && exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+    function kullaniciDoc(){
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    function yoneticiMi(){
+      return girisli() && (
+        request.auth.token.email in ['osmanonurmrt@gmail.com']
+        || (kullaniciVar() && kullaniciDoc().admin == true)
+      );
+    }
+    function kendiMagazam(store){
+      return kullaniciVar() && kullaniciDoc().storeKey == store;
+    }
+
+    // Kullanıcı ↔ mağaza eşlemesi
+    match /users/{uid} {
+      allow read: if girisli() && (request.auth.uid == uid || yoneticiMi());
+      allow write: if yoneticiMi();
+    }
+
+    // Mağaza kartı: ad, simge, renk, izinli personel listesi
+    match /stores/{store} {
+      allow get: if yoneticiMi() || kendiMagazam(store);
+      allow list: if yoneticiMi();
+      allow write: if yoneticiMi() || kendiMagazam(store);
+
+      // Mağazanın bütün verisi: entries, weekgoals, settings, tools, ghbhr*
+      match /{belge=**} {
+        allow read, write: if yoneticiMi() || kendiMagazam(store);
+      }
+    }
+
+    // Mağaza ayrımından önce köke yazılmış eski veriler.
+    // Taşıma işini yönetici yaptığı için yalnızca ona açık.
+    match /entries/{belge}      { allow read, write: if yoneticiMi(); }
+    match /weekgoals/{belge}    { allow read, write: if yoneticiMi(); }
+    match /tools/{belge}        { allow read, write: if yoneticiMi(); }
+    match /ghbhrWeekly/{belge}  { allow read, write: if yoneticiMi(); }
+    match /ghbhrReports/{belge} { allow read, write: if yoneticiMi(); }
+    match /settings/{belge}     { allow read, write: if yoneticiMi(); }
+  }
+}

@@ -295,21 +295,6 @@
   .profile-back:hover{ border-color:#fff; color:#fff; }
   .profile-note{ color:#e0a94a; font-size:.78rem; margin-top:14px; min-height:16px; }
 
-  .pin-box{ text-align:center; color:#fff; }
-  .pin-box .profile-av{ margin:0 auto; }
-  .pin-title{ font-size:1.15rem; margin-top:14px; }
-  .pin-hint{ color:#9a9a9a; font-size:.8rem; margin-top:5px; }
-  .pin-dots{ display:flex; gap:15px; justify-content:center; margin:20px 0 24px; }
-  .pin-dot{ width:15px; height:15px; border-radius:50%; border:2px solid #6e6e6e; }
-  .pin-dot.on{ background:#fff; border-color:#fff; }
-  .pin-pad{ display:grid; grid-template-columns:repeat(3,74px); gap:12px; justify-content:center; }
-  .pin-pad button{
-    height:58px; border-radius:10px; border:1px solid #3a3a3a; background:#232323; color:#fff;
-    font-size:1.25rem; cursor:pointer; font-family:inherit;
-  }
-  .pin-pad button:hover{ background:#333; }
-  .pin-pad button.wide{ font-size:.85rem; color:#b3b3b3; }
-  .pin-err{ color:#e07b7b; font-size:.8rem; min-height:18px; margin-top:14px; }
 
   .profile-chip{
     display:flex; align-items:center; gap:7px; margin-left:10px; align-self:center;
@@ -371,7 +356,34 @@
   .pe-icons span.sel{ border-color:var(--accent); }
   .pe-colors span{ width:34px; height:34px; border-radius:50%; cursor:pointer; border:2px solid transparent; }
   .pe-colors span.sel{ border-color:#fff; }
-  .pe-err{ color:#e07b7b; font-size:.78rem; min-height:18px; margin-top:12px; }
+  .pe-err{ color:#e07b7b; font-size:.78rem; min-height:18px; margin-top:12px; white-space:pre-line; }
+  .pe-hint{ color:#8b8b8b; font-size:.72rem; margin-top:8px; line-height:1.4; }
+  .login-box{ width:340px; }
+  .login-logo{ font-size:2.2rem; text-align:center; }
+  .profile-back.login-main{ width:100%; padding:10px; margin-top:16px; }
+  .login-link{
+    display:block; width:100%; margin-top:10px; background:none; border:none;
+    color:#8b8b8b; font-size:.75rem; cursor:pointer; font-family:inherit; text-decoration:underline;
+  }
+  .login-link:hover{ color:#fff; }
+  .profile-search{ width:320px; max-width:86vw; margin:0 auto 22px; display:block; text-align:center; }
+  .profile-bos{ color:#8b8b8b; font-size:.82rem; text-align:center; padding:18px 0; }
+  .izin-list{ display:flex; flex-wrap:wrap; gap:8px; }
+  .izin-row{ display:inline-flex; align-items:center; gap:6px; background:#1e1e1e; border:1px solid #333; border-radius:20px; padding:4px 5px 4px 12px; }
+  .izin-ad{ color:#fff; font-size:.8rem; }
+  .izin-row button{ background:none; border:1px solid #444; color:#9a9a9a; border-radius:12px; cursor:pointer; font-family:inherit; }
+  .izin-ben{ font-size:.62rem; padding:2px 7px; }
+  .izin-ben.sel{ border-color:var(--accent); color:var(--accent); }
+  .izin-sil{ font-size:.66rem; width:20px; height:20px; padding:0; line-height:1; border-radius:50%; }
+  .izin-sil:hover{ border-color:#c26565; color:#e28a8a; }
+  .izin-bos{ color:#6d6d6d; font-size:.76rem; }
+  .izin-add{ display:flex; gap:8px; margin-top:10px; }
+  .izin-add .pe-input{ flex:1; }
+  .izin-add .profile-back{ white-space:nowrap; }
+  .pb-text{ height:180px; resize:vertical; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:.78rem; line-height:1.5; }
+  .pb-log{ max-height:170px; overflow:auto; margin-top:10px; font-size:.75rem; line-height:1.6; }
+  .pb-log .iyi{ color:#7fb77f; }
+  .pb-log .kotu{ color:#e07b7b; }
   .profile-back.pe-save{ border-color:var(--accent); color:var(--accent); }
   .profile-back.pe-save:hover{ background:var(--accent); color:#1a1a1a; }
   .profile-foot .profile-back + .profile-back{ margin-left:8px; }
@@ -400,57 +412,92 @@
 </div>
 
 <div id="profileScreen" class="profile-screen" style="display:none;">
-  <div id="profilePickView">
-    <h2 id="profilePickTitle">Kim kullanıyor?</h2>
+
+  <div id="loginView" style="display:none;">
+    <div class="pe-box login-box">
+      <div class="login-logo">🏪</div>
+      <h2 style="text-align:center;margin:0 0 4px;">Mağaza Raporu</h2>
+      <div class="pe-hint" style="text-align:center;">Devam etmek için giriş yapın</div>
+      <label class="pe-label">E-posta</label>
+      <input type="email" id="loginEmail" class="pe-input" autocomplete="username">
+      <label class="pe-label">Şifre</label>
+      <input type="password" id="loginPass" class="pe-input" autocomplete="current-password">
+      <div class="pe-err" id="loginErr"></div>
+      <button class="profile-back pe-save login-main" id="loginBtn" type="button">Giriş yap</button>
+      <button class="login-link" id="loginForgotBtn" type="button">Şifremi unuttum</button>
+    </div>
+  </div>
+
+  <div id="profilePickView" style="display:none;">
+    <h2 id="profilePickTitle">Hangi mağaza?</h2>
+    <input type="text" id="profileSearch" class="pe-input profile-search" placeholder="Mağaza ara...">
     <div class="profile-list" id="profileList"></div>
     <div class="profile-note" id="profileNote"></div>
     <div class="profile-foot">
-      <button class="profile-back" id="profileResetBtn" type="button">⚙ Profilleri yönet</button>
+      <button class="profile-back" id="profileResetBtn" type="button">⚙ Mağazaları yönet</button>
+      <button class="profile-back" id="pickLogoutBtn" type="button">Çıkış yap</button>
     </div>
   </div>
 
   <div id="profileManageView" style="display:none;">
-    <h2>Profilleri yönet</h2>
+    <h2>Mağazaları yönet</h2>
     <div class="pm-list" id="pmList"></div>
     <div class="profile-note" id="pmNote"></div>
     <div class="profile-foot">
-      <button class="profile-back pe-save" id="pmAddBtn" type="button">+ Yeni profil</button>
+      <button class="profile-back pe-save" id="pmAddBtn" type="button">+ Yeni mağaza</button>
+      <button class="profile-back" id="pmBulkBtn" type="button">⇪ Toplu ekle</button>
       <button class="profile-back" id="pmBackBtn" type="button">← Geri</button>
     </div>
   </div>
 
   <div id="profileEditView" style="display:none;">
     <div class="pe-box">
-      <h2 id="peTitle" style="text-align:left;margin-bottom:6px;">Profili düzenle</h2>
-      <label class="pe-label">Ad</label>
-      <input type="text" id="peName" class="pe-input" maxlength="24" placeholder="ör. Mağaza 2367">
+      <h2 id="peTitle" style="margin-bottom:6px;">Mağaza ayarları</h2>
+      <label class="pe-label">Mağaza adı</label>
+      <input type="text" id="peName" class="pe-input" maxlength="32" placeholder="ör. Mağaza 2367">
       <label class="pe-label">Simge</label>
       <div class="pe-icons" id="peIcons"></div>
       <label class="pe-label">Renk</label>
       <div class="pe-colors" id="peColors"></div>
+
+      <div id="peUserWrap" style="display:none;">
+        <label class="pe-label">Kullanıcı e-postası</label>
+        <input type="email" id="peUserMail" class="pe-input" placeholder="magaza2367@ornek.com">
+        <label class="pe-label">Geçici şifre (en az 6 karakter)</label>
+        <input type="text" id="peUserPass" class="pe-input" placeholder="ilk giriş şifresi">
+      </div>
+
+      <label class="pe-label">İzinli listesinde çıkacak kişiler</label>
+      <div class="izin-list" id="peIzinList"></div>
+      <div class="izin-add">
+        <input type="text" id="peIzinYeni" class="pe-input" maxlength="24" placeholder="Kişi adı">
+        <button class="profile-back" id="peIzinAddBtn" type="button">+ Ekle</button>
+      </div>
+      <div class="pe-hint">“ben” işaretli kişi seçilirse akşam mesajında “ben izinliyim” yazar.</div>
+
       <div class="pe-err" id="peErr"></div>
-      <div class="profile-foot" style="text-align:left;margin-top:10px;">
+      <div class="profile-foot" style="margin-top:12px;">
         <button class="profile-back pe-save" id="peSaveBtn" type="button">Kaydet</button>
         <button class="profile-back" id="peCancelBtn" type="button">İptal</button>
       </div>
     </div>
   </div>
 
-  <div id="pinView" style="display:none;">
-    <div class="pin-box">
-      <div class="profile-av" id="pinAvatar"></div>
-      <div class="pin-title" id="pinName"></div>
-      <div class="pin-hint" id="pinHint"></div>
-      <div class="pin-dots" id="pinDots"></div>
-      <div class="pin-pad" id="pinPad"></div>
-      <div class="pin-err" id="pinErr"></div>
-      <div class="profile-foot" style="margin-top:16px;">
-        <button class="profile-back" id="pinBackBtn" type="button">← Geri</button>
+  <div id="profileBulkView" style="display:none;">
+    <div class="pe-box">
+      <h2 style="margin-bottom:6px;">Toplu mağaza ekle</h2>
+      <div class="pe-hint">Her satıra bir mağaza: <b>Mağaza adı ; e-posta ; şifre</b></div>
+      <textarea id="pbText" class="pe-input pb-text" placeholder="Mağaza 2367 ; m2367@ornek.com ; Gecici1234
+Mağaza 2410 ; m2410@ornek.com ; Gecici1234"></textarea>
+      <div class="pe-err" id="pbErr"></div>
+      <div class="pb-log" id="pbLog"></div>
+      <div class="profile-foot" style="margin-top:12px;">
+        <button class="profile-back pe-save" id="pbRunBtn" type="button">Hepsini oluştur</button>
+        <button class="profile-back" id="pbBackBtn" type="button">← Geri</button>
       </div>
     </div>
   </div>
 </div>
-
 <div id="appRoot" style="display:none;">
 
 <header>
@@ -462,10 +509,11 @@
         <span class="pc-av" id="profileChipAv"></span><span id="profileChipName"></span>
       </button>
       <div class="chip-menu" id="chipMenu" style="display:none;">
-        <button type="button" id="chipEditBtn">✏️ Profili düzenle</button>
-        <button type="button" id="chipPinBtn">🔑 PIN değiştir</button>
+        <button type="button" id="chipEditBtn">⚙️ Mağaza ayarları</button>
+        <button type="button" id="chipManageBtn">🗂️ Mağazaları yönet</button>
+        <button type="button" id="chipSwitchBtn">🔄 Mağaza değiştir</button>
         <div class="sep"></div>
-        <button type="button" id="chipSwitchBtn">🔄 Profil değiştir</button>
+        <button type="button" id="chipLogoutBtn">🚪 Çıkış yap</button>
       </div>
     </span>
   </div>
@@ -552,7 +600,6 @@
 <script>
 
 const GUN_ADLARI = ['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar'];
-const IZINLI_SECENEKLER = ['','Onur','Fatma','Zeynep'];
 let yorumDraft = '';
 const GUN_KISA = ['Pzt','Sal','Çar','Per','Cum','Cmt','Paz'];
 const NUMERIC_FIELDS = ['ciro','mgs','fbu','fbs','toplu_satis','hedef'];
@@ -862,6 +909,9 @@ async function loadCloudCache(){
 // Bu tarayıcıda duran eski verileri (araçlar, personel hedefleri, GH/BH ham verisi)
 // bir kereye mahsus buluta taşır. Buluttaki kaydın üzerine yazmaz, sadece eksikleri ekler.
 async function migrateBrowserDataToCloud(){
+  // Bu tarayıcıdaki eski yerel veri yalnızca mağaza ayrımından önceki asıl
+  // mağazaya aittir; yeni açılan mağazalara sızmamalı.
+  if(!aktifProfil || !aktifProfil.legacy) return;
   if(localStorage.getItem(CLOUD_MIGRATION_KEY)) return;
   let tasinan = [];
 
@@ -967,68 +1017,232 @@ function bootStatus(msg, isError){
   el.classList.toggle('error', !!isError);
 }
 
-// ==================== PROFİL / MAĞAZA OTURUMU (Netflix tarzı) ====================
-// Her profil ayrı bir mağazadır: kendi günlük verisi, hedefleri, personeli,
-// GH/BH kayıtları ve araçları vardır. Bir profilin verisi diğerinde görünmez.
-// PIN gerçek bir güvenlik katmanı değil, yanlış kişinin yanlış mağazaya veri
-// girmesini engelleyen bir kapıdır.
-const PROFILE_SESSION_KEY = 'aktifProfilOturum';
-const PROFILE_SESSION_GUN = 7;      // PIN bu cihazda kaç gün sorulmaz
-const PIN_UZUNLUK = 4;
-const PIN_MAX_DENEME = 5;
-// legacy: uygulamanın ilk verisi (mağaza ayrımı yokken yazılanlar) bu profile taşınır.
-const VARSAYILAN_PROFILLER = [
-  {key:'onur', name:'Onur', emoji:'🧑‍💼', color:'#C8A066', admin:true, legacy:true}
-];
-// Mağaza ayrımından önce oluşturulmuş, verisi olmayan kişi profilleri.
-const ESKI_KISI_PROFILLERI = ['fatma','zeynep'];
+// ==================== KİMLİK, MAĞAZA VE OTURUM ====================
+// Giriş artık Firebase e-posta/şifre ile. Her mağazanın tek kullanıcısı vardır;
+// kullanıcı ↔ mağaza eşlemesi users/{uid} dokümanında tutulur.
+// Yönetici bütün mağazaları görür ve yönetir.
+const YONETICI_EPOSTALARI = ['osmanonurmrt@gmail.com'];
+const SON_MAGAZA_KEY = 'sonMagaza';
+const VARSAYILAN_IZINLI = ['Onur','Fatma','Zeynep'];
 const PROFIL_SIMGELERI = ['🏪','🏬','🛒','🛍️','🧑‍💼','👩','👨','🧕','📊','🏢','⭐','🥇'];
 const PROFIL_RENKLERI  = ['#C8A066','#5f8d6a','#6f6494','#a34141','#3f6b8a','#8a6a3f','#4a4a4a','#9a5f7a'];
 
-let profilesCache = null;   // key -> {name,emoji,color,admin,legacy,order,pinS,pinF}
-let aktifProfil = null;     // {key,name,emoji,color,...}
-let pinState = null;        // {key, mod, girilen, ilkPin, kalanDeneme}
-let editState = null;       // {key|null, name, emoji, color}
+let kullanici = null;       // Firebase kullanıcısı
+let yoneticiMi = false;
+let magazalar = [];         // [{key,name,emoji,color,order,izinli,benKim,legacy,legacyTasindi}]
+let aktifProfil = null;     // açık olan mağaza
+let editState = null;       // düzenleme formunun geçici hali
+let magazaArama = '';
 
-async function loadProfiles(){
-  const doc = await profilesRef().get();
-  let data = (doc.exists ? doc.data() : null) || {};
-  if(!Object.keys(data).length){
-    const seed = {};
-    VARSAYILAN_PROFILLER.forEach((p,i)=>{
-      seed[p.key] = {name:p.name, emoji:p.emoji, color:p.color, admin:!!p.admin, legacy:!!p.legacy, order:i, pinS:null, pinF:null};
-    });
-    await profilesRef().set(seed);
-    data = seed;
-  }
-  profilesCache = data;
-  await profilSemasiniGuncelle();
-  return profilesCache;
+function magazaBul(key){ return magazalar.find(m=> m.key === key) || null; }
+function izinliSecenekleri(){
+  const liste = (aktifProfil && Array.isArray(aktifProfil.izinli) && aktifProfil.izinli.length)
+    ? aktifProfil.izinli : VARSAYILAN_IZINLI;
+  return [''].concat(liste);
 }
 
-// Profil = mağaza yapısına geçiş: verisi olmayan eski kişi profillerini kaldırır,
-// asıl profili yönetici ve legacy olarak işaretler. Bir kere çalışır.
-async function profilSemasiniGuncelle(){
-  const guncel = {};
-  ESKI_KISI_PROFILLERI.forEach(k=>{
-    if(profilesCache[k]){
-      guncel[k] = firebase.firestore.FieldValue.delete();
-      delete profilesCache[k];
-    }
+// ---------- Ekranlar ----------
+const PROFIL_EKRANLARI = ['loginView','profilePickView','profileManageView','profileEditView','profileBulkView'];
+function showProfileView(id){
+  document.getElementById('bootScreen').style.display = 'none';
+  document.getElementById('profileScreen').style.display = '';
+  PROFIL_EKRANLARI.forEach(v=>{
+    document.getElementById(v).style.display = (v === id) ? '' : 'none';
   });
-  const ilk = VARSAYILAN_PROFILLER[0];
-  const asil = profilesCache[ilk.key];
-  if(asil && (asil.admin !== true || asil.legacy !== true)){
-    guncel[ilk.key] = {admin:true, legacy:true};
-    asil.admin = true;
-    asil.legacy = true;
-  }
-  if(!Object.keys(guncel).length) return;
-  try{ await profilesRef().set(guncel, {merge:true}); }
-  catch(e){ /* şema güncellenemezse uygulama yine de açılsın */ }
+}
+function uygulamayaDon(){
+  document.getElementById('profileScreen').style.display = 'none';
+  document.getElementById('bootScreen').style.display = 'none';
+  document.getElementById('appRoot').style.display = '';
 }
 
-// Mağaza ayrımı gelmeden önce kök koleksiyonlara yazılmış veriyi asıl mağazaya
+// ---------- Giriş ----------
+function showLogin(mesaj, hataMi){
+  document.getElementById('appRoot').style.display = 'none';
+  showProfileView('loginView');
+  document.getElementById('loginErr').textContent = mesaj || '';
+  document.getElementById('loginErr').style.color = hataMi === false ? '#7fb77f' : '';
+  setTimeout(()=> document.getElementById('loginEmail').focus(), 60);
+}
+function girisHatasi(err){
+  const kodlar = {
+    'auth/invalid-email': 'E-posta adresi geçersiz.',
+    'auth/user-not-found': 'Bu e-posta ile kayıtlı kullanıcı yok.',
+    'auth/wrong-password': 'Şifre yanlış.',
+    'auth/invalid-credential': 'E-posta veya şifre hatalı.',
+    'auth/too-many-requests': 'Çok fazla deneme yapıldı, biraz bekleyin.',
+    'auth/operation-not-allowed': 'Firebase\'de e-posta/şifre girişi kapalı görünüyor.\nConsole → Authentication → Sign-in method → Email/Password → Enable.',
+    'auth/email-already-in-use': 'Bu e-posta zaten kullanılıyor.',
+    'auth/weak-password': 'Şifre en az 6 karakter olmalı.'
+  };
+  return kodlar[err && err.code] || ('Giriş yapılamadı: ' + (err && err.message ? err.message : err));
+}
+async function girisYap(){
+  const mail = document.getElementById('loginEmail').value.trim();
+  const sifre = document.getElementById('loginPass').value;
+  const hata = document.getElementById('loginErr');
+  hata.style.color = '';
+  if(!mail || !sifre){ hata.textContent = 'E-posta ve şifre gerekli.'; return; }
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true; btn.textContent = 'Giriş yapılıyor...';
+  try{
+    await auth.signInWithEmailAndPassword(mail, sifre);
+    document.getElementById('loginPass').value = '';
+  }catch(e){
+    hata.textContent = girisHatasi(e);
+  }
+  btn.disabled = false; btn.textContent = 'Giriş yap';
+}
+async function sifremiUnuttum(){
+  const mail = document.getElementById('loginEmail').value.trim();
+  const hata = document.getElementById('loginErr');
+  if(!mail){ hata.style.color = ''; hata.textContent = 'Önce e-posta adresinizi yazın.'; return; }
+  try{
+    await auth.sendPasswordResetEmail(mail);
+    hata.style.color = '#7fb77f';
+    hata.textContent = 'Şifre sıfırlama bağlantısı ' + mail + ' adresine gönderildi.';
+  }catch(e){
+    hata.style.color = '';
+    hata.textContent = girisHatasi(e);
+  }
+}
+async function cikisYap(){
+  kapatChipMenu();
+  stopCloudListeners();
+  resetStoreCaches();
+  aktifProfil = null;
+  magazalar = [];
+  yoneticiMi = false;
+  try{ localStorage.removeItem(SON_MAGAZA_KEY); }catch(e){ /* sorun değil */ }
+  document.getElementById('appRoot').style.display = 'none';
+  await auth.signOut();
+}
+
+// ---------- Kullanıcı bağlamı ----------
+async function kullaniciBaglami(user){
+  const uid = user.uid;
+  const eposta = (user.email || '').toLowerCase();
+  const sabitYonetici = YONETICI_EPOSTALARI.indexOf(eposta) !== -1;
+  let doc = await db.collection('users').doc(uid).get();
+  if(!doc.exists && sabitYonetici){
+    await db.collection('users').doc(uid).set({email: eposta, admin: true, storeKey: null});
+    doc = await db.collection('users').doc(uid).get();
+  }
+  const veri = doc.exists ? (doc.data() || {}) : {};
+  return {
+    uid,
+    eposta,
+    admin: sabitYonetici || veri.admin === true,
+    storeKey: veri.storeKey || null,
+    kayitliMi: doc.exists
+  };
+}
+
+// ---------- Mağaza listesi ----------
+async function magazalariYukle(baglam){
+  if(baglam.admin){
+    const snap = await db.collection('stores').get();
+    const liste = [];
+    snap.forEach(d=> liste.push(Object.assign({key:d.id}, d.data())));
+    magazalar = liste.sort((a,b)=> (a.order||0) - (b.order||0));
+    return magazalar;
+  }
+  const doc = await magazaRef(baglam.storeKey).get();
+  magazalar = doc.exists ? [Object.assign({key:baglam.storeKey}, doc.data())] : [];
+  return magazalar;
+}
+
+// Eski settings/profiles kaydındaki mağaza bilgilerini stores/{key} dokümanına taşır.
+// PIN alanları artık kullanılmıyor, taşınmıyor. Yalnızca yönetici çalıştırır.
+async function magazaMetaTasi(){
+  const doc = await profilesRef().get();
+  const eski = doc.exists ? (doc.data() || {}) : {};
+  const anahtarlar = Object.keys(eski);
+  for(const key of anahtarlar){
+    if(magazaBul(key)) continue;
+    const p = eski[key] || {};
+    const kayit = {
+      name: p.name || key,
+      emoji: p.emoji || PROFIL_SIMGELERI[0],
+      color: p.color || PROFIL_RENKLERI[0],
+      order: p.order || 0,
+      legacy: !!p.legacy,
+      legacyTasindi: !!p.legacyTasindi,
+      izinli: VARSAYILAN_IZINLI.slice(),
+      benKim: VARSAYILAN_IZINLI[0]
+    };
+    await magazaRef(key).set(kayit, {merge:true});
+    magazalar.push(Object.assign({key}, kayit));
+  }
+  // Hiç mağaza yoksa, mağaza ayrımından önceki veriyi sahiplenecek ilk mağazayı aç.
+  if(!magazalar.length){
+    const kayit = {
+      name: 'Mağazam', emoji: PROFIL_SIMGELERI[0], color: PROFIL_RENKLERI[0], order: 0,
+      legacy: true, legacyTasindi: false, izinli: VARSAYILAN_IZINLI.slice(), benKim: VARSAYILAN_IZINLI[0]
+    };
+    await magazaRef('magaza1').set(kayit);
+    magazalar.push(Object.assign({key:'magaza1'}, kayit));
+  }
+  magazalar.sort((a,b)=> (a.order||0) - (b.order||0));
+}
+
+// ---------- Mağaza seçimi ----------
+function showMagazaSecim(){
+  document.getElementById('appRoot').style.display = 'none';
+  magazaArama = '';
+  document.getElementById('profileSearch').value = '';
+  document.getElementById('profileSearch').style.display = magazalar.length > 8 ? '' : 'none';
+  document.getElementById('profileResetBtn').style.display = yoneticiMi ? '' : 'none';
+  showProfileView('profilePickView');
+  editState = null;
+  renderProfileList();
+}
+function renderProfileList(){
+  const el = document.getElementById('profileList');
+  const ara = magazaArama.toLowerCase().trim();
+  const liste = ara ? magazalar.filter(m=> (m.name||m.key).toLowerCase().includes(ara)) : magazalar;
+  el.innerHTML = liste.length ? liste.map(p=>
+    '<button class="profile-card" type="button" data-key="' + p.key + '">'
+      + '<span class="profile-av" style="background:' + (p.color || '#444') + '">' + (p.emoji || '🏪') + '</span>'
+      + '<span class="profile-name">' + escapeHtml(p.name || p.key) + '</span>'
+    + '</button>').join('') : '<div class="profile-bos">Eşleşen mağaza yok.</div>';
+  el.querySelectorAll('.profile-card').forEach(btn=>{
+    btn.addEventListener('click', ()=> magazaAc(btn.dataset.key, true));
+  });
+}
+function profilNotu(msg){ document.getElementById('profileNote').textContent = msg || ''; }
+
+async function magazaAc(key, hatirla){
+  const magaza = magazaBul(key);
+  if(!magaza){ profilNotu('Mağaza bulunamadı.'); return; }
+  // Mağazalar birbirinden bağımsız: öncekinin önbelleği ve dinleyicileri bırakılır.
+  stopCloudListeners();
+  resetStoreCaches();
+  aktifProfil = magaza;
+  if(hatirla){ try{ localStorage.setItem(SON_MAGAZA_KEY, key); }catch(e){ /* sorun değil */ } }
+
+  document.getElementById('profileScreen').style.display = 'none';
+  document.getElementById('appRoot').style.display = 'none';
+  document.getElementById('bootScreen').style.display = '';
+  bootStatus('Veriler yükleniyor...');
+  try{
+    if(aktifProfil.legacy && !aktifProfil.legacyTasindi){
+      bootStatus('Eski veriler bu mağazaya taşınıyor...');
+      const adet = await eskiVeriyiMagazayaTasi(key);
+      aktifProfil.legacyTasindi = true;
+      if(adet) setTimeout(()=> setStatus(adet + ' kayıt bu mağazanın altına taşındı ✓'), 1200);
+    }
+    await loadCloudCache();
+    listenCloudChanges();
+    uygulamayaDon();
+    renderProfileChip();
+    await startAppAfterLogin();
+  }catch(e){
+    bootStatus('Veriler yüklenemedi: ' + e.message, true);
+  }
+}
+
+// Mağaza ayrımı gelmeden önce kök koleksiyonlara yazılmış veriyi bu mağazaya
 // kopyalar. Orijinaller silinmez, yedek olarak yerinde kalır.
 async function eskiVeriyiMagazayaTasi(key){
   const kopyala = async (coll)=>{
@@ -1037,9 +1251,7 @@ async function eskiVeriyiMagazayaTasi(key){
     snap.forEach(d=> docs.push({id:d.id, data:d.data()}));
     for(let i=0;i<docs.length;i+=400){
       const batch = db.batch();
-      docs.slice(i, i+400).forEach(d=>{
-        batch.set(magazaRef(key).collection(coll).doc(d.id), d.data);
-      });
+      docs.slice(i, i+400).forEach(d=> batch.set(magazaRef(key).collection(coll).doc(d.id), d.data));
       await batch.commit();
     }
     return docs.length;
@@ -1055,300 +1267,13 @@ async function eskiVeriyiMagazayaTasi(key){
       toplam++;
     }
   }
-  await profilesRef().set({[key]: {legacyTasindi:true}}, {merge:true});
-  profilesCache[key].legacyTasindi = true;
+  await magazaRef(key).set({legacyTasindi:true}, {merge:true});
+  const m = magazaBul(key);
+  if(m) m.legacyTasindi = true;
   return toplam;
 }
 
-function profilListesi(){
-  return Object.keys(profilesCache || {})
-    .map(k => Object.assign({key:k}, profilesCache[k]))
-    .sort((a,b)=> (a.order||0) - (b.order||0));
-}
-function profilPinliMi(p){ return !!(p && (p.pinS || p.pinF)); }
-
-// PIN'in kendisi buluta yazılmaz, iki ayrı özetle saklanır.
-// SHA-256 güvenli olmayan kökenlerde (bazı tarayıcılarda file://) çalışmayabilir,
-// o yüzden her zaman ikinci bir yedek özet de üretilir.
-function fnvOzet(veri){
-  let h1 = 0x811c9dc5, h2 = 0x01000193;
-  for(let i=0;i<veri.length;i++){
-    h1 = Math.imul(h1 ^ veri.charCodeAt(i), 16777619) >>> 0;
-    h2 = Math.imul(h2 + veri.charCodeAt(i) * (i+7), 2246822519) >>> 0;
-  }
-  return h1.toString(16).padStart(8,'0') + h2.toString(16).padStart(8,'0');
-}
-async function pinOzetleri(pin, key){
-  const veri = 'mcrapor:' + key + ':' + pin;
-  let s256 = null;
-  if(window.crypto && crypto.subtle && crypto.subtle.digest){
-    try{
-      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(veri));
-      s256 = Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
-    }catch(e){ s256 = null; }
-  }
-  return {s: s256, f: fnvOzet(veri)};
-}
-async function pinDogruMu(pin, profil){
-  const o = await pinOzetleri(pin, profil.key);
-  if(profil.pinS && o.s) return profil.pinS === o.s;
-  if(profil.pinF) return profil.pinF === o.f;
-  return false;
-}
-async function pinKaydet(pin, key){
-  const o = await pinOzetleri(pin, key);
-  await profilesRef().set({[key]: {pinS:o.s, pinF:o.f}}, {merge:true});
-  profilesCache[key].pinS = o.s;
-  profilesCache[key].pinF = o.f;
-}
-async function pinSil(key){
-  await profilesRef().set({[key]: {pinS:null, pinF:null}}, {merge:true});
-  profilesCache[key].pinS = null;
-  profilesCache[key].pinF = null;
-}
-
-function kayitliOturum(){
-  try{
-    const o = JSON.parse(localStorage.getItem(PROFILE_SESSION_KEY) || 'null');
-    if(!o || !o.key || !o.ts) return null;
-    if(Date.now() - o.ts > PROFILE_SESSION_GUN * 86400000) return null;
-    return o;
-  }catch(e){ return null; }
-}
-function oturumKaydet(key){
-  try{ localStorage.setItem(PROFILE_SESSION_KEY, JSON.stringify({key, ts:Date.now()})); }catch(e){ /* kota */ }
-}
-function oturumSil(){
-  try{ localStorage.removeItem(PROFILE_SESSION_KEY); }catch(e){ /* sorun değil */ }
-}
-
-const PROFIL_EKRANLARI = ['profilePickView','pinView','profileManageView','profileEditView'];
-function showProfileView(id){
-  PROFIL_EKRANLARI.forEach(v=>{
-    document.getElementById(v).style.display = (v === id) ? '' : 'none';
-  });
-}
-function showProfileScreen(){
-  document.getElementById('bootScreen').style.display = 'none';
-  document.getElementById('appRoot').style.display = 'none';
-  document.getElementById('profileScreen').style.display = '';
-  showProfilePick();
-}
-function showProfilePick(){
-  showProfileView('profilePickView');
-  pinState = null;
-  editState = null;
-  renderProfileList();
-}
-
-function renderProfileList(){
-  const el = document.getElementById('profileList');
-  el.innerHTML = profilListesi().map(p=>
-    '<button class="profile-card" type="button" data-key="' + p.key + '">'
-      + '<span class="profile-av" style="background:' + (p.color || '#444') + '">' + (p.emoji || '👤') + '</span>'
-      + '<span class="profile-name">' + escapeHtml(p.name || p.key)
-      + (profilPinliMi(p) ? '' : '<small>PIN belirlenmedi</small>') + '</span>'
-    + '</button>').join('');
-  el.querySelectorAll('.profile-card').forEach(btn=>{
-    btn.addEventListener('click', ()=> profilKartiTiklandi(btn.dataset.key));
-  });
-}
-function profilNotu(msg){
-  document.getElementById('profileNote').textContent = msg || '';
-}
-
-function profilKartiTiklandi(key){
-  const p = Object.assign({key}, profilesCache[key]);
-  profilNotu('');
-  openPinView(key, profilPinliMi(p) ? 'giris' : 'kur');
-}
-
-function openPinView(key, mod){
-  const p = Object.assign({key}, profilesCache[key]);
-  pinState = {key, mod, girilen:'', ilkPin:null, kalanDeneme:PIN_MAX_DENEME};
-  document.getElementById('profilePickView').style.display = 'none';
-  document.getElementById('pinView').style.display = '';
-  const av = document.getElementById('pinAvatar');
-  av.textContent = p.emoji || '👤';
-  av.style.background = p.color || '#444';
-  document.getElementById('pinName').textContent = p.name || key;
-  document.getElementById('pinErr').textContent = '';
-  renderPinPad();
-  updatePinView();
-}
-function pinIpucu(){
-  if(!pinState) return '';
-  if(pinState.mod === 'kur')          return PIN_UZUNLUK + ' haneli yeni PIN belirle';
-  if(pinState.mod === 'kurTekrar')    return 'PIN\'i tekrar gir';
-  if(pinState.mod === 'yonetici')     return 'Yönetici PIN\'i';
-  if(pinState.mod === 'mevcut')       return 'Önce mevcut PIN\'i gir';
-  if(pinState.mod === 'yeniPin')      return 'Yeni PIN';
-  if(pinState.mod === 'yeniPinTekrar')return 'Yeni PIN\'i tekrar gir';
-  return 'PIN gir';
-}
-function updatePinView(){
-  document.getElementById('pinHint').textContent = pinIpucu();
-  const dots = [];
-  for(let i=0;i<PIN_UZUNLUK;i++){
-    dots.push('<span class="pin-dot' + (i < (pinState ? pinState.girilen.length : 0) ? ' on' : '') + '"></span>');
-  }
-  document.getElementById('pinDots').innerHTML = dots.join('');
-}
-function renderPinPad(){
-  const pad = document.getElementById('pinPad');
-  const tuslar = ['1','2','3','4','5','6','7','8','9','temizle','0','sil'];
-  pad.innerHTML = tuslar.map(t=>{
-    if(t === 'temizle') return '<button type="button" class="wide" data-key="C">Temizle</button>';
-    if(t === 'sil')     return '<button type="button" class="wide" data-key="B">← Sil</button>';
-    return '<button type="button" data-key="' + t + '">' + t + '</button>';
-  }).join('');
-  pad.querySelectorAll('button').forEach(b=>{
-    b.addEventListener('click', ()=> pinTus(b.dataset.key));
-  });
-}
-function pinTus(k){
-  if(!pinState) return;
-  document.getElementById('pinErr').textContent = '';
-  if(k === 'C'){ pinState.girilen = ''; updatePinView(); return; }
-  if(k === 'B'){ pinState.girilen = pinState.girilen.slice(0,-1); updatePinView(); return; }
-  if(pinState.girilen.length >= PIN_UZUNLUK) return;
-  pinState.girilen += k;
-  updatePinView();
-  if(pinState.girilen.length === PIN_UZUNLUK) setTimeout(pinTamamlandi, 120);
-}
-async function pinTamamlandi(){
-  if(!pinState) return;
-  const pin = pinState.girilen;
-  const key = pinState.key;
-  const p = Object.assign({key}, profilesCache[key]);
-  const hata = document.getElementById('pinErr');
-
-  if(pinState.mod === 'kur'){
-    pinState.ilkPin = pin;
-    pinState.mod = 'kurTekrar';
-    pinState.girilen = '';
-    updatePinView();
-    return;
-  }
-  if(pinState.mod === 'kurTekrar'){
-    if(pin !== pinState.ilkPin){
-      hata.textContent = 'İki PIN aynı değil, baştan alalım.';
-      pinState.mod = 'kur';
-      pinState.ilkPin = null;
-      pinState.girilen = '';
-      updatePinView();
-      return;
-    }
-    try{
-      await pinKaydet(pin, key);
-      await profilOnayla(key, true);
-    }catch(e){
-      hata.textContent = 'PIN kaydedilemedi: ' + e.message;
-      pinState.girilen = ''; updatePinView();
-    }
-    return;
-  }
-  if(pinState.mod === 'yeniPin'){
-    pinState.ilkPin = pin;
-    pinState.mod = 'yeniPinTekrar';
-    pinState.girilen = '';
-    updatePinView();
-    return;
-  }
-  if(pinState.mod === 'yeniPinTekrar'){
-    if(pin !== pinState.ilkPin){
-      hata.textContent = 'İki PIN aynı değil, baştan alalım.';
-      pinState.mod = 'yeniPin';
-      pinState.ilkPin = null;
-      pinState.girilen = '';
-      updatePinView();
-      return;
-    }
-    try{
-      await pinKaydet(pin, key);
-      pinState = null;
-      document.getElementById('profileScreen').style.display = 'none';
-      document.getElementById('appRoot').style.display = '';
-      setStatus('PIN değiştirildi ✓');
-    }catch(e){
-      hata.textContent = 'PIN kaydedilemedi: ' + e.message;
-      pinState.girilen = ''; updatePinView();
-    }
-    return;
-  }
-
-  const dogru = await pinDogruMu(pin, p);
-  if(!dogru){
-    pinState.kalanDeneme--;
-    pinState.girilen = '';
-    updatePinView();
-    if(pinState.kalanDeneme <= 0){
-      hata.textContent = 'Çok fazla yanlış deneme. Profil ekranına dönülüyor.';
-      setTimeout(showProfilePick, 1400);
-    } else {
-      hata.textContent = 'PIN yanlış. Kalan deneme: ' + pinState.kalanDeneme;
-    }
-    return;
-  }
-
-  if(pinState.mod === 'yonetici'){
-    pinState = null;
-    showProfileManage();
-    pmNotu('');
-    return;
-  }
-  if(pinState.mod === 'mevcut'){
-    pinState.mod = 'yeniPin';
-    pinState.girilen = '';
-    updatePinView();
-    return;
-  }
-  await profilOnayla(key, true);
-}
-
-async function profilOnayla(key, oturumuHatirla){
-  // Her profil ayrı bir mağaza olduğu için önceki mağazanın verisi ve
-  // dinleyicileri tamamen bırakılır, yenisi sıfırdan yüklenir.
-  stopCloudListeners();
-  resetStoreCaches();
-  aktifProfil = Object.assign({key}, profilesCache[key]);
-  if(oturumuHatirla) oturumKaydet(key);
-
-  document.getElementById('profileScreen').style.display = 'none';
-  document.getElementById('appRoot').style.display = 'none';
-  document.getElementById('bootScreen').style.display = '';
-  bootStatus('Veriler yükleniyor...');
-  try{
-    if(aktifProfil.legacy && !aktifProfil.legacyTasindi){
-      bootStatus('Eski veriler bu mağazaya taşınıyor...');
-      const adet = await eskiVeriyiMagazayaTasi(key);
-      aktifProfil.legacyTasindi = true;
-      if(adet) setTimeout(()=> setStatus(adet + ' kayıt bu mağazanın altına taşındı ✓'), 1200);
-    }
-    await loadCloudCache();
-    listenCloudChanges();
-    document.getElementById('bootScreen').style.display = 'none';
-    document.getElementById('appRoot').style.display = '';
-    renderProfileChip();
-    await startAppAfterLogin();
-  }catch(e){
-    bootStatus('Veriler yüklenemedi: ' + e.message, true);
-  }
-}
-
-function profilDegistir(){
-  kapatChipMenu();
-  oturumSil();
-  stopCloudListeners();
-  aktifProfil = null;
-  document.getElementById('appRoot').style.display = 'none';
-  showProfileScreen();
-}
-
-// ---------- Profil yönetimi (ekle / düzenle / PIN / sil) ----------
-function yoneticiProfili(){
-  return profilListesi().find(p=> p.admin) || profilListesi()[0] || null;
-}
+// ---------- Yönetim ----------
 function showProfileManage(){
   showProfileView('profileManageView');
   renderManageList();
@@ -1357,55 +1282,54 @@ function pmNotu(msg){ document.getElementById('pmNote').textContent = msg || '';
 
 function renderManageList(){
   const el = document.getElementById('pmList');
-  el.innerHTML = profilListesi().map(p=>{
+  el.innerHTML = magazalar.map(p=>{
     const etiketler = [];
-    if(p.admin) etiketler.push('yönetici');
-    etiketler.push(profilPinliMi(p) ? 'PIN var' : 'PIN yok');
+    if(p.kullaniciMaili) etiketler.push(p.kullaniciMaili);
+    else etiketler.push('kullanıcı bağlı değil');
     if(aktifProfil && aktifProfil.key === p.key) etiketler.push('açık olan');
     return '<div class="pm-row">'
-      + '<span class="pm-av" style="background:' + (p.color || '#444') + '">' + (p.emoji || '👤') + '</span>'
+      + '<span class="pm-av" style="background:' + (p.color || '#444') + '">' + (p.emoji || '🏪') + '</span>'
       + '<span class="pm-info"><span class="pm-name">' + escapeHtml(p.name || p.key) + '</span>'
-      + '<span class="pm-sub">' + etiketler.join(' · ') + '</span></span>'
+      + '<span class="pm-sub">' + escapeHtml(etiketler.join(' · ')) + '</span></span>'
       + '<span class="pm-acts">'
       + '<button type="button" data-act="duzenle" data-key="' + p.key + '">Düzenle</button>'
-      + '<button type="button" data-act="pin" data-key="' + p.key + '">PIN sıfırla</button>'
-      + (p.admin ? '' : '<button type="button" class="tehlike" data-act="sil" data-key="' + p.key + '">Sil</button>')
+      + '<button type="button" data-act="sifre" data-key="' + p.key + '">Şifre sıfırla</button>'
+      + '<button type="button" class="tehlike" data-act="sil" data-key="' + p.key + '">Sil</button>'
       + '</span></div>';
-  }).join('');
+  }).join('') || '<div class="profile-bos">Henüz mağaza yok.</div>';
   el.querySelectorAll('button').forEach(b=>{
     b.addEventListener('click', ()=> manageAksiyon(b.dataset.act, b.dataset.key));
   });
 }
 
 async function manageAksiyon(act, key){
-  const p = Object.assign({key}, profilesCache[key]);
-  if(act === 'duzenle'){ openProfileEdit(key, 'yonetim'); return; }
-  if(act === 'pin'){
-    if(!confirm(p.name + ' profilinin PIN\'i silinecek. Bir sonraki girişte yeni PIN belirlenir. Devam?')) return;
+  const p = magazaBul(key);
+  if(!p) return;
+  if(act === 'duzenle'){ openMagazaEdit(key, 'yonetim'); return; }
+  if(act === 'sifre'){
+    if(!p.kullaniciMaili){ pmNotu('Bu mağazaya bağlı kullanıcı yok.'); return; }
     try{
-      await pinSil(key);
-      renderManageList();
-      pmNotu(p.name + ' profilinin PIN\'i sıfırlandı.');
-    }catch(e){ pmNotu('Sıfırlanamadı: ' + e.message); }
+      await auth.sendPasswordResetEmail(p.kullaniciMaili);
+      pmNotu('Sıfırlama bağlantısı ' + p.kullaniciMaili + ' adresine gönderildi.');
+    }catch(e){ pmNotu('Gönderilemedi: ' + girisHatasi(e)); }
     return;
   }
   if(act === 'sil'){
-    if(p.admin){ pmNotu('Yönetici profili silinemez.'); return; }
-    if(aktifProfil && aktifProfil.key === key){ pmNotu('Şu an açık olan profil silinemez.'); return; }
-    if(!confirm(p.name + ' profili ve BU MAĞAZAYA AİT TÜM VERİ silinecek. Bu işlem geri alınamaz.')) return;
-    const onay = prompt('Silmeyi onaylamak için profilin adını yazın: ' + (p.name || key));
+    if(aktifProfil && aktifProfil.key === key){ pmNotu('Şu an açık olan mağaza silinemez.'); return; }
+    if(!confirm(p.name + ' mağazası ve TÜM VERİSİ silinecek. Bu işlem geri alınamaz.')) return;
+    const onay = prompt('Silmeyi onaylamak için mağaza adını yazın: ' + (p.name || key));
     if(onay === null) return;
     if(onay.trim() !== (p.name || key)){ pmNotu('Ad eşleşmedi, silme iptal edildi.'); return; }
     pmNotu('Siliniyor...');
     try{
-      await profilSil(key);
+      await magazaSil(key);
       renderManageList();
-      pmNotu(p.name + ' profili ve verisi silindi.');
+      pmNotu(p.name + ' mağazası ve verisi silindi. Kullanıcı hesabı Firebase konsolundan silinebilir.');
     }catch(e){ pmNotu('Silinemedi: ' + e.message); }
   }
 }
 
-async function profilSil(key){
+async function magazaSil(key){
   for(const coll of MAGAZA_KOLEKSIYONLARI){
     const snap = await magazaRef(key).collection(coll).get();
     const ids = [];
@@ -1416,38 +1340,64 @@ async function profilSil(key){
       await batch.commit();
     }
   }
-  try{ await magazaRef(key).delete(); }catch(e){ /* mağaza dokümanı hiç yazılmamış olabilir */ }
-  await profilesRef().set({[key]: firebase.firestore.FieldValue.delete()}, {merge:true});
-  delete profilesCache[key];
+  const users = await db.collection('users').get();
+  const silinecek = [];
+  users.forEach(d=>{ if((d.data() || {}).storeKey === key) silinecek.push(d.id); });
+  for(const uid of silinecek){
+    await db.collection('users').doc(uid).set({storeKey:null, magazaSilindi:true}, {merge:true});
+  }
+  await magazaRef(key).delete();
+  magazalar = magazalar.filter(m=> m.key !== key);
 }
 
-function yeniProfilKey(ad){
+function yeniMagazaKey(ad){
   const harfler = {'ı':'i','İ':'i','ş':'s','Ş':'s','ğ':'g','Ğ':'g','ü':'u','Ü':'u','ö':'o','Ö':'o','ç':'c','Ç':'c'};
   const slug = String(ad || 'magaza').toLowerCase()
     .replace(/[ıİşŞğĞüÜöÖçÇ]/g, h=> harfler[h] || h)
     .replace(/[^a-z0-9]+/g, '')
     .slice(0,14) || 'magaza';
   let key = slug, i = 2;
-  while(profilesCache[key]) key = slug + (i++);
+  while(magazaBul(key)) key = slug + (i++);
   return key;
 }
 
-// kaynak: 'yonetim' (yönetim listesinden) | 'uygulama' (rozet menüsünden)
-function openProfileEdit(key, kaynak){
-  const p = key ? Object.assign({key}, profilesCache[key]) : null;
+// Yeni kullanıcı, ikincil bir Firebase bağlantısıyla açılır; böylece yöneticinin
+// açık oturumu bozulmaz. Ücretsiz planda çalışır, sunucu gerektirmez.
+let ikincilApp = null;
+function ikincilAuth(){
+  if(!ikincilApp) ikincilApp = firebase.initializeApp(firebaseConfig, 'kullaniciOlusturucu');
+  return ikincilApp.auth();
+}
+async function kullaniciOlustur(eposta, sifre, storeKey){
+  const ia = ikincilAuth();
+  const cred = await ia.createUserWithEmailAndPassword(eposta, sifre);
+  const uid = cred.user.uid;
+  try{ await ia.signOut(); }catch(e){ /* zaten kapanmış olabilir */ }
+  await db.collection('users').doc(uid).set({email: eposta.toLowerCase(), storeKey: storeKey, admin: false});
+  return uid;
+}
+
+// ---------- Mağaza düzenleme / ayarlar ----------
+// kaynak: 'yonetim' (yönetici listesinden) | 'uygulama' (rozet menüsünden)
+function openMagazaEdit(key, kaynak){
+  const p = key ? magazaBul(key) : null;
   editState = {
     key: key || null,
     kaynak: kaynak || 'yonetim',
-    name: p ? (p.name || '') : '',
     emoji: p ? (p.emoji || PROFIL_SIMGELERI[0]) : PROFIL_SIMGELERI[0],
-    color: p ? (p.color || PROFIL_RENKLERI[0]) : PROFIL_RENKLERI[0]
+    color: p ? (p.color || PROFIL_RENKLERI[0]) : PROFIL_RENKLERI[0],
+    izinli: p && Array.isArray(p.izinli) ? p.izinli.slice() : VARSAYILAN_IZINLI.slice(),
+    benKim: p ? (p.benKim || '') : VARSAYILAN_IZINLI[0]
   };
-  document.getElementById('peTitle').textContent = key ? 'Profili düzenle' : 'Yeni profil';
-  document.getElementById('peName').value = editState.name;
+  document.getElementById('peTitle').textContent = key ? 'Mağaza ayarları' : 'Yeni mağaza';
+  document.getElementById('peName').value = p ? (p.name || '') : '';
+  document.getElementById('peUserWrap').style.display = key ? 'none' : '';
+  document.getElementById('peUserMail').value = '';
+  document.getElementById('peUserPass').value = '';
   document.getElementById('peErr').textContent = '';
   renderEditPickers();
+  renderIzinList();
   showProfileView('profileEditView');
-  document.getElementById('profileScreen').style.display = '';
   document.getElementById('appRoot').style.display = 'none';
   setTimeout(()=> document.getElementById('peName').focus(), 50);
 }
@@ -1465,73 +1415,178 @@ function renderEditPickers(){
     editState.color = el.dataset.color; renderEditPickers();
   }));
 }
-async function profilEditKaydet(){
+function renderIzinList(){
+  const el = document.getElementById('peIzinList');
+  if(!editState.izinli.length){
+    el.innerHTML = '<span class="izin-bos">Henüz kişi eklenmedi.</span>';
+    return;
+  }
+  el.innerHTML = editState.izinli.map((k,i)=>
+    '<span class="izin-row">'
+      + '<span class="izin-ad">' + escapeHtml(k) + '</span>'
+      + '<button type="button" class="izin-ben' + (editState.benKim === k ? ' sel' : '') + '" data-act="ben" data-i="' + i + '" title="Mesajda “ben izinliyim” yazılacak kişi">ben</button>'
+      + '<button type="button" class="izin-sil" data-act="sil" data-i="' + i + '" title="Kaldır">✕</button>'
+    + '</span>').join('');
+  el.querySelectorAll('button').forEach(b=> b.addEventListener('click', ()=>{
+    const i = Number(b.dataset.i);
+    if(b.dataset.act === 'sil'){
+      if(editState.benKim === editState.izinli[i]) editState.benKim = '';
+      editState.izinli.splice(i,1);
+    } else {
+      editState.benKim = (editState.benKim === editState.izinli[i]) ? '' : editState.izinli[i];
+    }
+    renderIzinList();
+  }));
+}
+function izinEkle(){
+  const inp = document.getElementById('peIzinYeni');
+  const ad = inp.value.trim();
+  if(!ad) return;
+  if(editState.izinli.some(k=> k.toLowerCase() === ad.toLowerCase())){
+    document.getElementById('peErr').textContent = 'Bu kişi listede zaten var.';
+    return;
+  }
+  editState.izinli.push(ad);
+  inp.value = '';
+  document.getElementById('peErr').textContent = '';
+  renderIzinList();
+}
+
+async function magazaEditKaydet(){
   if(!editState) return;
   const ad = document.getElementById('peName').value.trim();
   const hata = document.getElementById('peErr');
-  if(!ad){ hata.textContent = 'Ad boş olamaz.'; return; }
-  const cakisma = profilListesi().find(p=> p.key !== editState.key && (p.name || '').toLowerCase() === ad.toLowerCase());
-  if(cakisma){ hata.textContent = 'Bu adda bir profil zaten var.'; return; }
+  if(!ad){ hata.textContent = 'Mağaza adı boş olamaz.'; return; }
+  const cakisma = magazalar.find(p=> p.key !== editState.key && (p.name || '').toLowerCase() === ad.toLowerCase());
+  if(cakisma){ hata.textContent = 'Bu adda bir mağaza zaten var.'; return; }
 
   const yeniMi = !editState.key;
-  const key = editState.key || yeniProfilKey(ad);
-  const kayit = {name: ad, emoji: editState.emoji, color: editState.color};
+  let eposta = '', sifre = '';
   if(yeniMi){
-    kayit.admin = false;
-    kayit.legacy = false;
-    kayit.pinS = null;
-    kayit.pinF = null;
-    kayit.order = profilListesi().reduce((m,p)=> Math.max(m, p.order || 0), 0) + 1;
+    eposta = document.getElementById('peUserMail').value.trim().toLowerCase();
+    sifre  = document.getElementById('peUserPass').value;
+    if(!eposta || !sifre){ hata.textContent = 'Yeni mağaza için kullanıcı e-postası ve şifresi gerekli.'; return; }
+    if(sifre.length < 6){ hata.textContent = 'Şifre en az 6 karakter olmalı.'; return; }
   }
-  hata.textContent = '';
+
+  const key = editState.key || yeniMagazaKey(ad);
+  const kayit = {
+    name: ad, emoji: editState.emoji, color: editState.color,
+    izinli: editState.izinli.slice(), benKim: editState.benKim || ''
+  };
+  if(yeniMi){
+    kayit.order = magazalar.reduce((m,p)=> Math.max(m, p.order || 0), 0) + 1;
+    kayit.legacy = false;
+    kayit.legacyTasindi = true;
+    kayit.kullaniciMaili = eposta;
+  }
+
+  const btn = document.getElementById('peSaveBtn');
+  btn.disabled = true; btn.textContent = 'Kaydediliyor...';
   try{
-    await profilesRef().set({[key]: kayit}, {merge:true});
-    profilesCache[key] = Object.assign({}, profilesCache[key] || {}, kayit);
+    if(yeniMi) await kullaniciOlustur(eposta, sifre, key);
+    await magazaRef(key).set(kayit, {merge:true});
+    const mevcut = magazaBul(key);
+    if(mevcut) Object.assign(mevcut, kayit);
+    else magazalar.push(Object.assign({key}, kayit));
+    magazalar.sort((a,b)=> (a.order||0) - (b.order||0));
     if(aktifProfil && aktifProfil.key === key){
-      aktifProfil = Object.assign({key}, profilesCache[key]);
+      aktifProfil = magazaBul(key);
       renderProfileChip();
+      renderAll();
     }
-  }catch(e){ hata.textContent = 'Kaydedilemedi: ' + e.message; return; }
+  }catch(e){
+    hata.textContent = girisHatasi(e);
+    btn.disabled = false; btn.textContent = 'Kaydet';
+    return;
+  }
+  btn.disabled = false; btn.textContent = 'Kaydet';
 
   const kaynak = editState.kaynak;
   editState = null;
   if(kaynak === 'uygulama' && aktifProfil){
-    document.getElementById('profileScreen').style.display = 'none';
-    document.getElementById('appRoot').style.display = '';
-    setStatus('Profil güncellendi ✓');
+    uygulamayaDon();
+    setStatus('Mağaza ayarları güncellendi ✓');
   } else {
     showProfileManage();
-    pmNotu(yeniMi ? (ad + ' eklendi. İlk girişinde PIN belirleyecek.') : 'Profil güncellendi.');
+    pmNotu(yeniMi ? (ad + ' eklendi, kullanıcısı oluşturuldu.') : 'Mağaza güncellendi.');
   }
 }
-function profilEditIptal(){
+function magazaEditIptal(){
   const kaynak = editState ? editState.kaynak : 'yonetim';
   editState = null;
-  if(kaynak === 'uygulama' && aktifProfil){
-    document.getElementById('profileScreen').style.display = 'none';
-    document.getElementById('appRoot').style.display = '';
-  } else {
-    showProfileManage();
+  if(kaynak === 'uygulama' && aktifProfil) uygulamayaDon();
+  else showProfileManage();
+}
+
+// ---------- Toplu ekleme ----------
+function showBulkView(){
+  document.getElementById('pbErr').textContent = '';
+  document.getElementById('pbLog').innerHTML = '';
+  showProfileView('profileBulkView');
+}
+async function topluEkle(){
+  const satirlar = document.getElementById('pbText').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  const log = document.getElementById('pbLog');
+  const hata = document.getElementById('pbErr');
+  hata.textContent = '';
+  if(!satirlar.length){ hata.textContent = 'Önce satırları yazın.'; return; }
+
+  const btn = document.getElementById('pbRunBtn');
+  btn.disabled = true; btn.textContent = 'Oluşturuluyor...';
+  log.innerHTML = '';
+  let basarili = 0;
+  for(const satir of satirlar){
+    const parca = satir.split(';').map(s=>s.trim());
+    const ad = parca[0], eposta = (parca[1] || '').toLowerCase(), sifre = parca[2] || '';
+    const yaz = (metin, iyiMi)=>{
+      log.innerHTML += '<div class="' + (iyiMi ? 'iyi' : 'kotu') + '">' + escapeHtml(metin) + '</div>';
+      log.scrollTop = log.scrollHeight;
+    };
+    if(!ad || !eposta || !sifre){ yaz('✕ ' + satir + ' — üç alan da gerekli', false); continue; }
+    if(sifre.length < 6){ yaz('✕ ' + ad + ' — şifre en az 6 karakter olmalı', false); continue; }
+    if(magazalar.some(m=> (m.name||'').toLowerCase() === ad.toLowerCase())){
+      yaz('• ' + ad + ' — zaten var, atlandı', false); continue;
+    }
+    const key = yeniMagazaKey(ad);
+    try{
+      await kullaniciOlustur(eposta, sifre, key);
+      const kayit = {
+        name: ad, emoji: PROFIL_SIMGELERI[0], color: PROFIL_RENKLERI[magazalar.length % PROFIL_RENKLERI.length],
+        order: magazalar.reduce((m,p)=> Math.max(m, p.order || 0), 0) + 1,
+        legacy: false, legacyTasindi: true, izinli: [], benKim: '', kullaniciMaili: eposta
+      };
+      await magazaRef(key).set(kayit);
+      magazalar.push(Object.assign({key}, kayit));
+      basarili++;
+      yaz('✓ ' + ad + ' — ' + eposta, true);
+    }catch(e){
+      yaz('✕ ' + ad + ' — ' + girisHatasi(e), false);
+    }
   }
+  btn.disabled = false; btn.textContent = 'Hepsini oluştur';
+  magazalar.sort((a,b)=> (a.order||0) - (b.order||0));
+  if(basarili) document.getElementById('pbText').value = '';
 }
 
-// ---------- Rozet menüsü ----------
-function acChipMenu(){
-  const m = document.getElementById('chipMenu');
-  m.style.display = (m.style.display === 'none') ? '' : 'none';
-}
-function kapatChipMenu(){ document.getElementById('chipMenu').style.display = 'none'; }
-
+// ---------- Rozet ve menü ----------
 function renderProfileChip(){
   const chip = document.getElementById('profileChip');
   if(!chip) return;
   if(!aktifProfil){ chip.style.display = 'none'; return; }
   chip.style.display = '';
   const av = document.getElementById('profileChipAv');
-  av.textContent = aktifProfil.emoji || '👤';
+  av.textContent = aktifProfil.emoji || '🏪';
   av.style.background = aktifProfil.color || '#444';
   document.getElementById('profileChipName').textContent = aktifProfil.name || aktifProfil.key;
+  document.getElementById('chipSwitchBtn').style.display = (yoneticiMi && magazalar.length > 1) ? '' : 'none';
+  document.getElementById('chipManageBtn').style.display = yoneticiMi ? '' : 'none';
 }
+function acChipMenu(){
+  const m = document.getElementById('chipMenu');
+  m.style.display = (m.style.display === 'none') ? '' : 'none';
+}
+function kapatChipMenu(){ document.getElementById('chipMenu').style.display = 'none'; }
 
 function renderLastEditInfo(){
   const el = document.getElementById('lastEditInfo');
@@ -1546,76 +1601,91 @@ function renderLastEditInfo(){
   el.textContent = 'Bugünkü kaydı en son güncelleyen: ' + rec.updatedBy + saat;
 }
 
+// ---------- Olaylar ----------
+document.getElementById('loginBtn').addEventListener('click', girisYap);
+document.getElementById('loginForgotBtn').addEventListener('click', sifremiUnuttum);
+['loginEmail','loginPass'].forEach(id=>{
+  document.getElementById(id).addEventListener('keydown', e=>{
+    if(e.key === 'Enter'){ e.preventDefault(); girisYap(); }
+  });
+});
+document.getElementById('pickLogoutBtn').addEventListener('click', cikisYap);
+document.getElementById('profileSearch').addEventListener('input', function(){
+  magazaArama = this.value;
+  renderProfileList();
+});
+document.getElementById('profileResetBtn').addEventListener('click', ()=>{
+  if(!yoneticiMi){ profilNotu('Bu bölüm yalnızca yöneticide açılır.'); return; }
+  pmNotu('');
+  showProfileManage();
+});
+document.getElementById('pmBackBtn').addEventListener('click', showMagazaSecim);
+document.getElementById('pmAddBtn').addEventListener('click', ()=> openMagazaEdit(null, 'yonetim'));
+document.getElementById('pmBulkBtn').addEventListener('click', showBulkView);
+document.getElementById('pbBackBtn').addEventListener('click', showProfileManage);
+document.getElementById('pbRunBtn').addEventListener('click', topluEkle);
+document.getElementById('peSaveBtn').addEventListener('click', magazaEditKaydet);
+document.getElementById('peCancelBtn').addEventListener('click', magazaEditIptal);
+document.getElementById('peIzinAddBtn').addEventListener('click', izinEkle);
+document.getElementById('peIzinYeni').addEventListener('keydown', e=>{
+  if(e.key === 'Enter'){ e.preventDefault(); izinEkle(); }
+});
+document.getElementById('peName').addEventListener('keydown', e=>{
+  if(e.key === 'Enter'){ e.preventDefault(); magazaEditKaydet(); }
+});
+
 document.getElementById('profileChip').addEventListener('click', e=>{ e.stopPropagation(); acChipMenu(); });
 document.getElementById('chipEditBtn').addEventListener('click', ()=>{
   kapatChipMenu();
-  if(aktifProfil) openProfileEdit(aktifProfil.key, 'uygulama');
+  if(aktifProfil) openMagazaEdit(aktifProfil.key, 'uygulama');
 });
-document.getElementById('chipPinBtn').addEventListener('click', ()=>{
+document.getElementById('chipSwitchBtn').addEventListener('click', ()=>{
   kapatChipMenu();
-  if(!aktifProfil) return;
-  document.getElementById('profileScreen').style.display = '';
-  document.getElementById('appRoot').style.display = 'none';
-  openPinView(aktifProfil.key, profilPinliMi(profilesCache[aktifProfil.key]) ? 'mevcut' : 'yeniPin');
+  showMagazaSecim();
 });
-document.getElementById('chipSwitchBtn').addEventListener('click', profilDegistir);
+document.getElementById('chipManageBtn').addEventListener('click', ()=>{
+  kapatChipMenu();
+  if(!yoneticiMi) return;
+  pmNotu('');
+  showProfileManage();
+});
+document.getElementById('chipLogoutBtn').addEventListener('click', cikisYap);
 document.addEventListener('click', ()=> kapatChipMenu());
 
-document.getElementById('pinBackBtn').addEventListener('click', ()=>{
-  // PIN değiştirmeden vazgeçildiyse uygulamaya dön, girişteyse profil seçimine.
-  const uygulamaIci = pinState && ['mevcut','yeniPin','yeniPinTekrar'].includes(pinState.mod);
-  pinState = null;
-  if(uygulamaIci && aktifProfil){
-    document.getElementById('profileScreen').style.display = 'none';
-    document.getElementById('appRoot').style.display = '';
-    return;
-  }
-  showProfilePick();
-});
-document.getElementById('profileResetBtn').addEventListener('click', ()=>{
-  const yonetici = yoneticiProfili();
-  if(!yonetici){ profilNotu('Yönetici profili bulunamadı.'); return; }
-  if(!profilPinliMi(yonetici)){ showProfileManage(); return; }  // henüz PIN yoksa doğrudan aç
-  openPinView(yonetici.key, 'yonetici');
-});
-document.getElementById('pmBackBtn').addEventListener('click', showProfilePick);
-document.getElementById('pmAddBtn').addEventListener('click', ()=> openProfileEdit(null, 'yonetim'));
-document.getElementById('peSaveBtn').addEventListener('click', profilEditKaydet);
-document.getElementById('peCancelBtn').addEventListener('click', profilEditIptal);
-document.getElementById('peName').addEventListener('keydown', e=>{
-  if(e.key === 'Enter'){ e.preventDefault(); profilEditKaydet(); }
-});
-document.addEventListener('keydown', e=>{
-  if(!pinState || document.getElementById('pinView').style.display === 'none') return;
-  if(e.key >= '0' && e.key <= '9'){ pinTus(e.key); e.preventDefault(); }
-  else if(e.key === 'Backspace'){ pinTus('B'); e.preventDefault(); }
-  else if(e.key === 'Escape'){ showProfilePick(); e.preventDefault(); }
-});
-
-// Firebase'de şifre ekranı yok: arka planda anonim oturum açılır,
-// kullanıcıyı asıl karşılayan ekran yukarıdaki profil seçimidir.
+// ---------- Açılış ----------
 auth.onAuthStateChanged(async function(user){
   if(!user){
-    auth.signInAnonymously().catch(err=>{
-      bootStatus(
-        err.code === 'auth/operation-not-allowed'
-          ? 'Firebase\'de anonim giriş kapalı görünüyor.\nConsole → Authentication → Sign-in method → Anonymous → Enable.'
-          : ('Bağlantı kurulamadı: ' + err.message)
-      , true);
-    });
+    kullanici = null;
+    showLogin('');
     return;
   }
+  kullanici = user;
   try{
-    bootStatus('Profiller yükleniyor...');
-    await loadProfiles();
-    const oturum = kayitliOturum();
-    if(oturum && profilesCache[oturum.key] && profilPinliMi(profilesCache[oturum.key])){
-      await profilOnayla(oturum.key, true);
-    } else {
-      showProfileScreen();
+    bootStatus('Mağazalar yükleniyor...');
+    document.getElementById('profileScreen').style.display = 'none';
+    document.getElementById('bootScreen').style.display = '';
+
+    const baglam = await kullaniciBaglami(user);
+    yoneticiMi = baglam.admin;
+    await magazalariYukle(baglam);
+
+    if(yoneticiMi) await magazaMetaTasi();
+
+    if(!magazalar.length){
+      await auth.signOut();
+      showLogin('Bu hesap henüz bir mağazaya bağlanmamış. Yöneticinize başvurun.');
+      return;
     }
+    if(magazalar.length === 1){
+      await magazaAc(magazalar[0].key, true);
+      return;
+    }
+    let son = null;
+    try{ son = localStorage.getItem(SON_MAGAZA_KEY); }catch(e){ son = null; }
+    if(son && magazaBul(son)) await magazaAc(son, true);
+    else showMagazaSecim();
   }catch(e){
-    bootStatus('Profiller yüklenemedi: ' + e.message, true);
+    bootStatus('Açılamadı: ' + e.message + '\nGüvenlik kuralları bu hesaba izin vermiyor olabilir.', true);
   }
 });
 
@@ -1956,7 +2026,7 @@ function buildWeekBlock(monday){
     days.map((d,i)=>{
       const dk = dateStr(d);
       const izinli = izinliOf(records[i]);
-      const opts = IZINLI_SECENEKLER
+      const opts = izinliSecenekleri()
         .map(kisi=>`<option value="${kisi}"${kisi===izinli?' selected':''}>${kisi===''?'—':kisi}</option>`)
         .join('');
       return `<th class="${isToday(d)?'today-col':''}">${GUN_KISA[i]}<br>` +
@@ -2372,7 +2442,8 @@ function izinliOf(rec){
 }
 function izinliMetni(kisi){
   if(!kisi) return 'yoktur';
-  if(kisi === 'Onur') return 'ben izinliyim';
+  // Mağaza ayarlarında "ben" işaretlenen kişi raporu yazan kişidir.
+  if(aktifProfil && aktifProfil.benKim && kisi === aktifProfil.benKim) return 'ben izinliyim';
   return kisi;
 }
 function fmtKShort(n){
