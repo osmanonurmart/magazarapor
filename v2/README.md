@@ -6,15 +6,34 @@ Bu sürüm proje tanımındaki ekranların çalışan bir karşılığıdır ve 
 
 ## Çalıştırma
 
+### En kolay yol — tek dosya
+
+`tek-dosya.html` dosyasını indir ve **çift tıkla**. Kurulum, sunucu, hiçbir şey
+gerekmez; her şey o dosyanın içinde. PWA olarak kurulamaz (bunun için aşağıdaki
+yol gerekir), gerisi aynı.
+
+### Geliştirirken — yerel sunucu
+
 ```bash
 cd v2
 python3 -m http.server 8900
 ```
 
-Sonra tarayıcıda `http://localhost:8900` adresini aç.
+Sonra tarayıcıda `http://localhost:8900`. Kaynak dosyalar bölünmüş halde
+çalışır, PWA ve service worker da bu yolda devreye girer.
 
-`index.html`'e çift tıklayarak da açılır ama modüller ve service worker
-`file://` üstünde çalışmaz; yerel sunucu ile aç.
+`index.html`'e doğrudan çift tıklamak **çalışmaz** — tarayıcı `file://`
+üzerinden modül dosyalarını okumaz. Onun yerine `tek-dosya.html` kullan.
+
+### Tek dosyayı yeniden üretme
+
+Kaynak dosyalarda değişiklik yaptıktan sonra:
+
+```bash
+cd v2
+npm i -D esbuild        # yalnızca ilk sefer
+node olustur.mjs
+```
 
 ## Örnek veri ve şifreler
 
