@@ -21,10 +21,12 @@ export function bolgePaneli(pzt, yenile){
 
   const satirlar = magazalar.map(m => {
     const bu = haftaOzeti(m.key, pzt);
-    const gecen = haftaOzeti(m.key, oncekiPzt);
-    const gunYorum = sonYorum(m.key);
-    return {magaza:m, bu, gecen, yorum:gunYorum};
+    // Devam eden hafta, geçen haftanın aynı sayıdaki ilk günüyle kıyaslanır.
+    const gecen = haftaOzeti(m.key, oncekiPzt, bu.doluGun || undefined);
+    return {magaza:m, bu, gecen, yorum:sonYorum(m.key)};
   });
+  // Kaç gün üzerinden kıyaslandığını başlıkta söyle.
+  const kiyasGun = Math.max(...satirlar.map(s => s.bu.doluGun || 0), 0);
   // Ciro değişimine göre sırala: en çok düşen en üstte görünsün.
   satirlar.sort((a,b) => (U.yuzdeDegisim(a.gecen.ciroToplam, a.bu.ciroToplam) ?? 0)
                        - (U.yuzdeDegisim(b.gecen.ciroToplam, b.bu.ciroToplam) ?? 0));
@@ -32,7 +34,7 @@ export function bolgePaneli(pzt, yenile){
   const kok = U.el(`<div class="bolge-panel">
     <div class="bolum-ust">
       <h2>Özet — ${U.haftaBasligi(pzt)}</h2>
-      <span class="alt">${magazalar.length} mağaza · geçen hafta ile kıyas</span>
+      <span class="alt">${magazalar.length} mağaza · geçen haftanın ${kiyasGun && kiyasGun < 7 ? 'ilk ' + kiyasGun + ' günü' : 'tamamı'} ile kıyas</span>
     </div>
 
     <div class="gorunum-cubugu">

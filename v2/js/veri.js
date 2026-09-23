@@ -130,13 +130,32 @@ export function oturumYaz(key){ yaz('oturum', key ? {key, ts:Date.now()} : null)
 export function oturumSil(){ try{ localStorage.removeItem(ON_EK + 'oturum'); }catch(e){} }
 
 // ---------------- Tohum veri ----------------
-// İlk açılışta 20 mağaza, bölge müdürü ve kurucu profilleri ile birkaç haftalık
-// örnek veri üretir. Gerçek veri girilmeye başlayınca bir daha çalışmaz.
-const AD_HAVUZU = ['Ahmet','Ayşe','Mehmet','Fatma','Zeynep','Emre','Elif','Burak','Seda','Onur','Merve','Kerem'];
+// İlk açılışta 20 mağaza, bölge müdürü ve kurucu profili ile 10 haftalık örnek
+// veri üretir. Amaç: uygulamadaki her bölümün en az iki dolu örnekle açılması.
+// Gerçek veri girilmeye başlayınca bir daha çalışmaz.
+const AD_HAVUZU = ['Ahmet','Ayşe','Mehmet','Fatma','Zeynep','Emre','Elif','Burak','Seda','Onur',
+                   'Merve','Kerem','Hakan','Sibel','Tuğçe','Serkan','Derya','Okan','Nazlı','Barış'];
+const YORUMLAR = [
+  'Yol çalışması nedeniyle giriş sayısı düştü.',
+  'Hafta sonu kampanyası ciroyu yukarı çekti.',
+  'Sabah elektrik kesintisi oldu, kasa iki saat kapalı kaldı.',
+  'Karşı caddeye yeni mağaza açıldı, giriş sayısında etkisi var.',
+  'Toplu satış siparişi teslim edildi, ciro buradan geldi.',
+  'Yağmur nedeniyle akşam saatleri boş geçti.',
+  'Deterjan reyonu yenilendi, adetler arttı.',
+  'Personel izinli olduğu için kasa tek kişiyle döndü.',
+  'Okulların açılması sabah trafiğini artırdı.',
+  'Tekstil grubunda stok eksiği yaşandı.'
+];
+const IZIN_SECENEK = ['Haftalık','Yıllık','Rapor','Ücretsiz'];
+const URUN_GRUPLARI = ['Cam','Tekstil','Deterjan','Mutfak','Banyo','Dekorasyon'];
+
 function rastgele(tohum){
   let x = tohum;
   return () => { x = (x * 1103515245 + 12345) % 2147483648; return x / 2147483648; };
 }
+const sec = (rnd, liste) => liste[Math.floor(rnd() * liste.length) % liste.length];
+
 export function tohumla(zorla){
   if(!zorla && profilleriGetir().length) return false;
 
@@ -153,37 +172,85 @@ export function tohumla(zorla){
   profilleriYaz(profiller);
 
   kategorilerYaz([
-    {id:'k1', ad:'Cam',      urunler:[{id:'u1',ad:'Cam seti 6lı'},{id:'u2',ad:'Bardak 12li'},{id:'u3',ad:'Sürahi'}]},
-    {id:'k2', ad:'Tekstil',  urunler:[{id:'u4',ad:'Havlu seti'},{id:'u5',ad:'Nevresim'},{id:'u6',ad:'Halı 120x180'}]},
-    {id:'k3', ad:'Deterjan', urunler:[{id:'u7',ad:'Çamaşır deterjanı'},{id:'u8',ad:'Bulaşık jeli'},{id:'u9',ad:'Yumuşatıcı'}]},
-    {id:'k4', ad:'Mutfak',   urunler:[{id:'u10',ad:'Tencere seti'},{id:'u11',ad:'Tava 24cm'},{id:'u12',ad:'Saklama kabı'}]}
+    {id:'k1', ad:'Cam',         urunler:[{id:'u1',ad:'Cam seti 6lı'},{id:'u2',ad:'Bardak 12li'},{id:'u3',ad:'Sürahi'},{id:'u4',ad:'Kase seti'}]},
+    {id:'k2', ad:'Tekstil',     urunler:[{id:'u5',ad:'Havlu seti'},{id:'u6',ad:'Nevresim takımı'},{id:'u7',ad:'Halı 120x180'},{id:'u8',ad:'Paspas'}]},
+    {id:'k3', ad:'Deterjan',    urunler:[{id:'u9',ad:'Çamaşır deterjanı'},{id:'u10',ad:'Bulaşık jeli'},{id:'u11',ad:'Yumuşatıcı'},{id:'u12',ad:'Yüzey temizleyici'}]},
+    {id:'k4', ad:'Mutfak',      urunler:[{id:'u13',ad:'Tencere seti'},{id:'u14',ad:'Tava 24cm'},{id:'u15',ad:'Saklama kabı'},{id:'u16',ad:'Çaydanlık'}]},
+    {id:'k5', ad:'Dekorasyon',  urunler:[{id:'u17',ad:'Mum seti'},{id:'u18',ad:'Çerçeve'},{id:'u19',ad:'Yapay çiçek'}]}
   ]);
+  // Her ayarda en az iki örnek olsun.
+  etiketleriYaz([
+    {anahtar:'halı',     kart:'Halı satışı'},
+    {anahtar:'deterjan', kart:'Deterjan adedi'}
+  ]);
+  bolgeGorunumYaz({metrikler:['ciro','mdo','fbu'], kiyas:'gecenHafta'});
 
   const bugunD = new Date();
   const buPzt = pazartesi(bugunD);
-  magazalarIcinTohum(profiller.filter(p => p.rol === ROLLER.MAGAZA), buPzt, bugunD);
-  duyuruEkle('Bu hafta deterjan grubuna ağırlık veriyoruz, mağaza başı hedef 20 adet.');
+  const magazaListesi = profiller.filter(p => p.rol === ROLLER.MAGAZA);
+  magazalarIcinTohum(magazaListesi, buPzt, bugunD);
+  talepleriTohumla(magazaListesi, buPzt);
+
+  // Üç duyuru: en yenisi en üstte görünür.
+  yaz('duyurular', [
+    {id:'d3', metin:'Bu hafta deterjan grubuna ağırlık veriyoruz, mağaza başı hedef 20 adet.', tarih:new Date(bugunD.getTime() - 2*3600e3).toISOString()},
+    {id:'d2', metin:'Pazartesi ürün taleplerini gün sonuna kadar göndermeyi unutmayın.',        tarih:new Date(bugunD.getTime() - 26*3600e3).toISOString()},
+    {id:'d1', metin:'Hafta sonu vitrin düzeni yenilenecek, fotoğrafları akşam paylaşın.',        tarih:new Date(bugunD.getTime() - 50*3600e3).toISOString()}
+  ]);
   return true;
 }
 
-function magazalarIcinTohum(magazalar, buPzt, bugunD){
-  magazalar.forEach((m, mi) => {
+function magazalarIcinTohum(magazaListesi, buPzt, bugunD){
+  const bugunStr = dateStr(bugunD);
+
+  magazaListesi.forEach((m, mi) => {
     const rnd = rastgele(1000 + mi * 37);
-    const personel = [0,1,2,3].map(i => ({
+
+    // Beş personel; sonuncusu pasif, "ayrılan kişi geçmişte görünür" durumunu gösterir.
+    const personel = [0,1,2,3,4].map(i => ({
       id: 'p' + (i+1),
       ad: AD_HAVUZU[(mi*3 + i) % AD_HAVUZU.length],
-      aktif: true
+      aktif: i < 4
     }));
     personelYaz(m.key, personel);
 
+    // Üç kaynak kartı + iki elle girilen kart.
+    kartlarYaz(m.key, [
+      {id:'ciro',     ad:'Ciro',           alan:'ciro',  tur:'kaynak'},
+      {id:'mgs',      ad:'MGS',            alan:'mgs',   tur:'kaynak'},
+      {id:'toplu',    ad:'Toplu satış',    alan:'toplu', tur:'kaynak'},
+      {id:'hali',     ad:'Halı satışı',    alan:null,    tur:'elle'},
+      {id:'deterjan', ad:'Deterjan adedi', alan:null,    tur:'elle'}
+    ]);
+
     const taban = 22000 + Math.floor(rnd() * 20000);
-    for(let h = -7; h <= 0; h++){
+
+    for(let h = -9; h <= 0; h++){
       const pzt = haftaEkle(buPzt, h);
+      const sonIkiHafta = h >= -1;
       haftaHedefYaz(m.key, pzt, Math.round(taban * 7 * (0.95 + rnd()*0.2) / 1000) * 1000);
+
+      // Son iki haftada izinler sabit iki güne, farklı türlerle konur.
+      const bugunIdx = (bugunD.getDay() + 6) % 7;
+      const izinGunleri = h === 0
+        ? [{gun:Math.max(0, bugunIdx - 2), kisi:0, tur:IZIN_SECENEK[0]},
+           {gun:bugunIdx,                  kisi:2, tur:IZIN_SECENEK[(mi % 3) + 1]}]
+        : (sonIkiHafta
+            ? [{gun:1, kisi:0, tur:IZIN_SECENEK[0]}, {gun:4, kisi:2, tur:IZIN_SECENEK[(mi % 3) + 1]}]
+            : [{gun:Math.floor(rnd()*7), kisi:Math.floor(rnd()*4), tur:sec(rnd, IZIN_SECENEK)}]);
+      // Son iki haftada iki ayrı güne yorum yazılır; içinde bulunulan haftada
+      // bugün ve dün seçilir ki sağ paneldeki yorum kutusu dolu açılsın.
+      const bugunIndeks = (bugunD.getDay() + 6) % 7;
+      const yorumGunleri = h === 0
+        ? [Math.max(0, bugunIndeks - 1), bugunIndeks]
+        : (sonIkiHafta ? [1, 4] : (rnd() > 0.7 ? [Math.floor(rnd()*7)] : []));
+
       haftaGunleri(pzt).forEach((gun, gi) => {
-        if(gun > bugunD) return;
+        const tarih = dateStr(gun);
+        if(tarih > bugunStr) return;              // gelecek günler boş kalır
+
         const haftaSonu = gi >= 5 ? 1.25 : 1;
-        const ciro = Math.round(taban * haftaSonu * (0.7 + rnd()*0.6));
+        const ciro = Math.round(taban * haftaSonu * (0.75 + rnd()*0.5));
         const mgs  = Math.round(45 + rnd()*55);
         const kayit = {
           ciro,
@@ -192,20 +259,60 @@ function magazalarIcinTohum(magazalar, buPzt, bugunD){
           fbs: Math.round(850 + rnd()*900),
           mgs,
           toplu: Math.round(rnd()*18),
-          izinler: rnd() > 0.72 ? [{personelId: personel[Math.floor(rnd()*personel.length)].id, tur:'Haftalık'}] : []
+          izinler: izinGunleri.filter(z => z.gun === gi)
+                              .map(z => ({personelId: personel[z.kisi].id, tur: z.tur})),
+          kartlar: {
+            hali: Math.round(2 + rnd()*9),
+            deterjan: Math.round(12 + rnd()*28)
+          }
         };
-        if(rnd() > 0.85) kayit.yorum = 'Hava koşulları nedeniyle giriş sayısı düştü.';
-        gunYaz(m.key, dateStr(gun), kayit);
+        if(yorumGunleri.includes(gi)) kayit.yorum = sec(rnd, YORUMLAR);
+        gunYaz(m.key, tarih, kayit);
       });
-      // Pazar günleri yüklenen ürün Excel'ini taklit et.
-      urunHaftaYaz(m.key, pzt, {gruplar:[
-        {ad:'Cam',      adet: Math.round(40 + rnd()*60), pay: Number((3 + rnd()*7).toFixed(1))},
-        {ad:'Tekstil',  adet: Math.round(30 + rnd()*50), pay: Number((4 + rnd()*9).toFixed(1))},
-        {ad:'Deterjan', adet: Math.round(60 + rnd()*90), pay: Number((6 + rnd()*10).toFixed(1))},
-        {ad:'Mutfak',   adet: Math.round(20 + rnd()*40), pay: Number((2 + rnd()*6).toFixed(1))}
-      ]});
+
+      // Pazar günü yüklenen ürün Excel'ini taklit eder.
+      urunHaftaYaz(m.key, pzt, {
+        gruplar: URUN_GRUPLARI.map(ad => ({
+          ad,
+          adet: Math.round(20 + rnd()*110),
+          pay: Number((2 + rnd()*12).toFixed(1))
+        })),
+        yuklenme: new Date().toISOString()
+      });
     }
   });
+}
+
+// Son iki hafta için talepler: bir kısmı gönderir, bir kısmı göndermez ki
+// pazartesi raporunda hem gönderen hem göndermeyen listesi dolu olsun.
+function talepleriTohumla(magazaListesi, buPzt){
+  const kategoriler = kategorilerGetir();
+  const tumUrunler = kategoriler.flatMap(k => k.urunler || []);
+  const liste = [];
+
+  [{pzt: haftaEkle(buPzt, -1), gonderenSayisi: 18, durum:'Karşılandı'},
+   {pzt: buPzt,                gonderenSayisi: 13, durum:'Gönderildi'}].forEach((h, hi) => {
+    magazaListesi.slice(0, h.gonderenSayisi).forEach((m, mi) => {
+      const rnd = rastgele(500 + hi*100 + mi*17);
+      const adet = 2 + Math.floor(rnd()*3);
+      const secilenler = [];
+      for(let i=0;i<adet;i++){
+        const u = tumUrunler[Math.floor(rnd()*tumUrunler.length) % tumUrunler.length];
+        if(secilenler.some(s => s.urunId === u.id)) continue;
+        secilenler.push({urunId:u.id, ad:u.ad, adet: 1 + Math.floor(rnd()*6)});
+      }
+      const t = new Date(h.pzt); t.setHours(10 + Math.floor(rnd()*7));
+      liste.push({
+        id: 't' + hi + '_' + m.key,
+        magazaKey: m.key,
+        hafta: haftaKey(h.pzt),
+        tarih: t.toISOString(),
+        durum: h.durum,
+        satirlar: secilenler
+      });
+    });
+  });
+  taleplerYaz(liste);
 }
 
 export function hepsiniSil(){

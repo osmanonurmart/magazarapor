@@ -604,7 +604,42 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
     } catch (e) {
     }
   }
-  var AD_HAVUZU = ["Ahmet", "Ayşe", "Mehmet", "Fatma", "Zeynep", "Emre", "Elif", "Burak", "Seda", "Onur", "Merve", "Kerem"];
+  var AD_HAVUZU = [
+    "Ahmet",
+    "Ayşe",
+    "Mehmet",
+    "Fatma",
+    "Zeynep",
+    "Emre",
+    "Elif",
+    "Burak",
+    "Seda",
+    "Onur",
+    "Merve",
+    "Kerem",
+    "Hakan",
+    "Sibel",
+    "Tuğçe",
+    "Serkan",
+    "Derya",
+    "Okan",
+    "Nazlı",
+    "Barış"
+  ];
+  var YORUMLAR = [
+    "Yol çalışması nedeniyle giriş sayısı düştü.",
+    "Hafta sonu kampanyası ciroyu yukarı çekti.",
+    "Sabah elektrik kesintisi oldu, kasa iki saat kapalı kaldı.",
+    "Karşı caddeye yeni mağaza açıldı, giriş sayısında etkisi var.",
+    "Toplu satış siparişi teslim edildi, ciro buradan geldi.",
+    "Yağmur nedeniyle akşam saatleri boş geçti.",
+    "Deterjan reyonu yenilendi, adetler arttı.",
+    "Personel izinli olduğu için kasa tek kişiyle döndü.",
+    "Okulların açılması sabah trafiğini artırdı.",
+    "Tekstil grubunda stok eksiği yaşandı."
+  ];
+  var IZIN_SECENEK = ["Haftalık", "Yıllık", "Rapor", "Ücretsiz"];
+  var URUN_GRUPLARI = ["Cam", "Tekstil", "Deterjan", "Mutfak", "Banyo", "Dekorasyon"];
   function rastgele(tohum) {
     let x = tohum;
     return () => {
@@ -612,6 +647,7 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
       return x / 2147483648;
     };
   }
+  var sec = (rnd, liste) => liste[Math.floor(rnd() * liste.length) % liste.length];
   function tohumla(zorla) {
     if (!zorla && profilleriGetir().length) return false;
     const renkler = ["#C8A066", "#5f8d6a", "#6f6494", "#a34141", "#3f6b8a", "#8a6a3f", "#4d7d78", "#9a5f7a"];
@@ -630,34 +666,63 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
     profiller.push({ key: "kurucu", ad: "Kurucu", rol: ROLLER.KURUCU, simge: "👑", renk: "#C8A066", sifre: "1234" });
     profilleriYaz(profiller);
     kategorilerYaz([
-      { id: "k1", ad: "Cam", urunler: [{ id: "u1", ad: "Cam seti 6lı" }, { id: "u2", ad: "Bardak 12li" }, { id: "u3", ad: "Sürahi" }] },
-      { id: "k2", ad: "Tekstil", urunler: [{ id: "u4", ad: "Havlu seti" }, { id: "u5", ad: "Nevresim" }, { id: "u6", ad: "Halı 120x180" }] },
-      { id: "k3", ad: "Deterjan", urunler: [{ id: "u7", ad: "Çamaşır deterjanı" }, { id: "u8", ad: "Bulaşık jeli" }, { id: "u9", ad: "Yumuşatıcı" }] },
-      { id: "k4", ad: "Mutfak", urunler: [{ id: "u10", ad: "Tencere seti" }, { id: "u11", ad: "Tava 24cm" }, { id: "u12", ad: "Saklama kabı" }] }
+      { id: "k1", ad: "Cam", urunler: [{ id: "u1", ad: "Cam seti 6lı" }, { id: "u2", ad: "Bardak 12li" }, { id: "u3", ad: "Sürahi" }, { id: "u4", ad: "Kase seti" }] },
+      { id: "k2", ad: "Tekstil", urunler: [{ id: "u5", ad: "Havlu seti" }, { id: "u6", ad: "Nevresim takımı" }, { id: "u7", ad: "Halı 120x180" }, { id: "u8", ad: "Paspas" }] },
+      { id: "k3", ad: "Deterjan", urunler: [{ id: "u9", ad: "Çamaşır deterjanı" }, { id: "u10", ad: "Bulaşık jeli" }, { id: "u11", ad: "Yumuşatıcı" }, { id: "u12", ad: "Yüzey temizleyici" }] },
+      { id: "k4", ad: "Mutfak", urunler: [{ id: "u13", ad: "Tencere seti" }, { id: "u14", ad: "Tava 24cm" }, { id: "u15", ad: "Saklama kabı" }, { id: "u16", ad: "Çaydanlık" }] },
+      { id: "k5", ad: "Dekorasyon", urunler: [{ id: "u17", ad: "Mum seti" }, { id: "u18", ad: "Çerçeve" }, { id: "u19", ad: "Yapay çiçek" }] }
     ]);
+    etiketleriYaz([
+      { anahtar: "halı", kart: "Halı satışı" },
+      { anahtar: "deterjan", kart: "Deterjan adedi" }
+    ]);
+    bolgeGorunumYaz({ metrikler: ["ciro", "mdo", "fbu"], kiyas: "gecenHafta" });
     const bugunD = /* @__PURE__ */ new Date();
     const buPzt = pazartesi(bugunD);
-    magazalarIcinTohum(profiller.filter((p) => p.rol === ROLLER.MAGAZA), buPzt, bugunD);
-    duyuruEkle("Bu hafta deterjan grubuna ağırlık veriyoruz, mağaza başı hedef 20 adet.");
+    const magazaListesi = profiller.filter((p) => p.rol === ROLLER.MAGAZA);
+    magazalarIcinTohum(magazaListesi, buPzt, bugunD);
+    talepleriTohumla(magazaListesi, buPzt);
+    yaz("duyurular", [
+      { id: "d3", metin: "Bu hafta deterjan grubuna ağırlık veriyoruz, mağaza başı hedef 20 adet.", tarih: new Date(bugunD.getTime() - 2 * 36e5).toISOString() },
+      { id: "d2", metin: "Pazartesi ürün taleplerini gün sonuna kadar göndermeyi unutmayın.", tarih: new Date(bugunD.getTime() - 26 * 36e5).toISOString() },
+      { id: "d1", metin: "Hafta sonu vitrin düzeni yenilenecek, fotoğrafları akşam paylaşın.", tarih: new Date(bugunD.getTime() - 50 * 36e5).toISOString() }
+    ]);
     return true;
   }
-  function magazalarIcinTohum(magazalar2, buPzt, bugunD) {
-    magazalar2.forEach((m, mi) => {
+  function magazalarIcinTohum(magazaListesi, buPzt, bugunD) {
+    const bugunStr2 = dateStr(bugunD);
+    magazaListesi.forEach((m, mi) => {
       const rnd = rastgele(1e3 + mi * 37);
-      const personel = [0, 1, 2, 3].map((i) => ({
+      const personel = [0, 1, 2, 3, 4].map((i) => ({
         id: "p" + (i + 1),
         ad: AD_HAVUZU[(mi * 3 + i) % AD_HAVUZU.length],
-        aktif: true
+        aktif: i < 4
       }));
       personelYaz(m.key, personel);
+      kartlarYaz(m.key, [
+        { id: "ciro", ad: "Ciro", alan: "ciro", tur: "kaynak" },
+        { id: "mgs", ad: "MGS", alan: "mgs", tur: "kaynak" },
+        { id: "toplu", ad: "Toplu satış", alan: "toplu", tur: "kaynak" },
+        { id: "hali", ad: "Halı satışı", alan: null, tur: "elle" },
+        { id: "deterjan", ad: "Deterjan adedi", alan: null, tur: "elle" }
+      ]);
       const taban = 22e3 + Math.floor(rnd() * 2e4);
-      for (let h = -7; h <= 0; h++) {
+      for (let h = -9; h <= 0; h++) {
         const pzt = haftaEkle(buPzt, h);
+        const sonIkiHafta = h >= -1;
         haftaHedefYaz(m.key, pzt, Math.round(taban * 7 * (0.95 + rnd() * 0.2) / 1e3) * 1e3);
+        const bugunIdx = (bugunD.getDay() + 6) % 7;
+        const izinGunleri = h === 0 ? [
+          { gun: Math.max(0, bugunIdx - 2), kisi: 0, tur: IZIN_SECENEK[0] },
+          { gun: bugunIdx, kisi: 2, tur: IZIN_SECENEK[mi % 3 + 1] }
+        ] : sonIkiHafta ? [{ gun: 1, kisi: 0, tur: IZIN_SECENEK[0] }, { gun: 4, kisi: 2, tur: IZIN_SECENEK[mi % 3 + 1] }] : [{ gun: Math.floor(rnd() * 7), kisi: Math.floor(rnd() * 4), tur: sec(rnd, IZIN_SECENEK) }];
+        const bugunIndeks = (bugunD.getDay() + 6) % 7;
+        const yorumGunleri = h === 0 ? [Math.max(0, bugunIndeks - 1), bugunIndeks] : sonIkiHafta ? [1, 4] : rnd() > 0.7 ? [Math.floor(rnd() * 7)] : [];
         haftaGunleri(pzt).forEach((gun, gi) => {
-          if (gun > bugunD) return;
+          const tarih = dateStr(gun);
+          if (tarih > bugunStr2) return;
           const haftaSonu = gi >= 5 ? 1.25 : 1;
-          const ciro = Math.round(taban * haftaSonu * (0.7 + rnd() * 0.6));
+          const ciro = Math.round(taban * haftaSonu * (0.75 + rnd() * 0.5));
           const mgs = Math.round(45 + rnd() * 55);
           const kayit = {
             ciro,
@@ -666,19 +731,56 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
             fbs: Math.round(850 + rnd() * 900),
             mgs,
             toplu: Math.round(rnd() * 18),
-            izinler: rnd() > 0.72 ? [{ personelId: personel[Math.floor(rnd() * personel.length)].id, tur: "Haftalık" }] : []
+            izinler: izinGunleri.filter((z) => z.gun === gi).map((z) => ({ personelId: personel[z.kisi].id, tur: z.tur })),
+            kartlar: {
+              hali: Math.round(2 + rnd() * 9),
+              deterjan: Math.round(12 + rnd() * 28)
+            }
           };
-          if (rnd() > 0.85) kayit.yorum = "Hava koşulları nedeniyle giriş sayısı düştü.";
-          gunYaz(m.key, dateStr(gun), kayit);
+          if (yorumGunleri.includes(gi)) kayit.yorum = sec(rnd, YORUMLAR);
+          gunYaz(m.key, tarih, kayit);
         });
-        urunHaftaYaz(m.key, pzt, { gruplar: [
-          { ad: "Cam", adet: Math.round(40 + rnd() * 60), pay: Number((3 + rnd() * 7).toFixed(1)) },
-          { ad: "Tekstil", adet: Math.round(30 + rnd() * 50), pay: Number((4 + rnd() * 9).toFixed(1)) },
-          { ad: "Deterjan", adet: Math.round(60 + rnd() * 90), pay: Number((6 + rnd() * 10).toFixed(1)) },
-          { ad: "Mutfak", adet: Math.round(20 + rnd() * 40), pay: Number((2 + rnd() * 6).toFixed(1)) }
-        ] });
+        urunHaftaYaz(m.key, pzt, {
+          gruplar: URUN_GRUPLARI.map((ad) => ({
+            ad,
+            adet: Math.round(20 + rnd() * 110),
+            pay: Number((2 + rnd() * 12).toFixed(1))
+          })),
+          yuklenme: (/* @__PURE__ */ new Date()).toISOString()
+        });
       }
     });
+  }
+  function talepleriTohumla(magazaListesi, buPzt) {
+    const kategoriler = kategorilerGetir();
+    const tumUrunler = kategoriler.flatMap((k) => k.urunler || []);
+    const liste = [];
+    [
+      { pzt: haftaEkle(buPzt, -1), gonderenSayisi: 18, durum: "Karşılandı" },
+      { pzt: buPzt, gonderenSayisi: 13, durum: "Gönderildi" }
+    ].forEach((h, hi) => {
+      magazaListesi.slice(0, h.gonderenSayisi).forEach((m, mi) => {
+        const rnd = rastgele(500 + hi * 100 + mi * 17);
+        const adet = 2 + Math.floor(rnd() * 3);
+        const secilenler = [];
+        for (let i = 0; i < adet; i++) {
+          const u = tumUrunler[Math.floor(rnd() * tumUrunler.length) % tumUrunler.length];
+          if (secilenler.some((s) => s.urunId === u.id)) continue;
+          secilenler.push({ urunId: u.id, ad: u.ad, adet: 1 + Math.floor(rnd() * 6) });
+        }
+        const t = new Date(h.pzt);
+        t.setHours(10 + Math.floor(rnd() * 7));
+        liste.push({
+          id: "t" + hi + "_" + m.key,
+          magazaKey: m.key,
+          hafta: haftaKey(h.pzt),
+          tarih: t.toISOString(),
+          durum: h.durum,
+          satirlar: secilenler
+        });
+      });
+    });
+    taleplerYaz(liste);
   }
   function hepsiniSil() {
     const silinecek = [];
@@ -712,10 +814,11 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
     const haftalik = haftaHedefGetir(magaza, pzt);
     return haftalik ? Math.round(haftalik / 7) : null;
   }
-  function haftaOzeti(magaza, pzt) {
-    const kayitlar = haftaKayitlari(magaza, pzt);
+  function haftaOzeti(magaza, pzt, gunSiniri) {
+    const tumKayitlar = haftaKayitlari(magaza, pzt);
+    const kayitlar = gunSiniri ? tumKayitlar.slice(0, gunSiniri) : tumKayitlar;
     const ciroToplam = toplam(kayitlar.map((k) => sayi(k.ciro)));
-    const hedefToplam = haftaHedefGetir(magaza, pzt) || toplam(kayitlar.map((k) => gunlukHedef(magaza, pzt, k)));
+    const hedefToplam = haftaHedefGetir(magaza, pzt) || toplam(tumKayitlar.map((k) => gunlukHedef(magaza, pzt, k)));
     const gecen = haftaKayitlari(magaza, haftaEkle(pzt, -1));
     const doluGun = kayitlar.filter((k) => sayi(k.ciro) !== null).length;
     const gecenEs = doluGun ? gecen.slice(0, doluGun) : gecen;
@@ -724,7 +827,7 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
       ciroToplam,
       hedefToplam,
       doluGun,
-      oran: ciroToplam !== null && hedefToplam ? ciroToplam / hedefToplam * 100 : null,
+      oran: toplam(tumKayitlar.map((k) => sayi(k.ciro))) !== null && hedefToplam ? toplam(tumKayitlar.map((k) => sayi(k.ciro))) / hedefToplam * 100 : null,
       gecenCiro: toplam(gecenEs.map((k) => sayi(k.ciro))),
       gecenTamCiro: toplam(gecen.map((k) => sayi(k.ciro))),
       mdoOrt: ortalama(kayitlar.map((k) => sayi(k.mdo))),
@@ -1612,15 +1715,15 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
     const oncekiPzt = haftaEkle(pzt, -1);
     const satirlar = magazalar2.map((m) => {
       const bu = haftaOzeti(m.key, pzt);
-      const gecen = haftaOzeti(m.key, oncekiPzt);
-      const gunYorum = sonYorum(m.key);
-      return { magaza: m, bu, gecen, yorum: gunYorum };
+      const gecen = haftaOzeti(m.key, oncekiPzt, bu.doluGun || void 0);
+      return { magaza: m, bu, gecen, yorum: sonYorum(m.key) };
     });
+    const kiyasGun = Math.max(...satirlar.map((s) => s.bu.doluGun || 0), 0);
     satirlar.sort((a, b) => (yuzdeDegisim(a.gecen.ciroToplam, a.bu.ciroToplam) ?? 0) - (yuzdeDegisim(b.gecen.ciroToplam, b.bu.ciroToplam) ?? 0));
     const kok = el(`<div class="bolge-panel">
     <div class="bolum-ust">
       <h2>Özet — ${haftaBasligi(pzt)}</h2>
-      <span class="alt">${magazalar2.length} mağaza · geçen hafta ile kıyas</span>
+      <span class="alt">${magazalar2.length} mağaza · geçen haftanın ${kiyasGun && kiyasGun < 7 ? "ilk " + kiyasGun + " günü" : "tamamı"} ile kıyas</span>
     </div>
 
     <div class="gorunum-cubugu">
@@ -2030,16 +2133,16 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
     </div>
   </header>`);
     if (aktif.rol === ROLLER.KURUCU) {
-      const sec = el(`<select class="magaza-sec">
+      const sec2 = el(`<select class="magaza-sec">
       <option value="">— mağaza seç —</option>
       ${magazalar().map((m) => `<option value="${m.key}" ${kurucuMagaza === m.key ? "selected" : ""}>${esc(m.ad)}</option>`).join("")}
     </select>`);
-      sec.addEventListener("change", () => {
-        kurucuMagaza = sec.value || null;
+      sec2.addEventListener("change", () => {
+        kurucuMagaza = sec2.value || null;
         if (kurucuMagaza) sayfa = "ana";
         uygulamaCiz();
       });
-      kok.querySelector(".ust-orta").appendChild(sec);
+      kok.querySelector(".ust-orta").appendChild(sec2);
     }
     kok.querySelectorAll("[data-sayfa]").forEach((b) => b.addEventListener("click", () => {
       sayfa = b.dataset.sayfa;

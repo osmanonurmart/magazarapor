@@ -37,9 +37,24 @@ node olustur.mjs
 
 ## Örnek veri ve şifreler
 
-İlk açılışta 20 mağaza, bölge müdürü ve kurucu profili ile yaklaşık 8 haftalık
-örnek veri üretilir. **Bütün profillerin şifresi `1234`** (kurucu panelinden
-değiştirilebilir). Profil rozeti → "Örnek veriyi yenile" ile sıfırlanır.
+**Bütün profillerin şifresi `1234`** (kurucu panelinden değiştirilebilir).
+Profil rozeti → "Örnek veriyi yenile" ile her şey sıfırlanıp yeniden üretilir.
+
+İlk açılışta üretilenler — her bölüm en az iki dolu örnekle açılsın diye:
+
+- 20 mağaza + bölge müdürü + kurucu
+- Mağaza başına **10 haftalık** günlük veri; geçen hafta yedi günü dolu,
+  içinde bulunulan hafta bugüne kadar dolu (ileri günler bilerek boş)
+- Haftada **iki izin** kaydı, farklı izin türleriyle; biri bugüne denk gelir
+- **İki günlük yorum** (bugün ve dün dahil), bölge özetinde de görünür
+- Mağaza başına **beş kart**: üçü kaynaktan, ikisi elle girilen
+  (Halı satışı, Deterjan adedi) — son 14 günde değerleri dolu
+- Her hafta için **altı ürün grubu**, geçen haftaya göre pay değişimiyle
+- **Üç duyuru**
+- **İki haftalık ürün talebi**: geçen hafta 18 mağaza, bu hafta 13 mağaza
+  gönderdi; kalanlar pazartesi raporunda "göndermeyen" olarak çıkar
+- **Beş ürün kategorisi**, **iki etiket**, mağaza başına **beş personel**
+  (biri pasif, "ayrılan kişi geçmişte görünür" durumunu gösterir)
 
 ## Neler var
 

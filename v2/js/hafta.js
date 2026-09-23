@@ -28,11 +28,15 @@ export function gunlukHedef(magaza, pzt, kayit){
   return haftalik ? Math.round(haftalik / 7) : null;
 }
 
-export function haftaOzeti(magaza, pzt){
-  const kayitlar = V.haftaKayitlari(magaza, pzt);
+// gunSiniri verilirse yalnızca haftanın ilk o kadar günü hesaba katılır.
+// Yarım haftayı geçen haftanın tamamıyla kıyaslamamak için kullanılır.
+export function haftaOzeti(magaza, pzt, gunSiniri){
+  const tumKayitlar = V.haftaKayitlari(magaza, pzt);
+  const kayitlar = gunSiniri ? tumKayitlar.slice(0, gunSiniri) : tumKayitlar;
   const ciroToplam = U.toplam(kayitlar.map(k => U.sayi(k.ciro)));
+  // Hedef ve oran her zaman haftanın tamamı üzerinden.
   const hedefToplam = V.haftaHedefGetir(magaza, pzt)
-    || U.toplam(kayitlar.map(k => gunlukHedef(magaza, pzt, k)));
+    || U.toplam(tumKayitlar.map(k => gunlukHedef(magaza, pzt, k)));
   const gecen = V.haftaKayitlari(magaza, U.haftaEkle(pzt, -1));
   // Yarım hafta tam haftayla kıyaslanmasın: bu haftada veri girilen gün sayısı
   // kadar gün, geçen haftadan da baştan alınır.
@@ -43,7 +47,8 @@ export function haftaOzeti(magaza, pzt){
     ciroToplam,
     hedefToplam,
     doluGun,
-    oran: (ciroToplam !== null && hedefToplam) ? ciroToplam / hedefToplam * 100 : null,
+    oran: (U.toplam(tumKayitlar.map(k => U.sayi(k.ciro))) !== null && hedefToplam)
+      ? U.toplam(tumKayitlar.map(k => U.sayi(k.ciro))) / hedefToplam * 100 : null,
     gecenCiro: U.toplam(gecenEs.map(k => U.sayi(k.ciro))),
     gecenTamCiro: U.toplam(gecen.map(k => U.sayi(k.ciro))),
     mdoOrt: U.ortalama(kayitlar.map(k => U.sayi(k.mdo))),
