@@ -1,8 +1,9 @@
 // Tek dosyalık sürümü üretir: v2/tek-dosya.html
-// Bütün modülleri ve stili tek HTML içine gömer, böylece dosya çift tıklanarak
-// (file:// ile) açılabilir; yerel sunucu gerekmez.
+// index.html'i okuyup stili ve paketlenmiş betiği içine gömer; böylece dosya
+// çift tıklanarak (file:// ile) açılabilir, yerel sunucu gerekmez.
+// İki ayrı HTML şablonu tutulmaz, kaynak her zaman index.html'dir.
 //
-// Çalıştırma:  npx esbuild --version >/dev/null && node olustur.mjs
+// Çalıştırma:  npm i -D esbuild && node olustur.mjs
 import { build } from 'esbuild';
 import { readFile, writeFile } from 'node:fs/promises';
 
@@ -14,29 +15,16 @@ const paket = await build({
   charset: 'utf8',
   write: false
 });
-const js = paket.outputFiles[0].text;
+const js  = paket.outputFiles[0].text;
 const css = await readFile('css/app.css', 'utf8');
 const ikon = await readFile('icon.svg', 'utf8');
 
-const html = `<!DOCTYPE html>
-<html lang="tr">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#1d1d1f">
-<title>Mağaza Performans Takip</title>
-<link rel="icon" href="data:image/svg+xml;base64,${Buffer.from(ikon).toString('base64')}">
-<style>
-${css}
-</style>
-</head>
-<body>
-<div id="kok"><div class="acilis">Yükleniyor…</div></div>
-<script>
-${js}
-</script>
-</body>
-</html>
-`;
+let html = await readFile('index.html', 'utf8');
+html = html
+  .replace('<link rel="manifest" href="./manifest.webmanifest">\n', '')
+  .replace(/<link rel="icon"[^>]*>/, `<link rel="icon" href="data:image/svg+xml;base64,${Buffer.from(ikon).toString('base64')}">`)
+  .replace('<link rel="stylesheet" href="./css/app.css">', `<style>\n${css}\n</style>`)
+  .replace('<script type="module" src="./js/app.js"></script>', `<script>\n${js}\n</script>`);
+
 await writeFile('tek-dosya.html', html, 'utf8');
 console.log('tek-dosya.html yazıldı — ' + Math.round(html.length/1024) + ' KB');
