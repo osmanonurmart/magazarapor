@@ -309,7 +309,13 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
 .bulgu-grup{ margin-bottom:7px; font-size:.8rem; }
 .bulgu{ display:inline-block; background:var(--kagit); border:1px solid var(--cizgi); border-radius:20px; padding:2px 10px; margin:3px 5px 0 0; font-size:.76rem; }
 .bulgu i{ color:var(--soluk); font-style:normal; font-size:.68rem; margin-right:4px; }
-.bulgu-not{ font-size:.72rem; color:var(--soluk); margin-top:8px; }
+.bulgu-not{ font-size:.72rem; color:var(--soluk); margin-top:8px; line-height:1.5; }
+.bulgu-not.iyi{ color:var(--artis); font-weight:600; }
+.onizleme{ width:100%; font-size:.76rem; margin-top:4px; }
+.onizleme th,.onizleme td{ border:1px solid var(--cizgi); padding:4px 7px; text-align:right; }
+.onizleme thead th{ background:var(--kagit); font-weight:600; }
+.onizleme .on-gun{ text-align:left; white-space:nowrap; font-weight:600; }
+.on-uyari{ color:var(--vurgu); font-size:.7rem; margin-left:3px; }
 .uyari{ background:#f8eaea; color:var(--dusus); border-radius:8px; padding:9px 11px; font-size:.8rem; margin-top:10px; }
 .personel-satir{ display:flex; align-items:center; gap:8px; padding:5px 0; border-bottom:1px solid var(--cizgi); }
 .personel-satir.pasif{ opacity:.55; }
@@ -459,16 +465,18 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
   }
   function metniSayiyaCevir(s) {
     if (s === null || s === void 0) return null;
-    let t = String(s).replace(/[%₺\s]/g, "").replace(/TL/gi, "").trim();
-    if (!t || t === "-") return null;
+    let t = String(s).replace(/[^\d.,\-]/g, "");
+    if (!t || t === "-" || t === "." || t === ",") return null;
+    const eksi = t.trimStart().startsWith("-");
+    t = t.replace(/-/g, "");
     if (t.includes(",")) {
       t = t.replace(/\./g, "").replace(",", ".");
-    } else if (/^-?\d{1,3}(\.\d{3})+$/.test(t)) {
+    } else if (/^\d{1,3}(\.\d{3})+$/.test(t)) {
       t = t.replace(/\./g, "");
     }
-    t = t.replace(/[^\d.\-]/g, "");
     const n = parseFloat(t);
-    return isNaN(n) ? null : n;
+    if (isNaN(n)) return null;
+    return eksi ? -n : n;
   }
   function ortalama(liste) {
     const v = liste.filter((x) => x !== null && x !== void 0 && !isNaN(x));
@@ -834,7 +842,10 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
     { id: "fbs", ad: "FBS", tur: "para", formul: "ortalama", ipucu: "Haftalık ortalama" },
     { id: "hedef", ad: "Hedef", tur: "para", formul: "toplam", ipucu: "Haftalık toplam hedef" },
     { id: "oran", ad: "Oran", tur: "yuzde", formul: "oran", ipucu: "Hafta toplamı / hafta hedefi", hesaplanan: true },
-    { id: "toplu", ad: "Toplu Satışlar", tur: "tam", formul: "toplam", ipucu: "Haftalık toplam" }
+    { id: "toplu", ad: "Toplu Satışlar", tur: "tam", formul: "toplam", ipucu: "Haftalık toplam" },
+    // Kaynak sayfada var; kurucu panelinden açılabilir, varsayılanda kapalı.
+    { id: "urunAdedi", ad: "Ürün Adedi", tur: "tam", formul: "toplam", ipucu: "Haftalık toplam" },
+    { id: "faturaSayisi", ad: "Fatura Sayısı", tur: "tam", formul: "toplam", ipucu: "Haftalık toplam" }
   ];
   function bicim(tur, deger) {
     if (deger === null || deger === void 0 || deger === "") return "";
@@ -891,7 +902,7 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
         return { metin: (ozet.mgsToplam === null ? "–" : fmtSayi(ozet.mgsToplam, 0)) + " / ort " + (ort === null ? "–" : fmtSayi(ort, 0)), sinif: "" };
       }
       case "toplam": {
-        const v = kpi.id === "hedef" ? ozet.hedefToplam : ozet.topluToplam;
+        const v = kpi.id === "hedef" ? ozet.hedefToplam : toplam(ozet.kayitlar.map((k) => sayi(k[kpi.id])));
         return { metin: v === null ? "–" : fmtSayi(v, 0), sinif: "" };
       }
       case "oran":
@@ -1202,73 +1213,153 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
   }
 
   // js/yapistir.js
-  var ANAHTARLAR = [
-    { alan: "ciro", desenler: [/\bciro\b/i, /\bsatı[sş]\s*tutar/i] },
-    { alan: "mdo", desenler: [/\bmdo\b/i, /dönü[şs]üm\s*oran/i] },
-    { alan: "fbu", desenler: [/\bfb[üu]\b/i, /fatura\s*ba[şs][ıi]na\s*[üu]r[üu]n/i] },
-    { alan: "fbs", desenler: [/\bfbs\b/i, /fatura\s*ba[şs][ıi]na\s*sat/i] },
-    { alan: "mgs", desenler: [/\bmgs\b/i, /ma[ğg]aza\s*giri[şs]/i, /m[üu][şs]teri\s*say/i] },
-    { alan: "toplu", desenler: [/toplu\s*sat/i, /b[üu]y[üu]k\s*fatura/i] }
+  var KPI_ESLESME = [
+    { alan: "ciro", desen: /^(ciro|satı[şs])$/i },
+    { alan: "mdo", desen: /^mdo$/i },
+    { alan: "fbu", desen: /^fb[uü]$/i },
+    { alan: "fbs", desen: /^fbs$/i },
+    { alan: "mgs", desen: /^mgs$/i },
+    { alan: "urunAdedi", desen: /^[uü]r[uü]n\s*aded[ıi]$/i },
+    { alan: "faturaSayisi", desen: /^fatura\s*say[ıi]s[ıi]$/i }
   ];
-  function alanTani(etiket) {
-    const bulunan = ANAHTARLAR.find((a) => a.desenler.some((d) => d.test(etiket || "")));
-    return bulunan ? bulunan.alan : null;
+  var GUN_BASLIKLARI = [
+    /^pazartes[ıi]$/i,
+    /^sal[ıi]$/i,
+    /^[çc]ar[şs]amba$/i,
+    /^per[şs]embe$/i,
+    /^cuma$/i,
+    /^cumartes[ıi]$/i,
+    /^pazar$/i
+  ];
+  var temiz = (s) => String(s ?? "").replace(/\s+/g, " ").trim();
+  function alanTani(ad) {
+    const t = temiz(ad);
+    const b = KPI_ESLESME.find((k) => k.desen.test(t));
+    return b ? b.alan : null;
   }
-  function gunTani(etiket) {
-    if (/\bd[üu]n\b|önceki\s*g[üu]n/i.test(etiket || "")) return "dun";
-    if (/\bbug[üu]n\b|g[üu]nl[üu]k/i.test(etiket || "")) return "bugun";
-    return null;
+  function tabloBul(tablolar, basligaGore) {
+    return (tablolar || []).find((t) => t && t.satirlar && t.satirlar.length && basligaGore(t.satirlar[0].map(temiz)));
   }
-  function bookmarkletCozumle(veri) {
-    const bulgular = [];
-    const ekle = (etiket, hamDeger, kaynak) => {
-      const alan = alanTani(etiket);
-      if (!alan) return;
-      const deger = metniSayiyaCevir(hamDeger);
-      if (deger === null) return;
-      bulgular.push({ alan, gun: gunTani(etiket) || "bugun", deger, kaynak, etiket: String(etiket).slice(0, 60) });
-    };
-    (veri.alanlar || []).forEach((a) => ekle(a.etiket, a.deger, "alan"));
-    (veri.listeler || []).forEach((l) => ekle(l.etiket, (l.secili || [])[0], "liste"));
-    (veri.tablolar || []).forEach((t, ti) => {
-      (t.satirlar || []).forEach((satir) => {
-        if (!satir || satir.length < 2) return;
-        const etiket = satir[0];
-        for (let i = 1; i < satir.length; i++) ekle(etiket, satir[i], "tablo" + (ti + 1));
+  function sutunBul(baslik, desen) {
+    return baslik.findIndex((h) => desen.test(h));
+  }
+  function raporTarihi(veri) {
+    const alan = (veri.alanlar || []).find((a) => /^tarih$/i.test(temiz(a.etiket)));
+    if (alan && /^\d{4}-\d{2}-\d{2}$/.test(temiz(alan.deger))) return temiz(alan.deger);
+    if (veri.zaman && /^\d{4}-\d{2}-\d{2}/.test(veri.zaman)) return veri.zaman.slice(0, 10);
+    return bugunStr();
+  }
+  function haftaTablosunuCozumle(veri, tarih) {
+    const tablo = tabloBul(veri.tablolar, (b) => GUN_BASLIKLARI[0].test(b[1] || ""));
+    if (!tablo) return { gunler: [], haftaToplamlari: {} };
+    const baslik = tablo.satirlar[0].map(temiz);
+    const gunSutunlari = GUN_BASLIKLARI.map((d) => sutunBul(baslik, d));
+    const pzt = pazartesi(/* @__PURE__ */ new Date(tarih + "T12:00:00"));
+    const gunler = [];
+    gunSutunlari.forEach((sutun, i) => {
+      if (sutun < 0) return;
+      const d = new Date(pzt);
+      d.setDate(pzt.getDate() + i);
+      const gunStr = dateStr(d);
+      if (gunStr > tarih) return;
+      const degerler = {};
+      tablo.satirlar.slice(1).forEach((satir) => {
+        const alan = alanTani(satir[0]);
+        if (!alan) return;
+        const sayi2 = metniSayiyaCevir(satir[sutun]);
+        if (sayi2 !== null) degerler[alan] = sayi2;
       });
+      if (Object.keys(degerler).length) gunler.push({ tarih: gunStr, degerler });
     });
-    return bulgular;
+    const haftaToplamlari = {};
+    baslik.forEach((h, i) => {
+      if (!/hafta$|^(ocak|şubat|mart|nisan|mayıs|haziran|temmuz|ağustos|eylül|ekim|kasım|aralık)$/i.test(h)) return;
+      const ciroSatiri = tablo.satirlar.slice(1).find((s) => alanTani(s[0]) === "ciro");
+      if (ciroSatiri) haftaToplamlari[h] = metniSayiyaCevir(ciroSatiri[i]);
+    });
+    return { gunler, haftaToplamlari };
   }
-  function duzCozumle(veri) {
-    const bulgular = [];
-    Object.keys(veri).forEach((anahtar) => {
-      const alan = alanTani(anahtar.replace(/_/g, " "));
-      if (!alan) return;
-      const deger = metniSayiyaCevir(veri[anahtar]);
-      if (deger === null) return;
-      bulgular.push({ alan, gun: /_dun$|dün/i.test(anahtar) ? "dun" : "bugun", deger, kaynak: "alan", etiket: anahtar });
-    });
-    return bulgular;
+  function kpiTablosunuCozumle(veri, tarih) {
+    const tablo = tabloBul(veri.tablolar, (b2) => /^bug[uü]n$/i.test(b2[1] || ""));
+    if (!tablo) return {};
+    const baslik = tablo.satirlar[0].map(temiz);
+    const bugunSutun = sutunBul(baslik, /^bug[uü]n$/i);
+    const dunSutun = sutunBul(baslik, /^d[uü]n$/i);
+    const dun = /* @__PURE__ */ new Date(tarih + "T12:00:00");
+    dun.setDate(dun.getDate() - 1);
+    const cikar = (sutun) => {
+      if (sutun < 0) return null;
+      const degerler = {};
+      tablo.satirlar.slice(1).forEach((satir) => {
+        const alan = alanTani(satir[0]);
+        if (!alan) return;
+        const sayi2 = metniSayiyaCevir(satir[sutun]);
+        if (sayi2 !== null) degerler[alan] = sayi2;
+      });
+      return Object.keys(degerler).length ? degerler : null;
+    };
+    const sonuc = {};
+    const b = cikar(bugunSutun);
+    const d = cikar(dunSutun);
+    if (b) sonuc[tarih] = b;
+    if (d) sonuc[dateStr(dun)] = d;
+    return sonuc;
+  }
+  var TOPLU_ESIK = 2200;
+  function grupTablosunuCozumle(veri) {
+    const tablo = tabloBul(veri.tablolar, (b) => /^grup$/i.test(b[0] || ""));
+    if (!tablo) return null;
+    const baslik = tablo.satirlar[0].map(temiz);
+    const toplamSutun = sutunBul(baslik, /^toplam$/i);
+    if (toplamSutun < 0) return null;
+    const satirlar = tablo.satirlar.slice(1).map((s) => ({
+      ad: temiz(s[0]),
+      fatura: metniSayiyaCevir(s[sutunBul(baslik, /fatura/i)]),
+      adet: metniSayiyaCevir(s[sutunBul(baslik, /^adet$/i)]),
+      tutar: metniSayiyaCevir(s[toplamSutun])
+    })).filter((s) => s.ad);
+    const liste = (veri.listeler || []).find((l) => /gruplama/i.test(temiz(l.etiket)));
+    const olcut = liste && liste.secili && liste.secili[0] ? temiz(liste.secili[0]) : "";
+    const faturaBazli = /fatura/i.test(olcut);
+    return {
+      olcut: olcut || "bilinmiyor",
+      faturaBazli,
+      satirlar,
+      topluSatis: faturaBazli ? Math.round(satirlar.filter((s) => (s.tutar || 0) >= TOPLU_ESIK).reduce((t, s) => t + s.tutar, 0) / 1e3) : null,
+      topluAdet: faturaBazli ? satirlar.filter((s) => (s.tutar || 0) >= TOPLU_ESIK).length : null
+    };
   }
   function metniCozumle(metin) {
     let veri;
     try {
       veri = JSON.parse(metin);
     } catch (e) {
-      return { hata: "Yapıştırılan metin JSON değil. Yer imine tıklayıp tekrar deneyin." };
+      return { hata: "Yapıştırılan metin JSON değil. Yer imine tıklayıp çıkan kutudaki metni kopyalayın." };
     }
-    const bookmarkletMi = veri && (veri.tablolar || veri.alanlar || veri.secimler);
-    const bulgular = bookmarkletMi ? bookmarkletCozumle(veri) : duzCozumle(veri || {});
-    const secilen = { bugun: {}, dun: {} };
-    bulgular.forEach((b) => {
-      if (secilen[b.gun][b.alan] === void 0) secilen[b.gun][b.alan] = b;
+    if (!veri || typeof veri !== "object") return { hata: "Beklenen biçimde veri bulunamadı." };
+    const tarih = raporTarihi(veri);
+    const { gunler, haftaToplamlari } = haftaTablosunuCozumle(veri, tarih);
+    const kpi = kpiTablosunuCozumle(veri, tarih);
+    const grup = grupTablosunuCozumle(veri);
+    const harita = /* @__PURE__ */ new Map();
+    gunler.forEach((g) => harita.set(g.tarih, Object.assign({}, g.degerler)));
+    Object.keys(kpi).forEach((t) => {
+      harita.set(t, Object.assign({}, kpi[t], harita.get(t) || {}));
     });
+    if (grup && grup.topluSatis !== null && harita.has(tarih)) {
+      harita.get(tarih).toplu = grup.topluSatis;
+    }
+    const yazilacak = [...harita.entries()].map(([t, degerler]) => ({ tarih: t, degerler })).sort((a, b) => a.tarih.localeCompare(b.tarih));
+    if (!yazilacak.length) {
+      return { hata: "Tablolar okundu ama tanınan bir KPI satırı bulunamadı. Çıktıyı olduğu gibi paylaşırsanız eşleştirmeyi genişletirim." };
+    }
     return {
-      kaynak: bookmarkletMi ? "Yer imi çıktısı" : "Düz JSON",
+      kaynak: "Ciro takip sayfası",
       url: veri.url || "",
-      zaman: veri.zaman || "",
-      bulgular,
-      secilen,
+      tarih,
+      yazilacak,
+      haftaToplamlari,
+      grup,
       ham: veri
     };
   }
@@ -1421,9 +1512,20 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
     });
     return kok;
   }
+  var ONIZLEME_ALANLARI = [
+    { alan: "ciro", ad: "Ciro", basamak: 0 },
+    { alan: "mdo", ad: "MDO", basamak: 2 },
+    { alan: "fbu", ad: "FBÜ", basamak: 2 },
+    { alan: "fbs", ad: "FBS", basamak: 2 },
+    { alan: "mgs", ad: "MGS", basamak: 0 },
+    { alan: "urunAdedi", ad: "Ürün ad.", basamak: 0 },
+    { alan: "faturaSayisi", ad: "Fatura", basamak: 0 },
+    { alan: "toplu", ad: "Toplu", basamak: 0 }
+  ];
   function yapistirPenceresi(magazaKey, yenile) {
     const govde = el(`<div class="yapistir">
-    <p class="aciklama">Ciro takip sitesinde yer imine tıklayıp panoya kopyalayın, sonra buraya yapıştırın.</p>
+    <p class="aciklama">Ciro takip sitesinde yer imine tıklayın, çıkan kutudaki metni buraya yapıştırın.
+    Sayfa haftanın bütün günlerini verdiği için tek yapıştırma haftalık tabloyu baştan doldurur.</p>
     <textarea class="yapistir-alan" placeholder="Yer iminin kopyaladığı JSON..."></textarea>
     <div class="yapistir-sonuc"></div>
   </div>`);
@@ -1431,22 +1533,38 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
     const sonuc = govde.querySelector(".yapistir-sonuc");
     let cozum = null;
     const cozumle = () => {
+      if (!alan.value.trim()) {
+        sonuc.innerHTML = "";
+        cozum = null;
+        return;
+      }
       const c = metniCozumle(alan.value.trim());
       cozum = c;
       if (c.hata) {
         sonuc.innerHTML = `<div class="uyari">${esc(c.hata)}</div>`;
         return;
       }
-      const satir = (gun, etiket) => {
-        const alanlar = Object.keys(c.secilen[gun]);
-        if (!alanlar.length) return `<div class="bulgu-bos">${etiket}: eşleşen alan bulunamadı.</div>`;
-        return `<div class="bulgu-grup"><b>${etiket}</b>${alanlar.map((a) => `<span class="bulgu"><i>${a.toUpperCase()}</i> ${fmtSayi(c.secilen[gun][a].deger, 2)}</span>`).join("")}</div>`;
-      };
+      const gelen = ONIZLEME_ALANLARI.filter((a) => c.yazilacak.some((g) => g.degerler[a.alan] !== void 0));
+      const satirlar = c.yazilacak.map((g) => {
+        const d = /* @__PURE__ */ new Date(g.tarih + "T12:00:00");
+        const mevcut = gunGetir(magazaKey, g.tarih);
+        const uzerineMi = mevcut && ONIZLEME_ALANLARI.some((a) => mevcut[a.alan] !== void 0 && mevcut[a.alan] !== null);
+        return `<tr>
+        <td class="on-gun">${GUN_KISA[(d.getDay() + 6) % 7]} ${kisaTarih(d)}${uzerineMi ? ' <span class="on-uyari" title="Bu günde zaten veri var, üzerine yazılacak">●</span>' : ""}</td>
+        ${gelen.map((a) => `<td>${g.degerler[a.alan] === void 0 ? "–" : fmtSayi(g.degerler[a.alan], a.basamak)}</td>`).join("")}
+      </tr>`;
+      }).join("");
+      const ozet = Object.keys(c.haftaToplamlari || {});
       sonuc.innerHTML = `<div class="bulgu-kutu">
-      <div class="bulgu-ust">${esc(c.kaynak)}${c.url ? " · " + esc(c.url.slice(0, 60)) : ""}</div>
-      ${satir("bugun", "Bugün")}
-      ${satir("dun", "Dün")}
-      <div class="bulgu-not">Toplam ${c.bulgular.length} eşleşme bulundu. Kaydet dediğinizde yalnızca yukarıdakiler yazılır.</div>
+      <div class="bulgu-ust">${esc(c.kaynak)} · rapor tarihi <b>${esc(c.tarih)}</b>${c.url ? " · " + esc(c.url) : ""}</div>
+      <table class="onizleme">
+        <thead><tr><th>Gün</th>${gelen.map((a) => `<th>${a.ad}</th>`).join("")}</tr></thead>
+        <tbody>${satirlar}</tbody>
+      </table>
+      ${ozet.length ? `<div class="bulgu-not">Kaynaktaki özetler (yazılmaz, kıyas için):
+        ${ozet.map((k) => esc(k) + " " + fmtSayi(c.haftaToplamlari[k], 0)).join(" · ")}</div>` : ""}
+      ${grupNotu(c)}
+      <div class="bulgu-not">${c.yazilacak.length} gün yazılacak. ● işaretli günlerde mevcut veri var, üzerine yazılır.</div>
     </div>`;
     };
     alan.addEventListener("input", () => {
@@ -1459,29 +1577,32 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
           alan.value = await navigator.clipboard.readText();
           cozumle();
         } catch (e) {
-          sonuc.innerHTML = '<div class="uyari">Pano okunamadı, elle yapıştırın.</div>';
+          sonuc.innerHTML = '<div class="uyari">Pano okunamadı. Metni elle yapıştırın.</div>';
         }
       } },
       { ad: "Kaydet", sinif: "birincil", tik: () => {
         if (!cozum || cozum.hata) return;
-        const bugunStr2 = bugunStr();
-        const d = new Date(bugun());
-        d.setDate(d.getDate() - 1);
-        const dunStr = dateStr(d);
-        let sayac = 0;
-        [["bugun", bugunStr2], ["dun", dunStr]].forEach(([gun, tarih]) => {
-          const kayit = gunGetir(magazaKey, tarih) || {};
-          Object.keys(cozum.secilen[gun]).forEach((alanAd) => {
-            kayit[alanAd] = cozum.secilen[gun][alanAd].deger;
-            sayac++;
+        cozum.yazilacak.forEach((g) => {
+          const kayit = gunGetir(magazaKey, g.tarih) || {};
+          Object.keys(g.degerler).forEach((a) => {
+            kayit[a] = g.degerler[a];
           });
-          if (Object.keys(cozum.secilen[gun]).length) gunYaz(magazaKey, tarih, kayit);
+          gunYaz(magazaKey, g.tarih, kayit);
         });
+        haftaSec(pazartesi(/* @__PURE__ */ new Date(cozum.tarih + "T12:00:00")));
         kapat();
         yenile();
-        return sayac;
       } }
     ]);
+  }
+  function grupNotu(c) {
+    if (!c.grup) return "";
+    if (c.grup.faturaBazli) {
+      return `<div class="bulgu-not iyi">Toplu satış hesaplandı: ${c.grup.topluAdet} fatura,
+      ${fmtSayi(c.grup.topluSatis, 0)} K (2.200 ₺ üzeri faturalar).</div>`;
+    }
+    return `<div class="bulgu-not">Gruplama şu an <b>${esc(c.grup.olcut)}</b>. Toplu satışın da
+    otomatik gelmesi için kaynak sayfada gruplamayı <b>Fatura No</b> yapıp tekrar yapıştırın.</div>`;
   }
   function personelPenceresi(magazaKey, yenile) {
     const govde = el('<div class="personel"><div class="personel-liste"></div><div class="personel-ekle"><input type="text" placeholder="Yeni personel adı"><button class="mini birincil">+ Ekle</button></div><p class="aciklama">Listeden çıkarılan kişi geçmiş günlerde görünmeye devam eder.</p></div>');

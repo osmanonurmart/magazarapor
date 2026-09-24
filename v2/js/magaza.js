@@ -115,9 +115,21 @@ function simuleSatiri(yenile){
 }
 
 // ---------------- Yapıştır penceresi ----------------
+const ONIZLEME_ALANLARI = [
+  {alan:'ciro',         ad:'Ciro',    basamak:0},
+  {alan:'mdo',          ad:'MDO',     basamak:2},
+  {alan:'fbu',          ad:'FBÜ',     basamak:2},
+  {alan:'fbs',          ad:'FBS',     basamak:2},
+  {alan:'mgs',          ad:'MGS',     basamak:0},
+  {alan:'urunAdedi',    ad:'Ürün ad.',basamak:0},
+  {alan:'faturaSayisi', ad:'Fatura',  basamak:0},
+  {alan:'toplu',        ad:'Toplu',   basamak:0}
+];
+
 export function yapistirPenceresi(magazaKey, yenile){
   const govde = U.el(`<div class="yapistir">
-    <p class="aciklama">Ciro takip sitesinde yer imine tıklayıp panoya kopyalayın, sonra buraya yapıştırın.</p>
+    <p class="aciklama">Ciro takip sitesinde yer imine tıklayın, çıkan kutudaki metni buraya yapıştırın.
+    Sayfa haftanın bütün günlerini verdiği için tek yapıştırma haftalık tabloyu baştan doldurur.</p>
     <textarea class="yapistir-alan" placeholder="Yer iminin kopyaladığı JSON..."></textarea>
     <div class="yapistir-sonuc"></div>
   </div>`);
@@ -126,20 +138,34 @@ export function yapistirPenceresi(magazaKey, yenile){
   let cozum = null;
 
   const cozumle = () => {
+    if(!alan.value.trim()){ sonuc.innerHTML = ''; cozum = null; return; }
     const c = metniCozumle(alan.value.trim());
     cozum = c;
     if(c.hata){ sonuc.innerHTML = `<div class="uyari">${U.esc(c.hata)}</div>`; return; }
-    const satir = (gun, etiket) => {
-      const alanlar = Object.keys(c.secilen[gun]);
-      if(!alanlar.length) return `<div class="bulgu-bos">${etiket}: eşleşen alan bulunamadı.</div>`;
-      return `<div class="bulgu-grup"><b>${etiket}</b>${alanlar.map(a =>
-        `<span class="bulgu"><i>${a.toUpperCase()}</i> ${U.fmtSayi(c.secilen[gun][a].deger, 2)}</span>`).join('')}</div>`;
-    };
+
+    // Hangi alanlar geldi, onları sütun yap.
+    const gelen = ONIZLEME_ALANLARI.filter(a => c.yazilacak.some(g => g.degerler[a.alan] !== undefined));
+    const satirlar = c.yazilacak.map(g => {
+      const d = new Date(g.tarih + 'T12:00:00');
+      const mevcut = V.gunGetir(magazaKey, g.tarih);
+      const uzerineMi = mevcut && ONIZLEME_ALANLARI.some(a => mevcut[a.alan] !== undefined && mevcut[a.alan] !== null);
+      return `<tr>
+        <td class="on-gun">${U.GUN_KISA[(d.getDay()+6)%7]} ${U.kisaTarih(d)}${uzerineMi ? ' <span class="on-uyari" title="Bu günde zaten veri var, üzerine yazılacak">●</span>' : ''}</td>
+        ${gelen.map(a => `<td>${g.degerler[a.alan] === undefined ? '–' : U.fmtSayi(g.degerler[a.alan], a.basamak)}</td>`).join('')}
+      </tr>`;
+    }).join('');
+
+    const ozet = Object.keys(c.haftaToplamlari || {});
     sonuc.innerHTML = `<div class="bulgu-kutu">
-      <div class="bulgu-ust">${U.esc(c.kaynak)}${c.url ? ' · ' + U.esc(c.url.slice(0,60)) : ''}</div>
-      ${satir('bugun','Bugün')}
-      ${satir('dun','Dün')}
-      <div class="bulgu-not">Toplam ${c.bulgular.length} eşleşme bulundu. Kaydet dediğinizde yalnızca yukarıdakiler yazılır.</div>
+      <div class="bulgu-ust">${U.esc(c.kaynak)} · rapor tarihi <b>${U.esc(c.tarih)}</b>${c.url ? ' · ' + U.esc(c.url) : ''}</div>
+      <table class="onizleme">
+        <thead><tr><th>Gün</th>${gelen.map(a => `<th>${a.ad}</th>`).join('')}</tr></thead>
+        <tbody>${satirlar}</tbody>
+      </table>
+      ${ozet.length ? `<div class="bulgu-not">Kaynaktaki özetler (yazılmaz, kıyas için):
+        ${ozet.map(k => U.esc(k) + ' ' + U.fmtSayi(c.haftaToplamlari[k], 0)).join(' · ')}</div>` : ''}
+      ${grupNotu(c)}
+      <div class="bulgu-not">${c.yazilacak.length} gün yazılacak. ● işaretli günlerde mevcut veri var, üzerine yazılır.</div>
     </div>`;
   };
   alan.addEventListener('input', () => { clearTimeout(alan._z); alan._z = setTimeout(cozumle, 300); });
@@ -147,27 +173,33 @@ export function yapistirPenceresi(magazaKey, yenile){
   pencere('Veri ekle', govde, [
     {ad:'Panodan al', sinif:'', tik: async () => {
       try{ alan.value = await navigator.clipboard.readText(); cozumle(); }
-      catch(e){ sonuc.innerHTML = '<div class="uyari">Pano okunamadı, elle yapıştırın.</div>'; }
+      catch(e){ sonuc.innerHTML = '<div class="uyari">Pano okunamadı. Metni elle yapıştırın.</div>'; }
     }},
     {ad:'Kaydet', sinif:'birincil', tik: () => {
       if(!cozum || cozum.hata) return;
-      const bugunStr = U.bugunStr();
-      const d = new Date(U.bugun()); d.setDate(d.getDate()-1);
-      const dunStr = U.dateStr(d);
-      let sayac = 0;
-      [['bugun', bugunStr], ['dun', dunStr]].forEach(([gun, tarih]) => {
-        const kayit = V.gunGetir(magazaKey, tarih) || {};
-        Object.keys(cozum.secilen[gun]).forEach(alanAd => {
-          kayit[alanAd] = cozum.secilen[gun][alanAd].deger;
-          sayac++;
-        });
-        if(Object.keys(cozum.secilen[gun]).length) V.gunYaz(magazaKey, tarih, kayit);
+      cozum.yazilacak.forEach(g => {
+        const kayit = V.gunGetir(magazaKey, g.tarih) || {};
+        Object.keys(g.degerler).forEach(a => { kayit[a] = g.degerler[a]; });
+        V.gunYaz(magazaKey, g.tarih, kayit);
       });
+      // Yazılan günlerin haftasına geç ki sonuç hemen görünsün.
+      haftaSec(U.pazartesi(new Date(cozum.tarih + 'T12:00:00')));
       kapat();
       yenile();
-      return sayac;
     }}
   ]);
+}
+
+// Gruplama tablosu: fatura bazlıysa toplu satış hesaplanır, değilse nasıl
+// yapılacağı anlatılır.
+function grupNotu(c){
+  if(!c.grup) return '';
+  if(c.grup.faturaBazli){
+    return `<div class="bulgu-not iyi">Toplu satış hesaplandı: ${c.grup.topluAdet} fatura,
+      ${U.fmtSayi(c.grup.topluSatis, 0)} K (2.200 ₺ üzeri faturalar).</div>`;
+  }
+  return `<div class="bulgu-not">Gruplama şu an <b>${U.esc(c.grup.olcut)}</b>. Toplu satışın da
+    otomatik gelmesi için kaynak sayfada gruplamayı <b>Fatura No</b> yapıp tekrar yapıştırın.</div>`;
 }
 
 // ---------------- Personel penceresi ----------------

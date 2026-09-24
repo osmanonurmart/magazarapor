@@ -74,7 +74,7 @@ Profil rozeti → "Örnek veriyi yenile" ile her şey sıfırlanıp yeniden üre
 | Gün başlığında izin seçimi, izin türü, personel düzenleme | ✅ |
 | Simüle tarihi (geçmiş güne yazma dahil) | ✅ |
 | Sağ panel: esnek kartlar, günlük yorum, ay içi ve ay toplamı kıyası | ✅ |
-| Yapıştır / Veri Ekle — yer imi çıktısını çözümleme | ✅ (tolerant) |
+| Yapıştır / Veri Ekle — kaynak sayfanın üç tablosunu çözümleme | ✅ gerçek veriyle doğrulandı |
 | Haftalık ürün verisi, geçen haftaya göre pay değişimi, otomatik rapor | ✅ |
 | Bölge paneli: özet tablo, metrik seçimi, hedef girişi (elle/yapıştır/kural) | ✅ |
 | Duyuru panosu | ✅ |

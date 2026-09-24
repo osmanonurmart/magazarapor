@@ -11,6 +11,8 @@ Bu dosya v2 için tutulan açık liste. Yapıldıkça satırlar silinir.
 | 1.1 | Türkçe binlik ayıracı yanlış okunuyordu: `98.000` → `98`. Tablodaki bir hücreye tekrar girilince değer bine bölünüyordu. | ✅ düzeltildi |
 | 1.2 | Devam eden yarım hafta, geçen haftanın tamamıyla kıyaslanıyordu. Bölge özetinde 20 mağazanın hepsi "%60 düştü" görünüyordu. Artık aynı sayıdaki ilk günle kıyaslanıyor. | ✅ düzeltildi |
 | 1.3 | Haftalık tablodaki ciro formülü de aynı sorundaydı; artık "(ilk 3 gün)" diye belirtiyor. | ✅ düzeltildi |
+| 1.4 | Favicon adresi ham `<` `>` içeriyordu; tek dosya üreticisi onu ortasından kesiyor ve sayfanın üstünde `🏪 " >` kalıntısı görünüyordu. | ✅ düzeltildi |
+| 1.5 | Para birimi ekli sayılarda binlik ayıracı kontrolü çalışmıyordu: `23.411 TRY` → `23.411`. Gerçek kaynak verisiyle test edilirken çıktı. Artık harfler önce ayıklanıyor. | ✅ düzeltildi |
 
 ## 2. Bilinen açık hatalar
 
@@ -50,7 +52,7 @@ Bu dosya v2 için tutulan açık liste. Yapıldıkça satırlar silinir.
 | 5.1 | **Firebase** (Authentication + veritabanı) | `js/veri.js` bunun için ayrı tutuldu; yalnızca o dosyanın içi değişecek |
 | 5.2 | **Bildirimler** — veri girişi hatırlatması, pazartesi talep hatırlatması, duyuru bildirimi | Firebase Cloud Messaging gerekiyor |
 | 5.3 | **Araçlar sayfası** | v1'deki araç kutuları taşınmadı |
-| 5.4 | **Etiket → kart otomatik doldurma** | Etiket tanımlanıyor ama ürün satırlarından karta aktarma bağlı değil; kaynak site biçimi netleşince yapılabilir |
+| 5.4 | **Etiket → kart otomatik doldurma** | Etiket tanımlanıyor ama ürün satırlarından karta aktarma bağlı değil |
 | 5.5 | **Talep onay/ret** | Tanımda açık bırakılmıştı |
 | 5.6 | **Günlük ve aylık hedef** | Şu an yalnızca haftalık hedef var |
 | 5.7 | **Bölge tablosunda sıralama seçimi** (`Sıra ⇅`) | Şu an sabit: ciro değişimine göre |
@@ -91,3 +93,30 @@ Bu dosya v2 için tutulan açık liste. Yapıldıkça satırlar silinir.
 - Güvenlik kuralları rol bazlı olmalı: mağaza müdürü yalnızca kendi mağazası; bölge müdürü hepsini okur, hedef ve duyuru yazar; kurucu tam yetki.
 - Talepler ve duyurular ortak koleksiyonda; mağaza müdürü kendi talebini yazabilmeli ama başkasınınkini okuyamamalı.
 - `onSnapshot` ile canlı dinleme kurulursa madde 2.2 (iki sekme sorunu) kendiliğinden çözülür.
+
+## 8. Kaynak sayfa (ciro takip) — çözümlenen yapı
+
+Yer imi çıktısı üç tablo veriyor. Çözümleyici (`js/yapistir.js`) bunları tanıyor:
+
+| Tablo | İçerik | Ne yapılıyor |
+|---|---|---|
+| 1 | `KPI \| BUGÜN \| DÜN \| GEÇEN HAFTA \| ...değişim` | Bugün ve dün sütunları yazılıyor. Ürün adedi ve fatura sayısı yalnızca burada var. |
+| 2 | `KPI \| Pazartesi..Pazar \| 38.HAFTA \| 39.HAFTA \| aylar` | **Asıl kaynak.** Haftanın bütün günleri tek yapıştırmada yazılıyor. Hafta ve ay toplamları yalnızca kıyas için gösteriliyor. |
+| 3 | `GRUP \| FATURA SAYISI \| ADET \| TOPLAM \| DURUM` | Gruplama "Fatura No" ise 2.200 ₺ üzeri faturalar toplanıp toplu satış hesaplanıyor. "Satış Danışmanı" ise kullanıcıya gruplamayı değiştirmesi söyleniyor. |
+
+`Tarih` alanı raporun gününü veriyor; bilgisayarın saatine güvenilmiyor.
+Rapor tarihinden sonraki günler kaynakta 0 geldiği için yazılmıyor.
+
+Eşleşen KPI adları: Ciro/Satış, MDO, MGS, FBS, FBU, Ürün Adedi, Fatura Sayısı.
+Doğrulama: örnek çıktıda günlerin toplamı (23.411 + 28.398 + 29.459 + 1.829 =
+83.097) kaynağın "39.HAFTA" sütunuyla birebir tutuyor.
+
+### Buradan çıkan işler
+
+- **Toplu satış** için kaynak sayfada gruplama "Fatura No" olmalı. İki ayrı
+  yapıştırma gerekiyor; ileride tek adımda toplanması istenirse kaynak sayfadan
+  iki çıktı alınıp birleştirilebilir.
+- **Satış danışmanı kırılımı** (3. tablo) şu an kullanılmıyor. Personel bazlı
+  performans ekranı için hazır veri.
+- **Ürün Adedi** ve **Fatura Sayısı** KPI satırları eklendi, varsayılanda kapalı;
+  kurucu panelinden açılabilir.

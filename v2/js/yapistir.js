@@ -1,87 +1,183 @@
 // Panodan gelen veriyi işler.
-// İki biçimi tanır:
-//   1) Yer imi (bookmarklet) çıktısı: {url, tablolar, alanlar, secimler, listeler...}
-//   2) Düz alan sözlüğü: {ciro_bugun, mdo_bugun, ...} — eski sürümün ürettiği biçim
-// Kaynak sitenin yapısı kesinleşene kadar tolerant davranır: neyi bulduğunu
-// ekranda gösterir, kullanıcı onaylamadan kaydetmez.
+//
+// Kaynak site (ciro takip) yer imi çıktısında üç tablo veriyor:
+//   1) KPI tablosu      : KPI | BUGÜN | DÜN | GEÇEN HAFTA | ...değişim sütunları
+//   2) Hafta tablosu    : KPI | Pazartesi..Pazar | 38.HAFTA | 39.HAFTA | aylar
+//   3) Gruplama tablosu : satış danışmanı veya fatura kırılımı
+// "Tarih" alanı raporun hangi güne ait olduğunu söyler.
+//
+// En değerlisi 2. tablo: haftanın bütün günlerini tek seferde verir, yani bir
+// yapıştırma haftalık tabloyu baştan sona doldurur.
 import * as U from './util.js';
 
-const ANAHTARLAR = [
-  {alan:'ciro',  desenler:[/\bciro\b/i, /\bsatı[sş]\s*tutar/i]},
-  {alan:'mdo',   desenler:[/\bmdo\b/i, /dönü[şs]üm\s*oran/i]},
-  {alan:'fbu',   desenler:[/\bfb[üu]\b/i, /fatura\s*ba[şs][ıi]na\s*[üu]r[üu]n/i]},
-  {alan:'fbs',   desenler:[/\bfbs\b/i, /fatura\s*ba[şs][ıi]na\s*sat/i]},
-  {alan:'mgs',   desenler:[/\bmgs\b/i, /ma[ğg]aza\s*giri[şs]/i, /m[üu][şs]teri\s*say/i]},
-  {alan:'toplu', desenler:[/toplu\s*sat/i, /b[üu]y[üu]k\s*fatura/i]}
+// Kaynaktaki satır adı -> bizim alan adımız
+const KPI_ESLESME = [
+  {alan:'ciro',         desen:/^(ciro|satı[şs])$/i},
+  {alan:'mdo',          desen:/^mdo$/i},
+  {alan:'fbu',          desen:/^fb[uü]$/i},
+  {alan:'fbs',          desen:/^fbs$/i},
+  {alan:'mgs',          desen:/^mgs$/i},
+  {alan:'urunAdedi',    desen:/^[uü]r[uü]n\s*aded[ıi]$/i},
+  {alan:'faturaSayisi', desen:/^fatura\s*say[ıi]s[ıi]$/i}
 ];
+const GUN_BASLIKLARI = [/^pazartes[ıi]$/i, /^sal[ıi]$/i, /^[çc]ar[şs]amba$/i, /^per[şs]embe$/i,
+                        /^cuma$/i, /^cumartes[ıi]$/i, /^pazar$/i];
 
-function alanTani(etiket){
-  const bulunan = ANAHTARLAR.find(a => a.desenler.some(d => d.test(etiket || '')));
-  return bulunan ? bulunan.alan : null;
+const temiz = s => String(s ?? '').replace(/\s+/g, ' ').trim();
+function alanTani(ad){
+  const t = temiz(ad);
+  const b = KPI_ESLESME.find(k => k.desen.test(t));
+  return b ? b.alan : null;
 }
-function gunTani(etiket){
-  if(/\bd[üu]n\b|önceki\s*g[üu]n/i.test(etiket || '')) return 'dun';
-  if(/\bbug[üu]n\b|g[üu]nl[üu]k/i.test(etiket || '')) return 'bugun';
-  return null;
+function tabloBul(tablolar, basligaGore){
+  return (tablolar || []).find(t => t && t.satirlar && t.satirlar.length && basligaGore(t.satirlar[0].map(temiz)));
+}
+function sutunBul(baslik, desen){
+  return baslik.findIndex(h => desen.test(h));
 }
 
-// Yer imi çıktısındaki alanlar/listeler/tablolardan sayı toplar.
-function bookmarkletCozumle(veri){
-  const bulgular = [];   // {alan, gun, deger, kaynak}
-  const ekle = (etiket, hamDeger, kaynak) => {
-    const alan = alanTani(etiket);
-    if(!alan) return;
-    const deger = U.metniSayiyaCevir(hamDeger);
-    if(deger === null) return;
-    bulgular.push({alan, gun: gunTani(etiket) || 'bugun', deger, kaynak, etiket: String(etiket).slice(0,60)});
-  };
+// Raporun tarihi: "Tarih" alanı, yoksa çıktının zaman damgası, o da yoksa bugün.
+function raporTarihi(veri){
+  const alan = (veri.alanlar || []).find(a => /^tarih$/i.test(temiz(a.etiket)));
+  if(alan && /^\d{4}-\d{2}-\d{2}$/.test(temiz(alan.deger))) return temiz(alan.deger);
+  if(veri.zaman && /^\d{4}-\d{2}-\d{2}/.test(veri.zaman)) return veri.zaman.slice(0,10);
+  return U.bugunStr();
+}
 
-  (veri.alanlar || []).forEach(a => ekle(a.etiket, a.deger, 'alan'));
-  (veri.listeler || []).forEach(l => ekle(l.etiket, (l.secili || [])[0], 'liste'));
-  (veri.tablolar || []).forEach((t, ti) => {
-    (t.satirlar || []).forEach(satir => {
-      if(!satir || satir.length < 2) return;
-      const etiket = satir[0];
-      // Satırın ilk hücresi etiket, sonrakiler değer kabul edilir.
-      for(let i=1;i<satir.length;i++) ekle(etiket, satir[i], 'tablo' + (ti+1));
+// 2. tablo: haftanın günleri. Rapor tarihinden sonraki günler (hepsi 0) atlanır.
+function haftaTablosunuCozumle(veri, tarih){
+  const tablo = tabloBul(veri.tablolar, b => GUN_BASLIKLARI[0].test(b[1] || ''));
+  if(!tablo) return {gunler: [], haftaToplamlari: {}};
+
+  const baslik = tablo.satirlar[0].map(temiz);
+  const gunSutunlari = GUN_BASLIKLARI.map(d => sutunBul(baslik, d));
+  const pzt = U.pazartesi(new Date(tarih + 'T12:00:00'));
+
+  const gunler = [];
+  gunSutunlari.forEach((sutun, i) => {
+    if(sutun < 0) return;
+    const d = new Date(pzt); d.setDate(pzt.getDate() + i);
+    const gunStr = U.dateStr(d);
+    if(gunStr > tarih) return;                 // gelecek günler kaynakta 0 geliyor, yazma
+
+    const degerler = {};
+    tablo.satirlar.slice(1).forEach(satir => {
+      const alan = alanTani(satir[0]);
+      if(!alan) return;
+      const sayi = U.metniSayiyaCevir(satir[sutun]);
+      if(sayi !== null) degerler[alan] = sayi;
     });
+    if(Object.keys(degerler).length) gunler.push({tarih: gunStr, degerler});
   });
-  return bulgular;
+
+  // "38.HAFTA", "EYLÜL" gibi özet sütunları — yazılmaz, sadece gösterilir.
+  const haftaToplamlari = {};
+  baslik.forEach((h, i) => {
+    if(!/hafta$|^(ocak|şubat|mart|nisan|mayıs|haziran|temmuz|ağustos|eylül|ekim|kasım|aralık)$/i.test(h)) return;
+    const ciroSatiri = tablo.satirlar.slice(1).find(s => alanTani(s[0]) === 'ciro');
+    if(ciroSatiri) haftaToplamlari[h] = U.metniSayiyaCevir(ciroSatiri[i]);
+  });
+  return {gunler, haftaToplamlari};
 }
 
-// Eski düz biçim: ciro_bugun / ciro_dun gibi.
-function duzCozumle(veri){
-  const bulgular = [];
-  Object.keys(veri).forEach(anahtar => {
-    const alan = alanTani(anahtar.replace(/_/g, ' '));
-    if(!alan) return;
-    const deger = U.metniSayiyaCevir(veri[anahtar]);
-    if(deger === null) return;
-    bulgular.push({alan, gun: /_dun$|dün/i.test(anahtar) ? 'dun' : 'bugun', deger, kaynak:'alan', etiket:anahtar});
-  });
-  return bulgular;
+// 1. tablo: bugün ve dün sütunları. Hafta tablosunda olmayan alanları tamamlar
+// (ürün adedi, fatura sayısı gibi).
+function kpiTablosunuCozumle(veri, tarih){
+  const tablo = tabloBul(veri.tablolar, b => /^bug[uü]n$/i.test(b[1] || ''));
+  if(!tablo) return {};
+  const baslik = tablo.satirlar[0].map(temiz);
+  const bugunSutun = sutunBul(baslik, /^bug[uü]n$/i);
+  const dunSutun   = sutunBul(baslik, /^d[uü]n$/i);
+
+  const dun = new Date(tarih + 'T12:00:00');
+  dun.setDate(dun.getDate() - 1);
+
+  const cikar = sutun => {
+    if(sutun < 0) return null;
+    const degerler = {};
+    tablo.satirlar.slice(1).forEach(satir => {
+      const alan = alanTani(satir[0]);
+      if(!alan) return;
+      const sayi = U.metniSayiyaCevir(satir[sutun]);
+      if(sayi !== null) degerler[alan] = sayi;
+    });
+    return Object.keys(degerler).length ? degerler : null;
+  };
+  const sonuc = {};
+  const b = cikar(bugunSutun);
+  const d = cikar(dunSutun);
+  if(b) sonuc[tarih] = b;
+  if(d) sonuc[U.dateStr(dun)] = d;
+  return sonuc;
+}
+
+// 3. tablo: gruplama. "Fatura No" ile gruplanmışsa toplu satış hesaplanabilir.
+const TOPLU_ESIK = 2200;
+function grupTablosunuCozumle(veri){
+  const tablo = tabloBul(veri.tablolar, b => /^grup$/i.test(b[0] || ''));
+  if(!tablo) return null;
+  const baslik = tablo.satirlar[0].map(temiz);
+  const toplamSutun = sutunBul(baslik, /^toplam$/i);
+  if(toplamSutun < 0) return null;
+
+  const satirlar = tablo.satirlar.slice(1).map(s => ({
+    ad: temiz(s[0]),
+    fatura: U.metniSayiyaCevir(s[sutunBul(baslik, /fatura/i)]),
+    adet: U.metniSayiyaCevir(s[sutunBul(baslik, /^adet$/i)]),
+    tutar: U.metniSayiyaCevir(s[toplamSutun])
+  })).filter(s => s.ad);
+
+  // Gruplama ölçütünü açılır listeden anla.
+  const liste = (veri.listeler || []).find(l => /gruplama/i.test(temiz(l.etiket)));
+  const olcut = liste && liste.secili && liste.secili[0] ? temiz(liste.secili[0]) : '';
+  const faturaBazli = /fatura/i.test(olcut);
+
+  return {
+    olcut: olcut || 'bilinmiyor',
+    faturaBazli,
+    satirlar,
+    topluSatis: faturaBazli
+      ? Math.round(satirlar.filter(s => (s.tutar || 0) >= TOPLU_ESIK).reduce((t,s) => t + s.tutar, 0) / 1000)
+      : null,
+    topluAdet: faturaBazli ? satirlar.filter(s => (s.tutar || 0) >= TOPLU_ESIK).length : null
+  };
 }
 
 export function metniCozumle(metin){
   let veri;
   try{ veri = JSON.parse(metin); }
-  catch(e){ return {hata:'Yapıştırılan metin JSON değil. Yer imine tıklayıp tekrar deneyin.'}; }
+  catch(e){ return {hata:'Yapıştırılan metin JSON değil. Yer imine tıklayıp çıkan kutudaki metni kopyalayın.'}; }
+  if(!veri || typeof veri !== 'object') return {hata:'Beklenen biçimde veri bulunamadı.'};
 
-  const bookmarkletMi = veri && (veri.tablolar || veri.alanlar || veri.secimler);
-  const bulgular = bookmarkletMi ? bookmarkletCozumle(veri) : duzCozumle(veri || {});
+  const tarih = raporTarihi(veri);
+  const {gunler, haftaToplamlari} = haftaTablosunuCozumle(veri, tarih);
+  const kpi = kpiTablosunuCozumle(veri, tarih);
+  const grup = grupTablosunuCozumle(veri);
 
-  // Aynı alan için birden fazla bulgu varsa ilkini esas al.
-  const secilen = {bugun:{}, dun:{}};
-  bulgular.forEach(b => {
-    if(secilen[b.gun][b.alan] === undefined) secilen[b.gun][b.alan] = b;
+  // Gün listesini birleştir: hafta tablosu esas, KPI tablosu eksikleri tamamlar.
+  const harita = new Map();
+  gunler.forEach(g => harita.set(g.tarih, Object.assign({}, g.degerler)));
+  Object.keys(kpi).forEach(t => {
+    harita.set(t, Object.assign({}, kpi[t], harita.get(t) || {}));
   });
+  if(grup && grup.topluSatis !== null && harita.has(tarih)){
+    harita.get(tarih).toplu = grup.topluSatis;
+  }
 
+  const yazilacak = [...harita.entries()]
+    .map(([t, degerler]) => ({tarih: t, degerler}))
+    .sort((a,b) => a.tarih.localeCompare(b.tarih));
+
+  if(!yazilacak.length){
+    return {hata:'Tablolar okundu ama tanınan bir KPI satırı bulunamadı. Çıktıyı olduğu gibi paylaşırsanız eşleştirmeyi genişletirim.'};
+  }
   return {
-    kaynak: bookmarkletMi ? 'Yer imi çıktısı' : 'Düz JSON',
+    kaynak: 'Ciro takip sayfası',
     url: veri.url || '',
-    zaman: veri.zaman || '',
-    bulgular,
-    secilen,
+    tarih,
+    yazilacak,
+    haftaToplamlari,
+    grup,
     ham: veri
   };
 }

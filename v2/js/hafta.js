@@ -10,7 +10,10 @@ export const KPI_TANIM = [
   {id:'fbs',   ad:'FBS',            tur:'para',    formul:'ortalama',  ipucu:'Haftalık ortalama'},
   {id:'hedef', ad:'Hedef',          tur:'para',    formul:'toplam',    ipucu:'Haftalık toplam hedef'},
   {id:'oran',  ad:'Oran',           tur:'yuzde',   formul:'oran',      ipucu:'Hafta toplamı / hafta hedefi', hesaplanan:true},
-  {id:'toplu', ad:'Toplu Satışlar', tur:'tam',     formul:'toplam',    ipucu:'Haftalık toplam'}
+  {id:'toplu', ad:'Toplu Satışlar', tur:'tam',     formul:'toplam',    ipucu:'Haftalık toplam'},
+  // Kaynak sayfada var; kurucu panelinden açılabilir, varsayılanda kapalı.
+  {id:'urunAdedi',    ad:'Ürün Adedi',   tur:'tam', formul:'toplam', ipucu:'Haftalık toplam'},
+  {id:'faturaSayisi', ad:'Fatura Sayısı',tur:'tam', formul:'toplam', ipucu:'Haftalık toplam'}
 ];
 
 function bicim(tur, deger){
@@ -79,7 +82,9 @@ function formulHucresi(kpi, magaza, pzt, ozet){
       return {metin: (ozet.mgsToplam === null ? '–' : U.fmtSayi(ozet.mgsToplam,0)) + ' / ort ' + (ort === null ? '–' : U.fmtSayi(ort,0)), sinif:''};
     }
     case 'toplam': {
-      const v = kpi.id === 'hedef' ? ozet.hedefToplam : ozet.topluToplam;
+      const v = kpi.id === 'hedef'
+        ? ozet.hedefToplam
+        : U.toplam(ozet.kayitlar.map(k => U.sayi(k[kpi.id])));
       return {metin: v === null ? '–' : U.fmtSayi(v, 0), sinif:''};
     }
     case 'oran':

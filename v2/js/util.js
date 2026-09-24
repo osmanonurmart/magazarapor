@@ -73,20 +73,25 @@ export function degisimSinifi(n){
   return v > 0.05 ? 'artis' : (v < -0.05 ? 'dusus' : 'sabit');
 }
 // "12.345,67" / "%45" / "1 234" gibi girdileri sayıya çevirir.
+// "12.345,67 TRY", "% 45,45", "-93,79%", "23.411 TRY" gibi girdileri sayıya çevirir.
+// Önce harf ve simgeler atılır; binlik/ondalık ayrımı ondan sonra yapılır,
+// yoksa "23.411 TRY" içindeki harfler ayıraç kalıbını bozar.
 export function metniSayiyaCevir(s){
   if(s === null || s === undefined) return null;
-  let t = String(s).replace(/[%₺\s]/g,'').replace(/TL/gi,'').trim();
-  if(!t || t === '-') return null;
+  let t = String(s).replace(/[^\d.,\-]/g, '');
+  if(!t || t === '-' || t === '.' || t === ',') return null;
+  const eksi = t.trimStart().startsWith('-');
+  t = t.replace(/-/g, '');
   if(t.includes(',')){
-    // "123.456,78" — nokta binlik, virgül ondalık.
-    t = t.replace(/\./g,'').replace(',', '.');
-  } else if(/^-?\d{1,3}(\.\d{3})+$/.test(t)){
-    // "98.000" — virgül yok ve noktalar üçerli gruplar: binlik ayıracı.
-    t = t.replace(/\./g,'');
+    // "12.345,67" — nokta binlik, virgül ondalık.
+    t = t.replace(/\./g, '').replace(',', '.');
+  } else if(/^\d{1,3}(\.\d{3})+$/.test(t)){
+    // "23.411" — virgül yok ve noktalar üçerli gruplar: binlik ayıracı.
+    t = t.replace(/\./g, '');
   }
-  t = t.replace(/[^\d.\-]/g,'');
   const n = parseFloat(t);
-  return isNaN(n) ? null : n;
+  if(isNaN(n)) return null;
+  return eksi ? -n : n;
 }
 export function ortalama(liste){
   const v = liste.filter(x => x !== null && x !== undefined && !isNaN(x));

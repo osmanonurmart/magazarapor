@@ -300,7 +300,13 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
 .bulgu-grup{ margin-bottom:7px; font-size:.8rem; }
 .bulgu{ display:inline-block; background:var(--kagit); border:1px solid var(--cizgi); border-radius:20px; padding:2px 10px; margin:3px 5px 0 0; font-size:.76rem; }
 .bulgu i{ color:var(--soluk); font-style:normal; font-size:.68rem; margin-right:4px; }
-.bulgu-not{ font-size:.72rem; color:var(--soluk); margin-top:8px; }
+.bulgu-not{ font-size:.72rem; color:var(--soluk); margin-top:8px; line-height:1.5; }
+.bulgu-not.iyi{ color:var(--artis); font-weight:600; }
+.onizleme{ width:100%; font-size:.76rem; margin-top:4px; }
+.onizleme th,.onizleme td{ border:1px solid var(--cizgi); padding:4px 7px; text-align:right; }
+.onizleme thead th{ background:var(--kagit); font-weight:600; }
+.onizleme .on-gun{ text-align:left; white-space:nowrap; font-weight:600; }
+.on-uyari{ color:var(--vurgu); font-size:.7rem; margin-left:3px; }
 .uyari{ background:#f8eaea; color:var(--dusus); border-radius:8px; padding:9px 11px; font-size:.8rem; margin-top:10px; }
 .personel-satir{ display:flex; align-items:center; gap:8px; padding:5px 0; border-bottom:1px solid var(--cizgi); }
 .personel-satir.pasif{ opacity:.55; }
