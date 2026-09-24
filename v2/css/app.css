@@ -251,6 +251,8 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
 .k-rol{ font-size:.68rem; color:var(--soluk); width:54px; }
 .k-sifre{ width:78px; padding:4px 8px; border:1px solid var(--cizgi); border-radius:6px; font-size:.8rem; }
 .satir-ayar{ display:flex; gap:6px; flex-wrap:wrap; }
+.esik-satir{ display:flex; align-items:center; gap:8px; font-size:.82rem; }
+.esik-satir input{ width:100px; padding:5px 9px; border:1px solid var(--cizgi); border-radius:7px; text-align:right; }
 .etiket-satir{ display:flex; align-items:center; gap:8px; font-size:.8rem; padding:4px 0; }
 .etiket-satir code{ background:#f1efe9; padding:2px 6px; border-radius:5px; }
 .etiket-satir button{ margin-left:auto; }

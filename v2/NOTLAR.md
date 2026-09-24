@@ -103,14 +103,16 @@ Yer imi çıktısı üç tablo veriyor. Çözümleyici (`js/yapistir.js`) bunlar
 |---|---|---|
 | 1 | `KPI \| BUGÜN \| DÜN \| GEÇEN HAFTA \| ...değişim` | Bugün ve dün sütunları yazılıyor. Ürün adedi ve fatura sayısı yalnızca burada var. |
 | 2 | `KPI \| Pazartesi..Pazar \| 38.HAFTA \| 39.HAFTA \| aylar` | **Asıl kaynak.** Haftanın bütün günleri tek yapıştırmada yazılıyor. Hafta ve ay toplamları yalnızca kıyas için gösteriliyor. |
-| 3 | `GRUP \| FATURA SAYISI \| ADET \| TOPLAM \| DURUM` | Gruplama "Fatura No" ise 2.200 ₺ üzeri faturalar toplanıp toplu satış hesaplanıyor. "Satış Danışmanı" ise kullanıcıya gruplamayı değiştirmesi söyleniyor. |
+| 3 | `GRUP \| FATURA SAYISI \| ADET \| TOPLAM \| DURUM` | Gruplama "Fatura No" ise eşiğin üzerindeki faturalar toplanıp toplu satış hesaplanıyor. "Satış Danışmanı" ise kullanıcıya gruplamayı değiştirmesi söyleniyor. Eşik Kurucu panelinden ayarlanıyor (varsayılan 2.200 ₺). |
 
 `Tarih` alanı raporun gününü veriyor; bilgisayarın saatine güvenilmiyor.
 Rapor tarihinden sonraki günler kaynakta 0 geldiği için yazılmıyor.
 
 Eşleşen KPI adları: Ciro/Satış, MDO, MGS, FBS, FBU, Ürün Adedi, Fatura Sayısı.
-Doğrulama: örnek çıktıda günlerin toplamı (23.411 + 28.398 + 29.459 + 1.829 =
-83.097) kaynağın "39.HAFTA" sütunuyla birebir tutuyor.
+**Hafta tablosu ciroyu yuvarlıyor** (3.599,84 → 3.600); KPI tablosu bugün ve dün
+için tam değeri veriyor. Bu yüzden o iki günde KPI tablosu esas alınıyor,
+diğer günlerde hafta tablosu. Doğrulama: dört günün toplamı 84.867,34 çıkıyor,
+kaynağın "39.HAFTA" sütunu 84.867 — fark yalnızca kaynağın kendi yuvarlaması.
 
 ### Buradan çıkan işler
 

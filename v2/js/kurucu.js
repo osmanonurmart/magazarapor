@@ -14,6 +14,11 @@ export function kurucuPaneli(yenile){
       <div class="panel-kutu"><h3>Kullanıcılar</h3><div class="kullanici-yonet"></div></div>
       <div class="panel-kutu"><h3>Görünür KPI satırları</h3><div class="satir-ayar"></div>
         <p class="aciklama">Mağaza tablolarında hangi satırların görüneceğini belirler.</p></div>
+      <div class="panel-kutu"><h3>Toplu satış eşiği</h3>
+        <label class="esik-satir">Bu tutarın üzerindeki faturalar toplu satış sayılır:
+          <input type="text" inputmode="numeric" class="toplu-esik" value="${V.topluEsikGetir()}"> ₺</label>
+        <p class="aciklama">Yapıştırma sırasında kaynak sayfadaki fatura listesi bu eşiğe göre toplanır.</p>
+      </div>
       <div class="panel-kutu"><h3>Etiketler</h3><div class="etiket-yonet"></div>
         <div class="satir-ekle"><input class="e-anahtar" type="text" placeholder="halı"><input class="e-kart" type="text" placeholder="Halı satışı"><button class="mini birincil etiket-ekle">+ Ekle</button></div>
         <p class="aciklama">Ürün satırlarında anahtar kelime geçen kayıtlar bu kartta toplanır.</p></div>
@@ -128,6 +133,14 @@ export function kurucuPaneli(yenile){
     });
   };
   satirCiz();
+
+  // --- Toplu satış eşiği ---
+  kok.querySelector('.toplu-esik').addEventListener('change', function(){
+    const v = U.metniSayiyaCevir(this.value);
+    if(v === null || v < 0){ this.value = V.topluEsikGetir(); return; }
+    V.topluEsikYaz(v);
+    this.value = v;
+  });
 
   // --- Etiketler ---
   const etKutu = kok.querySelector('.etiket-yonet');

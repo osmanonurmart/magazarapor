@@ -260,6 +260,8 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
 .k-rol{ font-size:.68rem; color:var(--soluk); width:54px; }
 .k-sifre{ width:78px; padding:4px 8px; border:1px solid var(--cizgi); border-radius:6px; font-size:.8rem; }
 .satir-ayar{ display:flex; gap:6px; flex-wrap:wrap; }
+.esik-satir{ display:flex; align-items:center; gap:8px; font-size:.82rem; }
+.esik-satir input{ width:100px; padding:5px 9px; border:1px solid var(--cizgi); border-radius:7px; text-align:right; }
 .etiket-satir{ display:flex; align-items:center; gap:8px; font-size:.8rem; padding:4px 0; }
 .etiket-satir code{ background:#f1efe9; padding:2px 6px; border-radius:5px; }
 .etiket-satir button{ margin-left:auto; }
@@ -633,6 +635,12 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
   }
   function etiketleriGetir() {
     return oku("etiketler", [{ anahtar: "halı", kart: "Halı satışı" }]);
+  }
+  function topluEsikGetir() {
+    return oku("topluEsik", 2200);
+  }
+  function topluEsikYaz(v) {
+    yaz("topluEsik", v);
   }
   function etiketleriYaz(v) {
     yaz("etiketler", v);
@@ -1312,8 +1320,7 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
     if (d) sonuc[dateStr(dun)] = d;
     return sonuc;
   }
-  var TOPLU_ESIK = 2200;
-  function grupTablosunuCozumle(veri) {
+  function grupTablosunuCozumle(veri, topluEsik) {
     const tablo = tabloBul(veri.tablolar, (b) => /^grup$/i.test(b[0] || ""));
     if (!tablo) return null;
     const baslik = tablo.satirlar[0].map(temiz);
@@ -1332,11 +1339,14 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
       olcut: olcut || "bilinmiyor",
       faturaBazli,
       satirlar,
-      topluSatis: faturaBazli ? Math.round(satirlar.filter((s) => (s.tutar || 0) >= TOPLU_ESIK).reduce((t, s) => t + s.tutar, 0) / 1e3) : null,
-      topluAdet: faturaBazli ? satirlar.filter((s) => (s.tutar || 0) >= TOPLU_ESIK).length : null
+      esik: topluEsik,
+      topluSatis: faturaBazli ? Math.round(satirlar.filter((s) => (s.tutar || 0) >= topluEsik).reduce((t, s) => t + s.tutar, 0) / 1e3) : null,
+      topluAdet: faturaBazli ? satirlar.filter((s) => (s.tutar || 0) >= topluEsik).length : null,
+      faturaSayisi: satirlar.length
     };
   }
-  function metniCozumle(metin) {
+  function metniCozumle(metin, secenekler = {}) {
+    const topluEsik = secenekler.topluEsik ?? 2200;
     let veri;
     try {
       veri = JSON.parse(metin);
@@ -1347,11 +1357,11 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
     const tarih = raporTarihi(veri);
     const { gunler, haftaToplamlari } = haftaTablosunuCozumle(veri, tarih);
     const kpi = kpiTablosunuCozumle(veri, tarih);
-    const grup = grupTablosunuCozumle(veri);
+    const grup = grupTablosunuCozumle(veri, topluEsik);
     const harita = /* @__PURE__ */ new Map();
     gunler.forEach((g) => harita.set(g.tarih, Object.assign({}, g.degerler)));
     Object.keys(kpi).forEach((t) => {
-      harita.set(t, Object.assign({}, kpi[t], harita.get(t) || {}));
+      harita.set(t, Object.assign({}, harita.get(t) || {}, kpi[t]));
     });
     if (grup && grup.topluSatis !== null && harita.has(tarih)) {
       harita.get(tarih).toplu = grup.topluSatis;
@@ -1545,7 +1555,7 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
         cozum = null;
         return;
       }
-      const c = metniCozumle(alan.value.trim());
+      const c = metniCozumle(alan.value.trim(), { topluEsik: topluEsikGetir() });
       cozum = c;
       if (c.hata) {
         sonuc.innerHTML = `<div class="uyari">${esc(c.hata)}</div>`;
@@ -1605,8 +1615,10 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
   function grupNotu(c) {
     if (!c.grup) return "";
     if (c.grup.faturaBazli) {
-      return `<div class="bulgu-not iyi">Toplu satış hesaplandı: ${c.grup.topluAdet} fatura,
-      ${fmtSayi(c.grup.topluSatis, 0)} K (2.200 ₺ üzeri faturalar).</div>`;
+      const esik = fmtSayi(c.grup.esik, 0) + " ₺";
+      return c.grup.topluAdet ? `<div class="bulgu-not iyi">Toplu satış: ${c.grup.topluAdet} fatura, ${fmtSayi(c.grup.topluSatis, 0)} K
+         (${c.grup.faturaSayisi} faturanın ${esik} üzerinde olanları).</div>` : `<div class="bulgu-not">Bugünkü ${c.grup.faturaSayisi} faturanın hiçbiri ${esik} eşiğini geçmedi,
+         toplu satış 0 yazılacak. Eşik Kurucu panelinden değiştirilebilir.</div>`;
     }
     return `<div class="bulgu-not">Gruplama şu an <b>${esc(c.grup.olcut)}</b>. Toplu satışın da
     otomatik gelmesi için kaynak sayfada gruplamayı <b>Fatura No</b> yapıp tekrar yapıştırın.</div>`;
@@ -2063,6 +2075,11 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
       <div class="panel-kutu"><h3>Kullanıcılar</h3><div class="kullanici-yonet"></div></div>
       <div class="panel-kutu"><h3>Görünür KPI satırları</h3><div class="satir-ayar"></div>
         <p class="aciklama">Mağaza tablolarında hangi satırların görüneceğini belirler.</p></div>
+      <div class="panel-kutu"><h3>Toplu satış eşiği</h3>
+        <label class="esik-satir">Bu tutarın üzerindeki faturalar toplu satış sayılır:
+          <input type="text" inputmode="numeric" class="toplu-esik" value="${topluEsikGetir()}"> ₺</label>
+        <p class="aciklama">Yapıştırma sırasında kaynak sayfadaki fatura listesi bu eşiğe göre toplanır.</p>
+      </div>
       <div class="panel-kutu"><h3>Etiketler</h3><div class="etiket-yonet"></div>
         <div class="satir-ekle"><input class="e-anahtar" type="text" placeholder="halı"><input class="e-kart" type="text" placeholder="Halı satışı"><button class="mini birincil etiket-ekle">+ Ekle</button></div>
         <p class="aciklama">Ürün satırlarında anahtar kelime geçen kayıtlar bu kartta toplanır.</p></div>
@@ -2183,6 +2200,15 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
       });
     };
     satirCiz();
+    kok.querySelector(".toplu-esik").addEventListener("change", function() {
+      const v = metniSayiyaCevir(this.value);
+      if (v === null || v < 0) {
+        this.value = topluEsikGetir();
+        return;
+      }
+      topluEsikYaz(v);
+      this.value = v;
+    });
     const etKutu = kok.querySelector(".etiket-yonet");
     const etCiz = () => {
       const liste = etiketleriGetir();

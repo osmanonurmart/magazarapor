@@ -122,6 +122,9 @@ export function satirAyariGetir(){
 }
 export function satirAyariYaz(v){ yaz('gorunum:satirlar', v); }
 export function etiketleriGetir(){ return oku('etiketler', [{anahtar:'halı', kart:'Halı satışı'}]); }
+// Bu tutarın üzerindeki faturalar "toplu satış" sayılır.
+export function topluEsikGetir(){ return oku('topluEsik', 2200); }
+export function topluEsikYaz(v){ yaz('topluEsik', v); }
 export function etiketleriYaz(v){ yaz('etiketler', v); }
 
 // ---------------- Oturum ----------------

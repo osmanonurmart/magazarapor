@@ -112,8 +112,7 @@ function kpiTablosunuCozumle(veri, tarih){
 }
 
 // 3. tablo: gruplama. "Fatura No" ile gruplanmışsa toplu satış hesaplanabilir.
-const TOPLU_ESIK = 2200;
-function grupTablosunuCozumle(veri){
+function grupTablosunuCozumle(veri, topluEsik){
   const tablo = tabloBul(veri.tablolar, b => /^grup$/i.test(b[0] || ''));
   if(!tablo) return null;
   const baslik = tablo.satirlar[0].map(temiz);
@@ -136,14 +135,18 @@ function grupTablosunuCozumle(veri){
     olcut: olcut || 'bilinmiyor',
     faturaBazli,
     satirlar,
+    esik: topluEsik,
     topluSatis: faturaBazli
-      ? Math.round(satirlar.filter(s => (s.tutar || 0) >= TOPLU_ESIK).reduce((t,s) => t + s.tutar, 0) / 1000)
+      ? Math.round(satirlar.filter(s => (s.tutar || 0) >= topluEsik).reduce((t,s) => t + s.tutar, 0) / 1000)
       : null,
-    topluAdet: faturaBazli ? satirlar.filter(s => (s.tutar || 0) >= TOPLU_ESIK).length : null
+    topluAdet: faturaBazli ? satirlar.filter(s => (s.tutar || 0) >= topluEsik).length : null,
+    faturaSayisi: satirlar.length
   };
 }
 
-export function metniCozumle(metin){
+// secenekler: {topluEsik}
+export function metniCozumle(metin, secenekler = {}){
+  const topluEsik = secenekler.topluEsik ?? 2200;
   let veri;
   try{ veri = JSON.parse(metin); }
   catch(e){ return {hata:'Yapıştırılan metin JSON değil. Yer imine tıklayıp çıkan kutudaki metni kopyalayın.'}; }
@@ -152,13 +155,15 @@ export function metniCozumle(metin){
   const tarih = raporTarihi(veri);
   const {gunler, haftaToplamlari} = haftaTablosunuCozumle(veri, tarih);
   const kpi = kpiTablosunuCozumle(veri, tarih);
-  const grup = grupTablosunuCozumle(veri);
+  const grup = grupTablosunuCozumle(veri, topluEsik);
 
-  // Gün listesini birleştir: hafta tablosu esas, KPI tablosu eksikleri tamamlar.
+  // Gün listesini birleştir. Hafta tablosu bütün günleri verir ama ciroyu tam
+  // sayıya yuvarlar (3.599,84 → 3.600); KPI tablosu bugün ve dün için tam
+  // değeri verdiğinden o ikisinde KPI tablosu esas alınır.
   const harita = new Map();
   gunler.forEach(g => harita.set(g.tarih, Object.assign({}, g.degerler)));
   Object.keys(kpi).forEach(t => {
-    harita.set(t, Object.assign({}, kpi[t], harita.get(t) || {}));
+    harita.set(t, Object.assign({}, harita.get(t) || {}, kpi[t]));
   });
   if(grup && grup.topluSatis !== null && harita.has(tarih)){
     harita.get(tarih).toplu = grup.topluSatis;

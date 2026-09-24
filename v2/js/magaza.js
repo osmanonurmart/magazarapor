@@ -139,7 +139,7 @@ export function yapistirPenceresi(magazaKey, yenile){
 
   const cozumle = () => {
     if(!alan.value.trim()){ sonuc.innerHTML = ''; cozum = null; return; }
-    const c = metniCozumle(alan.value.trim());
+    const c = metniCozumle(alan.value.trim(), {topluEsik: V.topluEsikGetir()});
     cozum = c;
     if(c.hata){ sonuc.innerHTML = `<div class="uyari">${U.esc(c.hata)}</div>`; return; }
 
@@ -195,8 +195,12 @@ export function yapistirPenceresi(magazaKey, yenile){
 function grupNotu(c){
   if(!c.grup) return '';
   if(c.grup.faturaBazli){
-    return `<div class="bulgu-not iyi">Toplu satış hesaplandı: ${c.grup.topluAdet} fatura,
-      ${U.fmtSayi(c.grup.topluSatis, 0)} K (2.200 ₺ üzeri faturalar).</div>`;
+    const esik = U.fmtSayi(c.grup.esik, 0) + ' ₺';
+    return c.grup.topluAdet
+      ? `<div class="bulgu-not iyi">Toplu satış: ${c.grup.topluAdet} fatura, ${U.fmtSayi(c.grup.topluSatis, 0)} K
+         (${c.grup.faturaSayisi} faturanın ${esik} üzerinde olanları).</div>`
+      : `<div class="bulgu-not">Bugünkü ${c.grup.faturaSayisi} faturanın hiçbiri ${esik} eşiğini geçmedi,
+         toplu satış 0 yazılacak. Eşik Kurucu panelinden değiştirilebilir.</div>`;
   }
   return `<div class="bulgu-not">Gruplama şu an <b>${U.esc(c.grup.olcut)}</b>. Toplu satışın da
     otomatik gelmesi için kaynak sayfada gruplamayı <b>Fatura No</b> yapıp tekrar yapıştırın.</div>`;
