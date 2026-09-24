@@ -86,9 +86,12 @@ table{ border-collapse:collapse; }
   display:flex; align-items:center; gap:12px; padding:7px 14px; flex-wrap:wrap;
 }
 .ust-logo{
-  flex:0 0 auto; width:32px; height:32px; border-radius:9px; background:var(--koyu);
-  display:flex; align-items:center; justify-content:center; font-size:1.05rem;
+  flex:0 0 auto; width:34px; height:34px; padding:0; border:1px solid transparent;
+  border-radius:9px; background:none; cursor:pointer; overflow:hidden;
+  display:flex; align-items:center; justify-content:center; transition:border-color .12s, transform .12s;
 }
+.ust-logo img{ width:100%; height:100%; display:block; border-radius:8px; }
+.ust-logo:hover{ border-color:var(--vurgu); transform:scale(1.04); }
 .menu{ display:flex; gap:4px; flex-wrap:wrap; }
 .menu-btn{
   background:none; border:none; padding:7px 12px; border-radius:8px;
@@ -377,7 +380,42 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
 .kategori-liste{ display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:12px; }
 .kategori{ background:var(--kagit); border:1px solid var(--cizgi); border-radius:var(--r); padding:12px; }
 .kategori h4{ font-size:.84rem; margin-bottom:8px; }
-.urun-satir{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:4px 0; font-size:.8rem; }
+/* Ürün satırı: ad · yeşil tik · artı ya da kalem */
+.urun-satir{
+  display:flex; align-items:center; gap:7px; padding:4px 2px; font-size:.8rem;
+  border-bottom:1px solid var(--cizgi-ince); flex-wrap:wrap;
+}
+.urun-satir:last-child{ border-bottom:none; }
+.urun-satir .u-ad{ flex:1; min-width:0; }
+.urun-satir.secili .u-ad{ font-weight:600; }
+.u-tik{ color:var(--artis); font-weight:700; font-size:.86rem; }
+.u-dugme{
+  flex:0 0 auto; width:24px; height:24px; border-radius:7px; cursor:pointer;
+  border:1px solid var(--cizgi); background:var(--kagit); color:var(--soluk); font-size:.85rem; line-height:1;
+}
+.u-dugme.arti:hover{ border-color:var(--vurgu); color:var(--vurgu); }
+.u-dugme.kalem{ border-color:var(--vurgu); color:var(--vurgu); background:var(--acik-vurgu); }
+.u-notu{
+  flex:0 0 100%; font-size:.72rem; color:#5f4a22; background:var(--acik-vurgu);
+  border-radius:6px; padding:2px 8px; margin:1px 0 2px;
+}
+.u-not-girdi{ flex:0 0 100%; display:flex; gap:5px; margin:3px 0 2px; }
+.u-not-girdi input{ flex:1; min-width:0; padding:4px 8px; border:1px solid var(--vurgu); border-radius:6px; font-size:.75rem; }
+.u-not-girdi .sil:hover{ border-color:var(--dusus); color:var(--dusus); }
+/* Bölge görünümü: kaç mağaza istedi */
+.u-sayac{
+  flex:0 0 auto; border:1px solid var(--cizgi); background:var(--kagit); border-radius:20px;
+  padding:2px 10px; font-size:.72rem; font-weight:600; color:var(--yazi); cursor:pointer; white-space:nowrap;
+}
+.u-sayac.bos{ color:var(--soluk); cursor:default; font-weight:400; }
+.u-sayac:not(.bos):hover{ border-color:var(--vurgu); color:var(--vurgu); }
+.u-magazalar{ flex:0 0 100%; margin:3px 0 4px; border-left:2px solid var(--vurgu); padding-left:9px; }
+.u-magaza{ display:flex; gap:8px; font-size:.74rem; padding:2px 0; }
+.um-ad{ flex:0 0 130px; font-weight:600; }
+.um-adet{ flex:0 0 40px; color:var(--soluk); }
+.um-not{ flex:1; min-width:0; color:#5f4a22; }
+.s-not{ display:block; font-style:normal; font-size:.68rem; color:#5f4a22; }
+.rapor-liste{ max-height:320px; overflow:auto; }
 .sepet-satir{ display:flex; align-items:center; gap:6px; font-size:.79rem; padding:4px 0; border-bottom:1px solid var(--cizgi); }
 .s-ad{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .s-adet{ min-width:20px; text-align:center; font-weight:700; }
@@ -972,7 +1010,7 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
   }
   function talepleriTohumla(magazaListesi, buPzt) {
     const kategoriler = kategorilerGetir();
-    const tumUrunler = kategoriler.flatMap((k) => k.urunler || []);
+    const tumUrunler2 = kategoriler.flatMap((k) => k.urunler || []);
     const liste = [];
     [
       { pzt: haftaEkle(buPzt, -1), gonderenSayisi: 18, durum: "Karşılandı" },
@@ -983,7 +1021,7 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
         const adet = 2 + Math.floor(rnd() * 3);
         const secilenler = [];
         for (let i = 0; i < adet; i++) {
-          const u = tumUrunler[Math.floor(rnd() * tumUrunler.length) % tumUrunler.length];
+          const u = tumUrunler2[Math.floor(rnd() * tumUrunler2.length) % tumUrunler2.length];
           if (secilenler.some((s) => s.urunId === u.id)) continue;
           secilenler.push({ urunId: u.id, ad: u.ad, adet: 1 + Math.floor(rnd() * 6) });
         }
@@ -2278,11 +2316,22 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
     const hk = haftaKey(pzt);
     return taleplerGetir().find((t) => t.magazaKey === magazaKey && t.hafta === hk) || null;
   }
+  function tumUrunler() {
+    return kategorilerGetir().flatMap((k) => (k.urunler || []).map((u) => ({ ...u, kategori: k.ad })));
+  }
+  function urunAdi(id) {
+    const u = tumUrunler().find((x) => x.id === id);
+    return u ? u.ad : id;
+  }
   function talepEkrani(magazaKey, yenile) {
     const pzt = pazartesi(bugun());
     const mevcut = haftaninTalebi(magazaKey, pzt);
     const sepet = sepetler[magazaKey] = sepetler[magazaKey] || {};
-    const kategoriler = kategorilerGetir();
+    if (mevcut && !Object.keys(sepet).length) {
+      mevcut.satirlar.forEach((s) => {
+        sepet[s.urunId] = { adet: s.adet, not: s.not || "" };
+      });
+    }
     const kok = el(`<div class="talep-ekran">
     <div class="talep-sol">
       <div class="bolum-ust">
@@ -2293,88 +2342,134 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
     </div>
     <aside class="talep-sag">
       <div class="panel-kutu">
-        <h3>Sepet</h3>
+        <h3>🛒 Sepet</h3>
         <div class="sepet-liste"></div>
         <button class="mini birincil gonder">Talebi gönder</button>
         <div class="sepet-not"></div>
       </div>
       <div class="panel-kutu">
-        <h3>Geçmiş talepler</h3>
+        <h3>🕘 Geçmiş talepler</h3>
         <div class="talep-gecmis"></div>
       </div>
     </aside>
   </div>`);
     const katListe = kok.querySelector(".kategori-liste");
-    kategoriler.forEach((kat) => {
-      const blok = el(`<div class="kategori"><h4>${esc(kat.ad)}</h4><div class="urunler"></div></div>`);
-      const kap = blok.querySelector(".urunler");
-      (kat.urunler || []).forEach((u) => {
-        const satir = el(`<div class="urun-satir">
-        <span class="u-ad">${esc(u.ad)}</span>
-        <button class="mini" data-ekle="${u.id}">+</button>
-      </div>`);
-        satir.querySelector("[data-ekle]").addEventListener("click", () => {
-          sepet[u.id] = (sepet[u.id] || 0) + 1;
-          sepetCiz();
-        });
-        kap.appendChild(satir);
-      });
-      katListe.appendChild(blok);
-    });
     const sepetListe = kok.querySelector(".sepet-liste");
     const not = kok.querySelector(".sepet-not");
     const gonderBtn = kok.querySelector(".gonder");
-    function urunAdi(id) {
-      for (const k of kategoriler) {
-        const u = (k.urunler || []).find((x) => x.id === id);
-        if (u) return u.ad;
-      }
-      return id;
+    function urunleriCiz() {
+      katListe.innerHTML = "";
+      kategorilerGetir().forEach((kat) => {
+        const blok = el(`<div class="kategori"><h4>${esc(kat.ad)}</h4><div class="urunler"></div></div>`);
+        const kap = blok.querySelector(".urunler");
+        (kat.urunler || []).forEach((u) => {
+          const secili = sepet[u.id];
+          const satir = el(`<div class="urun-satir ${secili ? "secili" : ""}">
+          <span class="u-ad">${esc(u.ad)}</span>
+          ${secili ? '<span class="u-tik" title="Sepette">✓</span>' : ""}
+          <button class="u-dugme ${secili ? "kalem" : "arti"}"
+                  title="${secili ? "Not ekle veya düzenle" : "Sepete ekle"}">${secili ? "✎" : "+"}</button>
+        </div>`);
+          if (secili && secili.not) {
+            satir.appendChild(el(`<div class="u-notu">${esc(secili.not)}</div>`));
+          }
+          satir.querySelector(".u-dugme").addEventListener("click", () => {
+            if (!sepet[u.id]) {
+              sepet[u.id] = { adet: 1, not: "" };
+              urunleriCiz();
+              sepetCiz();
+            } else {
+              notAlani(satir, u.id);
+            }
+          });
+          kap.appendChild(satir);
+        });
+        katListe.appendChild(blok);
+      });
+    }
+    function notAlani(satir, urunId) {
+      if (satir.querySelector(".u-not-girdi")) return;
+      const eski = satir.querySelector(".u-notu");
+      if (eski) eski.remove();
+      const kutu = el(`<div class="u-not-girdi">
+      <input type="text" maxlength="80" placeholder="Detay: tek kişilik, siyah..." value="${esc(sepet[urunId].not || "")}">
+      <button class="mini birincil">Kaydet</button>
+      <button class="mini sil" title="Sepetten çıkar">✕</button>
+    </div>`);
+      const girdi = kutu.querySelector("input");
+      const kaydet = () => {
+        sepet[urunId].not = girdi.value.trim();
+        urunleriCiz();
+        sepetCiz();
+      };
+      kutu.querySelector(".birincil").addEventListener("click", kaydet);
+      kutu.querySelector(".sil").addEventListener("click", () => {
+        delete sepet[urunId];
+        urunleriCiz();
+        sepetCiz();
+      });
+      girdi.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          kaydet();
+        }
+        if (e.key === "Escape") {
+          e.preventDefault();
+          urunleriCiz();
+        }
+      });
+      satir.appendChild(kutu);
+      girdi.focus();
     }
     function sepetCiz() {
-      const idler = Object.keys(sepet).filter((id) => sepet[id] > 0);
+      const idler = Object.keys(sepet);
       sepetListe.innerHTML = idler.length ? "" : '<div class="menu-bos">Sepet boş.</div>';
       idler.forEach((id) => {
+        const s = sepet[id];
         const satir = el(`<div class="sepet-satir">
-        <span class="s-ad">${esc(urunAdi(id))}</span>
-        <button class="mini" data-eksi="${id}">−</button>
-        <span class="s-adet">${sepet[id]}</span>
-        <button class="mini" data-arti="${id}">+</button>
-        <button class="mini" data-sil="${id}">✕</button>
+        <span class="s-ad">${esc(urunAdi(id))}${s.not ? `<i class="s-not">${esc(s.not)}</i>` : ""}</span>
+        <button class="mini" data-eksi="1">−</button>
+        <span class="s-adet">${s.adet}</span>
+        <button class="mini" data-arti="1">+</button>
+        <button class="mini" data-sil="1">✕</button>
       </div>`);
         satir.querySelector("[data-eksi]").addEventListener("click", () => {
-          sepet[id] = Math.max(0, sepet[id] - 1);
+          s.adet = Math.max(1, s.adet - 1);
           sepetCiz();
         });
         satir.querySelector("[data-arti]").addEventListener("click", () => {
-          sepet[id]++;
+          s.adet++;
           sepetCiz();
         });
         satir.querySelector("[data-sil]").addEventListener("click", () => {
           delete sepet[id];
+          urunleriCiz();
           sepetCiz();
         });
         sepetListe.appendChild(satir);
       });
       gonderBtn.disabled = !idler.length;
     }
-    sepetCiz();
     gonderBtn.addEventListener("click", () => {
-      const satirlar = Object.keys(sepet).filter((id) => sepet[id] > 0).map((id) => ({ urunId: id, ad: urunAdi(id), adet: sepet[id] }));
+      const satirlar = Object.keys(sepet).map((id) => ({
+        urunId: id,
+        ad: urunAdi(id),
+        adet: sepet[id].adet,
+        not: sepet[id].not || ""
+      }));
       if (!satirlar.length) return;
+      const hk = haftaKey(pzt);
       const eski = haftaninTalebi(magazaKey, pzt);
-      const liste = taleplerGetir().filter((t) => t !== eski);
+      const liste = taleplerGetir().filter((t) => !(t.magazaKey === magazaKey && t.hafta === hk));
       liste.push({
         id: "t" + Date.now(),
         magazaKey,
-        hafta: haftaKey(pzt),
+        hafta: hk,
         tarih: (/* @__PURE__ */ new Date()).toISOString(),
         durum: "Gönderildi",
         satirlar
       });
       taleplerYaz(liste);
-      Object.keys(sepet).forEach((k) => delete sepet[k]);
-      sepetCiz();
       gecmisCiz();
       not.textContent = eski ? "Bu haftanın talebi güncellendi ✓" : "Talep gönderildi ✓";
       setTimeout(() => {
@@ -2388,12 +2483,62 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
       liste.slice(0, 8).forEach((t) => {
         gecmis.appendChild(el(`<div class="gecmis-satir">
         <div class="g-ust"><b>${esc(t.hafta)}</b><span class="durum ${t.durum === "Gönderildi" ? "bekliyor" : ""}">${esc(t.durum)}</span></div>
-        <div class="g-alt">${t.satirlar.map((s) => esc(s.ad) + " ×" + s.adet).join(", ")}</div>
+        <div class="g-alt">${t.satirlar.map((s) => esc(s.ad) + " ×" + s.adet + (s.not ? " (" + esc(s.not) + ")" : "")).join(", ")}</div>
       </div>`));
       });
     }
+    urunleriCiz();
+    sepetCiz();
     gecmisCiz();
-    if (mevcut) not.textContent = "Bu hafta için zaten bir talep gönderilmiş; yeni gönderim onu günceller.";
+    if (mevcut) not.textContent = "Bu hafta için talep gönderilmiş; değişiklik yapıp tekrar gönderebilirsiniz.";
+    return kok;
+  }
+  function urunTalepListesi(pzt) {
+    const hk = haftaKey(pzt);
+    const talepler = taleplerGetir().filter((t) => t.hafta === hk);
+    const magazaAdi = (k) => {
+      const p = profilGetir(k);
+      return p ? p.ad : k;
+    };
+    const harita = {};
+    talepler.forEach((t) => (t.satirlar || []).forEach((s) => {
+      (harita[s.urunId] = harita[s.urunId] || []).push({ magaza: magazaAdi(t.magazaKey), adet: s.adet, not: s.not || "" });
+    }));
+    const kok = el('<div class="kategori-liste"></div>');
+    kategorilerGetir().forEach((kat) => {
+      const blok = el(`<div class="kategori"><h4>${esc(kat.ad)}</h4><div class="urunler"></div></div>`);
+      const kap = blok.querySelector(".urunler");
+      (kat.urunler || []).forEach((u) => {
+        const isteyenler = harita[u.id] || [];
+        const toplamAdet = isteyenler.reduce((t, x) => t + (x.adet || 0), 0);
+        const satir = el(`<div class="urun-satir ${isteyenler.length ? "secili" : ""}">
+        <span class="u-ad">${esc(u.ad)}</span>
+        ${isteyenler.length ? '<span class="u-tik" title="İstenmiş">✓</span>' : ""}
+        <button class="u-sayac ${isteyenler.length ? "" : "bos"}"
+                title="${isteyenler.length ? "İsteyen mağazaları göster" : "Kimse istemedi"}">
+          ${isteyenler.length ? isteyenler.length + " mağaza · " + toplamAdet + " adet" : "–"}
+        </button>
+      </div>`);
+        if (isteyenler.length) {
+          satir.querySelector(".u-sayac").addEventListener("click", () => {
+            const acik2 = satir.querySelector(".u-magazalar");
+            if (acik2) {
+              acik2.remove();
+              return;
+            }
+            satir.appendChild(el(`<div class="u-magazalar">
+            ${isteyenler.map((x) => `<div class="u-magaza">
+              <span class="um-ad">${esc(x.magaza)}</span>
+              <span class="um-adet">×${x.adet}</span>
+              <span class="um-not">${x.not ? esc(x.not) : ""}</span>
+            </div>`).join("")}
+          </div>`));
+          });
+        }
+        kap.appendChild(satir);
+      });
+      kok.appendChild(blok);
+    });
     return kok;
   }
   function talepRaporu(pzt) {
@@ -2560,7 +2705,7 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
     <div class="rapor-ust">Gönderen: <b>${rapor.gonderenler.length}</b> · Göndermeyen: <b>${rapor.gondermeyenler.length}</b></div>
     ${rapor.talepler.map((t) => {
       const m = profilGetir(t.magazaKey);
-      return `<div class="rapor-satir"><b>${esc(m ? m.ad : t.magazaKey)}</b>: ${t.satirlar.map((s) => esc(s.ad) + " ×" + s.adet).join(", ")}</div>`;
+      return `<div class="rapor-satir"><b>${esc(m ? m.ad : t.magazaKey)}</b>: ${t.satirlar.map((s) => esc(s.ad) + " ×" + s.adet + (s.not ? ' <i class="s-not">' + esc(s.not) + "</i>" : "")).join(", ")}</div>`;
     }).join("") || '<div class="menu-bos">Bu hafta talep gelmedi.</div>'}
     ${rapor.gondermeyenler.length ? `<div class="rapor-eksik">Göndermeyen: ${rapor.gondermeyenler.map((m) => esc(m.ad)).join(", ")}</div>` : ""}`;
     const duyuruAlan = kok.querySelector(".duyuru-alan");
@@ -2846,7 +2991,7 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
       menu.push(["kurucu", "Ayarlar"], ["bolge", "Bölge Görünümü"], ["ana", "Mağaza Ekranı"], ["talep-rapor", "Ürün Talepleri"]);
     }
     const kok = el(`<header class="ust-cubuk">
-    <div class="ust-logo" title="Mağaza Performans Takip">🏪</div>
+    <button class="ust-logo" title="Ana sayfaya dön"><img alt="Mağaza Performans Takip"></button>
     <nav class="menu">${menu.map(([k, a]) => `<button class="menu-btn ${sayfa === k ? "secili" : ""}" data-sayfa="${k}">${a}</button>`).join("")}</nav>
     <div class="ust-orta"></div>
     <div class="ust-sag">
@@ -2875,6 +3020,13 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
     }));
     const yap = kok.querySelector("[data-yapistir]");
     if (yap) yap.addEventListener("click", () => yapistirPenceresi(aktifMagaza(), uygulamaCiz));
+    const logo = kok.querySelector(".ust-logo");
+    const simge = document.querySelector('link[rel="icon"]');
+    if (simge) logo.querySelector("img").src = simge.href;
+    logo.addEventListener("click", () => {
+      sayfa = varsayilanSayfa(aktif);
+      uygulamaCiz();
+    });
     kok.querySelector(".profil-rozet").addEventListener("click", profilMenusu);
     return kok;
   }
@@ -2941,20 +3093,34 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
   }
   function talepRaporSayfasi() {
     const pzt = pazartesi(bugun());
-    const tum = taleplerGetir().filter((t) => t.hafta === haftaKey(pzt));
-    const magazalar2 = magazalar();
-    const gonderen = tum.map((t) => t.magazaKey);
-    return el(`<div class="talep-rapor-sayfa">
-    <div class="bolum-ust"><h2>Ürün talepleri</h2><span class="alt">${haftaKey(pzt)}</span></div>
-    <div class="panel-kutu">
-      <div class="rapor-ust">Gönderen: <b>${gonderen.length}</b> · Göndermeyen: <b>${magazalar2.length - gonderen.length}</b></div>
-      ${tum.map((t) => {
+    const rapor = talepRaporu(pzt);
+    const kok = el(`<div class="talep-rapor-sayfa">
+    <div class="bolum-ust">
+      <h2>Ürün talepleri</h2>
+      <span class="alt">${haftaKey(pzt)} · gönderen ${rapor.gonderenler.length}, göndermeyen ${rapor.gondermeyenler.length}</span>
+    </div>
+    <div class="talep-ekran">
+      <div class="talep-sol"></div>
+      <aside class="talep-sag">
+        <div class="panel-kutu">
+          <h3>📦 Gönderen mağazalar</h3>
+          <div class="rapor-liste">
+            ${rapor.talepler.map((t) => {
       const m = profilGetir(t.magazaKey);
-      return `<div class="rapor-satir"><b>${esc(m ? m.ad : t.magazaKey)}</b>: ${t.satirlar.map((s) => esc(s.ad) + " ×" + s.adet).join(", ")}</div>`;
+      return `<div class="rapor-satir"><b>${esc(m ? m.ad : t.magazaKey)}</b>
+                <span>${t.satirlar.map((x) => esc(x.ad) + " ×" + x.adet).join(", ")}</span></div>`;
     }).join("") || '<div class="menu-bos">Bu hafta talep gelmedi.</div>'}
-      <div class="rapor-eksik">Göndermeyen: ${magazalar2.filter((m) => !gonderen.includes(m.key)).map((m) => esc(m.ad)).join(", ") || "—"}</div>
+          </div>
+        </div>
+        <div class="panel-kutu">
+          <h3>⚠ Göndermeyenler</h3>
+          <div class="rapor-eksik">${rapor.gondermeyenler.map((m) => esc(m.ad)).join(", ") || "—"}</div>
+        </div>
+      </aside>
     </div>
   </div>`);
+    kok.querySelector(".talep-sol").appendChild(urunTalepListesi(pzt));
+    return kok;
   }
   function ciz(icerik) {
     kokEl.innerHTML = "";

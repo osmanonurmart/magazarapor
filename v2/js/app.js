@@ -4,7 +4,7 @@ import * as V from './veri.js';
 import { magazaEkrani, yapistirPenceresi, personelPenceresi, seciliHafta, haftaSec } from './magaza.js';
 import { bolgePaneli } from './bolge.js';
 import { kurucuPaneli } from './kurucu.js';
-import { talepEkrani } from './talep.js';
+import { talepEkrani, urunTalepListesi, talepRaporu } from './talep.js';
 import { pencere, kapat } from './pencere.js';
 import { yerlesimSifirla, TASINABILIR } from './yerlesim.js';
 
@@ -86,7 +86,7 @@ function ustCubuk(){
   }
 
   const kok = U.el(`<header class="ust-cubuk">
-    <div class="ust-logo" title="Mağaza Performans Takip">🏪</div>
+    <button class="ust-logo" title="Ana sayfaya dön"><img alt="Mağaza Performans Takip"></button>
     <nav class="menu">${menu.map(([k,a]) => `<button class="menu-btn ${sayfa===k?'secili':''}" data-sayfa="${k}">${a}</button>`).join('')}</nav>
     <div class="ust-orta"></div>
     <div class="ust-sag">
@@ -117,6 +117,15 @@ function ustCubuk(){
   }));
   const yap = kok.querySelector('[data-yapistir]');
   if(yap) yap.addEventListener('click', () => yapistirPenceresi(aktifMagaza(), uygulamaCiz));
+  // Logo, tarayıcı sekmesindeki simgenin aynısı; tıklayınca ana sayfaya döner.
+  const logo = kok.querySelector('.ust-logo');
+  const simge = document.querySelector('link[rel="icon"]');
+  if(simge) logo.querySelector('img').src = simge.href;
+  logo.addEventListener('click', () => {
+    sayfa = varsayilanSayfa(aktif);
+    uygulamaCiz();
+  });
+
   kok.querySelector('.profil-rozet').addEventListener('click', profilMenusu);
   return kok;
 }
@@ -171,20 +180,34 @@ function sayfaIcerigi(){
 
 function talepRaporSayfasi(){
   const pzt = U.pazartesi(U.bugun());
-  const tum = V.taleplerGetir().filter(t => t.hafta === U.haftaKey(pzt));
-  const magazalar = V.magazalar();
-  const gonderen = tum.map(t => t.magazaKey);
-  return U.el(`<div class="talep-rapor-sayfa">
-    <div class="bolum-ust"><h2>Ürün talepleri</h2><span class="alt">${U.haftaKey(pzt)}</span></div>
-    <div class="panel-kutu">
-      <div class="rapor-ust">Gönderen: <b>${gonderen.length}</b> · Göndermeyen: <b>${magazalar.length - gonderen.length}</b></div>
-      ${tum.map(t => {
-        const m = V.profilGetir(t.magazaKey);
-        return `<div class="rapor-satir"><b>${U.esc(m ? m.ad : t.magazaKey)}</b>: ${t.satirlar.map(s => U.esc(s.ad) + ' ×' + s.adet).join(', ')}</div>`;
-      }).join('') || '<div class="menu-bos">Bu hafta talep gelmedi.</div>'}
-      <div class="rapor-eksik">Göndermeyen: ${magazalar.filter(m => !gonderen.includes(m.key)).map(m => U.esc(m.ad)).join(', ') || '—'}</div>
+  const rapor = talepRaporu(pzt);
+  const kok = U.el(`<div class="talep-rapor-sayfa">
+    <div class="bolum-ust">
+      <h2>Ürün talepleri</h2>
+      <span class="alt">${U.haftaKey(pzt)} · gönderen ${rapor.gonderenler.length}, göndermeyen ${rapor.gondermeyenler.length}</span>
+    </div>
+    <div class="talep-ekran">
+      <div class="talep-sol"></div>
+      <aside class="talep-sag">
+        <div class="panel-kutu">
+          <h3>📦 Gönderen mağazalar</h3>
+          <div class="rapor-liste">
+            ${rapor.talepler.map(t => {
+              const m = V.profilGetir(t.magazaKey);
+              return `<div class="rapor-satir"><b>${U.esc(m ? m.ad : t.magazaKey)}</b>
+                <span>${t.satirlar.map(x => U.esc(x.ad) + ' ×' + x.adet).join(', ')}</span></div>`;
+            }).join('') || '<div class="menu-bos">Bu hafta talep gelmedi.</div>'}
+          </div>
+        </div>
+        <div class="panel-kutu">
+          <h3>⚠ Göndermeyenler</h3>
+          <div class="rapor-eksik">${rapor.gondermeyenler.map(m => U.esc(m.ad)).join(', ') || '—'}</div>
+        </div>
+      </aside>
     </div>
   </div>`);
+  kok.querySelector('.talep-sol').appendChild(urunTalepListesi(pzt));
+  return kok;
 }
 
 // ---------------- Çizim ----------------

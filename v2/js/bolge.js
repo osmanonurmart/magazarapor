@@ -164,7 +164,8 @@ export function bolgePaneli(pzt, yenile){
     <div class="rapor-ust">Gönderen: <b>${rapor.gonderenler.length}</b> · Göndermeyen: <b>${rapor.gondermeyenler.length}</b></div>
     ${rapor.talepler.map(t => {
       const m = V.profilGetir(t.magazaKey);
-      return `<div class="rapor-satir"><b>${U.esc(m ? m.ad : t.magazaKey)}</b>: ${t.satirlar.map(s => U.esc(s.ad)+' ×'+s.adet).join(', ')}</div>`;
+      return `<div class="rapor-satir"><b>${U.esc(m ? m.ad : t.magazaKey)}</b>: ${t.satirlar.map(s =>
+        U.esc(s.ad) + ' ×' + s.adet + (s.not ? ' <i class="s-not">' + U.esc(s.not) + '</i>' : '')).join(', ')}</div>`;
     }).join('') || '<div class="menu-bos">Bu hafta talep gelmedi.</div>'}
     ${rapor.gondermeyenler.length ? `<div class="rapor-eksik">Göndermeyen: ${rapor.gondermeyenler.map(m => U.esc(m.ad)).join(', ')}</div>` : ''}`;
 

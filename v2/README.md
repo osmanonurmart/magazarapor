@@ -78,7 +78,9 @@ Profil rozeti → "Örnek veriyi yenile" ile her şey sıfırlanıp yeniden üre
 | Haftalık ürün verisi, geçen haftaya göre pay değişimi, otomatik rapor | ✅ |
 | Bölge paneli: özet tablo, metrik seçimi, hedef girişi (elle/yapıştır/kural) | ✅ |
 | Duyuru panosu | ✅ |
-| Ürün talep sistemi: kategori, sepet, gönderim, pazartesi raporu | ✅ |
+| Ürün talep sistemi: artı ile sepete ekleme, yeşil tik, kalemden ürün notu, pazartesi raporu | ✅ |
+| Bölge tarafında aynı ürün listesi: kaç mağazanın istediği, tıklayınca mağazalar ve notları | ✅ |
+| Üst çubuktaki logo tarayıcı simgesiyle aynı; tıklayınca ana sayfaya döner | ✅ |
 | Kurucu: mağaza görünümü, ürün/kategori, kullanıcılar, KPI satırları, etiketler | ✅ |
 | Haftalık rutin listesi (7 gün, tıklayınca yeşile döner, hafta başında sıfırlanır) | ✅ |
 | Sabit yerleşim: sol üst mevcut hafta, sağ üst dün/bugün, sol alt önceki hafta, sağ alt yorum | ✅ |
