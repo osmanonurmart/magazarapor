@@ -278,19 +278,32 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
 .yan-panel{ display:flex; flex-direction:column; gap:12px; min-width:0; }
 .yan-panel > .panel-kutu{ width:100%; }
 .panel-kutu{ background:var(--kagit); border:1px solid var(--cizgi); border-radius:var(--r); padding:12px; }
+/* Sekmeli özet kutusu — üst menüyle aynı görünüm. */
+.ozet-kutu{ padding:8px 10px 10px; }
+.sekme-bar{ display:flex; gap:2px; border-bottom:2px solid var(--cizgi); margin-bottom:9px; padding-right:24px; }
+.sekme{
+  background:none; border:none; padding:5px 8px 6px; cursor:pointer;
+  font-size:.75rem; font-weight:600; color:var(--soluk);
+  border-bottom:2px solid transparent; margin-bottom:-2px; white-space:nowrap;
+}
+.sekme:hover{ color:var(--yazi); }
+.sekme.secili{ color:var(--vurgu); border-bottom-color:var(--vurgu); }
+.sekme-govde{ min-width:0; }
 .panel-kutu h3{ font-size:.86rem; margin-bottom:3px; }
 .panel-alt{ color:var(--soluk); font-size:.72rem; margin-bottom:9px; }
-.kart-liste{ display:flex; flex-direction:column; gap:9px; }
-.kart{ border:1px solid var(--cizgi); border-radius:9px; padding:9px 10px; }
-.kart-ust{ display:flex; align-items:center; justify-content:space-between; }
-.kart-ad{ font-weight:650; font-size:.82rem; }
-.kart-sil{ background:none; border:none; color:#c9c9cf; cursor:pointer; font-size:.74rem; }
+/* Sıkı kart: başlık + iki satır, değişim bugünün yanında. */
+.kart-liste{ display:flex; flex-direction:column; gap:6px; }
+.kart{ border:1px solid var(--cizgi); border-radius:8px; padding:5px 8px 6px; }
+.kart-ust{ display:flex; align-items:center; justify-content:space-between; line-height:1.3; }
+.kart-ad{ font-weight:700; font-size:.76rem; }
+.kart-sil{ background:none; border:none; color:#c2c2ca; cursor:pointer; font-size:.68rem; padding:0 1px; line-height:1; }
 .kart-sil:hover{ color:var(--dusus); }
-.kart-satir{ display:flex; justify-content:space-between; align-items:center; font-size:.8rem; margin-top:4px; color:var(--soluk); }
-.kart-satir b{ color:var(--yazi); }
-.kart-girdi{ width:96px; padding:3px 7px; border:1px solid var(--cizgi); border-radius:6px; text-align:right; }
-.kart-degisim{ margin-top:6px; font-size:.82rem; font-weight:700; text-align:right; }
-.kart-ekle{ width:100%; margin-top:9px; background:none; border:1px dashed var(--cizgi); border-radius:9px; padding:8px; cursor:pointer; color:var(--soluk); }
+.kart-satir{ display:flex; justify-content:space-between; align-items:center; gap:6px; font-size:.74rem; margin-top:1px; color:var(--soluk); line-height:1.35; }
+.kart-satir > span:first-child{ flex:0 0 38px; }
+.kart-satir b{ color:var(--yazi); margin-left:auto; }
+.kart-girdi{ width:74px; padding:1px 6px; border:1px solid var(--cizgi); border-radius:5px; text-align:right; font-size:.74rem; margin-left:auto; }
+.kart-degisim{ flex:0 0 auto; font-size:.72rem; font-weight:700; min-width:62px; text-align:right; }
+.kart-ekle{ width:100%; margin-top:7px; background:none; border:1px dashed var(--cizgi); border-radius:8px; padding:5px; cursor:pointer; color:var(--soluk); font-size:.76rem; }
 .kart-ekle:hover{ border-color:var(--vurgu); color:var(--vurgu); }
 .kart-form{ display:flex; flex-direction:column; gap:7px; }
 .kart-form input,.kart-form select{ padding:6px 9px; border:1px solid var(--cizgi); border-radius:7px; }
@@ -754,6 +767,12 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
     else d[maddeId] = true;
     yaz("rutinDurum:" + magaza + ":" + haftaAnahtari, d);
     return d;
+  }
+  function ozetSekmesiGetir(magaza) {
+    return oku("ozetSekme:" + magaza, "gunluk");
+  }
+  function ozetSekmesiYaz(magaza, sekme) {
+    yaz("ozetSekme:" + magaza, sekme);
   }
   function yerlesimGetir(magaza) {
     return oku("yerlesim:" + magaza, { sira: {}, boyut: {} });
@@ -1228,7 +1247,19 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
 
   // js/panel.js
   var ALAN_ADLARI = { ciro: "Ciro", mdo: "MDO", fbu: "FBÜ", fbs: "FBS", mgs: "MGS", toplu: "Toplu satış" };
-  var ALAN_BICIM = { ciro: fmtTL, fbs: fmtTL, mdo: (v) => fmtYuzde(v, 1), fbu: (v) => fmtSayi(v, 2), mgs: (v) => fmtSayi(v, 0), toplu: (v) => fmtSayi(v, 0) };
+  var ALAN_BICIM = {
+    ciro: fmtTL,
+    fbs: fmtTL,
+    mdo: (v) => fmtYuzde(v, 1),
+    fbu: (v) => fmtSayi(v, 2),
+    mgs: (v) => fmtSayi(v, 0),
+    toplu: (v) => fmtSayi(v, 0)
+  };
+  var SEKMELER = [
+    { id: "gunluk", ad: "Dün / Bugün" },
+    { id: "ayIci", ad: "Ay içi" },
+    { id: "ayToplam", ad: "Ay toplamı" }
+  ];
   function alanBicimle(alan, deger) {
     const f = ALAN_BICIM[alan] || ((v) => fmtSayi(v, 0));
     return deger === null || deger === void 0 || deger === "" ? "–" : f(deger);
@@ -1247,11 +1278,10 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
       mdo: ortalama(kayitlar.map((k) => sayi(k.mdo))),
       fbu: ortalama(kayitlar.map((k) => sayi(k.fbu))),
       fbs: ortalama(kayitlar.map((k) => sayi(k.fbs))),
-      toplu: toplam(kayitlar.map((k) => sayi(k.toplu))),
-      gun: bitis
+      toplu: toplam(kayitlar.map((k) => sayi(k.toplu)))
     };
   }
-  function kiyasTablosu(panelId, baslik, altBaslik, sol, sag, solEtiket, sagEtiket) {
+  function kiyasIcerigi(altBaslik, sol, sag, solEtiket, sagEtiket) {
     const satirlar = ["ciro", "mdo", "fbu", "mgs", "fbs", "toplu"].map((alan) => {
       const d = yuzdeDegisim(sol[alan], sag[alan]);
       return `<tr>
@@ -1261,8 +1291,7 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
       <td class="${degisimSinifi(d)}">${fmtDegisim(d)}</td>
     </tr>`;
     }).join("");
-    return el(`<div class="panel-kutu" data-panel="${panelId}">
-    <h3>${esc(baslik)}</h3>
+    return el(`<div class="sekme-govde">
     <div class="panel-alt">${esc(altBaslik)}</div>
     <table class="kiyas-tablo">
       <thead><tr><th></th><th>${esc(solEtiket)}</th><th>${esc(sagEtiket)}</th><th>Fark</th></tr></thead>
@@ -1270,31 +1299,31 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
     </table>
   </div>`);
   }
-  function panelOlustur(magazaKey, secenekler = {}) {
+  function kartIcerigi(magazaKey, secenekler) {
     const duzenlenebilir = secenekler.duzenlenebilir !== false;
     const bugunD = bugun();
     const bugunStr2 = bugunStr();
     const dunD = new Date(bugunD);
     dunD.setDate(dunD.getDate() - 1);
-    const dunStr = dateStr(dunD);
     const buGun = gunGetir(magazaKey, bugunStr2) || {};
-    const dun = gunGetir(magazaKey, dunStr) || {};
-    const kok = el('<aside class="yan-panel"></aside>');
-    const kartKutu = el('<div class="panel-kutu" data-panel="kartlar"><h3>📈 Dün / Bugün</h3><div class="kart-liste"></div></div>');
-    const kartListe = kartKutu.querySelector(".kart-liste");
-    const kartlar = kartlarGetir(magazaKey);
-    kartlar.forEach((kart) => {
-      const oncekiDeger = kart.tur === "kaynak" ? dun[kart.alan] : (dun.kartlar || {})[kart.id];
-      const simdiDeger = kart.tur === "kaynak" ? buGun[kart.alan] : (buGun.kartlar || {})[kart.id];
-      const d = yuzdeDegisim(oncekiDeger, simdiDeger);
+    const dun = gunGetir(magazaKey, dateStr(dunD)) || {};
+    const govde = el('<div class="sekme-govde"><div class="kart-liste"></div></div>');
+    const kartListe = govde.querySelector(".kart-liste");
+    kartlarGetir(magazaKey).forEach((kart) => {
+      const onceki = kart.tur === "kaynak" ? dun[kart.alan] : (dun.kartlar || {})[kart.id];
+      const simdi = kart.tur === "kaynak" ? buGun[kart.alan] : (buGun.kartlar || {})[kart.id];
+      const d = yuzdeDegisim(onceki, simdi);
       const kartEl = el(`<div class="kart">
-      <div class="kart-ust"><span class="kart-ad">${esc(kart.ad)}</span>
-        <button class="kart-sil" title="Kartı kaldır">✕</button></div>
-      <div class="kart-satir"><span>Dün</span><b>${alanBicimle(kart.alan, oncekiDeger)}</b></div>
-      <div class="kart-satir"><span>Bugün</span>
-        ${kart.tur === "kaynak" ? `<b>${alanBicimle(kart.alan, simdiDeger)}</b>` : `<input class="kart-girdi" type="text" inputmode="decimal" value="${simdiDeger ?? ""}" ${duzenlenebilir ? "" : "disabled"}>`}
+      <div class="kart-ust">
+        <span class="kart-ad">${esc(kart.ad)}</span>
+        <button class="kart-sil" title="Kartı kaldır">✕</button>
       </div>
-      <div class="kart-degisim ${degisimSinifi(d)}">${fmtDegisim(d)}</div>
+      <div class="kart-satir"><span>Dün</span><b>${alanBicimle(kart.alan, onceki)}</b></div>
+      <div class="kart-satir kart-bugun">
+        <span>Bugün</span>
+        ${kart.tur === "kaynak" ? `<b>${alanBicimle(kart.alan, simdi)}</b>` : `<input class="kart-girdi" type="text" inputmode="decimal" value="${simdi ?? ""}" ${duzenlenebilir ? "" : "disabled"}>`}
+        <span class="kart-degisim ${degisimSinifi(d)}">${fmtDegisim(d)}</span>
+      </div>
     </div>`);
       const girdi = kartEl.querySelector(".kart-girdi");
       if (girdi) girdi.addEventListener("change", () => {
@@ -1313,9 +1342,55 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
     if (duzenlenebilir) {
       const ekle = el('<button class="kart-ekle">+ Kart ekle</button>');
       ekle.addEventListener("click", () => kartEklemeFormu(magazaKey, kartListe, secenekler));
-      kartKutu.appendChild(ekle);
+      govde.appendChild(ekle);
     }
-    kok.appendChild(kartKutu);
+    return govde;
+  }
+  function panelOlustur(magazaKey, secenekler = {}) {
+    const duzenlenebilir = secenekler.duzenlenebilir !== false;
+    const bugunD = bugun();
+    const bugunStr2 = bugunStr();
+    const buGun = gunGetir(magazaKey, bugunStr2) || {};
+    const kok = el('<aside class="yan-panel"></aside>');
+    const ozet = el(`<div class="panel-kutu ozet-kutu" data-panel="ozet">
+    <div class="sekme-bar">
+      ${SEKMELER.map((s) => `<button class="sekme" data-sekme="${s.id}">${s.ad}</button>`).join("")}
+    </div>
+    <div class="sekme-icerik"></div>
+  </div>`);
+    const icerik = ozet.querySelector(".sekme-icerik");
+    const yil = bugunD.getFullYear(), ay = bugunD.getMonth() + 1, gun = bugunD.getDate();
+    const oncekiAy = ay === 1 ? 12 : ay - 1;
+    const oncekiYil = ay === 1 ? yil - 1 : yil;
+    const sekmeCiz = (id) => {
+      icerik.innerHTML = "";
+      if (id === "ayIci") {
+        icerik.appendChild(kiyasIcerigi(
+          `1–${gun} ${AY_ADLARI[oncekiAy - 1]} · 1–${gun} ${AY_ADLARI[ay - 1]}`,
+          ayToplami(magazaKey, oncekiYil, oncekiAy, gun),
+          ayToplami(magazaKey, yil, ay, gun),
+          AY_KISA[oncekiAy - 1],
+          AY_KISA[ay - 1]
+        ));
+      } else if (id === "ayToplam") {
+        icerik.appendChild(kiyasIcerigi(
+          `${AY_ADLARI[oncekiAy - 1]} tamamı · ${AY_ADLARI[ay - 1]} bugüne kadar`,
+          ayToplami(magazaKey, oncekiYil, oncekiAy),
+          ayToplami(magazaKey, yil, ay, gun),
+          AY_KISA[oncekiAy - 1],
+          AY_KISA[ay - 1]
+        ));
+      } else {
+        icerik.appendChild(kartIcerigi(magazaKey, secenekler));
+      }
+      ozet.querySelectorAll(".sekme").forEach((b) => b.classList.toggle("secili", b.dataset.sekme === id));
+    };
+    ozet.querySelectorAll(".sekme").forEach((b) => b.addEventListener("click", () => {
+      ozetSekmesiYaz(magazaKey, b.dataset.sekme);
+      sekmeCiz(b.dataset.sekme);
+    }));
+    sekmeCiz(ozetSekmesiGetir(magazaKey));
+    kok.appendChild(ozet);
     const yorumKutu = el(`<div class="panel-kutu" data-panel="yorum">
     <h3>📝 Günlük yorum</h3>
     <div class="panel-alt">${kisaTarih(bugunD)} — bölge müdürüne iletilir</div>
@@ -1335,27 +1410,6 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
       }, 500);
     });
     kok.appendChild(yorumKutu);
-    const yil = bugunD.getFullYear(), ay = bugunD.getMonth() + 1, gun = bugunD.getDate();
-    const oncekiAy = ay === 1 ? 12 : ay - 1;
-    const oncekiYil = ay === 1 ? yil - 1 : yil;
-    kok.appendChild(kiyasTablosu(
-      "ayIci",
-      "📅 Ay içi kıyas",
-      `1–${gun} ${AY_ADLARI[oncekiAy - 1]} · 1–${gun} ${AY_ADLARI[ay - 1]}`,
-      ayToplami(magazaKey, oncekiYil, oncekiAy, gun),
-      ayToplami(magazaKey, yil, ay, gun),
-      AY_KISA[oncekiAy - 1],
-      AY_KISA[ay - 1]
-    ));
-    kok.appendChild(kiyasTablosu(
-      "ayToplam",
-      "🗓️ Ay toplamı",
-      `${AY_ADLARI[oncekiAy - 1]} tamamı · ${AY_ADLARI[ay - 1]} bugüne kadar`,
-      ayToplami(magazaKey, oncekiYil, oncekiAy),
-      ayToplami(magazaKey, yil, ay, gun),
-      AY_KISA[oncekiAy - 1],
-      AY_KISA[ay - 1]
-    ));
     return kok;
   }
   function kartEklemeFormu(magazaKey, kap, secenekler) {

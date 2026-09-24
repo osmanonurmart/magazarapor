@@ -269,19 +269,32 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
 .yan-panel{ display:flex; flex-direction:column; gap:12px; min-width:0; }
 .yan-panel > .panel-kutu{ width:100%; }
 .panel-kutu{ background:var(--kagit); border:1px solid var(--cizgi); border-radius:var(--r); padding:12px; }
+/* Sekmeli özet kutusu — üst menüyle aynı görünüm. */
+.ozet-kutu{ padding:8px 10px 10px; }
+.sekme-bar{ display:flex; gap:2px; border-bottom:2px solid var(--cizgi); margin-bottom:9px; padding-right:24px; }
+.sekme{
+  background:none; border:none; padding:5px 8px 6px; cursor:pointer;
+  font-size:.75rem; font-weight:600; color:var(--soluk);
+  border-bottom:2px solid transparent; margin-bottom:-2px; white-space:nowrap;
+}
+.sekme:hover{ color:var(--yazi); }
+.sekme.secili{ color:var(--vurgu); border-bottom-color:var(--vurgu); }
+.sekme-govde{ min-width:0; }
 .panel-kutu h3{ font-size:.86rem; margin-bottom:3px; }
 .panel-alt{ color:var(--soluk); font-size:.72rem; margin-bottom:9px; }
-.kart-liste{ display:flex; flex-direction:column; gap:9px; }
-.kart{ border:1px solid var(--cizgi); border-radius:9px; padding:9px 10px; }
-.kart-ust{ display:flex; align-items:center; justify-content:space-between; }
-.kart-ad{ font-weight:650; font-size:.82rem; }
-.kart-sil{ background:none; border:none; color:#c9c9cf; cursor:pointer; font-size:.74rem; }
+/* Sıkı kart: başlık + iki satır, değişim bugünün yanında. */
+.kart-liste{ display:flex; flex-direction:column; gap:6px; }
+.kart{ border:1px solid var(--cizgi); border-radius:8px; padding:5px 8px 6px; }
+.kart-ust{ display:flex; align-items:center; justify-content:space-between; line-height:1.3; }
+.kart-ad{ font-weight:700; font-size:.76rem; }
+.kart-sil{ background:none; border:none; color:#c2c2ca; cursor:pointer; font-size:.68rem; padding:0 1px; line-height:1; }
 .kart-sil:hover{ color:var(--dusus); }
-.kart-satir{ display:flex; justify-content:space-between; align-items:center; font-size:.8rem; margin-top:4px; color:var(--soluk); }
-.kart-satir b{ color:var(--yazi); }
-.kart-girdi{ width:96px; padding:3px 7px; border:1px solid var(--cizgi); border-radius:6px; text-align:right; }
-.kart-degisim{ margin-top:6px; font-size:.82rem; font-weight:700; text-align:right; }
-.kart-ekle{ width:100%; margin-top:9px; background:none; border:1px dashed var(--cizgi); border-radius:9px; padding:8px; cursor:pointer; color:var(--soluk); }
+.kart-satir{ display:flex; justify-content:space-between; align-items:center; gap:6px; font-size:.74rem; margin-top:1px; color:var(--soluk); line-height:1.35; }
+.kart-satir > span:first-child{ flex:0 0 38px; }
+.kart-satir b{ color:var(--yazi); margin-left:auto; }
+.kart-girdi{ width:74px; padding:1px 6px; border:1px solid var(--cizgi); border-radius:5px; text-align:right; font-size:.74rem; margin-left:auto; }
+.kart-degisim{ flex:0 0 auto; font-size:.72rem; font-weight:700; min-width:62px; text-align:right; }
+.kart-ekle{ width:100%; margin-top:7px; background:none; border:1px dashed var(--cizgi); border-radius:8px; padding:5px; cursor:pointer; color:var(--soluk); font-size:.76rem; }
 .kart-ekle:hover{ border-color:var(--vurgu); color:var(--vurgu); }
 .kart-form{ display:flex; flex-direction:column; gap:7px; }
 .kart-form input,.kart-form select{ padding:6px 9px; border:1px solid var(--cizgi); border-radius:7px; }

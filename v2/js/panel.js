@@ -1,9 +1,18 @@
-// Sağ panel: esnek kartlar, günlük yorum, ay içi ve ay toplamı kıyası, duyuru.
+// Sağ panel: sekmeli özet kutusu (Dün/Bugün, Ay içi kıyas, Ay toplamı)
+// ve günlük yorum kutusu.
 import * as U from './util.js';
 import * as V from './veri.js';
 
 const ALAN_ADLARI = {ciro:'Ciro', mdo:'MDO', fbu:'FBÜ', fbs:'FBS', mgs:'MGS', toplu:'Toplu satış'};
-const ALAN_BICIM = {ciro:U.fmtTL, fbs:U.fmtTL, mdo:v=>U.fmtYuzde(v,1), fbu:v=>U.fmtSayi(v,2), mgs:v=>U.fmtSayi(v,0), toplu:v=>U.fmtSayi(v,0)};
+const ALAN_BICIM = {
+  ciro:U.fmtTL, fbs:U.fmtTL, mdo:v=>U.fmtYuzde(v,1), fbu:v=>U.fmtSayi(v,2),
+  mgs:v=>U.fmtSayi(v,0), toplu:v=>U.fmtSayi(v,0)
+};
+const SEKMELER = [
+  {id:'gunluk',   ad:'Dün / Bugün'},
+  {id:'ayIci',    ad:'Ay içi'},
+  {id:'ayToplam', ad:'Ay toplamı'}
+];
 
 function alanBicimle(alan, deger){
   const f = ALAN_BICIM[alan] || (v => U.fmtSayi(v, 0));
@@ -25,12 +34,11 @@ function ayToplami(magaza, yil, ay, sonGun){
     mdo:  U.ortalama(kayitlar.map(k => U.sayi(k.mdo))),
     fbu:  U.ortalama(kayitlar.map(k => U.sayi(k.fbu))),
     fbs:  U.ortalama(kayitlar.map(k => U.sayi(k.fbs))),
-    toplu:U.toplam(kayitlar.map(k => U.sayi(k.toplu))),
-    gun: bitis
+    toplu:U.toplam(kayitlar.map(k => U.sayi(k.toplu)))
   };
 }
 
-function kiyasTablosu(panelId, baslik, altBaslik, sol, sag, solEtiket, sagEtiket){
+function kiyasIcerigi(altBaslik, sol, sag, solEtiket, sagEtiket){
   const satirlar = ['ciro','mdo','fbu','mgs','fbs','toplu'].map(alan => {
     const d = U.yuzdeDegisim(sol[alan], sag[alan]);
     return `<tr>
@@ -40,8 +48,7 @@ function kiyasTablosu(panelId, baslik, altBaslik, sol, sag, solEtiket, sagEtiket
       <td class="${U.degisimSinifi(d)}">${U.fmtDegisim(d)}</td>
     </tr>`;
   }).join('');
-  return U.el(`<div class="panel-kutu" data-panel="${panelId}">
-    <h3>${U.esc(baslik)}</h3>
+  return U.el(`<div class="sekme-govde">
     <div class="panel-alt">${U.esc(altBaslik)}</div>
     <table class="kiyas-tablo">
       <thead><tr><th></th><th>${U.esc(solEtiket)}</th><th>${U.esc(sagEtiket)}</th><th>Fark</th></tr></thead>
@@ -50,35 +57,35 @@ function kiyasTablosu(panelId, baslik, altBaslik, sol, sag, solEtiket, sagEtiket
   </div>`);
 }
 
-export function panelOlustur(magazaKey, secenekler = {}){
+// ---------------- Dün / Bugün kartları ----------------
+function kartIcerigi(magazaKey, secenekler){
   const duzenlenebilir = secenekler.duzenlenebilir !== false;
   const bugunD = U.bugun();
   const bugunStr = U.bugunStr();
   const dunD = new Date(bugunD); dunD.setDate(dunD.getDate() - 1);
-  const dunStr = U.dateStr(dunD);
   const buGun = V.gunGetir(magazaKey, bugunStr) || {};
-  const dun   = V.gunGetir(magazaKey, dunStr) || {};
+  const dun   = V.gunGetir(magazaKey, U.dateStr(dunD)) || {};
 
-  const kok = U.el('<aside class="yan-panel"></aside>');
+  const govde = U.el('<div class="sekme-govde"><div class="kart-liste"></div></div>');
+  const kartListe = govde.querySelector('.kart-liste');
 
-  // 1) Esnek kartlar
-  const kartKutu = U.el('<div class="panel-kutu" data-panel="kartlar"><h3>📈 Dün / Bugün</h3><div class="kart-liste"></div></div>');
-  const kartListe = kartKutu.querySelector('.kart-liste');
-  const kartlar = V.kartlarGetir(magazaKey);
-  kartlar.forEach(kart => {
-    const oncekiDeger = kart.tur === 'kaynak' ? dun[kart.alan]   : (dun.kartlar   || {})[kart.id];
-    const simdiDeger  = kart.tur === 'kaynak' ? buGun[kart.alan] : (buGun.kartlar || {})[kart.id];
-    const d = U.yuzdeDegisim(oncekiDeger, simdiDeger);
+  V.kartlarGetir(magazaKey).forEach(kart => {
+    const onceki = kart.tur === 'kaynak' ? dun[kart.alan]   : (dun.kartlar   || {})[kart.id];
+    const simdi  = kart.tur === 'kaynak' ? buGun[kart.alan] : (buGun.kartlar || {})[kart.id];
+    const d = U.yuzdeDegisim(onceki, simdi);
     const kartEl = U.el(`<div class="kart">
-      <div class="kart-ust"><span class="kart-ad">${U.esc(kart.ad)}</span>
-        <button class="kart-sil" title="Kartı kaldır">✕</button></div>
-      <div class="kart-satir"><span>Dün</span><b>${alanBicimle(kart.alan, oncekiDeger)}</b></div>
-      <div class="kart-satir"><span>Bugün</span>
-        ${kart.tur === 'kaynak'
-          ? `<b>${alanBicimle(kart.alan, simdiDeger)}</b>`
-          : `<input class="kart-girdi" type="text" inputmode="decimal" value="${simdiDeger ?? ''}" ${duzenlenebilir?'':'disabled'}>`}
+      <div class="kart-ust">
+        <span class="kart-ad">${U.esc(kart.ad)}</span>
+        <button class="kart-sil" title="Kartı kaldır">✕</button>
       </div>
-      <div class="kart-degisim ${U.degisimSinifi(d)}">${U.fmtDegisim(d)}</div>
+      <div class="kart-satir"><span>Dün</span><b>${alanBicimle(kart.alan, onceki)}</b></div>
+      <div class="kart-satir kart-bugun">
+        <span>Bugün</span>
+        ${kart.tur === 'kaynak'
+          ? `<b>${alanBicimle(kart.alan, simdi)}</b>`
+          : `<input class="kart-girdi" type="text" inputmode="decimal" value="${simdi ?? ''}" ${duzenlenebilir?'':'disabled'}>`}
+        <span class="kart-degisim ${U.degisimSinifi(d)}">${U.fmtDegisim(d)}</span>
+      </div>
     </div>`);
     const girdi = kartEl.querySelector('.kart-girdi');
     if(girdi) girdi.addEventListener('change', () => {
@@ -94,14 +101,62 @@ export function panelOlustur(magazaKey, secenekler = {}){
     });
     kartListe.appendChild(kartEl);
   });
+
   if(duzenlenebilir){
     const ekle = U.el('<button class="kart-ekle">+ Kart ekle</button>');
     ekle.addEventListener('click', () => kartEklemeFormu(magazaKey, kartListe, secenekler));
-    kartKutu.appendChild(ekle);
+    govde.appendChild(ekle);
   }
-  kok.appendChild(kartKutu);
+  return govde;
+}
 
-  // 2) Günlük yorum
+// ---------------- Panel ----------------
+export function panelOlustur(magazaKey, secenekler = {}){
+  const duzenlenebilir = secenekler.duzenlenebilir !== false;
+  const bugunD = U.bugun();
+  const bugunStr = U.bugunStr();
+  const buGun = V.gunGetir(magazaKey, bugunStr) || {};
+  const kok = U.el('<aside class="yan-panel"></aside>');
+
+  // --- Sekmeli özet kutusu ---
+  const ozet = U.el(`<div class="panel-kutu ozet-kutu" data-panel="ozet">
+    <div class="sekme-bar">
+      ${SEKMELER.map(s => `<button class="sekme" data-sekme="${s.id}">${s.ad}</button>`).join('')}
+    </div>
+    <div class="sekme-icerik"></div>
+  </div>`);
+  const icerik = ozet.querySelector('.sekme-icerik');
+
+  const yil = bugunD.getFullYear(), ay = bugunD.getMonth() + 1, gun = bugunD.getDate();
+  const oncekiAy = ay === 1 ? 12 : ay - 1;
+  const oncekiYil = ay === 1 ? yil - 1 : yil;
+
+  const sekmeCiz = id => {
+    icerik.innerHTML = '';
+    if(id === 'ayIci'){
+      icerik.appendChild(kiyasIcerigi(
+        `1–${gun} ${U.AY_ADLARI[oncekiAy-1]} · 1–${gun} ${U.AY_ADLARI[ay-1]}`,
+        ayToplami(magazaKey, oncekiYil, oncekiAy, gun), ayToplami(magazaKey, yil, ay, gun),
+        U.AY_KISA[oncekiAy-1], U.AY_KISA[ay-1]));
+    } else if(id === 'ayToplam'){
+      icerik.appendChild(kiyasIcerigi(
+        `${U.AY_ADLARI[oncekiAy-1]} tamamı · ${U.AY_ADLARI[ay-1]} bugüne kadar`,
+        ayToplami(magazaKey, oncekiYil, oncekiAy), ayToplami(magazaKey, yil, ay, gun),
+        U.AY_KISA[oncekiAy-1], U.AY_KISA[ay-1]));
+    } else {
+      icerik.appendChild(kartIcerigi(magazaKey, secenekler));
+    }
+    ozet.querySelectorAll('.sekme').forEach(b => b.classList.toggle('secili', b.dataset.sekme === id));
+  };
+
+  ozet.querySelectorAll('.sekme').forEach(b => b.addEventListener('click', () => {
+    V.ozetSekmesiYaz(magazaKey, b.dataset.sekme);
+    sekmeCiz(b.dataset.sekme);
+  }));
+  sekmeCiz(V.ozetSekmesiGetir(magazaKey));
+  kok.appendChild(ozet);
+
+  // --- Günlük yorum ---
   const yorumKutu = U.el(`<div class="panel-kutu" data-panel="yorum">
     <h3>📝 Günlük yorum</h3>
     <div class="panel-alt">${U.kisaTarih(bugunD)} — bölge müdürüne iletilir</div>
@@ -120,24 +175,6 @@ export function panelOlustur(magazaKey, secenekler = {}){
   });
   kok.appendChild(yorumKutu);
 
-  // 3) Ay içi kıyas (geçen ayın aynı gününe kadar)
-  const yil = bugunD.getFullYear(), ay = bugunD.getMonth() + 1, gun = bugunD.getDate();
-  const oncekiAy = ay === 1 ? 12 : ay - 1;
-  const oncekiYil = ay === 1 ? yil - 1 : yil;
-  kok.appendChild(kiyasTablosu('ayIci',
-    '📅 Ay içi kıyas', `1–${gun} ${U.AY_ADLARI[oncekiAy-1]} · 1–${gun} ${U.AY_ADLARI[ay-1]}`,
-    ayToplami(magazaKey, oncekiYil, oncekiAy, gun), ayToplami(magazaKey, yil, ay, gun),
-    U.AY_KISA[oncekiAy-1], U.AY_KISA[ay-1]
-  ));
-
-  // 4) Ay toplamı kıyası
-  kok.appendChild(kiyasTablosu('ayToplam',
-    '🗓️ Ay toplamı', `${U.AY_ADLARI[oncekiAy-1]} tamamı · ${U.AY_ADLARI[ay-1]} bugüne kadar`,
-    ayToplami(magazaKey, oncekiYil, oncekiAy), ayToplami(magazaKey, yil, ay, gun),
-    U.AY_KISA[oncekiAy-1], U.AY_KISA[ay-1]
-  ));
-
-  // Duyurular artık üstteki gezinti çubuğunun sağında; burada tekrarlanmıyor.
   return kok;
 }
 

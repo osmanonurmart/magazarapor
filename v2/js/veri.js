@@ -133,6 +133,10 @@ export function rutinDurumDegistir(magaza, haftaAnahtari, maddeId){
   return d;
 }
 
+// Özet panelinde açık olan sekme (gunluk | ayIci | ayToplam)
+export function ozetSekmesiGetir(magaza){ return oku('ozetSekme:' + magaza, 'gunluk'); }
+export function ozetSekmesiYaz(magaza, sekme){ yaz('ozetSekme:' + magaza, sekme); }
+
 // ---------------- Panel yerleşimi ----------------
 // Her mağaza panellerin sırasını ve boyutunu kendi ayarlar.
 export function yerlesimGetir(magaza){ return oku('yerlesim:' + magaza, {sira:{}, boyut:{}}); }
