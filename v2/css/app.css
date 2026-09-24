@@ -280,8 +280,11 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
 .acilir-menu button{ display:block; width:100%; text-align:left; background:none; border:none; padding:8px 10px; border-radius:7px; cursor:pointer; font-size:.8rem; }
 .acilir-menu button:hover{ background:#f1efe9; }
 .menu-baslik{ font-size:.72rem; color:var(--soluk); padding:4px 8px 8px; }
-.izin-satir{ display:flex; align-items:center; gap:7px; padding:5px 8px; border-radius:7px; font-size:.8rem; }
+.izin-satir{ display:flex; align-items:center; gap:7px; padding:5px 8px; border-radius:7px; font-size:.8rem; cursor:pointer; }
 .izin-satir:hover{ background:#f7f5f1; }
+/* Kutu yalnızca göstergedir; tıklamayı satır ele alır. */
+.izin-satir input[type=checkbox]{ pointer-events:none; }
+.izin-satir .izin-tur{ cursor:pointer; }
 .izin-ad{ flex:1; }
 .izin-tur{ padding:3px 6px; border:1px solid var(--cizgi); border-radius:6px; font-size:.72rem; }
 .menu-alt{ border-top:1px solid var(--cizgi) !important; margin-top:6px; color:var(--soluk); }

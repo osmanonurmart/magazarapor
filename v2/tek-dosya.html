@@ -289,8 +289,11 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
 .acilir-menu button{ display:block; width:100%; text-align:left; background:none; border:none; padding:8px 10px; border-radius:7px; cursor:pointer; font-size:.8rem; }
 .acilir-menu button:hover{ background:#f1efe9; }
 .menu-baslik{ font-size:.72rem; color:var(--soluk); padding:4px 8px 8px; }
-.izin-satir{ display:flex; align-items:center; gap:7px; padding:5px 8px; border-radius:7px; font-size:.8rem; }
+.izin-satir{ display:flex; align-items:center; gap:7px; padding:5px 8px; border-radius:7px; font-size:.8rem; cursor:pointer; }
 .izin-satir:hover{ background:#f7f5f1; }
+/* Kutu yalnızca göstergedir; tıklamayı satır ele alır. */
+.izin-satir input[type=checkbox]{ pointer-events:none; }
+.izin-satir .izin-tur{ cursor:pointer; }
 .izin-ad{ flex:1; }
 .izin-tur{ padding:3px 6px; border:1px solid var(--cizgi); border-radius:6px; font-size:.72rem; }
 .menu-alt{ border-top:1px solid var(--cizgi) !important; margin-top:6px; color:var(--soluk); }
@@ -1022,13 +1025,13 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
     if (!aktifler.length) kap.appendChild(el('<div class="menu-bos">Personel listesi boş.</div>'));
     aktifler.forEach((p) => {
       const mevcut = izinler.find((z) => z.personelId === p.id);
-      const satir = el(`<label class="izin-satir">
-      <input type="checkbox" ${mevcut ? "checked" : ""}>
+      const satir = el(`<div class="izin-satir">
+      <input type="checkbox" tabindex="-1" ${mevcut ? "checked" : ""}>
       <span class="izin-ad">${esc(p.ad)}</span>
       <select class="izin-tur" ${mevcut ? "" : "disabled"}>
         ${IZIN_TURLERI.map((t) => `<option ${mevcut && mevcut.tur === t ? "selected" : ""}>${t}</option>`).join("")}
       </select>
-    </label>`);
+    </div>`);
       const kutu2 = satir.querySelector("input");
       const tur = satir.querySelector("select");
       const kaydet = () => {
@@ -1038,7 +1041,9 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
         gunAlanYaz(magazaKey, tarih, "izinler", liste);
         secenekler.yenile && secenekler.yenile();
       };
-      kutu2.addEventListener("change", () => {
+      satir.addEventListener("click", (e) => {
+        if (e.target.closest(".izin-tur")) return;
+        kutu2.checked = !kutu2.checked;
         tur.disabled = !kutu2.checked;
         kaydet();
       });
@@ -1053,10 +1058,12 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
     const kutu = dugme.getBoundingClientRect();
     menu.style.top = window.scrollY + kutu.bottom + 4 + "px";
     menu.style.left = Math.min(kutu.left, window.innerWidth - 260) + "px";
-    setTimeout(() => document.addEventListener("click", function kapat2() {
+    function disariTiklandi(e) {
+      if (menu.contains(e.target)) return;
       menu.remove();
-      document.removeEventListener("click", kapat2);
-    }, { once: true }), 0);
+      document.removeEventListener("click", disariTiklandi);
+    }
+    setTimeout(() => document.addEventListener("click", disariTiklandi), 0);
   }
 
   // js/panel.js

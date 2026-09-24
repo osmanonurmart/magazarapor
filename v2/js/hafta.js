@@ -222,13 +222,16 @@ function izinMenusu(dugme, magazaKey, tarih, personel, secenekler){
   if(!aktifler.length) kap.appendChild(U.el('<div class="menu-bos">Personel listesi boş.</div>'));
   aktifler.forEach(p => {
     const mevcut = izinler.find(z => z.personelId === p.id);
-    const satir = U.el(`<label class="izin-satir">
-      <input type="checkbox" ${mevcut ? 'checked' : ''}>
+    // Satır bir <label> değil: iç içe label + checkbox tıklamayı iki kez
+    // tetikleyip seçimi geri alıyordu. Kutu yalnızca görsel, tıklamayı satır
+    // ele alıyor.
+    const satir = U.el(`<div class="izin-satir">
+      <input type="checkbox" tabindex="-1" ${mevcut ? 'checked' : ''}>
       <span class="izin-ad">${U.esc(p.ad)}</span>
       <select class="izin-tur" ${mevcut ? '' : 'disabled'}>
         ${V.IZIN_TURLERI.map(t => `<option ${mevcut && mevcut.tur === t ? 'selected' : ''}>${t}</option>`).join('')}
       </select>
-    </label>`);
+    </div>`);
     const kutu = satir.querySelector('input');
     const tur = satir.querySelector('select');
     const kaydet = () => {
@@ -238,7 +241,12 @@ function izinMenusu(dugme, magazaKey, tarih, personel, secenekler){
       V.gunAlanYaz(magazaKey, tarih, 'izinler', liste);
       secenekler.yenile && secenekler.yenile();
     };
-    kutu.addEventListener('change', () => { tur.disabled = !kutu.checked; kaydet(); });
+    satir.addEventListener('click', e => {
+      if(e.target.closest('.izin-tur')) return;     // tür seçerken satır değişmesin
+      kutu.checked = !kutu.checked;
+      tur.disabled = !kutu.checked;
+      kaydet();
+    });
     tur.addEventListener('change', kaydet);
     kap.appendChild(satir);
   });
@@ -252,8 +260,13 @@ function izinMenusu(dugme, magazaKey, tarih, personel, secenekler){
   const kutu = dugme.getBoundingClientRect();
   menu.style.top = (window.scrollY + kutu.bottom + 4) + 'px';
   menu.style.left = Math.min(kutu.left, window.innerWidth - 260) + 'px';
-  setTimeout(() => document.addEventListener('click', function kapat(){
+
+  // Menü yalnızca dışına tıklayınca kapansın; içeride birden fazla kişi
+  // işaretlenebilmeli.
+  function disariTiklandi(e){
+    if(menu.contains(e.target)) return;
     menu.remove();
-    document.removeEventListener('click', kapat);
-  }, {once:true}), 0);
+    document.removeEventListener('click', disariTiklandi);
+  }
+  setTimeout(() => document.addEventListener('click', disariTiklandi), 0);
 }
