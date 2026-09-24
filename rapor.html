@@ -134,8 +134,109 @@
   .tr-klasor{ font-size:.72rem; color:#666; text-align:right; line-height:1.6; }
   .tr-klasor b{ color:var(--dark); }
   .tr-link{ background:none; border:none; color:var(--accent); cursor:pointer; font-size:.72rem; padding:0; text-decoration:underline; }
-  .tr-durum{ font-size:.78rem; color:var(--green); text-align:center; min-height:18px; }
-  .tr-durum.error{ color:var(--red); }
+
+  /* Uygulama içi pencereler ve bildirimler. --k telefonda ekranı büyütme oranıdır. */
+  :root{ --k:1; }
+  .ui-ov{
+    position:fixed; inset:0; z-index:2000; background:rgba(34,28,20,.45); backdrop-filter:blur(3px);
+    display:flex; align-items:center; justify-content:center; padding:calc(var(--k)*16px);
+    animation:uiFade .15s ease-out; -webkit-text-size-adjust:100%; text-size-adjust:100%;
+  }
+  .ui-dlg{
+    background:#fff; border-radius:calc(var(--k)*20px); width:calc(var(--k)*360px); max-width:100%;
+    padding:calc(var(--k)*24px) calc(var(--k)*20px) calc(var(--k)*18px); text-align:center;
+    box-shadow:0 20px 50px rgba(0,0,0,.25); animation:uiPop .2s cubic-bezier(.2,.9,.3,1.15);
+  }
+  .ui-ikon{
+    width:calc(var(--k)*54px); height:calc(var(--k)*54px); border-radius:50%; margin:0 auto calc(var(--k)*12px);
+    display:flex; align-items:center; justify-content:center; font-size:calc(var(--k)*26px); background:#fbf1e1;
+  }
+  .ui-dlg.tehlike .ui-ikon{ background:#fbe9e9; }
+  .ui-baslik{ font-size:calc(var(--k)*17px); font-weight:700; color:var(--dark); margin-bottom:calc(var(--k)*6px); }
+  .ui-mesaj{ font-size:calc(var(--k)*13.5px); color:#6b6b6b; line-height:1.5; white-space:pre-line; }
+  .ui-input{
+    width:100%; margin-top:calc(var(--k)*14px); padding:calc(var(--k)*11px) calc(var(--k)*12px);
+    border:1.5px solid var(--line); border-radius:calc(var(--k)*12px); font-size:calc(var(--k)*16px);
+    text-align:center; font-family:inherit; background:#fdfcfa;
+  }
+  .ui-input:focus{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(200,160,102,.18); }
+  .ui-btns{ display:flex; gap:calc(var(--k)*8px); margin-top:calc(var(--k)*20px); }
+  .ui-dlg.dikey .ui-btns{ flex-direction:column; }
+  .ui-btn{
+    flex:1; border:none; border-radius:calc(var(--k)*13px); padding:calc(var(--k)*12px) calc(var(--k)*10px);
+    font-size:calc(var(--k)*14.5px); font-weight:600; cursor:pointer; background:#f1efe9; color:#555;
+    font-family:inherit; transition:filter .15s, transform .1s;
+  }
+  .ui-btn:hover{ filter:brightness(.96); }
+  .ui-btn:active{ transform:scale(.97); }
+  .ui-btn.birincil{ background:var(--accent); color:#fff; }
+  .ui-btn.tehlike{ background:var(--red); color:#fff; }
+  .ui-btn.sade{ background:none; color:#999; }
+  @keyframes uiFade{ from{ opacity:0; } }
+  @keyframes uiPop{ from{ opacity:0; transform:scale(.92) translateY(8px); } }
+
+  .ui-toast{
+    position:fixed; left:50%; bottom:calc(var(--k)*24px); z-index:2100; transform:translate(-50%, 160%);
+    opacity:0; transition:transform .28s cubic-bezier(.2,.9,.3,1.1), opacity .2s; pointer-events:none;
+    background:var(--dark); color:#fff; padding:calc(var(--k)*11px) calc(var(--k)*18px);
+    border-radius:calc(var(--k)*14px); font-size:calc(var(--k)*13.5px); font-weight:500;
+    box-shadow:0 10px 30px rgba(0,0,0,.25); max-width:calc(100% - 32px); text-align:center;
+    -webkit-text-size-adjust:100%; text-size-adjust:100%;
+  }
+  .ui-toast.acik{ transform:translate(-50%, 0); opacity:1; }
+  .ui-toast.basari{ background:#2f6b3a; }
+  .ui-toast.hata{ background:var(--red); }
+
+  /* Uygulama içi kamera (kırık fotoğrafları art arda çekmek için) */
+  .kam-ov{
+    position:fixed; inset:0; z-index:1500; background:#000; display:flex; flex-direction:column;
+    -webkit-text-size-adjust:100%; text-size-adjust:100%; animation:uiFade .15s;
+  }
+  .kam-goruntu{ position:relative; flex:1; min-height:0; overflow:hidden; }
+  .kam-goruntu video{ width:100%; height:100%; object-fit:cover; display:block; background:#000; }
+  .kam-flas{ position:absolute; inset:0; background:#fff; opacity:0; pointer-events:none; }
+  .kam-flas.on{ animation:kamFlas .3s ease-out; }
+  @keyframes kamFlas{ 0%{ opacity:.85; } 100%{ opacity:0; } }
+  .kam-ust{
+    position:absolute; top:0; left:0; right:0; display:flex; justify-content:space-between; align-items:center;
+    padding:calc(var(--k)*14px) calc(var(--k)*16px) calc(var(--k)*30px);
+    background:linear-gradient(rgba(0,0,0,.6), transparent); color:#fff;
+  }
+  .kam-baslik{ font-size:calc(var(--k)*16px); font-weight:700; }
+  .kam-baslik small{ display:block; font-size:calc(var(--k)*12px); font-weight:400; opacity:.75; margin-top:2px; }
+  .kam-kapat{
+    width:calc(var(--k)*40px); height:calc(var(--k)*40px); border-radius:50%; border:none; cursor:pointer;
+    background:rgba(255,255,255,.18); color:#fff; font-size:calc(var(--k)*18px);
+  }
+  .kam-alt{ background:#111; padding:calc(var(--k)*14px) calc(var(--k)*18px) calc(var(--k)*24px); }
+  .kam-serit{ display:flex; gap:calc(var(--k)*8px); justify-content:center; margin-bottom:calc(var(--k)*16px); }
+  .kam-mini{
+    position:relative; width:calc(var(--k)*52px); height:calc(var(--k)*52px); border-radius:calc(var(--k)*11px);
+    border:2px solid rgba(255,255,255,.22); background:#222; overflow:hidden; cursor:pointer; padding:0;
+    color:rgba(255,255,255,.45); font-size:calc(var(--k)*17px); font-weight:700; font-family:inherit;
+    transition:transform .15s, border-color .15s;
+  }
+  .kam-mini img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .kam-mini .km-no{
+    position:absolute; left:3px; bottom:3px; z-index:1; background:rgba(0,0,0,.6); color:#fff;
+    font-size:calc(var(--k)*10px); border-radius:5px; padding:0 5px; line-height:1.5;
+  }
+  .kam-mini.aktif{ border-color:var(--accent); transform:scale(1.1); box-shadow:0 0 0 3px rgba(200,160,102,.35); }
+  .kam-kontrol{ display:flex; align-items:center; justify-content:space-between; }
+  .kam-yan{
+    width:calc(var(--k)*80px); background:none; border:none; color:#fff; cursor:pointer;
+    font-size:calc(var(--k)*14px); font-weight:600; font-family:inherit; padding:calc(var(--k)*8px) 0;
+  }
+  .kam-yan.bitti{ color:var(--accent); }
+  .kam-deklansor{
+    width:calc(var(--k)*76px); height:calc(var(--k)*76px); border-radius:50%; cursor:pointer;
+    border:calc(var(--k)*4px) solid #fff; background:transparent; padding:calc(var(--k)*5px);
+  }
+  .kam-deklansor::after{
+    content:''; display:block; width:100%; height:100%; border-radius:50%; background:#fff; transition:transform .1s;
+  }
+  .kam-deklansor:active::after{ transform:scale(.88); }
+  .kam-deklansor:disabled{ opacity:.5; }
 
   .icon-picker{ display:flex; flex-wrap:wrap; gap:7px; margin-top:2px; }
   .icon-picker .ip-item{
@@ -592,7 +693,7 @@
 
     <div id="trKirikView">
       <div class="tr-card">
-        <div class="tr-card-title">Kırık fotoğrafları <span class="tr-hint">— sırayla 1'den 5'e</span></div>
+        <div class="tr-card-title">Kırık fotoğrafları <span class="tr-hint" id="kirikIpucu">— sırayla 1'den 5'e</span></div>
         <div class="kirik-slots" id="kirikSlots"></div>
         <div class="tr-foto-row">
           <button class="tr-foto-btn" type="button" onclick="kirikGaleridenEkle()">🖼️ Galeriden sırayla ekle</button>
@@ -634,7 +735,6 @@
       </div>
     </div>
 
-    <div class="tr-durum" id="transferDurum"></div>
   </div>
   <input type="file" id="kirikSlotInput" accept="image/*" style="display:none;">
   <input type="file" id="kirikGaleriInput" accept="image/*" multiple style="display:none;">
@@ -684,7 +784,127 @@
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 1;
+const APP_SURUM = 2;
+
+// ==================== ARAYÜZ: pencere, onay, bildirim ====================
+// Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
+// Sayfa telefonda 1300px genişlikte açıldığı için --k ile büyütülerek gösterilir.
+function telefonMu(){
+  return window.matchMedia('(pointer:coarse)').matches && screen.width < 900;
+}
+function arayuzOlcek(){
+  const sayfaGen = document.documentElement.clientWidth;
+  const k = (telefonMu() && sayfaGen > screen.width) ? sayfaGen / screen.width : 1;
+  document.documentElement.style.setProperty('--k', String(k));
+  return k;
+}
+arayuzOlcek();
+window.addEventListener('resize', arayuzOlcek);
+
+function uiDialog(o){
+  return new Promise(res=>{
+    const ov = document.createElement('div');
+    ov.className = 'ui-ov';
+    const dlg = document.createElement('div');
+    dlg.className = 'ui-dlg' + (o.tehlike ? ' tehlike' : '') + (o.dikey ? ' dikey' : '');
+    if(o.ikon){
+      const ik = document.createElement('div');
+      ik.className = 'ui-ikon';
+      ik.textContent = o.ikon;
+      dlg.appendChild(ik);
+    }
+    if(o.baslik){
+      const b = document.createElement('div');
+      b.className = 'ui-baslik';
+      b.textContent = o.baslik;
+      dlg.appendChild(b);
+    }
+    if(o.mesaj){
+      const m = document.createElement('div');
+      m.className = 'ui-mesaj';
+      m.textContent = o.mesaj;
+      dlg.appendChild(m);
+    }
+    let input = null;
+    if(o.input){
+      input = document.createElement('input');
+      input.className = 'ui-input';
+      input.type = o.input.tip || 'text';
+      if(input.type === 'number') input.inputMode = 'numeric';
+      input.value = o.input.deger !== undefined && o.input.deger !== null ? String(o.input.deger) : '';
+      input.placeholder = o.input.placeholder || '';
+      dlg.appendChild(input);
+    }
+    const btns = document.createElement('div');
+    btns.className = 'ui-btns';
+    let birincil = null;
+    const kapat = deger=>{
+      document.removeEventListener('keydown', tus, true);
+      ov.remove();
+      res(deger);
+    };
+    const degerAl = b=> b.deger === '__input' ? (input ? input.value : '') : b.deger;
+    o.butonlar.forEach(b=>{
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'ui-btn' + (b.tip ? ' ' + b.tip : '');
+      btn.textContent = b.metin;
+      btn.addEventListener('click', ()=> kapat(degerAl(b)));
+      if(b.tip === 'birincil' || b.tip === 'tehlike') birincil = {btn, b};
+      btns.appendChild(btn);
+    });
+    dlg.appendChild(btns);
+    ov.appendChild(dlg);
+    ov.addEventListener('click', e=>{ if(e.target === ov) kapat(o.iptalDeger); });
+    function tus(e){
+      if(e.key === 'Escape'){ e.preventDefault(); e.stopPropagation(); kapat(o.iptalDeger); }
+      else if(e.key === 'Enter' && birincil){ e.preventDefault(); e.stopPropagation(); kapat(degerAl(birincil.b)); }
+    }
+    document.addEventListener('keydown', tus, true);
+    document.body.appendChild(ov);
+    if(input){ input.focus(); input.select(); }
+    else if(birincil) birincil.btn.focus();
+  });
+}
+function uiUyari(mesaj, o){
+  o = o || {};
+  return uiDialog({ikon:o.ikon || 'ℹ️', baslik:o.baslik || 'Bilgi', mesaj,
+    butonlar:[{metin:'Tamam', deger:true, tip:'birincil'}], iptalDeger:true});
+}
+function uiOnay(mesaj, o){
+  o = o || {};
+  return uiDialog({ikon:o.ikon || (o.tehlike ? '⚠️' : '❓'), baslik:o.baslik || 'Emin misiniz?', mesaj,
+    tehlike:!!o.tehlike,
+    butonlar:[{metin:o.hayir || 'Vazgeç', deger:false},
+              {metin:o.evet || 'Devam et', deger:true, tip:o.tehlike ? 'tehlike' : 'birincil'}],
+    iptalDeger:false});
+}
+function uiSor(mesaj, varsayilan, o){
+  o = o || {};
+  return uiDialog({ikon:o.ikon || '✏️', baslik:o.baslik || '', mesaj, tehlike:!!o.tehlike,
+    input:{deger:varsayilan, tip:o.tip, placeholder:o.placeholder},
+    butonlar:[{metin:'Vazgeç', deger:null}, {metin:o.evet || 'Tamam', deger:'__input', tip:o.tehlike ? 'tehlike' : 'birincil'}],
+    iptalDeger:null});
+}
+
+let uiToastZamanlayici = null;
+// sure: ms; 0 verilirse kendiliğinden kapanmaz (ilerleme mesajları için).
+function uiBildirim(mesaj, tip, sure){
+  let el = document.getElementById('uiToast');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'uiToast';
+    document.body.appendChild(el);
+  }
+  clearTimeout(uiToastZamanlayici);
+  if(!mesaj){ el.classList.remove('acik'); return; }
+  el.className = 'ui-toast' + (tip ? ' ' + tip : '');
+  el.textContent = mesaj;
+  void el.offsetWidth;
+  el.classList.add('acik');
+  if(sure === 0) return;
+  uiToastZamanlayici = setTimeout(()=> el.classList.remove('acik'), sure || (tip === 'hata' ? 4500 : 2600));
+}
 
 const GUN_ADLARI = ['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar'];
 const IZINLI_SECENEKLER = ['','Onur','Fatma','Zeynep'];
@@ -807,7 +1027,8 @@ async function migrateLocalDataToCloud(){
     setStatus('Bu tarayıcıda yerel (eski) veri bulunamadı. Bu butonu, verinin kayıp olduğu ORİJİNAL bilgisayarda/dosyada çalıştırmanız gerekiyor.', true);
     return;
   }
-  if(!confirm(localKeys.length + ' yerel kayıt bulundu. Bunlar buluta yüklenecek (mevcut bulut verisinin üzerine yazabilir, en güncel/dolu veri kazanır). Devam edilsin mi?')) return;
+  if(!await uiOnay(localKeys.length + ' yerel kayıt bulundu. Bunlar buluta yüklenecek; mevcut bulut verisinin üzerine yazabilir, en güncel/dolu veri kazanır.',
+                    {baslik:'Buluta yüklensin mi?', ikon:'☁️', evet:'Yükle'})) return;
 
   const btn = document.getElementById('migrateBtn');
   btn.disabled = true;
@@ -1518,7 +1739,8 @@ async function manageAksiyon(act, key){
   const p = Object.assign({key}, profilesCache[key]);
   if(act === 'duzenle'){ openProfileEdit(key, 'yonetim'); return; }
   if(act === 'pin'){
-    if(!confirm(p.name + ' profilinin PIN\'i silinecek. Bir sonraki girişte yeni PIN belirlenir. Devam?')) return;
+    if(!await uiOnay(p.name + ' profilinin PIN\'i silinecek. Bir sonraki girişte yeni PIN belirlenir.',
+                     {baslik:'PIN sıfırlansın mı?', ikon:'🔑', evet:'Sıfırla'})) return;
     try{
       await pinSil(key);
       renderManageList();
@@ -1529,8 +1751,10 @@ async function manageAksiyon(act, key){
   if(act === 'sil'){
     if(p.admin){ pmNotu('Yönetici profili silinemez.'); return; }
     if(aktifProfil && aktifProfil.key === key){ pmNotu('Şu an açık olan profil silinemez.'); return; }
-    if(!confirm(p.name + ' profili ve BU MAĞAZAYA AİT TÜM VERİ silinecek. Bu işlem geri alınamaz.')) return;
-    const onay = prompt('Silmeyi onaylamak için profilin adını yazın: ' + (p.name || key));
+    if(!await uiOnay(p.name + ' profili ve bu mağazaya ait tüm veri silinecek. Bu işlem geri alınamaz.',
+                     {baslik:'Profil silinsin mi?', tehlike:true, evet:'Sil'})) return;
+    const onay = await uiSor('Silmeyi onaylamak için profilin adını yazın: ' + (p.name || key), '',
+                             {baslik:'Son onay', ikon:'🗑️', tehlike:true, evet:'Sil', placeholder:p.name || key});
     if(onay === null) return;
     if(onay.trim() !== (p.name || key)){ pmNotu('Ad eşleşmedi, silme iptal edildi.'); return; }
     pmNotu('Siliniyor...');
@@ -2398,7 +2622,7 @@ function ghbhrBuildReportText(weekKey, save){
 }
 
 // GH veya BH verisini (ve o haftanın buluttaki kayıtlı raporunu) siler.
-function ghbhrDelete(weekKey, kind){
+async function ghbhrDelete(weekKey, kind){
   const etiket = kind.toUpperCase();
   const entry = ghbhrGetWeekly(weekKey);
   const raporVar = !!ghbhrReportsCache[weekKey];
@@ -2406,9 +2630,9 @@ function ghbhrDelete(weekKey, kind){
     setStatus('Hafta ' + weekKey + ' için silinecek ' + etiket + ' verisi yok.', true);
     return;
   }
-  if(!confirm('Hafta ' + weekKey + ' ' + etiket + ' verisi silinecek.' +
-              (raporVar ? '\nBu haftanın kayıtlı kıyas raporu da silinecek.' : '') +
-              '\nDevam edilsin mi?')) return;
+  if(!await uiOnay('Hafta ' + weekKey + ' ' + etiket + ' verisi silinecek.' +
+                   (raporVar ? '\nBu haftanın kayıtlı kıyas raporu da silinecek.' : ''),
+                   {baslik:etiket + ' verisi silinsin mi?', tehlike:true, evet:'Sil'})) return;
 
   entry[kind] = null;
   ghbhrSetWeekly(weekKey, entry);
@@ -3195,7 +3419,7 @@ function closeEditToolModal(){
 }
 function saveToolEdit(){
   const name = document.getElementById('editToolName').value.trim();
-  if(!name){ alert('Lütfen araç için bir isim yazın.'); return; }
+  if(!name){ uiUyari('Lütfen araç için bir isim yazın.', {baslik:'İsim eksik', ikon:'✏️'}); return; }
   const tools = getTools();
   const tool = tools.find(t => t.id === editToolId);
   if(!tool){ closeEditToolModal(); return; }
@@ -3278,8 +3502,8 @@ function downloadToolFile(id){
 function saveNewTool(){
   const name = document.getElementById('newToolName').value.trim();
   const code = document.getElementById('newToolCode').value;
-  if(!name){ alert('Lütfen araç için bir isim yazın.'); return; }
-  if(!code.trim()){ alert('Lütfen HTML kodunu yapıştırın veya bir dosya sürükleyin.'); return; }
+  if(!name){ uiUyari('Lütfen araç için bir isim yazın.', {baslik:'İsim eksik', ikon:'✏️'}); return; }
+  if(!code.trim()){ uiUyari('Lütfen HTML kodunu yapıştırın veya bir dosya sürükleyin.', {baslik:'Kod eksik', ikon:'📄'}); return; }
   const tools = getTools();
   tools.push({
     id: 'tool_' + Date.now(),
@@ -3292,8 +3516,8 @@ function saveNewTool(){
   renderToolsGrid();
 }
 
-function deleteTool(id){
-  if(!confirm('Bu aracı silmek istediğinize emin misiniz?')) return;
+async function deleteTool(id){
+  if(!await uiOnay('Bu araç kalıcı olarak silinecek.', {baslik:'Araç silinsin mi?', tehlike:true, evet:'Sil'})) return;
   let tools = getTools();
   tools = tools.filter(t => t.id !== id);
   saveTools(tools);
@@ -3376,10 +3600,9 @@ function listenTransferChanges(){
 }
 
 function setTransferDurum(msg, isError){
-  const el = document.getElementById('transferDurum');
-  if(!el) return;
-  el.textContent = msg || '';
-  el.className = 'tr-durum' + (isError ? ' error' : '');
+  if(!msg){ uiBildirim(''); return; }
+  const tip = isError ? 'hata' : (msg.startsWith('✓') ? 'basari' : '');
+  uiBildirim(msg.replace(/^✓\s*/, ''), tip, msg.includes('...') ? 0 : undefined);
 }
 
 // Sayfa telefonda 1300px genişlikte açıldığı için Transfer ekranı
@@ -3387,9 +3610,8 @@ function setTransferDurum(msg, isError){
 function transferMobilOlcek(){
   const wrap = document.getElementById('transferWrap');
   const sayfaGen = document.documentElement.clientWidth;
-  const telefon = window.matchMedia('(pointer:coarse)').matches && screen.width < 900;
-  if(telefon && sayfaGen > screen.width){
-    const olcek = sayfaGen / screen.width;
+  const olcek = arayuzOlcek();
+  if(olcek > 1){
     wrap.style.zoom = String(olcek);
     wrap.style.maxWidth = 'none';
     wrap.style.width = Math.floor((sayfaGen - 32) / olcek) + 'px';
@@ -3429,27 +3651,30 @@ function resmiAc(file){
     img.src = url;
   });
 }
-function resmiKucult(img, maxKenar, kalite){
-  const oran = Math.min(1, maxKenar / Math.max(img.naturalWidth, img.naturalHeight));
+function resmiKucult(kaynak, gen, yuk, maxKenar, kalite){
+  const oran = Math.min(1, maxKenar / Math.max(gen, yuk));
   const c = document.createElement('canvas');
-  c.width = Math.max(1, Math.round(img.naturalWidth * oran));
-  c.height = Math.max(1, Math.round(img.naturalHeight * oran));
-  c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+  c.width = Math.max(1, Math.round(gen * oran));
+  c.height = Math.max(1, Math.round(yuk * oran));
+  c.getContext('2d').drawImage(kaynak, 0, 0, c.width, c.height);
   return c.toDataURL('image/jpeg', kalite);
 }
-async function fotoHazirla(file){
-  const img = await resmiAc(file);
+function kaynaktanFoto(kaynak, gen, yuk){
   let kenar = FOTO_MAX_KENAR, kalite = 0.85;
-  let full = resmiKucult(img, kenar, kalite);
+  let full = resmiKucult(kaynak, gen, yuk, kenar, kalite);
   while(full.length > FOTO_MAX_BOYUT && kalite > 0.5){
     kalite -= 0.1;
-    full = resmiKucult(img, kenar, kalite);
+    full = resmiKucult(kaynak, gen, yuk, kenar, kalite);
   }
   while(full.length > FOTO_MAX_BOYUT && kenar > 400){
     kenar = Math.round(kenar * 0.8);
-    full = resmiKucult(img, kenar, kalite);
+    full = resmiKucult(kaynak, gen, yuk, kenar, kalite);
   }
-  return {full, thumb: resmiKucult(img, THUMB_KENAR, 0.7)};
+  return {full, thumb: resmiKucult(kaynak, gen, yuk, THUMB_KENAR, 0.7)};
+}
+async function fotoHazirla(file){
+  const img = await resmiAc(file);
+  return kaynaktanFoto(img, img.naturalWidth, img.naturalHeight);
 }
 
 // ---------- Kırık: telefon tarafı ----------
@@ -3469,16 +3694,177 @@ function renderKirikSlotlar(){
         renderKirikSlotlar();
       });
     } else {
-      slot.innerHTML = '<span class="ks-no">' + (i+1) + '</span><span>📷 Çek / ekle</span>';
+      slot.innerHTML = '<span class="ks-no">' + (i+1) + '</span><span>📷</span>';
     }
-    slot.addEventListener('click', ()=>{
-      kirikHedefSlot = i;
-      document.getElementById('kirikSlotInput').click();
-    });
+    slot.addEventListener('click', ()=> kirikSlotTikla(i));
     holder.appendChild(slot);
   });
   const dolu = kirikSlotlar.filter(Boolean).length;
+  document.getElementById('kirikIpucu').textContent = telefonMu()
+    ? '— 1\'e dokunun, 5 fotoğrafı art arda çekin'
+    : '— sırayla 1\'den 5\'e';
   document.getElementById('kirikGonderBtn').textContent = '📤 Gönder (' + dolu + '/' + KIRIK_FOTO_SAYISI + ')';
+}
+
+function kirikDosyadanSec(slot){
+  kirikHedefSlot = slot;
+  document.getElementById('kirikSlotInput').click();
+}
+
+// Boş kutu: telefonda kamera açılır ve boş kutular sırayla çekilir.
+// Dolu kutu: yeniden çekme / galeriden seçme / kaldırma seçenekleri.
+async function kirikSlotTikla(i){
+  if(!kirikSlotlar[i]){
+    if(telefonMu()) kameraAc(i, false);
+    else kirikDosyadanSec(i);
+    return;
+  }
+  const secim = await uiDialog({
+    ikon:'📷', baslik:(i+1) + '. fotoğraf', dikey:true,
+    butonlar:[
+      {metin:'📷  Yeniden çek', deger:'cek', tip:'birincil'},
+      {metin:'🖼️  Galeriden seç', deger:'galeri'},
+      {metin:'🗑  Kaldır', deger:'sil'},
+      {metin:'Vazgeç', deger:null, tip:'sade'}
+    ],
+    iptalDeger:null
+  });
+  if(secim === 'cek'){
+    if(telefonMu()) kameraAc(i, true);
+    else kirikDosyadanSec(i);
+  } else if(secim === 'galeri'){
+    kirikDosyadanSec(i);
+  } else if(secim === 'sil'){
+    kirikSlotlar[i] = null;
+    renderKirikSlotlar();
+  }
+}
+
+// ---------- Uygulama içi kamera ----------
+let kamera = null;   // {ov, video, stream, aktif, tek, mesgul}
+
+async function kameraAc(slot, tek){
+  if(kamera) return;
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){ kameraYok(slot, null); return; }
+  let stream;
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({
+      audio:false,
+      video:{facingMode:{ideal:'environment'}, width:{ideal:1920}, height:{ideal:1920}}
+    });
+  }catch(e){
+    kameraYok(slot, e);
+    return;
+  }
+  arayuzOlcek();
+  const ov = document.createElement('div');
+  ov.className = 'kam-ov';
+  ov.innerHTML =
+    '<div class="kam-goruntu">' +
+      '<video autoplay playsinline muted></video>' +
+      '<div class="kam-flas"></div>' +
+      '<div class="kam-ust"><div class="kam-baslik"></div>' +
+        '<button class="kam-kapat" type="button" title="Kapat">✕</button></div>' +
+    '</div>' +
+    '<div class="kam-alt">' +
+      '<div class="kam-serit"></div>' +
+      '<div class="kam-kontrol">' +
+        '<button class="kam-yan" type="button" data-act="galeri">🖼️ Galeri</button>' +
+        '<button class="kam-deklansor" type="button" title="Çek"></button>' +
+        '<button class="kam-yan bitti" type="button" data-act="bitti">Bitti</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(ov);
+  const video = ov.querySelector('video');
+  video.srcObject = stream;
+  try{ await video.play(); }catch(e){ /* autoplay ile zaten oynar */ }
+  kamera = {ov, video, stream, aktif:slot, tek, mesgul:false};
+  ov.querySelector('.kam-kapat').addEventListener('click', kameraKapat);
+  ov.querySelector('[data-act="bitti"]').addEventListener('click', kameraKapat);
+  ov.querySelector('[data-act="galeri"]').addEventListener('click', ()=>{
+    kirikHedefSlot = kamera.aktif;
+    document.getElementById('kirikSlotInput').click();
+  });
+  ov.querySelector('.kam-deklansor').addEventListener('click', kameraCek);
+  renderKamera();
+}
+
+function kameraYok(slot, hata){
+  const izinYok = hata && (hata.name === 'NotAllowedError' || hata.name === 'SecurityError');
+  uiDialog({
+    ikon:'📷', baslik:'Kamera açılamadı',
+    mesaj: izinYok
+      ? 'Tarayıcı kamera iznini vermedi. Adres çubuğundaki kilit simgesinden kameraya izin verebilir ya da fotoğrafı dosyadan seçebilirsiniz.'
+      : 'Bu cihazda uygulama içi kamera açılamadı. Fotoğrafı telefonun kendi kamerasıyla çekebilirsiniz.',
+    butonlar:[{metin:'Vazgeç', deger:false}, {metin:'Fotoğraf çek / seç', deger:true, tip:'birincil'}],
+    iptalDeger:false
+  }).then(evet=>{ if(evet) kirikDosyadanSec(slot); });
+}
+
+function renderKamera(){
+  if(!kamera) return;
+  const dolu = kirikSlotlar.filter(Boolean).length;
+  kamera.ov.querySelector('.kam-baslik').innerHTML =
+    (kamera.aktif + 1) + '. fotoğraf<small>' + dolu + ' / ' + KIRIK_FOTO_SAYISI + ' hazır</small>';
+  const serit = kamera.ov.querySelector('.kam-serit');
+  serit.innerHTML = '';
+  kirikSlotlar.forEach((f, i)=>{
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'kam-mini' + (i === kamera.aktif ? ' aktif' : '');
+    if(f){
+      b.innerHTML = '<img alt=""><span class="km-no">' + (i+1) + '</span>';
+      b.querySelector('img').src = f.thumb;
+    } else {
+      b.textContent = String(i+1);
+    }
+    // Şeritten bir kutuya dokunmak o fotoğrafı yeniden çekmeyi sağlar.
+    b.addEventListener('click', ()=>{ kamera.aktif = i; renderKamera(); });
+    serit.appendChild(b);
+  });
+}
+
+// Sıradaki boş kutu: önce çekilenin sağına, yoksa baştan bakar.
+function siradakiBosSlot(sonra){
+  for(let i=sonra+1;i<KIRIK_FOTO_SAYISI;i++) if(!kirikSlotlar[i]) return i;
+  for(let i=0;i<=sonra;i++) if(!kirikSlotlar[i]) return i;
+  return -1;
+}
+
+async function kameraCek(){
+  if(!kamera || kamera.mesgul) return;
+  const v = kamera.video;
+  if(!v.videoWidth){ uiBildirim('Kamera henüz hazır değil', 'hata'); return; }
+  kamera.mesgul = true;
+  const flas = kamera.ov.querySelector('.kam-flas');
+  flas.classList.remove('on'); void flas.offsetWidth; flas.classList.add('on');
+  const c = document.createElement('canvas');
+  c.width = v.videoWidth;
+  c.height = v.videoHeight;
+  c.getContext('2d').drawImage(v, 0, 0);
+  const cekilen = kamera.aktif;
+  kirikSlotlar[cekilen] = kaynaktanFoto(c, c.width, c.height);
+  renderKirikSlotlar();
+  const sonraki = kamera.tek ? -1 : siradakiBosSlot(cekilen);
+  if(sonraki < 0){
+    renderKamera();
+    setTimeout(()=>{
+      kameraKapat();
+      const dolu = kirikSlotlar.filter(Boolean).length;
+      if(dolu === KIRIK_FOTO_SAYISI) uiBildirim('5 fotoğraf hazır, kontrol edip gönderebilirsiniz', 'basari');
+    }, 350);
+    return;
+  }
+  kamera.aktif = sonraki;
+  renderKamera();
+  kamera.mesgul = false;
+}
+
+function kameraKapat(){
+  if(!kamera) return;
+  kamera.stream.getTracks().forEach(t=> t.stop());
+  kamera.ov.remove();
+  kamera = null;
 }
 
 function kirikGaleridenEkle(){
@@ -3487,13 +3873,10 @@ function kirikGaleridenEkle(){
 
 // Seçilen dosyaları, verilen slottan başlayarak boş slotlara sırayla yerleştirir.
 async function kirikSlotlaraYerlestir(files, baslangic){
-  let slot = baslangic;
+  let slot = baslangic, fazla = false;
   for(const f of files){
     while(slot < KIRIK_FOTO_SAYISI && kirikSlotlar[slot] && slot !== baslangic) slot++;
-    if(slot >= KIRIK_FOTO_SAYISI){
-      setTransferDurum('5 fotoğraf doldu, fazlası eklenmedi.', true);
-      break;
-    }
+    if(slot >= KIRIK_FOTO_SAYISI){ fazla = true; break; }
     setTransferDurum('Fotoğraf hazırlanıyor (' + (slot+1) + ')...');
     try{
       kirikSlotlar[slot] = await fotoHazirla(f);
@@ -3504,7 +3887,12 @@ async function kirikSlotlaraYerlestir(files, baslangic){
     renderKirikSlotlar();
     slot++;
   }
-  setTransferDurum('');
+  if(kamera){
+    const sonraki = siradakiBosSlot(Math.min(slot, KIRIK_FOTO_SAYISI) - 1);
+    if(sonraki < 0) kameraKapat();
+    else { kamera.aktif = sonraki; renderKamera(); }
+  }
+  setTransferDurum(fazla ? '5 fotoğraf doldu, fazlası eklenmedi.' : '', fazla);
 }
 
 document.getElementById('kirikSlotInput').addEventListener('change', async e=>{
@@ -3551,7 +3939,8 @@ async function kirikGonder(){
   kirikSlotlar.forEach((f,i)=>{ if(f) fotolar.push({sira:i+1, full:f.full, thumb:f.thumb}); });
   if(!fotolar.length){ setTransferDurum('Önce fotoğraf ekleyin.', true); return; }
   if(fotolar.length < KIRIK_FOTO_SAYISI &&
-     !confirm(fotolar.length + ' fotoğraf var. Yine de gönderilsin mi?')) return;
+     !await uiOnay(KIRIK_FOTO_SAYISI + ' fotoğraftan ' + fotolar.length + ' tanesi hazır. Eksik haliyle gönderilsin mi?',
+                   {baslik:'Eksik fotoğraf', ikon:'📷', evet:'Gönder', hayir:'Geri dön'})) return;
   transferMesgul = true;
   document.getElementById('kirikGonderBtn').disabled = true;
   try{
@@ -3563,6 +3952,7 @@ async function kirikGonder(){
   }finally{
     transferMesgul = false;
     document.getElementById('kirikGonderBtn').disabled = false;
+    renderTransferListeleri();
   }
 }
 
@@ -3619,6 +4009,7 @@ async function genelGonder(){
   }finally{
     transferMesgul = false;
     document.getElementById('genelGonderBtn').disabled = false;
+    renderTransferListeleri();
   }
 }
 
@@ -3714,7 +4105,8 @@ function renderKirikKlasorBilgi(){
 
 async function kirikSayacDegistir(){
   const mevcut = kirikSayac || 0;
-  const v = prompt('Son oluşturulan klasör numarası kaç?\n(Bir sonraki kayıt bu sayının bir fazlası olur.)', String(mevcut));
+  const v = await uiSor('Son oluşturulan klasör numarasını yazın. Bir sonraki kayıt bunun bir fazlası olur.', String(mevcut),
+                        {baslik:'Klasör numarası', ikon:'📁', tip:'number', evet:'Kaydet'});
   if(v === null) return;
   const n = parseInt(v, 10);
   if(isNaN(n) || n < 0){ setTransferDurum('Geçerli bir sayı girin.', true); return; }
@@ -3815,7 +4207,7 @@ async function transferSil(t){
   await batch.commit();
 }
 async function transferSilOnayli(t){
-  if(!confirm('Bu kayıt silinsin mi?')) return;
+  if(!await uiOnay('Bu kayıt ve fotoğrafları silinecek.', {baslik:'Kayıt silinsin mi?', tehlike:true, evet:'Sil'})) return;
   try{ await transferSil(t); }
   catch(e){ setTransferDurum('Silinemedi: ' + e.message, true); }
 }
@@ -3940,7 +4332,8 @@ let guncellemeKontrolde = false;
 async function guncellemeKontrol(){
   if(guncellemeKontrolde) return;
   if(location.protocol === 'file:'){
-    alert('Sayfa bilgisayardaki bir dosyadan açılmış, güncelleme buradan kontrol edilemiyor.\nGüncel sürüm için sayfayı internet adresinden açın.');
+    uiUyari('Sayfa bilgisayardaki bir dosyadan açılmış, güncelleme buradan kontrol edilemiyor. Güncel sürüm için sayfayı internet adresinden açın.',
+            {baslik:'Kontrol edilemiyor', ikon:'🔄'});
     return;
   }
   guncellemeKontrolde = true;
@@ -3958,11 +4351,11 @@ async function guncellemeKontrol(){
       location.reload();
       return;
     }
-    renderSurumRozet('v' + APP_SURUM + ' ✓ güncel');
-    setTimeout(()=> renderSurumRozet(), 2500);
+    renderSurumRozet();
+    uiBildirim('Son sürümü kullanıyorsunuz (v' + APP_SURUM + ')', 'basari');
   }catch(e){
     renderSurumRozet();
-    alert('Güncelleme kontrol edilemedi: ' + e.message);
+    uiBildirim('Güncelleme kontrol edilemedi: ' + e.message, 'hata');
   }finally{
     guncellemeKontrolde = false;
   }
