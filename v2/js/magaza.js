@@ -25,7 +25,7 @@ export function magazaEkrani(magazaKey, secenekler = {}){
   panelleriHazirla(gezinti, {kapId:'gezinti', magaza:magazaKey, yon:'yatay'});
 
   const govde = U.el('<div class="ekran-govde"></div>');
-  const sol = U.el('<div class="ana-alan"></div>');
+  const sol = U.el('<div class="ana-alan" data-panel="anaAlan" data-kap="1" data-ad="📊 Haftalık tablolar"></div>');
   sol.appendChild(haftaTablosu(magazaKey, pzt, {
     duzenlenebilir, yenile,
     urunAc: p => urunPenceresi(magazaKey, p, duzenlenebilir, yenile),
@@ -43,21 +43,29 @@ export function magazaEkrani(magazaKey, secenekler = {}){
 
   sol.appendChild(simuleSatiri(yenile));
   govde.appendChild(sol);
-  govde.appendChild(panelOlustur(magazaKey, {duzenlenebilir, yenile}));
+  const yan = panelOlustur(magazaKey, {duzenlenebilir, yenile});
+  yan.dataset.panel = 'yanPanel';
+  yan.dataset.kap = '1';
+  yan.dataset.ad = '📌 Özet paneli';
+  govde.appendChild(yan);
+  panelleriHazirla(yan, {kapId:'yanPanel', magaza:magazaKey, yon:'dikey'});
+  panelleriHazirla(govde, {kapId:'govde', magaza:magazaKey, yon:'yatay'});
   kok.appendChild(govde);
   return kok;
 }
 
 function haftaGezinti(pzt, yenile){
   const bugunD = U.bugun();
-  const yil = pzt.getFullYear();
-  const ay = pzt.getMonth() + 1;
+  // Ay şeridi haftanın perşembesine göre belirlenir; 31 Ağustos'ta başlayan
+  // hafta Eylül'e ait sayılır ve şerit hafta seçince değişmez.
+  const {yil, ay} = U.haftaninAyi(pzt);
   const haftalar = U.ayinHaftalari(yil, ay);
   const seciliKey = U.haftaKey(pzt);
 
   const duyurular = V.duyurularGetir();
   const kok = U.el(`<div class="hafta-gezinti">
     <div class="gez-sol" data-panel="hafta">
+      <div class="panel-adi">📅 Hafta seçimi</div>
       <div class="ay-satir">
         ${U.AY_KISA.map((a,i) => `<button class="ay ${i+1===ay?'secili':''}" data-ay="${i+1}">${a}</button>`).join('')}
         <select class="yil-sec">
@@ -87,12 +95,12 @@ function haftaGezinti(pzt, yenile){
   </div>`);
 
   kok.querySelectorAll('[data-ay]').forEach(b => b.addEventListener('click', () => {
-    const yeniAy = Number(b.dataset.ay);
-    const hedef = U.ayinHaftalari(Number(kok.querySelector('.yil-sec').value), yeniAy)[0];
-    haftaSec(hedef); yenile();
+    const hedef = U.ayinHaftalari(Number(kok.querySelector('.yil-sec').value), Number(b.dataset.ay))[0];
+    if(hedef){ haftaSec(hedef); yenile(); }
   }));
   kok.querySelector('.yil-sec').addEventListener('change', function(){
-    haftaSec(U.ayinHaftalari(Number(this.value), ay)[0]); yenile();
+    const hedef = U.ayinHaftalari(Number(this.value), ay)[0];
+    if(hedef){ haftaSec(hedef); yenile(); }
   });
   kok.querySelectorAll('[data-pzt]').forEach(b => b.addEventListener('click', () => {
     haftaSec(new Date(b.dataset.pzt + 'T12:00:00')); yenile();

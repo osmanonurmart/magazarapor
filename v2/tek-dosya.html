@@ -10,7 +10,7 @@
 /* Mağaza Performans Takip — tek stil dosyası.
    Açık tema esas; renkler değişkenlerden geliyor. */
 :root{
-  --arka:#f4f2ef; --kagit:#ffffff; --cizgi:#e3ded5; --yazi:#26262a; --soluk:#8a8a92;
+  --arka:#f0ede8; --kagit:#ffffff; --cizgi:#c9c1b3; --cizgi-ince:#ddd6c9; --yazi:#26262a; --soluk:#7c7c86;
   --vurgu:#C8A066; --koyu:#1d1d1f; --artis:#2f7d46; --dusus:#b23b3b; --acik-vurgu:#faf5eb;
   --golge:0 2px 10px rgba(0,0,0,.06); --golge-buyuk:0 12px 40px rgba(0,0,0,.18);
   --r:10px;
@@ -122,12 +122,16 @@ table{ border-collapse:collapse; }
   display:flex; flex-direction:column;
 }
 .duyuru-baslik{ font-size:.72rem; font-weight:700; color:var(--soluk); margin-bottom:5px; }
-.duyuru-serit{ display:flex; flex-direction:column; gap:4px; min-height:0; }
-/* Tek satır: yarım kesilmiş metin görünmesin, tamamı ipucunda. */
+.duyuru-serit{ display:flex; flex-direction:column; gap:7px; min-height:0; overflow-y:auto; }
+/* Her duyuru ayrı bir mesaj balonu; tek satır, tamamı ipucunda. */
 .duyuru-satir{
-  background:var(--acik-vurgu); border-radius:7px; padding:4px 9px; font-size:.74rem; line-height:1.4;
+  position:relative; background:var(--acik-vurgu); border:1px solid #e0cda4;
+  border-left:3px solid var(--vurgu); border-radius:4px 10px 10px 4px;
+  padding:6px 10px 6px 11px; font-size:.74rem; line-height:1.4; color:#5f4a22;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  box-shadow:0 1px 3px rgba(0,0,0,.07);
 }
+.duyuru-satir::before{ content:'📢'; margin-right:6px; opacity:.6; font-size:.7rem; }
 .duyuru-bos{ color:var(--soluk); font-size:.74rem; }
 
 /* ---------- Haftalık rutin ---------- */
@@ -142,11 +146,11 @@ table{ border-collapse:collapse; }
 .rutin-blok .tablo-sar{ flex:1; min-height:0; overflow:auto; }
 .rutin-tablo{ width:100%; min-width:300px; table-layout:fixed; }
 .rutin-tablo th{
-  font-size:.64rem; font-weight:600; color:var(--soluk); padding:1px 2px;
-  border-bottom:1px solid var(--cizgi); text-align:center;
+  font-size:.64rem; font-weight:700; color:var(--soluk); padding:1px 2px;
+  border-bottom:2px solid var(--cizgi); text-align:center;
 }
 .rutin-tablo th.bugun{ color:var(--vurgu); }
-.rutin-tablo td{ vertical-align:top; padding:3px 2px; border-right:1px solid #f0ece4; }
+.rutin-tablo td{ vertical-align:top; padding:3px 2px; border-right:1px solid var(--cizgi-ince); }
 .rutin-tablo td:last-child{ border-right:none; }
 .rutin-tablo td.bugun{ background:#fdfbf6; }
 /* Sade yazı; üzerine gelince kutuya döner, tıklanınca yeşile. */
@@ -178,18 +182,28 @@ table{ border-collapse:collapse; }
 }
 
 /* ---------- Taşınabilir / boyutlanabilir paneller ---------- */
+/* Her panelin sol üstünde adı durur. */
+.panel-adi{
+  font-size:.72rem; font-weight:700; color:var(--soluk); margin-bottom:5px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
 .panel-ayarlanabilir{ position:relative; }
+.panel-kapsayici > .panel-adi{ padding-left:2px; }
+.panel-kapsayici > .panel-tut{ right:auto; left:2px; top:-2px; }
 .panel-tut{
-  position:absolute; top:2px; right:2px; z-index:5;
+  position:absolute; top:2px; right:2px; z-index:5; pointer-events:none;
   width:18px; height:18px; padding:0; line-height:1; border-radius:5px;
   border:1px solid var(--cizgi); background:var(--kagit); color:#b9b9c0;
   font-size:.64rem; cursor:grab; opacity:0; transition:opacity .12s;
 }
-.panel-ayarlanabilir:hover > .panel-tut{ opacity:1; }
+.panel-ayarlanabilir:hover > .panel-tut{ opacity:1; pointer-events:auto; }
 .panel-tut:hover{ color:var(--vurgu); border-color:var(--vurgu); }
 .panel-tut:active{ cursor:grabbing; }
-.panel-tutamak{ position:absolute; z-index:4; opacity:0; transition:opacity .12s; background:var(--vurgu); }
-.panel-ayarlanabilir:hover > .panel-tutamak{ opacity:.25; }
+.panel-tutamak{
+  position:absolute; z-index:4; opacity:0; transition:opacity .12s; background:var(--vurgu);
+  pointer-events:none;   /* görünmezken altındaki düğmelerin tıklamasını çalmasın */
+}
+.panel-ayarlanabilir:hover > .panel-tutamak{ opacity:.25; pointer-events:auto; }
 .panel-tutamak:hover{ opacity:.7 !important; }
 .panel-tutamak.sag{ top:8px; bottom:8px; right:-2px; width:4px; border-radius:3px; cursor:col-resize; }
 .panel-tutamak.alt{ left:8px; right:8px; bottom:-2px; height:4px; border-radius:3px; cursor:row-resize; }
@@ -217,8 +231,9 @@ table{ border-collapse:collapse; }
 .ok{ background:none; border:1px solid var(--cizgi); border-radius:8px; width:26px; height:26px; cursor:pointer; flex:0 0 auto; }
 
 /* ---------- Ekran gövdesi ---------- */
-.ekran-govde{ display:grid; grid-template-columns:minmax(0,1fr) 330px; gap:14px; align-items:start; }
-.ana-alan{ display:flex; flex-direction:column; gap:12px; min-width:0; }
+.ekran-govde{ display:flex; gap:14px; align-items:flex-start; }
+.ana-alan{ display:flex; flex-direction:column; gap:12px; min-width:0; flex:1 1 0; }
+.yan-panel{ flex:0 0 330px; }
 
 /* ---------- Haftalık tablo ---------- */
 .hafta-blok{ background:var(--kagit); border:1px solid var(--cizgi); border-radius:var(--r); overflow:hidden; }
@@ -234,6 +249,9 @@ table{ border-collapse:collapse; }
 .tablo-sar{ overflow-x:auto; }
 .hafta-tablo{ width:100%; min-width:720px; font-size:.76rem; }
 .hafta-tablo th,.hafta-tablo td{ border:1px solid var(--cizgi); padding:0; text-align:center; }
+.hafta-tablo thead th{ border-bottom-width:2px; }
+.hafta-tablo .kpi-sutun{ border-right-width:2px; }
+.hafta-tablo .formul-sutun{ border-left-width:2px; }
 .hafta-tablo thead th{ background:#faf9f6; padding:4px 3px; font-weight:600; vertical-align:top; }
 .hafta-tablo thead th.bugun{ background:var(--acik-vurgu); }
 .gun-ad{ display:block; font-size:.72rem; line-height:1.2; }
@@ -258,6 +276,7 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
 
 /* ---------- Sağ panel ---------- */
 .yan-panel{ display:flex; flex-direction:column; gap:12px; min-width:0; }
+.yan-panel > .panel-kutu{ width:100%; }
 .panel-kutu{ background:var(--kagit); border:1px solid var(--cizgi); border-radius:var(--r); padding:12px; }
 .panel-kutu h3{ font-size:.86rem; margin-bottom:3px; }
 .panel-alt{ color:var(--soluk); font-size:.72rem; margin-bottom:9px; }
@@ -280,7 +299,8 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
 .yorum-alan:focus{ outline:none; border-color:var(--vurgu); }
 .yorum-durum{ font-size:.72rem; color:var(--artis); min-height:15px; margin-top:4px; }
 .kiyas-tablo{ width:100%; font-size:.76rem; }
-.kiyas-tablo th{ color:var(--soluk); font-weight:500; text-align:right; padding:3px 4px; border-bottom:1px solid var(--cizgi); }
+.kiyas-tablo th{ color:var(--soluk); font-weight:600; text-align:right; padding:3px 4px; border-bottom:2px solid var(--cizgi); }
+.kiyas-tablo td{ border-bottom:1px solid var(--cizgi-ince); }
 .kiyas-tablo td{ padding:4px; text-align:right; }
 .kiyas-tablo td:first-child,.kiyas-tablo th:first-child{ text-align:left; }
 .duyuru{ display:flex; gap:8px; align-items:flex-start; justify-content:space-between; background:var(--acik-vurgu); border-radius:8px; padding:8px 10px; font-size:.78rem; margin-bottom:6px; }
@@ -289,6 +309,7 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
 .gorunum-cubugu{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:12px; font-size:.8rem; color:var(--soluk); }
 .ozet-tablo{ width:100%; min-width:860px; background:var(--kagit); font-size:.78rem; }
 .ozet-tablo th,.ozet-tablo td{ border:1px solid var(--cizgi); padding:5px 8px; text-align:right; }
+.ozet-tablo thead th{ border-bottom-width:2px; }
 .ozet-tablo thead th{ background:#faf9f6; text-align:center; }
 .ozet-tablo .alt-baslik th{ font-weight:500; color:var(--soluk); font-size:.72rem; }
 .ozet-tablo tbody tr{ cursor:pointer; }
@@ -387,6 +408,7 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
 .bulgu-not.iyi{ color:var(--artis); font-weight:600; }
 .onizleme{ width:100%; font-size:.76rem; margin-top:4px; }
 .onizleme th,.onizleme td{ border:1px solid var(--cizgi); padding:4px 7px; text-align:right; }
+.onizleme thead th{ border-bottom-width:2px; }
 .onizleme thead th{ background:var(--kagit); font-weight:600; }
 .onizleme .on-gun{ text-align:left; white-space:nowrap; font-weight:600; }
 .on-uyari{ color:var(--vurgu); font-size:.7rem; margin-left:3px; }
@@ -403,6 +425,7 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
 .urun-ust{ font-weight:700; margin-bottom:10px; }
 .urun-tablo{ width:100%; font-size:.79rem; }
 .urun-tablo th,.urun-tablo td{ border:1px solid var(--cizgi); padding:5px 8px; text-align:right; }
+.urun-tablo thead th{ border-bottom-width:2px; }
 .urun-tablo th:first-child,.urun-tablo td:first-child{ text-align:left; }
 .urun-tablo thead th{ background:#faf9f6; }
 .urun-tablo tr.one-cikan{ background:var(--acik-vurgu); }
@@ -414,7 +437,11 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
 
 /* ---------- Mobil: üst gezinme / orta tablo / alt kartlar ---------- */
 @media (max-width: 900px){
-  .ekran-govde,.talep-ekran{ grid-template-columns:1fr; }
+  /* Dikey dizilişte çocuklar kapsayıcıyı doldursun; içerik genişliğine göre
+     büyüyüp sayfayı yana taşırmasınlar. */
+  .ekran-govde{ flex-direction:column; align-items:stretch; }
+  .ekran-govde > *{ flex:1 1 auto !important; }
+  .talep-ekran{ grid-template-columns:1fr; }
   .sayfa{ padding:10px; }
   .ust-cubuk{ padding:7px 10px; gap:8px; }
   .menu{ order:1; width:100%; overflow-x:auto; }
@@ -502,13 +529,21 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
     const { hafta } = isoHafta(pzt);
     return kisaTarih(gunler[0]) + " - " + kisaTarih(gunler[6]) + " (Hafta " + hafta + ")";
   }
+  function persembe(pzt) {
+    const d = new Date(pzt);
+    d.setDate(d.getDate() + 3);
+    return d;
+  }
+  function haftaninAyi(pzt) {
+    const p = persembe(pzt);
+    return { yil: p.getFullYear(), ay: p.getMonth() + 1 };
+  }
   function ayinHaftalari(yil, ay) {
-    const ilk = new Date(yil, ay - 1, 1);
-    const son = new Date(yil, ay, 0);
     const haftalar = [];
-    let p = pazartesi(ilk);
-    while (p <= son) {
-      haftalar.push(new Date(p));
+    let p = pazartesi(new Date(yil, ay - 1, 1));
+    for (let i = 0; i < 6; i++) {
+      const pr = persembe(p);
+      if (pr.getFullYear() === yil && pr.getMonth() + 1 === ay) haftalar.push(new Date(p));
       p = haftaEkle(p, 1);
     }
     return haftalar;
@@ -1049,7 +1084,7 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
     const personel = personelGetir(magazaKey);
     const kok = el(`<section class="hafta-blok" data-hafta="${haftaKey(pzt)}">
     <header class="hafta-ust">
-      <div class="hafta-baslik">${haftaBasligi(pzt)}</div>
+      <div class="hafta-baslik">📊 ${haftaBasligi(pzt)}</div>
       <div class="hafta-hedef">
         <span class="etiket">Hedef</span>
         <input class="hedef-girdi" type="text" inputmode="numeric" value="${ozet.hedefToplam ?? ""}" ${duzenlenebilir ? "" : "disabled"}>
@@ -1216,7 +1251,7 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
       gun: bitis
     };
   }
-  function kiyasTablosu(baslik, altBaslik, sol, sag, solEtiket, sagEtiket) {
+  function kiyasTablosu(panelId, baslik, altBaslik, sol, sag, solEtiket, sagEtiket) {
     const satirlar = ["ciro", "mdo", "fbu", "mgs", "fbs", "toplu"].map((alan) => {
       const d = yuzdeDegisim(sol[alan], sag[alan]);
       return `<tr>
@@ -1226,7 +1261,7 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
       <td class="${degisimSinifi(d)}">${fmtDegisim(d)}</td>
     </tr>`;
     }).join("");
-    return el(`<div class="panel-kutu">
+    return el(`<div class="panel-kutu" data-panel="${panelId}">
     <h3>${esc(baslik)}</h3>
     <div class="panel-alt">${esc(altBaslik)}</div>
     <table class="kiyas-tablo">
@@ -1245,7 +1280,7 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
     const buGun = gunGetir(magazaKey, bugunStr2) || {};
     const dun = gunGetir(magazaKey, dunStr) || {};
     const kok = el('<aside class="yan-panel"></aside>');
-    const kartKutu = el('<div class="panel-kutu"><h3>Dün / Bugün</h3><div class="kart-liste"></div></div>');
+    const kartKutu = el('<div class="panel-kutu" data-panel="kartlar"><h3>📈 Dün / Bugün</h3><div class="kart-liste"></div></div>');
     const kartListe = kartKutu.querySelector(".kart-liste");
     const kartlar = kartlarGetir(magazaKey);
     kartlar.forEach((kart) => {
@@ -1281,8 +1316,8 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
       kartKutu.appendChild(ekle);
     }
     kok.appendChild(kartKutu);
-    const yorumKutu = el(`<div class="panel-kutu">
-    <h3>Günlük yorum</h3>
+    const yorumKutu = el(`<div class="panel-kutu" data-panel="yorum">
+    <h3>📝 Günlük yorum</h3>
     <div class="panel-alt">${kisaTarih(bugunD)} — bölge müdürüne iletilir</div>
     <textarea class="yorum-alan" placeholder="Düşüş veya yükselişin sebebi..." ${duzenlenebilir ? "" : "disabled"}>${esc(buGun.yorum || "")}</textarea>
     <div class="yorum-durum"></div>
@@ -1304,7 +1339,8 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
     const oncekiAy = ay === 1 ? 12 : ay - 1;
     const oncekiYil = ay === 1 ? yil - 1 : yil;
     kok.appendChild(kiyasTablosu(
-      "Ay içi kıyas",
+      "ayIci",
+      "📅 Ay içi kıyas",
       `1–${gun} ${AY_ADLARI[oncekiAy - 1]} · 1–${gun} ${AY_ADLARI[ay - 1]}`,
       ayToplami(magazaKey, oncekiYil, oncekiAy, gun),
       ayToplami(magazaKey, yil, ay, gun),
@@ -1312,7 +1348,8 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
       AY_KISA[ay - 1]
     ));
     kok.appendChild(kiyasTablosu(
-      "Ay toplamı",
+      "ayToplam",
+      "🗓️ Ay toplamı",
       `${AY_ADLARI[oncekiAy - 1]} tamamı · ${AY_ADLARI[ay - 1]} bugüne kadar`,
       ayToplami(magazaKey, oncekiYil, oncekiAy),
       ayToplami(magazaKey, yil, ay, gun),
@@ -1659,13 +1696,19 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
       if (b && b.yukseklik) {
         panel.style.height = b.yukseklik + "px";
       }
-      if (!panel.querySelector(".panel-tut")) {
+      if (panel.dataset.kap) panel.classList.add("panel-kapsayici");
+      if (panel.dataset.ad && !panel.querySelector(":scope > .panel-adi")) {
+        panel.insertBefore(el(`<div class="panel-adi">${panel.dataset.ad}</div>`), panel.firstChild);
+      }
+      if (!panel.querySelector(":scope > .panel-tut")) {
         const tut = el('<button class="panel-tut" title="Basılı tutup sürükleyin — yerini değiştirir">⠿</button>');
         tut.addEventListener("pointerdown", (e) => tasimayaBasla(e, panel, kapsayici, kapId, magaza, yon));
         panel.appendChild(tut);
         if (yon === "yatay") panel.appendChild(tutamak(panel, id, magaza, "sag"));
-        panel.appendChild(tutamak(panel, id, magaza, "alt"));
-        panel.appendChild(tutamak(panel, id, magaza, "kose"));
+        if (!panel.dataset.kap) {
+          panel.appendChild(tutamak(panel, id, magaza, "alt"));
+          panel.appendChild(tutamak(panel, id, magaza, "kose"));
+        }
       }
     });
   }
@@ -1759,7 +1802,7 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
     kok.appendChild(gezinti);
     panelleriHazirla(gezinti, { kapId: "gezinti", magaza: magazaKey, yon: "yatay" });
     const govde = el('<div class="ekran-govde"></div>');
-    const sol = el('<div class="ana-alan"></div>');
+    const sol = el('<div class="ana-alan" data-panel="anaAlan" data-kap="1" data-ad="📊 Haftalık tablolar"></div>');
     sol.appendChild(haftaTablosu(magazaKey, pzt, {
       duzenlenebilir,
       yenile,
@@ -1778,19 +1821,25 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
     panelleriHazirla(sol, { kapId: "anaAlan", magaza: magazaKey, yon: "dikey" });
     sol.appendChild(simuleSatiri(yenile));
     govde.appendChild(sol);
-    govde.appendChild(panelOlustur(magazaKey, { duzenlenebilir, yenile }));
+    const yan = panelOlustur(magazaKey, { duzenlenebilir, yenile });
+    yan.dataset.panel = "yanPanel";
+    yan.dataset.kap = "1";
+    yan.dataset.ad = "📌 Özet paneli";
+    govde.appendChild(yan);
+    panelleriHazirla(yan, { kapId: "yanPanel", magaza: magazaKey, yon: "dikey" });
+    panelleriHazirla(govde, { kapId: "govde", magaza: magazaKey, yon: "yatay" });
     kok.appendChild(govde);
     return kok;
   }
   function haftaGezinti(pzt, yenile) {
     const bugunD = bugun();
-    const yil = pzt.getFullYear();
-    const ay = pzt.getMonth() + 1;
+    const { yil, ay } = haftaninAyi(pzt);
     const haftalar = ayinHaftalari(yil, ay);
     const seciliKey = haftaKey(pzt);
     const duyurular = duyurularGetir();
     const kok = el(`<div class="hafta-gezinti">
     <div class="gez-sol" data-panel="hafta">
+      <div class="panel-adi">📅 Hafta seçimi</div>
       <div class="ay-satir">
         ${AY_KISA.map((a, i) => `<button class="ay ${i + 1 === ay ? "secili" : ""}" data-ay="${i + 1}">${a}</button>`).join("")}
         <select class="yil-sec">
@@ -1817,14 +1866,18 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
     </div>
   </div>`);
     kok.querySelectorAll("[data-ay]").forEach((b) => b.addEventListener("click", () => {
-      const yeniAy = Number(b.dataset.ay);
-      const hedef = ayinHaftalari(Number(kok.querySelector(".yil-sec").value), yeniAy)[0];
-      haftaSec(hedef);
-      yenile();
+      const hedef = ayinHaftalari(Number(kok.querySelector(".yil-sec").value), Number(b.dataset.ay))[0];
+      if (hedef) {
+        haftaSec(hedef);
+        yenile();
+      }
     }));
     kok.querySelector(".yil-sec").addEventListener("change", function() {
-      haftaSec(ayinHaftalari(Number(this.value), ay)[0]);
-      yenile();
+      const hedef = ayinHaftalari(Number(this.value), ay)[0];
+      if (hedef) {
+        haftaSec(hedef);
+        yenile();
+      }
     });
     kok.querySelectorAll("[data-pzt]").forEach((b) => b.addEventListener("click", () => {
       haftaSec(/* @__PURE__ */ new Date(b.dataset.pzt + "T12:00:00"));

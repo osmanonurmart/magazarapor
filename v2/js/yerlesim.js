@@ -34,14 +34,23 @@ export function panelleriHazirla(kapsayici, {kapId, magaza, yon = 'yatay'}){
     if(b && b.genislik && yon === 'yatay'){ panel.style.flex = '0 0 auto'; panel.style.width = b.genislik + 'px'; }
     if(b && b.yukseklik){ panel.style.height = b.yukseklik + 'px'; }
 
-    if(!panel.querySelector('.panel-tut')){
+    // Kapsayıcı paneller (sütunlar) farklı işaretlenir: tutamağı solda durur,
+    // adı da kendisi yazdırır.
+    if(panel.dataset.kap) panel.classList.add('panel-kapsayici');
+    if(panel.dataset.ad && !panel.querySelector(':scope > .panel-adi')){
+      panel.insertBefore(el(`<div class="panel-adi">${panel.dataset.ad}</div>`), panel.firstChild);
+    }
+
+    if(!panel.querySelector(':scope > .panel-tut')){
       const tut = el('<button class="panel-tut" title="Basılı tutup sürükleyin — yerini değiştirir">⠿</button>');
       tut.addEventListener('pointerdown', e => tasimayaBasla(e, panel, kapsayici, kapId, magaza, yon));
       panel.appendChild(tut);
 
       if(yon === 'yatay') panel.appendChild(tutamak(panel, id, magaza, 'sag'));
-      panel.appendChild(tutamak(panel, id, magaza, 'alt'));
-      panel.appendChild(tutamak(panel, id, magaza, 'kose'));
+      if(!panel.dataset.kap){
+        panel.appendChild(tutamak(panel, id, magaza, 'alt'));
+        panel.appendChild(tutamak(panel, id, magaza, 'kose'));
+      }
     }
   });
 }

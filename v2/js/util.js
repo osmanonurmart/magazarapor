@@ -41,13 +41,22 @@ export function haftaBasligi(pzt){
   const {hafta} = isoHafta(pzt);
   return kisaTarih(gunler[0]) + ' - ' + kisaTarih(gunler[6]) + ' (Hafta ' + hafta + ')';
 }
-// Bir ayın içine düşen haftalar: ayın herhangi bir gününü içeren bütün pazartesiler.
+// Bir hafta, perşembesinin düştüğü aya aittir (ISO kuralı). Böylece her hafta
+// tek bir aya girer; hafta seçmek şeridi değiştirmez.
+export function persembe(pzt){ const d = new Date(pzt); d.setDate(d.getDate() + 3); return d; }
+export function haftaninAyi(pzt){
+  const p = persembe(pzt);
+  return {yil: p.getFullYear(), ay: p.getMonth() + 1};
+}
 export function ayinHaftalari(yil, ay){
-  const ilk = new Date(yil, ay-1, 1);
-  const son = new Date(yil, ay, 0);
+  // Ayın ilk gününü içeren haftadan başlayıp perşembesi bu ayda olanları al.
   const haftalar = [];
-  let p = pazartesi(ilk);
-  while(p <= son){ haftalar.push(new Date(p)); p = haftaEkle(p, 1); }
+  let p = pazartesi(new Date(yil, ay-1, 1));
+  for(let i=0;i<6;i++){
+    const pr = persembe(p);
+    if(pr.getFullYear() === yil && pr.getMonth() + 1 === ay) haftalar.push(new Date(p));
+    p = haftaEkle(p, 1);
+  }
   return haftalar;
 }
 // Bütün hafta etiketleri aynı biçimde: "7.Eyl - 13.Eyl", ay sınırını aşanlar dahil.

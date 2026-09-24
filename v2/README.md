@@ -82,6 +82,7 @@ Profil rozeti → "Örnek veriyi yenile" ile her şey sıfırlanıp yeniden üre
 | Kurucu: mağaza görünümü, ürün/kategori, kullanıcılar, KPI satırları, etiketler | ✅ |
 | Haftalık rutin listesi (7 gün, tıklayınca yeşile döner, hafta başında sıfırlanır) | ✅ |
 | Panelleri sürükleyip yerini değiştirme ve kenarlarından boyutlandırma (mağaza bazlı) | ✅ |
+| Her panelin sol üstünde adı; hafta seçimi, duyurular, rutin, haftalık tablolar, özet paneli ve içindeki kutular | ✅ |
 | Mobil yerleşim (üst gezinme / orta tablo / alt kartlar) | ✅ |
 | PWA (manifest + service worker, çevrimdışı kabuk) | ✅ |
 

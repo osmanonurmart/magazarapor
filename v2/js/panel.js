@@ -30,7 +30,7 @@ function ayToplami(magaza, yil, ay, sonGun){
   };
 }
 
-function kiyasTablosu(baslik, altBaslik, sol, sag, solEtiket, sagEtiket){
+function kiyasTablosu(panelId, baslik, altBaslik, sol, sag, solEtiket, sagEtiket){
   const satirlar = ['ciro','mdo','fbu','mgs','fbs','toplu'].map(alan => {
     const d = U.yuzdeDegisim(sol[alan], sag[alan]);
     return `<tr>
@@ -40,7 +40,7 @@ function kiyasTablosu(baslik, altBaslik, sol, sag, solEtiket, sagEtiket){
       <td class="${U.degisimSinifi(d)}">${U.fmtDegisim(d)}</td>
     </tr>`;
   }).join('');
-  return U.el(`<div class="panel-kutu">
+  return U.el(`<div class="panel-kutu" data-panel="${panelId}">
     <h3>${U.esc(baslik)}</h3>
     <div class="panel-alt">${U.esc(altBaslik)}</div>
     <table class="kiyas-tablo">
@@ -62,7 +62,7 @@ export function panelOlustur(magazaKey, secenekler = {}){
   const kok = U.el('<aside class="yan-panel"></aside>');
 
   // 1) Esnek kartlar
-  const kartKutu = U.el('<div class="panel-kutu"><h3>Dün / Bugün</h3><div class="kart-liste"></div></div>');
+  const kartKutu = U.el('<div class="panel-kutu" data-panel="kartlar"><h3>📈 Dün / Bugün</h3><div class="kart-liste"></div></div>');
   const kartListe = kartKutu.querySelector('.kart-liste');
   const kartlar = V.kartlarGetir(magazaKey);
   kartlar.forEach(kart => {
@@ -102,8 +102,8 @@ export function panelOlustur(magazaKey, secenekler = {}){
   kok.appendChild(kartKutu);
 
   // 2) Günlük yorum
-  const yorumKutu = U.el(`<div class="panel-kutu">
-    <h3>Günlük yorum</h3>
+  const yorumKutu = U.el(`<div class="panel-kutu" data-panel="yorum">
+    <h3>📝 Günlük yorum</h3>
     <div class="panel-alt">${U.kisaTarih(bugunD)} — bölge müdürüne iletilir</div>
     <textarea class="yorum-alan" placeholder="Düşüş veya yükselişin sebebi..." ${duzenlenebilir?'':'disabled'}>${U.esc(buGun.yorum || '')}</textarea>
     <div class="yorum-durum"></div>
@@ -124,15 +124,15 @@ export function panelOlustur(magazaKey, secenekler = {}){
   const yil = bugunD.getFullYear(), ay = bugunD.getMonth() + 1, gun = bugunD.getDate();
   const oncekiAy = ay === 1 ? 12 : ay - 1;
   const oncekiYil = ay === 1 ? yil - 1 : yil;
-  kok.appendChild(kiyasTablosu(
-    'Ay içi kıyas', `1–${gun} ${U.AY_ADLARI[oncekiAy-1]} · 1–${gun} ${U.AY_ADLARI[ay-1]}`,
+  kok.appendChild(kiyasTablosu('ayIci',
+    '📅 Ay içi kıyas', `1–${gun} ${U.AY_ADLARI[oncekiAy-1]} · 1–${gun} ${U.AY_ADLARI[ay-1]}`,
     ayToplami(magazaKey, oncekiYil, oncekiAy, gun), ayToplami(magazaKey, yil, ay, gun),
     U.AY_KISA[oncekiAy-1], U.AY_KISA[ay-1]
   ));
 
   // 4) Ay toplamı kıyası
-  kok.appendChild(kiyasTablosu(
-    'Ay toplamı', `${U.AY_ADLARI[oncekiAy-1]} tamamı · ${U.AY_ADLARI[ay-1]} bugüne kadar`,
+  kok.appendChild(kiyasTablosu('ayToplam',
+    '🗓️ Ay toplamı', `${U.AY_ADLARI[oncekiAy-1]} tamamı · ${U.AY_ADLARI[ay-1]} bugüne kadar`,
     ayToplami(magazaKey, oncekiYil, oncekiAy), ayToplami(magazaKey, yil, ay, gun),
     U.AY_KISA[oncekiAy-1], U.AY_KISA[ay-1]
   ));

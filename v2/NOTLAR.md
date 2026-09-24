@@ -13,6 +13,8 @@ Bu dosya v2 için tutulan açık liste. Yapıldıkça satırlar silinir.
 | 1.3 | Haftalık tablodaki ciro formülü de aynı sorundaydı; artık "(ilk 3 gün)" diye belirtiyor. | ✅ düzeltildi |
 | 1.4 | Favicon adresi ham `<` `>` içeriyordu; tek dosya üreticisi onu ortasından kesiyor ve sayfanın üstünde `🏪 " >` kalıntısı görünüyordu. | ✅ düzeltildi |
 | 1.5 | Para birimi ekli sayılarda binlik ayıracı kontrolü çalışmıyordu: `23.411 TRY` → `23.411`. Gerçek kaynak verisiyle test edilirken çıktı. Artık harfler önce ayıklanıyor. | ✅ düzeltildi |
+| 1.9 | **Mobilde sayfa yana taşıyordu.** Gövde esnek yapıya çevrilince dikey dizilişte `align-items:flex-start` çocukları içerik genişliğine büyütüyordu. Mobilde `stretch` yapıldı. | ✅ düzeltildi |
+| 1.8 | **Hafta şeridinde yanlış hafta seçiliyordu.** Ay, haftanın pazartesisine bakılarak belirleniyordu; 31 Ağustos'ta başlayan hafta tıklanınca ay Ağustos'a geçip şerit tamamen değişiyor, kullanıcı "yanındakini seçti" sanıyordu. Artık hafta, perşembesinin düştüğü aya ait (ISO kuralı) ve şerit hafta seçince değişmiyor. | ✅ düzeltildi |
 | 1.7 | **Panel sürükleme ilk adımda kesiliyordu.** Panel DOM'da yer değiştirince tarayıcı pointer yakalamasını düşürüyor, kalan hareket olayları gelmiyordu. Olaylar artık pencereden dinleniyor. | ✅ düzeltildi |
 | 1.6 | **İzin seçimi hiç kaydetmiyordu.** Satır bir `<label>` idi ve içindeki onay kutusuna tıklamak olayı iki kez tetikleyip seçimi anında geri alıyordu. Üstelik menü ilk tıklamada kapandığı için birden fazla kişi işaretlenemiyordu. Satır artık `<div>`, tıklamayı kendisi ele alıyor ve menü yalnızca dışına tıklanınca kapanıyor. | ✅ düzeltildi |
 
