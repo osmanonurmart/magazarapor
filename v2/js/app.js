@@ -85,6 +85,7 @@ function ustCubuk(){
   }
 
   const kok = U.el(`<header class="ust-cubuk">
+    <div class="ust-logo" title="Mağaza Performans Takip">🏪</div>
     <nav class="menu">${menu.map(([k,a]) => `<button class="menu-btn ${sayfa===k?'secili':''}" data-sayfa="${k}">${a}</button>`).join('')}</nav>
     <div class="ust-orta"></div>
     <div class="ust-sag">

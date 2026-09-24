@@ -137,14 +137,7 @@ export function panelOlustur(magazaKey, secenekler = {}){
     U.AY_KISA[oncekiAy-1], U.AY_KISA[ay-1]
   ));
 
-  // 5) Duyuru
-  const duyurular = V.duyurularGetir();
-  if(duyurular.length){
-    kok.appendChild(U.el(`<div class="panel-kutu duyuru-kutu">
-      <h3>Duyuru</h3>
-      ${duyurular.slice(0,3).map(d => `<div class="duyuru">${U.esc(d.metin)}</div>`).join('')}
-    </div>`));
-  }
+  // Duyurular artık üstteki gezinti çubuğunun sağında; burada tekrarlanmıyor.
   return kok;
 }
 

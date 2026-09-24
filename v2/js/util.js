@@ -50,13 +50,11 @@ export function ayinHaftalari(yil, ay){
   while(p <= son){ haftalar.push(new Date(p)); p = haftaEkle(p, 1); }
   return haftalar;
 }
-// "31·01·02" gibi ay sınırını aşan aralıkları doğru gösterir.
+// Bütün hafta etiketleri aynı biçimde: "7.Eyl - 13.Eyl", ay sınırını aşanlar dahil.
 export function haftaAraligiEtiketi(pzt){
   const g = haftaGunleri(pzt);
-  const ayAyni = g[0].getMonth() === g[6].getMonth();
-  return ayAyni
-    ? g[0].getDate() + '-' + g[6].getDate()
-    : g[0].getDate() + '.' + AY_KISA[g[0].getMonth()] + ' - ' + g[6].getDate() + '.' + AY_KISA[g[6].getMonth()];
+  const yaz = d => d.getDate() + '.' + AY_KISA[d.getMonth()];
+  return yaz(g[0]) + ' - ' + yaz(g[6]);
 }
 
 export const sayi = n => (n === null || n === undefined || n === '' || isNaN(n)) ? null : Number(n);

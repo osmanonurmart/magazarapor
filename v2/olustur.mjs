@@ -22,7 +22,7 @@ const ikon = await readFile('icon.svg', 'utf8');
 let html = await readFile('index.html', 'utf8');
 html = html
   .replace('<link rel="manifest" href="./manifest.webmanifest">\n', '')
-  .replace(/<link rel="icon"[^>]*>/, `<link rel="icon" href="data:image/svg+xml;base64,${Buffer.from(ikon).toString('base64')}">`)
+  .replace('href="./icon.svg"', `href="data:image/svg+xml;base64,${Buffer.from(ikon).toString('base64')}"`)
   .replace('<link rel="stylesheet" href="./css/app.css">', `<style>\n${css}\n</style>`)
   .replace('<script type="module" src="./js/app.js"></script>', `<script>\n${js}\n</script>`);
 

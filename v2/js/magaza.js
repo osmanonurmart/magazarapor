@@ -45,23 +45,34 @@ function haftaGezinti(pzt, yenile){
   const haftalar = U.ayinHaftalari(yil, ay);
   const seciliKey = U.haftaKey(pzt);
 
+  const duyurular = V.duyurularGetir();
   const kok = U.el(`<div class="hafta-gezinti">
-    <div class="ay-satir">
-      ${U.AY_KISA.map((a,i) => `<button class="ay ${i+1===ay?'secili':''}" data-ay="${i+1}">${a}</button>`).join('')}
-      <select class="yil-sec">
-        ${[yil-1, yil, yil+1].map(y => `<option ${y===yil?'selected':''}>${y}</option>`).join('')}
-      </select>
-    </div>
-    <div class="hafta-satir">
-      <button class="ok" data-kaydir="-1" title="Önceki hafta">◀</button>
-      <div class="hafta-listesi">
-        ${haftalar.map(h => `<button class="hafta ${U.haftaKey(h)===seciliKey?'secili':''}" data-pzt="${U.dateStr(h)}">
-            <span class="h-no">H${U.isoHafta(h).hafta}</span>
-            <span class="h-aralik">${U.haftaAraligiEtiketi(h)}</span>
-          </button>`).join('')}
+    <div class="gez-sol">
+      <div class="ay-satir">
+        ${U.AY_KISA.map((a,i) => `<button class="ay ${i+1===ay?'secili':''}" data-ay="${i+1}">${a}</button>`).join('')}
+        <select class="yil-sec">
+          ${[yil-1, yil, yil+1].map(y => `<option ${y===yil?'selected':''}>${y}</option>`).join('')}
+        </select>
       </div>
-      <button class="ok" data-kaydir="1" title="Sonraki hafta">▶</button>
-      <button class="mini" data-bugun="1">Bu hafta</button>
+      <div class="hafta-satir">
+        <button class="ok" data-kaydir="-1" title="Önceki hafta">◀</button>
+        <div class="hafta-listesi">
+          ${haftalar.map(h => `<button class="hafta ${U.haftaKey(h)===seciliKey?'secili':''}" data-pzt="${U.dateStr(h)}">
+              <span class="h-no">H${U.isoHafta(h).hafta}</span>
+              <span class="h-aralik">${U.haftaAraligiEtiketi(h)}</span>
+            </button>`).join('')}
+        </div>
+        <button class="ok" data-kaydir="1" title="Sonraki hafta">▶</button>
+        <button class="mini" data-bugun="1">Bu hafta</button>
+      </div>
+    </div>
+    <div class="gez-sag">
+      <div class="duyuru-baslik">📢 Duyurular</div>
+      <div class="duyuru-serit">
+        ${duyurular.length
+          ? duyurular.slice(0,3).map(d => `<div class="duyuru-satir" title="${U.esc(d.metin)}">${U.esc(d.metin)}</div>`).join('')
+          : '<div class="duyuru-bos">Duyuru yok.</div>'}
+      </div>
     </div>
   </div>`);
 
