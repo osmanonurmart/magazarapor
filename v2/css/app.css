@@ -192,6 +192,8 @@ table{ border-collapse:collapse; }
 .tuval.tasima-modu{ user-select:none; }
 
 /* Sütunlar arasındaki tutamaç */
+/* Yerleşim kilitliyken sütunlar arasında sadece boşluk kalır. */
+.tuval-aralik{ flex:0 0 12px; }
 .tuval-ayirac{ flex:0 0 12px; cursor:col-resize; position:relative; }
 .tuval-ayirac::after{
   content:''; position:absolute; left:50%; top:12px; bottom:12px; width:3px;

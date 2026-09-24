@@ -6,7 +6,7 @@ import { bolgePaneli } from './bolge.js';
 import { kurucuPaneli } from './kurucu.js';
 import { talepEkrani } from './talep.js';
 import { pencere, kapat } from './pencere.js';
-import { yerlesimSifirla } from './yerlesim.js';
+import { yerlesimSifirla, TASINABILIR } from './yerlesim.js';
 
 const kokEl = document.getElementById('kok');
 let aktif = null;        // aktif profil
@@ -126,7 +126,7 @@ function profilMenusu(e){
   document.querySelectorAll('.acilir-menu').forEach(m => m.remove());
   const menu = U.el(`<div class="acilir-menu profil-menu">
     ${aktif.rol === V.ROLLER.MAGAZA ? '<button data-act="personel">👥 Personel</button>' : ''}
-    <button data-act="yerlesim">🧩 Panel yerleşimini sıfırla</button>
+    ${TASINABILIR ? '<button data-act="yerlesim">🧩 Panel yerleşimini sıfırla</button>' : ''}
     <button data-act="sifirla">♻ Örnek veriyi yenile</button>
     <button data-act="cikis">🚪 Profil değiştir</button>
   </div>`);

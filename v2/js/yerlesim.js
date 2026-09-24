@@ -9,9 +9,16 @@
 import * as V from './veri.js';
 import { el } from './util.js';
 
+// Serbest yerleşim şimdilik kapalı: düzen sabit, bloklar taşınmıyor ve
+// boyutlandırılmıyor. Açmak için tek yapılacak bunu true yapmak.
+export const TASINABILIR = false;
+
 const EN_KUCUK_YUZDE = 12;
 const EN_KUCUK_YUKSEKLIK = 80;
 
+// Sabit düzen: üstte hafta seçimi / duyurular / rutin,
+// sol üst mevcut hafta, sağ üst dün-bugün özeti,
+// sol alt önceki hafta, sağ alt günlük yorum.
 // Yeni bir panel eklendiğinde burada yoksa en alta kendi satırında görünür.
 const VARSAYILAN_DUZEN = [
   {bloklar: [{panel:'hafta', yuzde:34}, {panel:'duyuru', yuzde:28}, {panel:'rutin', yuzde:38}]},
@@ -21,7 +28,8 @@ const VARSAYILAN_DUZEN = [
 
 function duzeniOku(magaza, panelAdlari){
   const kayit = V.yerlesimGetir(magaza);
-  let satirlar = Array.isArray(kayit.satirlar) && kayit.satirlar.length
+  // Kilitliyken kullanıcının eski düzeni değil, sabit düzen kullanılır.
+  let satirlar = (TASINABILIR && Array.isArray(kayit.satirlar) && kayit.satirlar.length)
     ? JSON.parse(JSON.stringify(kayit.satirlar))
     : JSON.parse(JSON.stringify(VARSAYILAN_DUZEN));
 
@@ -65,26 +73,32 @@ export function tuvalCiz(panelHaritasi, {magaza, adlar = {}}){
         if(!govde) return;
         const sarmal = el(`<div class="tuval-blok" data-panel="${blok.panel}"></div>`);
         sarmal.style.flex = `0 1 ${blok.yuzde}%`;
-        const b = boyutlar[blok.panel];
-        if(b && b.yukseklik) sarmal.style.height = b.yukseklik + 'px';
+        if(TASINABILIR){
+          const b = boyutlar[blok.panel];
+          if(b && b.yukseklik) sarmal.style.height = b.yukseklik + 'px';
+        }
 
         sarmal.appendChild(el(`<div class="blok-baslik">
-          <button class="panel-tut" title="Basılı tutup sürükleyin">⠿</button>
+          ${TASINABILIR ? '<button class="panel-tut" title="Basılı tutup sürükleyin">⠿</button>' : ''}
           <span class="blok-ad">${adlar[blok.panel] || blok.panel}</span>
         </div>`));
         sarmal.appendChild(govde);
-        sarmal.appendChild(el('<span class="blok-tutamak alt" title="Yükseklik"></span>'));
 
-        sarmal.querySelector('.panel-tut').addEventListener('pointerdown',
-          e => tasimayaBasla(e, blok.panel));
-        sarmal.querySelector('.blok-tutamak.alt').addEventListener('pointerdown',
-          e => yukseklikBasla(e, sarmal, blok.panel));
+        if(TASINABILIR){
+          sarmal.appendChild(el('<span class="blok-tutamak alt" title="Yükseklik"></span>'));
+          sarmal.querySelector('.panel-tut').addEventListener('pointerdown',
+            e => tasimayaBasla(e, blok.panel));
+          sarmal.querySelector('.blok-tutamak.alt').addEventListener('pointerdown',
+            e => yukseklikBasla(e, sarmal, blok.panel));
+        }
         satirEl.appendChild(sarmal);
 
-        if(bi < satir.bloklar.length - 1){
+        if(TASINABILIR && bi < satir.bloklar.length - 1){
           const ayirac = el('<div class="tuval-ayirac" title="Genişliği ayarla"></div>');
           ayirac.addEventListener('pointerdown', e => genislikBasla(e, satirEl, si, bi));
           satirEl.appendChild(ayirac);
+        } else if(bi < satir.bloklar.length - 1){
+          satirEl.appendChild(el('<div class="tuval-aralik"></div>'));
         }
       });
       tuval.appendChild(satirEl);

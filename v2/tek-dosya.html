@@ -201,6 +201,8 @@ table{ border-collapse:collapse; }
 .tuval.tasima-modu{ user-select:none; }
 
 /* Sütunlar arasındaki tutamaç */
+/* Yerleşim kilitliyken sütunlar arasında sadece boşluk kalır. */
+.tuval-aralik{ flex:0 0 12px; }
 .tuval-ayirac{ flex:0 0 12px; cursor:col-resize; position:relative; }
 .tuval-ayirac::after{
   content:''; position:absolute; left:50%; top:12px; bottom:12px; width:3px;
@@ -1709,6 +1711,7 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
   }
 
   // js/yerlesim.js
+  var TASINABILIR = false;
   var EN_KUCUK_YUZDE = 12;
   var EN_KUCUK_YUKSEKLIK = 80;
   var VARSAYILAN_DUZEN = [
@@ -1718,7 +1721,7 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
   ];
   function duzeniOku(magaza, panelAdlari) {
     const kayit = yerlesimGetir(magaza);
-    let satirlar = Array.isArray(kayit.satirlar) && kayit.satirlar.length ? JSON.parse(JSON.stringify(kayit.satirlar)) : JSON.parse(JSON.stringify(VARSAYILAN_DUZEN));
+    let satirlar = TASINABILIR && Array.isArray(kayit.satirlar) && kayit.satirlar.length ? JSON.parse(JSON.stringify(kayit.satirlar)) : JSON.parse(JSON.stringify(VARSAYILAN_DUZEN));
     satirlar.forEach((s) => {
       s.bloklar = (s.bloklar || []).filter((b) => panelAdlari.includes(b.panel));
     });
@@ -1755,27 +1758,33 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
           if (!govde) return;
           const sarmal = el(`<div class="tuval-blok" data-panel="${blok.panel}"></div>`);
           sarmal.style.flex = `0 1 ${blok.yuzde}%`;
-          const b = boyutlar[blok.panel];
-          if (b && b.yukseklik) sarmal.style.height = b.yukseklik + "px";
+          if (TASINABILIR) {
+            const b = boyutlar[blok.panel];
+            if (b && b.yukseklik) sarmal.style.height = b.yukseklik + "px";
+          }
           sarmal.appendChild(el(`<div class="blok-baslik">
-          <button class="panel-tut" title="Basılı tutup sürükleyin">⠿</button>
+          ${TASINABILIR ? '<button class="panel-tut" title="Basılı tutup sürükleyin">⠿</button>' : ""}
           <span class="blok-ad">${adlar[blok.panel] || blok.panel}</span>
         </div>`));
           sarmal.appendChild(govde);
-          sarmal.appendChild(el('<span class="blok-tutamak alt" title="Yükseklik"></span>'));
-          sarmal.querySelector(".panel-tut").addEventListener(
-            "pointerdown",
-            (e) => tasimayaBasla(e, blok.panel)
-          );
-          sarmal.querySelector(".blok-tutamak.alt").addEventListener(
-            "pointerdown",
-            (e) => yukseklikBasla(e, sarmal, blok.panel)
-          );
+          if (TASINABILIR) {
+            sarmal.appendChild(el('<span class="blok-tutamak alt" title="Yükseklik"></span>'));
+            sarmal.querySelector(".panel-tut").addEventListener(
+              "pointerdown",
+              (e) => tasimayaBasla(e, blok.panel)
+            );
+            sarmal.querySelector(".blok-tutamak.alt").addEventListener(
+              "pointerdown",
+              (e) => yukseklikBasla(e, sarmal, blok.panel)
+            );
+          }
           satirEl.appendChild(sarmal);
-          if (bi < satir.bloklar.length - 1) {
+          if (TASINABILIR && bi < satir.bloklar.length - 1) {
             const ayirac = el('<div class="tuval-ayirac" title="Genişliği ayarla"></div>');
             ayirac.addEventListener("pointerdown", (e) => genislikBasla(e, satirEl, si, bi));
             satirEl.appendChild(ayirac);
+          } else if (bi < satir.bloklar.length - 1) {
+            satirEl.appendChild(el('<div class="tuval-aralik"></div>'));
           }
         });
         tuval.appendChild(satirEl);
@@ -2874,7 +2883,7 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
     document.querySelectorAll(".acilir-menu").forEach((m) => m.remove());
     const menu = el(`<div class="acilir-menu profil-menu">
     ${aktif.rol === ROLLER.MAGAZA ? '<button data-act="personel">👥 Personel</button>' : ""}
-    <button data-act="yerlesim">🧩 Panel yerleşimini sıfırla</button>
+    ${TASINABILIR ? '<button data-act="yerlesim">🧩 Panel yerleşimini sıfırla</button>' : ""}
     <button data-act="sifirla">♻ Örnek veriyi yenile</button>
     <button data-act="cikis">🚪 Profil değiştir</button>
   </div>`);
