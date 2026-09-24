@@ -35,6 +35,13 @@ npm i -D esbuild        # yalnızca ilk sefer
 node olustur.mjs
 ```
 
+## Yer imi (veri çekme) kurulumu
+
+`yer-imi.html` dosyasına çift tıkla. Turuncu düğmeyi yer imleri çubuğuna
+**sürükle** — yapıştırma, sürükle. Chrome ve Edge, yer imi adresine
+yapıştırılan `javascript:` ön ekini sessizce siliyor; sürükleyerek eklemek
+bunu tamamen atlıyor. Sayfada elle ekleme ve konsol yolu da anlatılıyor.
+
 ## Örnek veri ve şifreler
 
 **Bütün profillerin şifresi `1234`** (kurucu panelinden değiştirilebilir).

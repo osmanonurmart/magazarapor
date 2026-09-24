@@ -1,7 +1,7 @@
 // Çevrimdışı kabuk. Sürüm değişince eski önbellek silinir.
 const SURUM = 'mc2-v1';
 const DOSYALAR = [
-  './', './index.html', './manifest.webmanifest', './icon.svg',
+  './', './index.html', './manifest.webmanifest', './icon.svg', './yer-imi.html',
   './css/app.css',
   './js/app.js', './js/util.js', './js/veri.js', './js/hafta.js',
   './js/panel.js', './js/magaza.js', './js/bolge.js', './js/kurucu.js',
