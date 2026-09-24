@@ -81,8 +81,9 @@ Profil rozeti → "Örnek veriyi yenile" ile her şey sıfırlanıp yeniden üre
 | Ürün talep sistemi: kategori, sepet, gönderim, pazartesi raporu | ✅ |
 | Kurucu: mağaza görünümü, ürün/kategori, kullanıcılar, KPI satırları, etiketler | ✅ |
 | Haftalık rutin listesi (7 gün, tıklayınca yeşile döner, hafta başında sıfırlanır) | ✅ |
-| Panelleri sürükleyip yerini değiştirme ve kenarlarından boyutlandırma (mağaza bazlı) | ✅ |
-| Her panelin sol üstünde adı; hafta seçimi, duyurular, rutin, haftalık tablolar, özet paneli ve içindeki kutular | ✅ |
+| Notion tarzı serbest yerleşim: blok sürükleyip satır/sütun oluşturma, sütun genişliği ve blok yüksekliği (mağaza bazlı) | ✅ |
+| Her bloğun sol üstünde adı ve sürükleme tutamağı | ✅ |
+| Özet paneli sekmeli: Dün/Bugün · Ay içi · Ay toplamı | ✅ |
 | Mobil yerleşim (üst gezinme / orta tablo / alt kartlar) | ✅ |
 | PWA (manifest + service worker, çevrimdışı kabuk) | ✅ |
 

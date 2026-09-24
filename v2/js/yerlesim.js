@@ -1,133 +1,250 @@
-// Panel yerleşimi: kullanıcı panelleri sürükleyip yerini değiştirebilir,
-// kenarlarından tutup boyutlandırabilir. Her mağaza kendi düzenini saklar.
+// Notion tarzı serbest yerleşim.
 //
-// Kullanım: panelleriHazirla(kapsayici, {kapId, magaza, yenile})
-// Kapsayıcının [data-panel] taşıyan doğrudan çocukları panel sayılır.
+// Yerleşim satırlardan oluşur, her satır yan yana duran bloklardan. Bir bloğu
+// tutamağından sürükleyip:
+//   - başka bloğun soluna/sağına bırakırsan o satıra sütun olarak girer,
+//   - üstüne/altına bırakırsan yeni bir satır açılır.
+// Sütunlar arasındaki çizgiden çekerek genişlik, bloğun altından çekerek
+// yükseklik ayarlanır. Düzen mağaza bazlı saklanır.
 import * as V from './veri.js';
 import { el } from './util.js';
 
-const EN_KUCUK_GENISLIK = 180;
-const EN_KUCUK_YUKSEKLIK = 90;
+const EN_KUCUK_YUZDE = 12;
+const EN_KUCUK_YUKSEKLIK = 80;
 
-export function panelleriHazirla(kapsayici, {kapId, magaza, yon = 'yatay'}){
-  const paneller = [...kapsayici.children].filter(c => c.dataset && c.dataset.panel);
-  if(!paneller.length) return;
+// Yeni bir panel eklendiğinde burada yoksa en alta kendi satırında görünür.
+const VARSAYILAN_DUZEN = [
+  {bloklar: [{panel:'hafta', yuzde:34}, {panel:'duyuru', yuzde:28}, {panel:'rutin', yuzde:38}]},
+  {bloklar: [{panel:'haftaSecili', yuzde:71}, {panel:'ozet', yuzde:29}]},
+  {bloklar: [{panel:'haftaOnceki', yuzde:71}, {panel:'yorum', yuzde:29}]}
+];
 
-  const yerlesim = V.yerlesimGetir(magaza);
-  const kayitliSira = (yerlesim.sira || {})[kapId];
-  const boyutlar = yerlesim.boyut || {};
+function duzeniOku(magaza, panelAdlari){
+  const kayit = V.yerlesimGetir(magaza);
+  let satirlar = Array.isArray(kayit.satirlar) && kayit.satirlar.length
+    ? JSON.parse(JSON.stringify(kayit.satirlar))
+    : JSON.parse(JSON.stringify(VARSAYILAN_DUZEN));
 
-  // Kayıtlı sırayı uygula.
-  if(Array.isArray(kayitliSira) && kayitliSira.length){
-    kayitliSira.forEach(id => {
-      const p = paneller.find(x => x.dataset.panel === id);
-      if(p) kapsayici.appendChild(p);
-    });
-    paneller.forEach(p => { if(!kayitliSira.includes(p.dataset.panel)) kapsayici.appendChild(p); });
-  }
+  // Artık olmayan panelleri at.
+  satirlar.forEach(s => { s.bloklar = (s.bloklar || []).filter(b => panelAdlari.includes(b.panel)); });
+  satirlar = satirlar.filter(s => s.bloklar.length);
 
-  paneller.forEach(panel => {
-    const id = panel.dataset.panel;
-    panel.classList.add('panel-ayarlanabilir');
+  // Yeni eklenen panelleri en alta koy.
+  const yerlesmis = satirlar.flatMap(s => s.bloklar.map(b => b.panel));
+  panelAdlari.filter(a => !yerlesmis.includes(a))
+    .forEach(a => satirlar.push({bloklar: [{panel:a, yuzde:100}]}));
 
-    const b = boyutlar[id];
-    if(b && b.genislik && yon === 'yatay'){ panel.style.flex = '0 0 auto'; panel.style.width = b.genislik + 'px'; }
-    if(b && b.yukseklik){ panel.style.height = b.yukseklik + 'px'; }
-
-    // Kapsayıcı paneller (sütunlar) farklı işaretlenir: tutamağı solda durur,
-    // adı da kendisi yazdırır.
-    if(panel.dataset.kap) panel.classList.add('panel-kapsayici');
-    if(panel.dataset.ad && !panel.querySelector(':scope > .panel-adi')){
-      panel.insertBefore(el(`<div class="panel-adi">${panel.dataset.ad}</div>`), panel.firstChild);
-    }
-
-    if(!panel.querySelector(':scope > .panel-tut')){
-      const tut = el('<button class="panel-tut" title="Basılı tutup sürükleyin — yerini değiştirir">⠿</button>');
-      tut.addEventListener('pointerdown', e => tasimayaBasla(e, panel, kapsayici, kapId, magaza, yon));
-      panel.appendChild(tut);
-
-      if(yon === 'yatay') panel.appendChild(tutamak(panel, id, magaza, 'sag'));
-      if(!panel.dataset.kap){
-        panel.appendChild(tutamak(panel, id, magaza, 'alt'));
-        panel.appendChild(tutamak(panel, id, magaza, 'kose'));
-      }
-    }
-  });
+  satirlar.forEach(duzeltYuzdeler);
+  return satirlar;
+}
+function duzeltYuzdeler(satir){
+  const toplam = satir.bloklar.reduce((t,b) => t + (Number(b.yuzde) || 0), 0);
+  if(!toplam){ satir.bloklar.forEach(b => b.yuzde = 100 / satir.bloklar.length); return; }
+  satir.bloklar.forEach(b => b.yuzde = (Number(b.yuzde) || 0) * 100 / toplam);
 }
 
-function tutamak(panel, id, magaza, tip){
-  const t = el(`<span class="panel-tutamak ${tip}" title="Boyutlandır"></span>`);
-  t.addEventListener('pointerdown', e => {
+// panelHaritasi: {panelAdi: HTMLElement}, adlar: {panelAdi: 'Görünen ad'}
+export function tuvalCiz(panelHaritasi, {magaza, adlar = {}}){
+  const panelAdlari = Object.keys(panelHaritasi);
+  let satirlar = duzeniOku(magaza, panelAdlari);
+  const tuval = el('<div class="tuval"></div>');
+  const boyutlar = V.yerlesimGetir(magaza).boyut || {};
+
+  const kaydet = () => {
+    const y = V.yerlesimGetir(magaza);
+    y.satirlar = satirlar;
+    V.yerlesimYaz(magaza, y);
+  };
+
+  function ciz(){
+    tuval.innerHTML = '';
+    satirlar.forEach((satir, si) => {
+      const satirEl = el(`<div class="tuval-satir" data-satir="${si}"></div>`);
+      satir.bloklar.forEach((blok, bi) => {
+        const govde = panelHaritasi[blok.panel];
+        if(!govde) return;
+        const sarmal = el(`<div class="tuval-blok" data-panel="${blok.panel}"></div>`);
+        sarmal.style.flex = `0 1 ${blok.yuzde}%`;
+        const b = boyutlar[blok.panel];
+        if(b && b.yukseklik) sarmal.style.height = b.yukseklik + 'px';
+
+        sarmal.appendChild(el(`<div class="blok-baslik">
+          <button class="panel-tut" title="Basılı tutup sürükleyin">⠿</button>
+          <span class="blok-ad">${adlar[blok.panel] || blok.panel}</span>
+        </div>`));
+        sarmal.appendChild(govde);
+        sarmal.appendChild(el('<span class="blok-tutamak alt" title="Yükseklik"></span>'));
+
+        sarmal.querySelector('.panel-tut').addEventListener('pointerdown',
+          e => tasimayaBasla(e, blok.panel));
+        sarmal.querySelector('.blok-tutamak.alt').addEventListener('pointerdown',
+          e => yukseklikBasla(e, sarmal, blok.panel));
+        satirEl.appendChild(sarmal);
+
+        if(bi < satir.bloklar.length - 1){
+          const ayirac = el('<div class="tuval-ayirac" title="Genişliği ayarla"></div>');
+          ayirac.addEventListener('pointerdown', e => genislikBasla(e, satirEl, si, bi));
+          satirEl.appendChild(ayirac);
+        }
+      });
+      tuval.appendChild(satirEl);
+    });
+  }
+
+  // ---------- Taşıma ----------
+  function tasimayaBasla(e, panelAdi){
     e.preventDefault();
     e.stopPropagation();
-    const baslangic = {x:e.clientX, y:e.clientY, g:panel.offsetWidth, y0:panel.offsetHeight};
-    panel.classList.add('boyutlaniyor');
+    const isaret = el('<div class="birakma-isareti"></div>');
+    document.body.appendChild(isaret);
+    tuval.classList.add('tasima-modu');
+    const kaynak = tuval.querySelector(`.tuval-blok[data-panel="${panelAdi}"]`);
+    if(kaynak) kaynak.classList.add('tasiniyor');
+    let hedef = null;
 
     const hareket = ev => {
-      if(tip !== 'alt'){
-        const g = Math.max(EN_KUCUK_GENISLIK, baslangic.g + (ev.clientX - baslangic.x));
-        panel.style.flex = '0 0 auto';
-        panel.style.width = g + 'px';
-      }
-      if(tip !== 'sag'){
-        panel.style.height = Math.max(EN_KUCUK_YUKSEKLIK, baslangic.y0 + (ev.clientY - baslangic.y)) + 'px';
+      hedef = birakmaNoktasi(ev.clientX, ev.clientY, panelAdi);
+      if(!hedef){ isaret.style.display = 'none'; return; }
+      isaret.style.display = '';
+      const r = hedef.kutu;
+      if(hedef.yon === 'sol' || hedef.yon === 'sag'){
+        isaret.className = 'birakma-isareti dikey';
+        isaret.style.left = (window.scrollX + (hedef.yon === 'sol' ? r.left : r.right) - 2) + 'px';
+        isaret.style.top = (window.scrollY + r.top) + 'px';
+        isaret.style.height = r.height + 'px';
+        isaret.style.width = '4px';
+      } else {
+        isaret.className = 'birakma-isareti yatay';
+        isaret.style.left = (window.scrollX + r.left) + 'px';
+        isaret.style.top = (window.scrollY + (hedef.yon === 'ust' ? r.top : r.bottom) - 2) + 'px';
+        isaret.style.width = r.width + 'px';
+        isaret.style.height = '4px';
       }
     };
     const bitir = () => {
-      panel.classList.remove('boyutlaniyor');
       window.removeEventListener('pointermove', hareket);
       window.removeEventListener('pointerup', bitir);
       window.removeEventListener('pointercancel', bitir);
-      V.yerlesimBoyutYaz(magaza, id, {
-        genislik: tip !== 'alt' ? panel.offsetWidth : undefined,
-        yukseklik: tip !== 'sag' ? panel.offsetHeight : undefined
-      });
+      isaret.remove();
+      tuval.classList.remove('tasima-modu');
+      if(kaynak) kaynak.classList.remove('tasiniyor');
+      if(hedef){ tasi(panelAdi, hedef); kaydet(); ciz(); }
     };
     window.addEventListener('pointermove', hareket);
     window.addEventListener('pointerup', bitir);
     window.addEventListener('pointercancel', bitir);
-  });
-  return t;
+  }
+
+  // İmlecin üzerindeki bloğu ve hangi kenarına yakın olduğunu bulur.
+  function birakmaNoktasi(x, y, kaynakPanel){
+    const bloklar = [...tuval.querySelectorAll('.tuval-blok')];
+    for(const b of bloklar){
+      const r = b.getBoundingClientRect();
+      if(x < r.left || x > r.right || y < r.top || y > r.bottom) continue;
+      const solPay = (x - r.left) / r.width;
+      const ustPay = (y - r.top) / r.height;
+      let yon;
+      if(solPay < 0.25) yon = 'sol';
+      else if(solPay > 0.75) yon = 'sag';
+      else if(ustPay < 0.35) yon = 'ust';
+      else yon = 'alt';
+      if(b.dataset.panel === kaynakPanel) return null;
+      return {panel: b.dataset.panel, yon, kutu: r};
+    }
+    return null;
+  }
+
+  function blokBul(panelAdi){
+    for(let si=0; si<satirlar.length; si++){
+      const bi = satirlar[si].bloklar.findIndex(b => b.panel === panelAdi);
+      if(bi > -1) return {si, bi};
+    }
+    return null;
+  }
+
+  function tasi(kaynakPanel, hedef){
+    const k = blokBul(kaynakPanel);
+    const h = blokBul(hedef.panel);
+    if(!k || !h) return;
+    const [tasinan] = satirlar[k.si].bloklar.splice(k.bi, 1);
+
+    // Kaynak satır boşaldıysa kaldır, hedef satırın yeni indeksini düzelt.
+    let hedefSatir = h.si;
+    if(!satirlar[k.si].bloklar.length){
+      satirlar.splice(k.si, 1);
+      if(k.si < hedefSatir) hedefSatir--;
+    } else {
+      duzeltYuzdeler(satirlar[k.si]);
+    }
+    const hedefBi = satirlar[hedefSatir].bloklar.findIndex(b => b.panel === hedef.panel);
+
+    if(hedef.yon === 'sol' || hedef.yon === 'sag'){
+      const satir = satirlar[hedefSatir];
+      const komsu = satir.bloklar[hedefBi];
+      // Yeni sütun, komşunun yerinden pay alır.
+      tasinan.yuzde = komsu.yuzde / 2;
+      komsu.yuzde = komsu.yuzde / 2;
+      satir.bloklar.splice(hedef.yon === 'sol' ? hedefBi : hedefBi + 1, 0, tasinan);
+      duzeltYuzdeler(satir);
+    } else {
+      tasinan.yuzde = 100;
+      satirlar.splice(hedef.yon === 'ust' ? hedefSatir : hedefSatir + 1, 0, {bloklar:[tasinan]});
+    }
+  }
+
+  // ---------- Genişlik ----------
+  function genislikBasla(e, satirEl, si, bi){
+    e.preventDefault();
+    e.stopPropagation();
+    const satir = satirlar[si];
+    const sol = satir.bloklar[bi], sag = satir.bloklar[bi+1];
+    const toplamPx = satirEl.getBoundingClientRect().width;
+    const baslangicX = e.clientX;
+    const solY = sol.yuzde, sagY = sag.yuzde;
+    satirEl.classList.add('ayarlaniyor');
+
+    const hareket = ev => {
+      const fark = (ev.clientX - baslangicX) / toplamPx * 100;
+      const yeniSol = Math.max(EN_KUCUK_YUZDE, Math.min(solY + sagY - EN_KUCUK_YUZDE, solY + fark));
+      sol.yuzde = yeniSol;
+      sag.yuzde = solY + sagY - yeniSol;
+      const blokEl = [...satirEl.querySelectorAll('.tuval-blok')];
+      blokEl[bi].style.flex = `0 1 ${sol.yuzde}%`;
+      blokEl[bi+1].style.flex = `0 1 ${sag.yuzde}%`;
+    };
+    const bitir = () => {
+      satirEl.classList.remove('ayarlaniyor');
+      window.removeEventListener('pointermove', hareket);
+      window.removeEventListener('pointerup', bitir);
+      kaydet();
+    };
+    window.addEventListener('pointermove', hareket);
+    window.addEventListener('pointerup', bitir);
+  }
+
+  // ---------- Yükseklik ----------
+  function yukseklikBasla(e, sarmal, panelAdi){
+    e.preventDefault();
+    e.stopPropagation();
+    const baslangic = {y:e.clientY, h:sarmal.offsetHeight};
+    sarmal.classList.add('boyutlaniyor');
+    const hareket = ev => {
+      sarmal.style.height = Math.max(EN_KUCUK_YUKSEKLIK, baslangic.h + (ev.clientY - baslangic.y)) + 'px';
+    };
+    const bitir = () => {
+      sarmal.classList.remove('boyutlaniyor');
+      window.removeEventListener('pointermove', hareket);
+      window.removeEventListener('pointerup', bitir);
+      V.yerlesimBoyutYaz(magaza, panelAdi, {yukseklik: sarmal.offsetHeight});
+    };
+    window.addEventListener('pointermove', hareket);
+    window.addEventListener('pointerup', bitir);
+  }
+
+  ciz();
+  return tuval;
 }
 
-function tasimayaBasla(e, panel, kapsayici, kapId, magaza, yon){
-  e.preventDefault();
-  e.stopPropagation();
-  // Pointer yakalama kullanılmıyor: panel DOM'da yer değiştirdiği anda yakalama
-  // düşüyor ve sürükleme ilk adımda kesiliyordu. Olaylar pencereden dinleniyor.
-  panel.classList.add('tasiniyor');
-  kapsayici.classList.add('tasima-modu');
-
-  const hareket = ev => {
-    const hedef = [...kapsayici.children].find(c => {
-      if(c === panel || !c.dataset || !c.dataset.panel) return false;
-      const r = c.getBoundingClientRect();
-      return ev.clientX >= r.left && ev.clientX <= r.right && ev.clientY >= r.top && ev.clientY <= r.bottom;
-    });
-    if(!hedef) return;
-    const r = hedef.getBoundingClientRect();
-    const oncesineMi = yon === 'yatay'
-      ? ev.clientX < r.left + r.width/2
-      : ev.clientY < r.top + r.height/2;
-    const yeniKomsu = oncesineMi ? hedef : hedef.nextSibling;
-    if(yeniKomsu === panel || (yeniKomsu === panel.nextSibling && !oncesineMi)) return;
-    kapsayici.insertBefore(panel, yeniKomsu);
-  };
-  const bitir = () => {
-    panel.classList.remove('tasiniyor');
-    kapsayici.classList.remove('tasima-modu');
-    window.removeEventListener('pointermove', hareket);
-    window.removeEventListener('pointerup', bitir);
-    window.removeEventListener('pointercancel', bitir);
-    V.yerlesimSiraYaz(magaza, kapId,
-      [...kapsayici.children].filter(c => c.dataset && c.dataset.panel).map(c => c.dataset.panel));
-  };
-  window.addEventListener('pointermove', hareket);
-  window.addEventListener('pointerup', bitir);
-  window.addEventListener('pointercancel', bitir);
-}
-
-// Kullanıcının elle verdiği boyut ve sırayı sıfırlar.
 export function yerlesimSifirla(magaza){
-  V.yerlesimYaz(magaza, {sira:{}, boyut:{}});
+  V.yerlesimYaz(magaza, {satirlar:[], boyut:{}});
 }

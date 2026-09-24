@@ -27,6 +27,7 @@ Bu dosya v2 için tutulan açık liste. Yapıldıkça satırlar silinir.
 | 2.3 | Simüle tarihi sayfa yenilenince sıfırlanıyor. Kullanıcı geçmiş güne veri girerken sayfayı yenilerse farkında olmadan bugüne yazmaya başlar. | Orta | Düşük |
 | 2.4 | Sağ paneldeki elle girilen kartlara (Halı satışı vb.) **yalnızca bugün** değer yazılabiliyor. Geçmiş bir günün kart değeri düzeltilemiyor. | Orta | Orta |
 | 2.5 | Bölge panelinde mağazaya tıklayıp detaya inince geri dönmek için üstteki "Özet"e basmak gerekiyor; ekranda geri butonu yok. | Düşük | Düşük |
+| 2.9 | Tuvalde bir satırdaki bloklar en uzun bloğun boyuna uzuyor; kısa blokların altında boşluk kalıyor. Notion da böyle davranıyor, blok yüksekliği elle ayarlanabiliyor. | Kozmetik | Orta |
 | 2.6 | Kategori silinince o kategorideki ürünlerin id'leri boşta kalıyor. Eski taleplerde ürün **adı** saklandığı için görüntü bozulmuyor, ama id kırık. | Düşük | Düşük |
 | 2.7 | Hafta hedefi kutusu ham sayı gösteriyor (`265000`), tablodaki diğer sayılar biçimli (`265.000`). | Kozmetik | Düşük |
 | 2.8 | `bolgeGorunum.kiyas` ayarı veride duruyor ama hiçbir yerde kullanılmıyor — ölü alan. Tanımdaki "Kıyas: Dün vs Bugün ▾" seçimi yapılmadı. | Düşük | Orta |

@@ -6,7 +6,7 @@ import { panelOlustur } from './panel.js';
 import { metniCozumle } from './yapistir.js';
 import { pencere, kapat } from './pencere.js';
 import { rutinBlogu } from './rutin.js';
-import { panelleriHazirla } from './yerlesim.js';
+import { tuvalCiz } from './yerlesim.js';
 
 let seciliPzt = null;
 
@@ -15,42 +15,42 @@ export function haftaSec(pzt){ seciliPzt = U.pazartesi(pzt); }
 
 export function magazaEkrani(magazaKey, secenekler = {}){
   const pzt = seciliHafta();
+  const oncekiPzt = U.haftaEkle(pzt, -1);
   const duzenlenebilir = secenekler.duzenlenebilir !== false;
   const yenile = secenekler.yenile || (() => {});
 
-  const kok = U.el('<div class="magaza-ekran"></div>');
-  const gezinti = haftaGezinti(pzt, yenile);
-  gezinti.appendChild(rutinBlogu(magazaKey, pzt, {duzenlenebilir, yenile}));
-  kok.appendChild(gezinti);
-  panelleriHazirla(gezinti, {kapId:'gezinti', magaza:magazaKey, yon:'yatay'});
-
-  const govde = U.el('<div class="ekran-govde"></div>');
-  const sol = U.el('<div class="ana-alan" data-panel="anaAlan" data-kap="1" data-ad="📊 Haftalık tablolar"></div>');
-  sol.appendChild(haftaTablosu(magazaKey, pzt, {
+  const tabloSecenekleri = {
     duzenlenebilir, yenile,
     urunAc: p => urunPenceresi(magazaKey, p, duzenlenebilir, yenile),
     personelDuzenle: () => personelPenceresi(magazaKey, yenile)
-  }));
-  sol.appendChild(haftaTablosu(magazaKey, U.haftaEkle(pzt, -1), {
-    duzenlenebilir, yenile,
-    urunAc: p => urunPenceresi(magazaKey, p, duzenlenebilir, yenile),
-    personelDuzenle: () => personelPenceresi(magazaKey, yenile)
-  }));
-  const bloklar = sol.querySelectorAll('.hafta-blok');
-  if(bloklar[0]) bloklar[0].dataset.panel = 'haftaSecili';
-  if(bloklar[1]) bloklar[1].dataset.panel = 'haftaOnceki';
-  panelleriHazirla(sol, {kapId:'anaAlan', magaza:magazaKey, yon:'dikey'});
-
-  sol.appendChild(simuleSatiri(yenile));
-  govde.appendChild(sol);
+  };
+  const gez = haftaGezinti(pzt, yenile);
   const yan = panelOlustur(magazaKey, {duzenlenebilir, yenile});
-  yan.dataset.panel = 'yanPanel';
-  yan.dataset.kap = '1';
-  yan.dataset.ad = '📌 Özet paneli';
-  govde.appendChild(yan);
-  panelleriHazirla(yan, {kapId:'yanPanel', magaza:magazaKey, yon:'dikey'});
-  panelleriHazirla(govde, {kapId:'govde', magaza:magazaKey, yon:'yatay'});
-  kok.appendChild(govde);
+
+  // Her bölüm bir blok. Yeni bir bölüm eklemek için buraya bir satır eklemek
+  // yeterli; taşıma, boyutlandırma ve başlık kendiliğinden geliyor.
+  const paneller = {
+    hafta:        gez.hafta,
+    duyuru:       gez.duyuru,
+    rutin:        rutinBlogu(magazaKey, pzt, {duzenlenebilir, yenile}),
+    haftaSecili:  haftaTablosu(magazaKey, pzt, tabloSecenekleri),
+    haftaOnceki:  haftaTablosu(magazaKey, oncekiPzt, tabloSecenekleri),
+    ozet:         yan.ozet,
+    yorum:        yan.yorum
+  };
+  const adlar = {
+    hafta:       '📅 Hafta seçimi',
+    duyuru:      '📢 Duyurular',
+    rutin:       '✓ Haftalık rutin',
+    haftaSecili: '📊 ' + U.haftaBasligi(pzt),
+    haftaOnceki: '📊 ' + U.haftaBasligi(oncekiPzt),
+    ozet:        '📌 Özet',
+    yorum:       '📝 Günlük yorum'
+  };
+
+  const kok = U.el('<div class="magaza-ekran"></div>');
+  kok.appendChild(tuvalCiz(paneller, {magaza: magazaKey, adlar}));
+  kok.appendChild(simuleSatiri(yenile));
   return kok;
 }
 
@@ -62,54 +62,52 @@ function haftaGezinti(pzt, yenile){
   const haftalar = U.ayinHaftalari(yil, ay);
   const seciliKey = U.haftaKey(pzt);
 
-  const duyurular = V.duyurularGetir();
-  const kok = U.el(`<div class="hafta-gezinti">
-    <div class="gez-sol" data-panel="hafta">
-      <div class="panel-adi">📅 Hafta seçimi</div>
-      <div class="ay-satir">
-        ${U.AY_KISA.map((a,i) => `<button class="ay ${i+1===ay?'secili':''}" data-ay="${i+1}">${a}</button>`).join('')}
-        <select class="yil-sec">
-          ${[yil-1, yil, yil+1].map(y => `<option ${y===yil?'selected':''}>${y}</option>`).join('')}
-        </select>
-      </div>
-      <div class="hafta-satir">
-        <button class="ok" data-kaydir="-1" title="Önceki hafta">◀</button>
-        <div class="hafta-listesi">
-          ${haftalar.map(h => `<button class="hafta ${U.haftaKey(h)===seciliKey?'secili':''}" data-pzt="${U.dateStr(h)}">
-              <span class="h-no">H${U.isoHafta(h).hafta}</span>
-              <span class="h-aralik">${U.haftaAraligiEtiketi(h)}</span>
-            </button>`).join('')}
-        </div>
-        <button class="ok" data-kaydir="1" title="Sonraki hafta">▶</button>
-        <button class="mini" data-bugun="1">Bu hafta</button>
-      </div>
+  const hafta = U.el(`<div class="gez-sol">
+    <div class="ay-satir">
+      ${U.AY_KISA.map((a,i) => `<button class="ay ${i+1===ay?'secili':''}" data-ay="${i+1}">${a}</button>`).join('')}
+      <select class="yil-sec">
+        ${[yil-1, yil, yil+1].map(y => `<option ${y===yil?'selected':''}>${y}</option>`).join('')}
+      </select>
     </div>
-    <div class="gez-sag" data-panel="duyuru">
-      <div class="duyuru-baslik">📢 Duyurular</div>
-      <div class="duyuru-serit">
-        ${duyurular.length
-          ? duyurular.slice(0,3).map(d => `<div class="duyuru-satir" title="${U.esc(d.metin)}">${U.esc(d.metin)}</div>`).join('')
-          : '<div class="duyuru-bos">Duyuru yok.</div>'}
+    <div class="hafta-satir">
+      <button class="ok" data-kaydir="-1" title="Önceki hafta">◀</button>
+      <div class="hafta-listesi">
+        ${haftalar.map(h => `<button class="hafta ${U.haftaKey(h)===seciliKey?'secili':''}" data-pzt="${U.dateStr(h)}">
+            <span class="h-no">H${U.isoHafta(h).hafta}</span>
+            <span class="h-aralik">${U.haftaAraligiEtiketi(h)}</span>
+          </button>`).join('')}
       </div>
+      <button class="ok" data-kaydir="1" title="Sonraki hafta">▶</button>
+      <button class="mini" data-bugun="1">Bu hafta</button>
     </div>
   </div>`);
 
-  kok.querySelectorAll('[data-ay]').forEach(b => b.addEventListener('click', () => {
-    const hedef = U.ayinHaftalari(Number(kok.querySelector('.yil-sec').value), Number(b.dataset.ay))[0];
+  const duyurular = V.duyurularGetir();
+  const duyuru = U.el(`<div class="gez-sag">
+    <div class="duyuru-serit">
+      ${duyurular.length
+        ? duyurular.slice(0,6).map(d => `<div class="duyuru-satir" title="${U.esc(d.metin)}">${U.esc(d.metin)}</div>`).join('')
+        : '<div class="duyuru-bos">Duyuru yok.</div>'}
+    </div>
+  </div>`);
+
+  hafta.querySelectorAll('[data-ay]').forEach(b => b.addEventListener('click', () => {
+    const hedef = U.ayinHaftalari(Number(hafta.querySelector('.yil-sec').value), Number(b.dataset.ay))[0];
     if(hedef){ haftaSec(hedef); yenile(); }
   }));
-  kok.querySelector('.yil-sec').addEventListener('change', function(){
+  hafta.querySelector('.yil-sec').addEventListener('change', function(){
     const hedef = U.ayinHaftalari(Number(this.value), ay)[0];
     if(hedef){ haftaSec(hedef); yenile(); }
   });
-  kok.querySelectorAll('[data-pzt]').forEach(b => b.addEventListener('click', () => {
+  hafta.querySelectorAll('[data-pzt]').forEach(b => b.addEventListener('click', () => {
     haftaSec(new Date(b.dataset.pzt + 'T12:00:00')); yenile();
   }));
-  kok.querySelectorAll('[data-kaydir]').forEach(b => b.addEventListener('click', () => {
+  hafta.querySelectorAll('[data-kaydir]').forEach(b => b.addEventListener('click', () => {
     haftaSec(U.haftaEkle(pzt, Number(b.dataset.kaydir))); yenile();
   }));
-  kok.querySelector('[data-bugun]').addEventListener('click', () => { haftaSec(U.pazartesi(bugunD)); yenile(); });
-  return kok;
+  hafta.querySelector('[data-bugun]').addEventListener('click', () => { haftaSec(U.pazartesi(bugunD)); yenile(); });
+
+  return {hafta, duyuru};
 }
 
 function simuleSatiri(yenile){

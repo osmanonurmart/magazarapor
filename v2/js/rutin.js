@@ -17,7 +17,6 @@ export function rutinBlogu(magazaKey, pzt, secenekler = {}){
 
   const kok = U.el(`<section class="rutin-blok" data-panel="rutin">
     <header class="rutin-ust">
-      <span class="rutin-baslik">✓ Haftalık rutin</span>
       <span class="rutin-sayac ${toplam && biten === toplam ? 'tamam' : ''}">${biten}/${toplam}</span>
     </header>
     <div class="tablo-sar">

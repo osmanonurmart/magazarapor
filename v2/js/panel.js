@@ -116,8 +116,6 @@ export function panelOlustur(magazaKey, secenekler = {}){
   const bugunD = U.bugun();
   const bugunStr = U.bugunStr();
   const buGun = V.gunGetir(magazaKey, bugunStr) || {};
-  const kok = U.el('<aside class="yan-panel"></aside>');
-
   // --- Sekmeli özet kutusu ---
   const ozet = U.el(`<div class="panel-kutu ozet-kutu" data-panel="ozet">
     <div class="sekme-bar">
@@ -154,11 +152,9 @@ export function panelOlustur(magazaKey, secenekler = {}){
     sekmeCiz(b.dataset.sekme);
   }));
   sekmeCiz(V.ozetSekmesiGetir(magazaKey));
-  kok.appendChild(ozet);
 
   // --- Günlük yorum ---
   const yorumKutu = U.el(`<div class="panel-kutu" data-panel="yorum">
-    <h3>📝 Günlük yorum</h3>
     <div class="panel-alt">${U.kisaTarih(bugunD)} — bölge müdürüne iletilir</div>
     <textarea class="yorum-alan" placeholder="Düşüş veya yükselişin sebebi..." ${duzenlenebilir?'':'disabled'}>${U.esc(buGun.yorum || '')}</textarea>
     <div class="yorum-durum"></div>
@@ -173,9 +169,7 @@ export function panelOlustur(magazaKey, secenekler = {}){
       setTimeout(() => { yorumKutu.querySelector('.yorum-durum').textContent = ''; }, 1800);
     }, 500);
   });
-  kok.appendChild(yorumKutu);
-
-  return kok;
+  return {ozet, yorum: yorumKutu};
 }
 
 function kartEklemeFormu(magazaKey, kap, secenekler){

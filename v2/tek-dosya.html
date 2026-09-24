@@ -112,16 +112,7 @@ table{ border-collapse:collapse; }
 
 /* ---------- Hafta gezinme ---------- */
 /* Solda hafta seçimi (içerik kadar yer kaplar), sağda duyurular. */
-.hafta-gezinti{
-  background:var(--kagit); border:1px solid var(--cizgi); border-radius:var(--r);
-  padding:9px 11px; margin-bottom:12px; display:flex; gap:14px; align-items:stretch;
-}
-.gez-sol{ flex:0 1 auto; min-width:0; }
-.gez-sag{
-  flex:1 1 230px; min-width:0; border-left:1px solid var(--cizgi); padding-left:14px;
-  display:flex; flex-direction:column;
-}
-.duyuru-baslik{ font-size:.72rem; font-weight:700; color:var(--soluk); margin-bottom:5px; }
+.gez-sol,.gez-sag{ min-width:0; display:flex; flex-direction:column; }
 .duyuru-serit{ display:flex; flex-direction:column; gap:7px; min-height:0; overflow-y:auto; }
 /* Her duyuru ayrı bir mesaj balonu; tek satır, tamamı ipucunda. */
 .duyuru-satir{
@@ -135,12 +126,8 @@ table{ border-collapse:collapse; }
 .duyuru-bos{ color:var(--soluk); font-size:.74rem; }
 
 /* ---------- Haftalık rutin ---------- */
-.rutin-blok{
-  flex:2 1 400px; min-width:0; border-left:1px solid var(--cizgi); padding-left:14px;
-  display:flex; flex-direction:column;
-}
-.rutin-ust{ display:flex; align-items:center; justify-content:space-between; margin-bottom:5px; }
-.rutin-baslik{ font-size:.72rem; font-weight:700; color:var(--soluk); }
+.rutin-blok{ min-width:0; display:flex; flex-direction:column; }
+.rutin-ust{ display:flex; align-items:center; justify-content:flex-end; margin-bottom:3px; }
 .rutin-sayac{ font-size:.68rem; font-weight:700; color:var(--soluk); background:#f1efe9; border-radius:20px; padding:1px 8px; }
 .rutin-sayac.tamam{ background:#e6f2ea; color:var(--artis); }
 .rutin-blok .tablo-sar{ flex:1; min-height:0; overflow:auto; }
@@ -181,37 +168,52 @@ table{ border-collapse:collapse; }
   border-radius:6px; margin-bottom:2px;
 }
 
-/* ---------- Taşınabilir / boyutlanabilir paneller ---------- */
-/* Her panelin sol üstünde adı durur. */
-.panel-adi{
-  font-size:.72rem; font-weight:700; color:var(--soluk); margin-bottom:5px;
+/* ---------- Notion tarzı tuval ---------- */
+.tuval{ display:flex; flex-direction:column; gap:12px; }
+.tuval-satir{ display:flex; align-items:stretch; gap:0; min-width:0; }
+.tuval-blok{
+  position:relative; display:flex; flex-direction:column; min-width:0; min-height:70px;
+  background:var(--kagit); border:1px solid var(--cizgi); border-radius:var(--r);
+  padding:7px 10px 10px; overflow:hidden;
+}
+.tuval-blok > *:not(.blok-baslik):not(.blok-tutamak){ min-height:0; overflow:auto; }
+.blok-baslik{ display:flex; align-items:center; gap:6px; margin-bottom:5px; flex:0 0 auto; }
+.blok-ad{
+  font-size:.72rem; font-weight:700; color:var(--soluk);
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
-.panel-ayarlanabilir{ position:relative; }
-.panel-kapsayici > .panel-adi{ padding-left:2px; }
-.panel-kapsayici > .panel-tut{ right:auto; left:2px; top:-2px; }
 .panel-tut{
-  position:absolute; top:2px; right:2px; z-index:5; pointer-events:none;
-  width:18px; height:18px; padding:0; line-height:1; border-radius:5px;
+  flex:0 0 auto; width:17px; height:17px; padding:0; line-height:1; border-radius:5px;
   border:1px solid var(--cizgi); background:var(--kagit); color:#b9b9c0;
-  font-size:.64rem; cursor:grab; opacity:0; transition:opacity .12s;
+  font-size:.62rem; cursor:grab; opacity:0; transition:opacity .12s;
 }
-.panel-ayarlanabilir:hover > .panel-tut{ opacity:1; pointer-events:auto; }
+.tuval-blok:hover .panel-tut{ opacity:1; }
 .panel-tut:hover{ color:var(--vurgu); border-color:var(--vurgu); }
 .panel-tut:active{ cursor:grabbing; }
-.panel-tutamak{
-  position:absolute; z-index:4; opacity:0; transition:opacity .12s; background:var(--vurgu);
-  pointer-events:none;   /* görünmezken altındaki düğmelerin tıklamasını çalmasın */
+.blok-tutamak.alt{
+  position:absolute; left:14px; right:14px; bottom:0; height:6px; cursor:row-resize;
+  background:var(--vurgu); opacity:0; border-radius:3px; transition:opacity .12s;
 }
-.panel-ayarlanabilir:hover > .panel-tutamak{ opacity:.25; pointer-events:auto; }
-.panel-tutamak:hover{ opacity:.7 !important; }
-.panel-tutamak.sag{ top:8px; bottom:8px; right:-2px; width:4px; border-radius:3px; cursor:col-resize; }
-.panel-tutamak.alt{ left:8px; right:8px; bottom:-2px; height:4px; border-radius:3px; cursor:row-resize; }
-.panel-tutamak.kose{ right:-3px; bottom:-3px; width:11px; height:11px; border-radius:3px; cursor:nwse-resize; }
-.panel-ayarlanabilir.tasiniyor{ opacity:.55; outline:2px dashed var(--vurgu); outline-offset:2px; }
-.panel-ayarlanabilir.boyutlaniyor{ outline:2px solid var(--vurgu); outline-offset:2px; }
-.tasima-modu{ user-select:none; }
-.tasima-modu .panel-ayarlanabilir{ transition:none; }
+.tuval-blok:hover .blok-tutamak.alt{ opacity:.2; }
+.blok-tutamak.alt:hover{ opacity:.6 !important; }
+.tuval-blok.tasiniyor{ opacity:.45; outline:2px dashed var(--vurgu); outline-offset:-2px; }
+.tuval-blok.boyutlaniyor{ outline:2px solid var(--vurgu); outline-offset:-2px; }
+.tuval.tasima-modu{ user-select:none; }
+
+/* Sütunlar arasındaki tutamaç */
+.tuval-ayirac{ flex:0 0 12px; cursor:col-resize; position:relative; }
+.tuval-ayirac::after{
+  content:''; position:absolute; left:50%; top:12px; bottom:12px; width:3px;
+  transform:translateX(-50%); border-radius:3px; background:var(--vurgu);
+  opacity:0; transition:opacity .12s;
+}
+.tuval-ayirac:hover::after,.tuval-satir.ayarlaniyor .tuval-ayirac::after{ opacity:.45; }
+
+/* Bırakma göstergesi */
+.birakma-isareti{
+  position:absolute; z-index:500; background:var(--vurgu); border-radius:3px;
+  box-shadow:0 0 0 3px rgba(200,160,102,.25); pointer-events:none;
+}
 
 .ay-satir{ display:flex; gap:2px; align-items:center; flex-wrap:wrap; }
 .ay{ background:none; border:none; padding:4px 8px; border-radius:7px; cursor:pointer; font-size:.78rem; color:var(--soluk); }
@@ -231,9 +233,7 @@ table{ border-collapse:collapse; }
 .ok{ background:none; border:1px solid var(--cizgi); border-radius:8px; width:26px; height:26px; cursor:pointer; flex:0 0 auto; }
 
 /* ---------- Ekran gövdesi ---------- */
-.ekran-govde{ display:flex; gap:14px; align-items:flex-start; }
-.ana-alan{ display:flex; flex-direction:column; gap:12px; min-width:0; flex:1 1 0; }
-.yan-panel{ flex:0 0 330px; }
+
 
 /* ---------- Haftalık tablo ---------- */
 .hafta-blok{ background:var(--kagit); border:1px solid var(--cizgi); border-radius:var(--r); overflow:hidden; }
@@ -275,9 +275,10 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
 .simule-not{ color:var(--vurgu); }
 
 /* ---------- Sağ panel ---------- */
-.yan-panel{ display:flex; flex-direction:column; gap:12px; min-width:0; }
-.yan-panel > .panel-kutu{ width:100%; }
+
 .panel-kutu{ background:var(--kagit); border:1px solid var(--cizgi); border-radius:var(--r); padding:12px; }
+/* Tuvalde blok zaten çerçeveli; içteki kutu çıplak durur. */
+.tuval-blok > .panel-kutu,.tuval-blok > .hafta-blok{ border:none; border-radius:0; padding:0; background:none; }
 /* Sekmeli özet kutusu — üst menüyle aynı görünüm. */
 .ozet-kutu{ padding:8px 10px 10px; }
 .sekme-bar{ display:flex; gap:2px; border-bottom:2px solid var(--cizgi); margin-bottom:9px; padding-right:24px; }
@@ -450,10 +451,10 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
 
 /* ---------- Mobil: üst gezinme / orta tablo / alt kartlar ---------- */
 @media (max-width: 900px){
-  /* Dikey dizilişte çocuklar kapsayıcıyı doldursun; içerik genişliğine göre
-     büyüyüp sayfayı yana taşırmasınlar. */
-  .ekran-govde{ flex-direction:column; align-items:stretch; }
-  .ekran-govde > *{ flex:1 1 auto !important; }
+  /* Dar ekranda bütün bloklar alt alta. */
+  .tuval-satir{ flex-direction:column; gap:12px; }
+  .tuval-blok{ flex:1 1 auto !important; height:auto !important; }
+  .tuval-ayirac{ display:none; }
   .talep-ekran{ grid-template-columns:1fr; }
   .sayfa{ padding:10px; }
   .ust-cubuk{ padding:7px 10px; gap:8px; }
@@ -461,9 +462,7 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
   .ust-orta{ order:3; width:100%; }
   .ust-sag{ order:2; margin-left:auto; }
   .hafta-gezinti{ flex-direction:column; gap:10px; }
-  .gez-sag,.rutin-blok{ border-left:none; border-top:1px solid var(--cizgi); padding-left:0; padding-top:10px; }
-  .panel-ayarlanabilir{ width:auto !important; }
-  .panel-tutamak.sag,.panel-tutamak.kose{ display:none; }
+
   .duyuru-satir{ white-space:normal; }
   .hafta-listesi{ gap:6px; }
   .hafta-tablo{ min-width:640px; font-size:.74rem; }
@@ -786,12 +785,6 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
     y.boyut[panelId] = Object.assign({}, y.boyut[panelId], boyut);
     yerlesimYaz(magaza, y);
   }
-  function yerlesimSiraYaz(magaza, kapId, sira) {
-    const y = yerlesimGetir(magaza);
-    y.sira = y.sira || {};
-    y.sira[kapId] = sira;
-    yerlesimYaz(magaza, y);
-  }
   function bolgeGorunumGetir() {
     return oku("gorunum:bolge", { metrikler: ["ciro", "mdo", "fbu"], kiyas: "gecenHafta" });
   }
@@ -1103,7 +1096,6 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
     const personel = personelGetir(magazaKey);
     const kok = el(`<section class="hafta-blok" data-hafta="${haftaKey(pzt)}">
     <header class="hafta-ust">
-      <div class="hafta-baslik">📊 ${haftaBasligi(pzt)}</div>
       <div class="hafta-hedef">
         <span class="etiket">Hedef</span>
         <input class="hedef-girdi" type="text" inputmode="numeric" value="${ozet.hedefToplam ?? ""}" ${duzenlenebilir ? "" : "disabled"}>
@@ -1351,7 +1343,6 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
     const bugunD = bugun();
     const bugunStr2 = bugunStr();
     const buGun = gunGetir(magazaKey, bugunStr2) || {};
-    const kok = el('<aside class="yan-panel"></aside>');
     const ozet = el(`<div class="panel-kutu ozet-kutu" data-panel="ozet">
     <div class="sekme-bar">
       ${SEKMELER.map((s) => `<button class="sekme" data-sekme="${s.id}">${s.ad}</button>`).join("")}
@@ -1390,9 +1381,7 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
       sekmeCiz(b.dataset.sekme);
     }));
     sekmeCiz(ozetSekmesiGetir(magazaKey));
-    kok.appendChild(ozet);
     const yorumKutu = el(`<div class="panel-kutu" data-panel="yorum">
-    <h3>📝 Günlük yorum</h3>
     <div class="panel-alt">${kisaTarih(bugunD)} — bölge müdürüne iletilir</div>
     <textarea class="yorum-alan" placeholder="Düşüş veya yükselişin sebebi..." ${duzenlenebilir ? "" : "disabled"}>${esc(buGun.yorum || "")}</textarea>
     <div class="yorum-durum"></div>
@@ -1409,8 +1398,7 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
         }, 1800);
       }, 500);
     });
-    kok.appendChild(yorumKutu);
-    return kok;
+    return { ozet, yorum: yorumKutu };
   }
   function kartEklemeFormu(magazaKey, kap, secenekler) {
     const form = el(`<div class="kart kart-form">
@@ -1639,7 +1627,6 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
     const biten = maddeler.filter((m) => durum[m.id]).length;
     const kok = el(`<section class="rutin-blok" data-panel="rutin">
     <header class="rutin-ust">
-      <span class="rutin-baslik">✓ Haftalık rutin</span>
       <span class="rutin-sayac ${toplam2 && biten === toplam2 ? "tamam" : ""}">${biten}/${toplam2}</span>
     </header>
     <div class="tablo-sar">
@@ -1722,119 +1709,224 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
   }
 
   // js/yerlesim.js
-  var EN_KUCUK_GENISLIK = 180;
-  var EN_KUCUK_YUKSEKLIK = 90;
-  function panelleriHazirla(kapsayici, { kapId, magaza, yon = "yatay" }) {
-    const paneller = [...kapsayici.children].filter((c) => c.dataset && c.dataset.panel);
-    if (!paneller.length) return;
-    const yerlesim = yerlesimGetir(magaza);
-    const kayitliSira = (yerlesim.sira || {})[kapId];
-    const boyutlar = yerlesim.boyut || {};
-    if (Array.isArray(kayitliSira) && kayitliSira.length) {
-      kayitliSira.forEach((id) => {
-        const p = paneller.find((x) => x.dataset.panel === id);
-        if (p) kapsayici.appendChild(p);
-      });
-      paneller.forEach((p) => {
-        if (!kayitliSira.includes(p.dataset.panel)) kapsayici.appendChild(p);
+  var EN_KUCUK_YUZDE = 12;
+  var EN_KUCUK_YUKSEKLIK = 80;
+  var VARSAYILAN_DUZEN = [
+    { bloklar: [{ panel: "hafta", yuzde: 34 }, { panel: "duyuru", yuzde: 28 }, { panel: "rutin", yuzde: 38 }] },
+    { bloklar: [{ panel: "haftaSecili", yuzde: 71 }, { panel: "ozet", yuzde: 29 }] },
+    { bloklar: [{ panel: "haftaOnceki", yuzde: 71 }, { panel: "yorum", yuzde: 29 }] }
+  ];
+  function duzeniOku(magaza, panelAdlari) {
+    const kayit = yerlesimGetir(magaza);
+    let satirlar = Array.isArray(kayit.satirlar) && kayit.satirlar.length ? JSON.parse(JSON.stringify(kayit.satirlar)) : JSON.parse(JSON.stringify(VARSAYILAN_DUZEN));
+    satirlar.forEach((s) => {
+      s.bloklar = (s.bloklar || []).filter((b) => panelAdlari.includes(b.panel));
+    });
+    satirlar = satirlar.filter((s) => s.bloklar.length);
+    const yerlesmis = satirlar.flatMap((s) => s.bloklar.map((b) => b.panel));
+    panelAdlari.filter((a) => !yerlesmis.includes(a)).forEach((a) => satirlar.push({ bloklar: [{ panel: a, yuzde: 100 }] }));
+    satirlar.forEach(duzeltYuzdeler);
+    return satirlar;
+  }
+  function duzeltYuzdeler(satir) {
+    const toplam2 = satir.bloklar.reduce((t, b) => t + (Number(b.yuzde) || 0), 0);
+    if (!toplam2) {
+      satir.bloklar.forEach((b) => b.yuzde = 100 / satir.bloklar.length);
+      return;
+    }
+    satir.bloklar.forEach((b) => b.yuzde = (Number(b.yuzde) || 0) * 100 / toplam2);
+  }
+  function tuvalCiz(panelHaritasi, { magaza, adlar = {} }) {
+    const panelAdlari = Object.keys(panelHaritasi);
+    let satirlar = duzeniOku(magaza, panelAdlari);
+    const tuval = el('<div class="tuval"></div>');
+    const boyutlar = yerlesimGetir(magaza).boyut || {};
+    const kaydet = () => {
+      const y = yerlesimGetir(magaza);
+      y.satirlar = satirlar;
+      yerlesimYaz(magaza, y);
+    };
+    function ciz2() {
+      tuval.innerHTML = "";
+      satirlar.forEach((satir, si) => {
+        const satirEl = el(`<div class="tuval-satir" data-satir="${si}"></div>`);
+        satir.bloklar.forEach((blok, bi) => {
+          const govde = panelHaritasi[blok.panel];
+          if (!govde) return;
+          const sarmal = el(`<div class="tuval-blok" data-panel="${blok.panel}"></div>`);
+          sarmal.style.flex = `0 1 ${blok.yuzde}%`;
+          const b = boyutlar[blok.panel];
+          if (b && b.yukseklik) sarmal.style.height = b.yukseklik + "px";
+          sarmal.appendChild(el(`<div class="blok-baslik">
+          <button class="panel-tut" title="Basılı tutup sürükleyin">⠿</button>
+          <span class="blok-ad">${adlar[blok.panel] || blok.panel}</span>
+        </div>`));
+          sarmal.appendChild(govde);
+          sarmal.appendChild(el('<span class="blok-tutamak alt" title="Yükseklik"></span>'));
+          sarmal.querySelector(".panel-tut").addEventListener(
+            "pointerdown",
+            (e) => tasimayaBasla(e, blok.panel)
+          );
+          sarmal.querySelector(".blok-tutamak.alt").addEventListener(
+            "pointerdown",
+            (e) => yukseklikBasla(e, sarmal, blok.panel)
+          );
+          satirEl.appendChild(sarmal);
+          if (bi < satir.bloklar.length - 1) {
+            const ayirac = el('<div class="tuval-ayirac" title="Genişliği ayarla"></div>');
+            ayirac.addEventListener("pointerdown", (e) => genislikBasla(e, satirEl, si, bi));
+            satirEl.appendChild(ayirac);
+          }
+        });
+        tuval.appendChild(satirEl);
       });
     }
-    paneller.forEach((panel) => {
-      const id = panel.dataset.panel;
-      panel.classList.add("panel-ayarlanabilir");
-      const b = boyutlar[id];
-      if (b && b.genislik && yon === "yatay") {
-        panel.style.flex = "0 0 auto";
-        panel.style.width = b.genislik + "px";
-      }
-      if (b && b.yukseklik) {
-        panel.style.height = b.yukseklik + "px";
-      }
-      if (panel.dataset.kap) panel.classList.add("panel-kapsayici");
-      if (panel.dataset.ad && !panel.querySelector(":scope > .panel-adi")) {
-        panel.insertBefore(el(`<div class="panel-adi">${panel.dataset.ad}</div>`), panel.firstChild);
-      }
-      if (!panel.querySelector(":scope > .panel-tut")) {
-        const tut = el('<button class="panel-tut" title="Basılı tutup sürükleyin — yerini değiştirir">⠿</button>');
-        tut.addEventListener("pointerdown", (e) => tasimayaBasla(e, panel, kapsayici, kapId, magaza, yon));
-        panel.appendChild(tut);
-        if (yon === "yatay") panel.appendChild(tutamak(panel, id, magaza, "sag"));
-        if (!panel.dataset.kap) {
-          panel.appendChild(tutamak(panel, id, magaza, "alt"));
-          panel.appendChild(tutamak(panel, id, magaza, "kose"));
-        }
-      }
-    });
-  }
-  function tutamak(panel, id, magaza, tip) {
-    const t = el(`<span class="panel-tutamak ${tip}" title="Boyutlandır"></span>`);
-    t.addEventListener("pointerdown", (e) => {
+    function tasimayaBasla(e, panelAdi) {
       e.preventDefault();
       e.stopPropagation();
-      const baslangic = { x: e.clientX, y: e.clientY, g: panel.offsetWidth, y0: panel.offsetHeight };
-      panel.classList.add("boyutlaniyor");
+      const isaret = el('<div class="birakma-isareti"></div>');
+      document.body.appendChild(isaret);
+      tuval.classList.add("tasima-modu");
+      const kaynak = tuval.querySelector(`.tuval-blok[data-panel="${panelAdi}"]`);
+      if (kaynak) kaynak.classList.add("tasiniyor");
+      let hedef = null;
       const hareket = (ev) => {
-        if (tip !== "alt") {
-          const g = Math.max(EN_KUCUK_GENISLIK, baslangic.g + (ev.clientX - baslangic.x));
-          panel.style.flex = "0 0 auto";
-          panel.style.width = g + "px";
+        hedef = birakmaNoktasi(ev.clientX, ev.clientY, panelAdi);
+        if (!hedef) {
+          isaret.style.display = "none";
+          return;
         }
-        if (tip !== "sag") {
-          panel.style.height = Math.max(EN_KUCUK_YUKSEKLIK, baslangic.y0 + (ev.clientY - baslangic.y)) + "px";
+        isaret.style.display = "";
+        const r = hedef.kutu;
+        if (hedef.yon === "sol" || hedef.yon === "sag") {
+          isaret.className = "birakma-isareti dikey";
+          isaret.style.left = window.scrollX + (hedef.yon === "sol" ? r.left : r.right) - 2 + "px";
+          isaret.style.top = window.scrollY + r.top + "px";
+          isaret.style.height = r.height + "px";
+          isaret.style.width = "4px";
+        } else {
+          isaret.className = "birakma-isareti yatay";
+          isaret.style.left = window.scrollX + r.left + "px";
+          isaret.style.top = window.scrollY + (hedef.yon === "ust" ? r.top : r.bottom) - 2 + "px";
+          isaret.style.width = r.width + "px";
+          isaret.style.height = "4px";
         }
       };
       const bitir = () => {
-        panel.classList.remove("boyutlaniyor");
         window.removeEventListener("pointermove", hareket);
         window.removeEventListener("pointerup", bitir);
         window.removeEventListener("pointercancel", bitir);
-        yerlesimBoyutYaz(magaza, id, {
-          genislik: tip !== "alt" ? panel.offsetWidth : void 0,
-          yukseklik: tip !== "sag" ? panel.offsetHeight : void 0
-        });
+        isaret.remove();
+        tuval.classList.remove("tasima-modu");
+        if (kaynak) kaynak.classList.remove("tasiniyor");
+        if (hedef) {
+          tasi(panelAdi, hedef);
+          kaydet();
+          ciz2();
+        }
       };
       window.addEventListener("pointermove", hareket);
       window.addEventListener("pointerup", bitir);
       window.addEventListener("pointercancel", bitir);
-    });
-    return t;
-  }
-  function tasimayaBasla(e, panel, kapsayici, kapId, magaza, yon) {
-    e.preventDefault();
-    e.stopPropagation();
-    panel.classList.add("tasiniyor");
-    kapsayici.classList.add("tasima-modu");
-    const hareket = (ev) => {
-      const hedef = [...kapsayici.children].find((c) => {
-        if (c === panel || !c.dataset || !c.dataset.panel) return false;
-        const r2 = c.getBoundingClientRect();
-        return ev.clientX >= r2.left && ev.clientX <= r2.right && ev.clientY >= r2.top && ev.clientY <= r2.bottom;
-      });
-      if (!hedef) return;
-      const r = hedef.getBoundingClientRect();
-      const oncesineMi = yon === "yatay" ? ev.clientX < r.left + r.width / 2 : ev.clientY < r.top + r.height / 2;
-      const yeniKomsu = oncesineMi ? hedef : hedef.nextSibling;
-      if (yeniKomsu === panel || yeniKomsu === panel.nextSibling && !oncesineMi) return;
-      kapsayici.insertBefore(panel, yeniKomsu);
-    };
-    const bitir = () => {
-      panel.classList.remove("tasiniyor");
-      kapsayici.classList.remove("tasima-modu");
-      window.removeEventListener("pointermove", hareket);
-      window.removeEventListener("pointerup", bitir);
-      window.removeEventListener("pointercancel", bitir);
-      yerlesimSiraYaz(
-        magaza,
-        kapId,
-        [...kapsayici.children].filter((c) => c.dataset && c.dataset.panel).map((c) => c.dataset.panel)
-      );
-    };
-    window.addEventListener("pointermove", hareket);
-    window.addEventListener("pointerup", bitir);
-    window.addEventListener("pointercancel", bitir);
+    }
+    function birakmaNoktasi(x, y, kaynakPanel) {
+      const bloklar = [...tuval.querySelectorAll(".tuval-blok")];
+      for (const b of bloklar) {
+        const r = b.getBoundingClientRect();
+        if (x < r.left || x > r.right || y < r.top || y > r.bottom) continue;
+        const solPay = (x - r.left) / r.width;
+        const ustPay = (y - r.top) / r.height;
+        let yon;
+        if (solPay < 0.25) yon = "sol";
+        else if (solPay > 0.75) yon = "sag";
+        else if (ustPay < 0.35) yon = "ust";
+        else yon = "alt";
+        if (b.dataset.panel === kaynakPanel) return null;
+        return { panel: b.dataset.panel, yon, kutu: r };
+      }
+      return null;
+    }
+    function blokBul(panelAdi) {
+      for (let si = 0; si < satirlar.length; si++) {
+        const bi = satirlar[si].bloklar.findIndex((b) => b.panel === panelAdi);
+        if (bi > -1) return { si, bi };
+      }
+      return null;
+    }
+    function tasi(kaynakPanel, hedef) {
+      const k = blokBul(kaynakPanel);
+      const h = blokBul(hedef.panel);
+      if (!k || !h) return;
+      const [tasinan] = satirlar[k.si].bloklar.splice(k.bi, 1);
+      let hedefSatir = h.si;
+      if (!satirlar[k.si].bloklar.length) {
+        satirlar.splice(k.si, 1);
+        if (k.si < hedefSatir) hedefSatir--;
+      } else {
+        duzeltYuzdeler(satirlar[k.si]);
+      }
+      const hedefBi = satirlar[hedefSatir].bloklar.findIndex((b) => b.panel === hedef.panel);
+      if (hedef.yon === "sol" || hedef.yon === "sag") {
+        const satir = satirlar[hedefSatir];
+        const komsu = satir.bloklar[hedefBi];
+        tasinan.yuzde = komsu.yuzde / 2;
+        komsu.yuzde = komsu.yuzde / 2;
+        satir.bloklar.splice(hedef.yon === "sol" ? hedefBi : hedefBi + 1, 0, tasinan);
+        duzeltYuzdeler(satir);
+      } else {
+        tasinan.yuzde = 100;
+        satirlar.splice(hedef.yon === "ust" ? hedefSatir : hedefSatir + 1, 0, { bloklar: [tasinan] });
+      }
+    }
+    function genislikBasla(e, satirEl, si, bi) {
+      e.preventDefault();
+      e.stopPropagation();
+      const satir = satirlar[si];
+      const sol = satir.bloklar[bi], sag = satir.bloklar[bi + 1];
+      const toplamPx = satirEl.getBoundingClientRect().width;
+      const baslangicX = e.clientX;
+      const solY = sol.yuzde, sagY = sag.yuzde;
+      satirEl.classList.add("ayarlaniyor");
+      const hareket = (ev) => {
+        const fark = (ev.clientX - baslangicX) / toplamPx * 100;
+        const yeniSol = Math.max(EN_KUCUK_YUZDE, Math.min(solY + sagY - EN_KUCUK_YUZDE, solY + fark));
+        sol.yuzde = yeniSol;
+        sag.yuzde = solY + sagY - yeniSol;
+        const blokEl = [...satirEl.querySelectorAll(".tuval-blok")];
+        blokEl[bi].style.flex = `0 1 ${sol.yuzde}%`;
+        blokEl[bi + 1].style.flex = `0 1 ${sag.yuzde}%`;
+      };
+      const bitir = () => {
+        satirEl.classList.remove("ayarlaniyor");
+        window.removeEventListener("pointermove", hareket);
+        window.removeEventListener("pointerup", bitir);
+        kaydet();
+      };
+      window.addEventListener("pointermove", hareket);
+      window.addEventListener("pointerup", bitir);
+    }
+    function yukseklikBasla(e, sarmal, panelAdi) {
+      e.preventDefault();
+      e.stopPropagation();
+      const baslangic = { y: e.clientY, h: sarmal.offsetHeight };
+      sarmal.classList.add("boyutlaniyor");
+      const hareket = (ev) => {
+        sarmal.style.height = Math.max(EN_KUCUK_YUKSEKLIK, baslangic.h + (ev.clientY - baslangic.y)) + "px";
+      };
+      const bitir = () => {
+        sarmal.classList.remove("boyutlaniyor");
+        window.removeEventListener("pointermove", hareket);
+        window.removeEventListener("pointerup", bitir);
+        yerlesimBoyutYaz(magaza, panelAdi, { yukseklik: sarmal.offsetHeight });
+      };
+      window.addEventListener("pointermove", hareket);
+      window.addEventListener("pointerup", bitir);
+    }
+    ciz2();
+    return tuval;
   }
   function yerlesimSifirla(magaza) {
-    yerlesimYaz(magaza, { sira: {}, boyut: {} });
+    yerlesimYaz(magaza, { satirlar: [], boyut: {} });
   }
 
   // js/magaza.js
@@ -1847,42 +1939,39 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
   }
   function magazaEkrani(magazaKey, secenekler = {}) {
     const pzt = seciliHafta();
+    const oncekiPzt = haftaEkle(pzt, -1);
     const duzenlenebilir = secenekler.duzenlenebilir !== false;
     const yenile = secenekler.yenile || (() => {
     });
-    const kok = el('<div class="magaza-ekran"></div>');
-    const gezinti = haftaGezinti(pzt, yenile);
-    gezinti.appendChild(rutinBlogu(magazaKey, pzt, { duzenlenebilir, yenile }));
-    kok.appendChild(gezinti);
-    panelleriHazirla(gezinti, { kapId: "gezinti", magaza: magazaKey, yon: "yatay" });
-    const govde = el('<div class="ekran-govde"></div>');
-    const sol = el('<div class="ana-alan" data-panel="anaAlan" data-kap="1" data-ad="📊 Haftalık tablolar"></div>');
-    sol.appendChild(haftaTablosu(magazaKey, pzt, {
+    const tabloSecenekleri = {
       duzenlenebilir,
       yenile,
       urunAc: (p) => urunPenceresi(magazaKey, p, duzenlenebilir, yenile),
       personelDuzenle: () => personelPenceresi(magazaKey, yenile)
-    }));
-    sol.appendChild(haftaTablosu(magazaKey, haftaEkle(pzt, -1), {
-      duzenlenebilir,
-      yenile,
-      urunAc: (p) => urunPenceresi(magazaKey, p, duzenlenebilir, yenile),
-      personelDuzenle: () => personelPenceresi(magazaKey, yenile)
-    }));
-    const bloklar = sol.querySelectorAll(".hafta-blok");
-    if (bloklar[0]) bloklar[0].dataset.panel = "haftaSecili";
-    if (bloklar[1]) bloklar[1].dataset.panel = "haftaOnceki";
-    panelleriHazirla(sol, { kapId: "anaAlan", magaza: magazaKey, yon: "dikey" });
-    sol.appendChild(simuleSatiri(yenile));
-    govde.appendChild(sol);
+    };
+    const gez = haftaGezinti(pzt, yenile);
     const yan = panelOlustur(magazaKey, { duzenlenebilir, yenile });
-    yan.dataset.panel = "yanPanel";
-    yan.dataset.kap = "1";
-    yan.dataset.ad = "📌 Özet paneli";
-    govde.appendChild(yan);
-    panelleriHazirla(yan, { kapId: "yanPanel", magaza: magazaKey, yon: "dikey" });
-    panelleriHazirla(govde, { kapId: "govde", magaza: magazaKey, yon: "yatay" });
-    kok.appendChild(govde);
+    const paneller = {
+      hafta: gez.hafta,
+      duyuru: gez.duyuru,
+      rutin: rutinBlogu(magazaKey, pzt, { duzenlenebilir, yenile }),
+      haftaSecili: haftaTablosu(magazaKey, pzt, tabloSecenekleri),
+      haftaOnceki: haftaTablosu(magazaKey, oncekiPzt, tabloSecenekleri),
+      ozet: yan.ozet,
+      yorum: yan.yorum
+    };
+    const adlar = {
+      hafta: "📅 Hafta seçimi",
+      duyuru: "📢 Duyurular",
+      rutin: "✓ Haftalık rutin",
+      haftaSecili: "📊 " + haftaBasligi(pzt),
+      haftaOnceki: "📊 " + haftaBasligi(oncekiPzt),
+      ozet: "📌 Özet",
+      yorum: "📝 Günlük yorum"
+    };
+    const kok = el('<div class="magaza-ekran"></div>');
+    kok.appendChild(tuvalCiz(paneller, { magaza: magazaKey, adlar }));
+    kok.appendChild(simuleSatiri(yenile));
     return kok;
   }
   function haftaGezinti(pzt, yenile) {
@@ -1890,62 +1979,58 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
     const { yil, ay } = haftaninAyi(pzt);
     const haftalar = ayinHaftalari(yil, ay);
     const seciliKey = haftaKey(pzt);
-    const duyurular = duyurularGetir();
-    const kok = el(`<div class="hafta-gezinti">
-    <div class="gez-sol" data-panel="hafta">
-      <div class="panel-adi">📅 Hafta seçimi</div>
-      <div class="ay-satir">
-        ${AY_KISA.map((a, i) => `<button class="ay ${i + 1 === ay ? "secili" : ""}" data-ay="${i + 1}">${a}</button>`).join("")}
-        <select class="yil-sec">
-          ${[yil - 1, yil, yil + 1].map((y) => `<option ${y === yil ? "selected" : ""}>${y}</option>`).join("")}
-        </select>
-      </div>
-      <div class="hafta-satir">
-        <button class="ok" data-kaydir="-1" title="Önceki hafta">◀</button>
-        <div class="hafta-listesi">
-          ${haftalar.map((h) => `<button class="hafta ${haftaKey(h) === seciliKey ? "secili" : ""}" data-pzt="${dateStr(h)}">
-              <span class="h-no">H${isoHafta(h).hafta}</span>
-              <span class="h-aralik">${haftaAraligiEtiketi(h)}</span>
-            </button>`).join("")}
-        </div>
-        <button class="ok" data-kaydir="1" title="Sonraki hafta">▶</button>
-        <button class="mini" data-bugun="1">Bu hafta</button>
-      </div>
+    const hafta = el(`<div class="gez-sol">
+    <div class="ay-satir">
+      ${AY_KISA.map((a, i) => `<button class="ay ${i + 1 === ay ? "secili" : ""}" data-ay="${i + 1}">${a}</button>`).join("")}
+      <select class="yil-sec">
+        ${[yil - 1, yil, yil + 1].map((y) => `<option ${y === yil ? "selected" : ""}>${y}</option>`).join("")}
+      </select>
     </div>
-    <div class="gez-sag" data-panel="duyuru">
-      <div class="duyuru-baslik">📢 Duyurular</div>
-      <div class="duyuru-serit">
-        ${duyurular.length ? duyurular.slice(0, 3).map((d) => `<div class="duyuru-satir" title="${esc(d.metin)}">${esc(d.metin)}</div>`).join("") : '<div class="duyuru-bos">Duyuru yok.</div>'}
+    <div class="hafta-satir">
+      <button class="ok" data-kaydir="-1" title="Önceki hafta">◀</button>
+      <div class="hafta-listesi">
+        ${haftalar.map((h) => `<button class="hafta ${haftaKey(h) === seciliKey ? "secili" : ""}" data-pzt="${dateStr(h)}">
+            <span class="h-no">H${isoHafta(h).hafta}</span>
+            <span class="h-aralik">${haftaAraligiEtiketi(h)}</span>
+          </button>`).join("")}
       </div>
+      <button class="ok" data-kaydir="1" title="Sonraki hafta">▶</button>
+      <button class="mini" data-bugun="1">Bu hafta</button>
     </div>
   </div>`);
-    kok.querySelectorAll("[data-ay]").forEach((b) => b.addEventListener("click", () => {
-      const hedef = ayinHaftalari(Number(kok.querySelector(".yil-sec").value), Number(b.dataset.ay))[0];
+    const duyurular = duyurularGetir();
+    const duyuru = el(`<div class="gez-sag">
+    <div class="duyuru-serit">
+      ${duyurular.length ? duyurular.slice(0, 6).map((d) => `<div class="duyuru-satir" title="${esc(d.metin)}">${esc(d.metin)}</div>`).join("") : '<div class="duyuru-bos">Duyuru yok.</div>'}
+    </div>
+  </div>`);
+    hafta.querySelectorAll("[data-ay]").forEach((b) => b.addEventListener("click", () => {
+      const hedef = ayinHaftalari(Number(hafta.querySelector(".yil-sec").value), Number(b.dataset.ay))[0];
       if (hedef) {
         haftaSec(hedef);
         yenile();
       }
     }));
-    kok.querySelector(".yil-sec").addEventListener("change", function() {
+    hafta.querySelector(".yil-sec").addEventListener("change", function() {
       const hedef = ayinHaftalari(Number(this.value), ay)[0];
       if (hedef) {
         haftaSec(hedef);
         yenile();
       }
     });
-    kok.querySelectorAll("[data-pzt]").forEach((b) => b.addEventListener("click", () => {
+    hafta.querySelectorAll("[data-pzt]").forEach((b) => b.addEventListener("click", () => {
       haftaSec(/* @__PURE__ */ new Date(b.dataset.pzt + "T12:00:00"));
       yenile();
     }));
-    kok.querySelectorAll("[data-kaydir]").forEach((b) => b.addEventListener("click", () => {
+    hafta.querySelectorAll("[data-kaydir]").forEach((b) => b.addEventListener("click", () => {
       haftaSec(haftaEkle(pzt, Number(b.dataset.kaydir)));
       yenile();
     }));
-    kok.querySelector("[data-bugun]").addEventListener("click", () => {
+    hafta.querySelector("[data-bugun]").addEventListener("click", () => {
       haftaSec(pazartesi(bugunD));
       yenile();
     });
-    return kok;
+    return { hafta, duyuru };
   }
   function simuleSatiri(yenile) {
     const kok = el(`<div class="simule-satir">

@@ -103,16 +103,7 @@ table{ border-collapse:collapse; }
 
 /* ---------- Hafta gezinme ---------- */
 /* Solda hafta seçimi (içerik kadar yer kaplar), sağda duyurular. */
-.hafta-gezinti{
-  background:var(--kagit); border:1px solid var(--cizgi); border-radius:var(--r);
-  padding:9px 11px; margin-bottom:12px; display:flex; gap:14px; align-items:stretch;
-}
-.gez-sol{ flex:0 1 auto; min-width:0; }
-.gez-sag{
-  flex:1 1 230px; min-width:0; border-left:1px solid var(--cizgi); padding-left:14px;
-  display:flex; flex-direction:column;
-}
-.duyuru-baslik{ font-size:.72rem; font-weight:700; color:var(--soluk); margin-bottom:5px; }
+.gez-sol,.gez-sag{ min-width:0; display:flex; flex-direction:column; }
 .duyuru-serit{ display:flex; flex-direction:column; gap:7px; min-height:0; overflow-y:auto; }
 /* Her duyuru ayrı bir mesaj balonu; tek satır, tamamı ipucunda. */
 .duyuru-satir{
@@ -126,12 +117,8 @@ table{ border-collapse:collapse; }
 .duyuru-bos{ color:var(--soluk); font-size:.74rem; }
 
 /* ---------- Haftalık rutin ---------- */
-.rutin-blok{
-  flex:2 1 400px; min-width:0; border-left:1px solid var(--cizgi); padding-left:14px;
-  display:flex; flex-direction:column;
-}
-.rutin-ust{ display:flex; align-items:center; justify-content:space-between; margin-bottom:5px; }
-.rutin-baslik{ font-size:.72rem; font-weight:700; color:var(--soluk); }
+.rutin-blok{ min-width:0; display:flex; flex-direction:column; }
+.rutin-ust{ display:flex; align-items:center; justify-content:flex-end; margin-bottom:3px; }
 .rutin-sayac{ font-size:.68rem; font-weight:700; color:var(--soluk); background:#f1efe9; border-radius:20px; padding:1px 8px; }
 .rutin-sayac.tamam{ background:#e6f2ea; color:var(--artis); }
 .rutin-blok .tablo-sar{ flex:1; min-height:0; overflow:auto; }
@@ -172,37 +159,52 @@ table{ border-collapse:collapse; }
   border-radius:6px; margin-bottom:2px;
 }
 
-/* ---------- Taşınabilir / boyutlanabilir paneller ---------- */
-/* Her panelin sol üstünde adı durur. */
-.panel-adi{
-  font-size:.72rem; font-weight:700; color:var(--soluk); margin-bottom:5px;
+/* ---------- Notion tarzı tuval ---------- */
+.tuval{ display:flex; flex-direction:column; gap:12px; }
+.tuval-satir{ display:flex; align-items:stretch; gap:0; min-width:0; }
+.tuval-blok{
+  position:relative; display:flex; flex-direction:column; min-width:0; min-height:70px;
+  background:var(--kagit); border:1px solid var(--cizgi); border-radius:var(--r);
+  padding:7px 10px 10px; overflow:hidden;
+}
+.tuval-blok > *:not(.blok-baslik):not(.blok-tutamak){ min-height:0; overflow:auto; }
+.blok-baslik{ display:flex; align-items:center; gap:6px; margin-bottom:5px; flex:0 0 auto; }
+.blok-ad{
+  font-size:.72rem; font-weight:700; color:var(--soluk);
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
-.panel-ayarlanabilir{ position:relative; }
-.panel-kapsayici > .panel-adi{ padding-left:2px; }
-.panel-kapsayici > .panel-tut{ right:auto; left:2px; top:-2px; }
 .panel-tut{
-  position:absolute; top:2px; right:2px; z-index:5; pointer-events:none;
-  width:18px; height:18px; padding:0; line-height:1; border-radius:5px;
+  flex:0 0 auto; width:17px; height:17px; padding:0; line-height:1; border-radius:5px;
   border:1px solid var(--cizgi); background:var(--kagit); color:#b9b9c0;
-  font-size:.64rem; cursor:grab; opacity:0; transition:opacity .12s;
+  font-size:.62rem; cursor:grab; opacity:0; transition:opacity .12s;
 }
-.panel-ayarlanabilir:hover > .panel-tut{ opacity:1; pointer-events:auto; }
+.tuval-blok:hover .panel-tut{ opacity:1; }
 .panel-tut:hover{ color:var(--vurgu); border-color:var(--vurgu); }
 .panel-tut:active{ cursor:grabbing; }
-.panel-tutamak{
-  position:absolute; z-index:4; opacity:0; transition:opacity .12s; background:var(--vurgu);
-  pointer-events:none;   /* görünmezken altındaki düğmelerin tıklamasını çalmasın */
+.blok-tutamak.alt{
+  position:absolute; left:14px; right:14px; bottom:0; height:6px; cursor:row-resize;
+  background:var(--vurgu); opacity:0; border-radius:3px; transition:opacity .12s;
 }
-.panel-ayarlanabilir:hover > .panel-tutamak{ opacity:.25; pointer-events:auto; }
-.panel-tutamak:hover{ opacity:.7 !important; }
-.panel-tutamak.sag{ top:8px; bottom:8px; right:-2px; width:4px; border-radius:3px; cursor:col-resize; }
-.panel-tutamak.alt{ left:8px; right:8px; bottom:-2px; height:4px; border-radius:3px; cursor:row-resize; }
-.panel-tutamak.kose{ right:-3px; bottom:-3px; width:11px; height:11px; border-radius:3px; cursor:nwse-resize; }
-.panel-ayarlanabilir.tasiniyor{ opacity:.55; outline:2px dashed var(--vurgu); outline-offset:2px; }
-.panel-ayarlanabilir.boyutlaniyor{ outline:2px solid var(--vurgu); outline-offset:2px; }
-.tasima-modu{ user-select:none; }
-.tasima-modu .panel-ayarlanabilir{ transition:none; }
+.tuval-blok:hover .blok-tutamak.alt{ opacity:.2; }
+.blok-tutamak.alt:hover{ opacity:.6 !important; }
+.tuval-blok.tasiniyor{ opacity:.45; outline:2px dashed var(--vurgu); outline-offset:-2px; }
+.tuval-blok.boyutlaniyor{ outline:2px solid var(--vurgu); outline-offset:-2px; }
+.tuval.tasima-modu{ user-select:none; }
+
+/* Sütunlar arasındaki tutamaç */
+.tuval-ayirac{ flex:0 0 12px; cursor:col-resize; position:relative; }
+.tuval-ayirac::after{
+  content:''; position:absolute; left:50%; top:12px; bottom:12px; width:3px;
+  transform:translateX(-50%); border-radius:3px; background:var(--vurgu);
+  opacity:0; transition:opacity .12s;
+}
+.tuval-ayirac:hover::after,.tuval-satir.ayarlaniyor .tuval-ayirac::after{ opacity:.45; }
+
+/* Bırakma göstergesi */
+.birakma-isareti{
+  position:absolute; z-index:500; background:var(--vurgu); border-radius:3px;
+  box-shadow:0 0 0 3px rgba(200,160,102,.25); pointer-events:none;
+}
 
 .ay-satir{ display:flex; gap:2px; align-items:center; flex-wrap:wrap; }
 .ay{ background:none; border:none; padding:4px 8px; border-radius:7px; cursor:pointer; font-size:.78rem; color:var(--soluk); }
@@ -222,9 +224,7 @@ table{ border-collapse:collapse; }
 .ok{ background:none; border:1px solid var(--cizgi); border-radius:8px; width:26px; height:26px; cursor:pointer; flex:0 0 auto; }
 
 /* ---------- Ekran gövdesi ---------- */
-.ekran-govde{ display:flex; gap:14px; align-items:flex-start; }
-.ana-alan{ display:flex; flex-direction:column; gap:12px; min-width:0; flex:1 1 0; }
-.yan-panel{ flex:0 0 330px; }
+
 
 /* ---------- Haftalık tablo ---------- */
 .hafta-blok{ background:var(--kagit); border:1px solid var(--cizgi); border-radius:var(--r); overflow:hidden; }
@@ -266,9 +266,10 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
 .simule-not{ color:var(--vurgu); }
 
 /* ---------- Sağ panel ---------- */
-.yan-panel{ display:flex; flex-direction:column; gap:12px; min-width:0; }
-.yan-panel > .panel-kutu{ width:100%; }
+
 .panel-kutu{ background:var(--kagit); border:1px solid var(--cizgi); border-radius:var(--r); padding:12px; }
+/* Tuvalde blok zaten çerçeveli; içteki kutu çıplak durur. */
+.tuval-blok > .panel-kutu,.tuval-blok > .hafta-blok{ border:none; border-radius:0; padding:0; background:none; }
 /* Sekmeli özet kutusu — üst menüyle aynı görünüm. */
 .ozet-kutu{ padding:8px 10px 10px; }
 .sekme-bar{ display:flex; gap:2px; border-bottom:2px solid var(--cizgi); margin-bottom:9px; padding-right:24px; }
@@ -441,10 +442,10 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
 
 /* ---------- Mobil: üst gezinme / orta tablo / alt kartlar ---------- */
 @media (max-width: 900px){
-  /* Dikey dizilişte çocuklar kapsayıcıyı doldursun; içerik genişliğine göre
-     büyüyüp sayfayı yana taşırmasınlar. */
-  .ekran-govde{ flex-direction:column; align-items:stretch; }
-  .ekran-govde > *{ flex:1 1 auto !important; }
+  /* Dar ekranda bütün bloklar alt alta. */
+  .tuval-satir{ flex-direction:column; gap:12px; }
+  .tuval-blok{ flex:1 1 auto !important; height:auto !important; }
+  .tuval-ayirac{ display:none; }
   .talep-ekran{ grid-template-columns:1fr; }
   .sayfa{ padding:10px; }
   .ust-cubuk{ padding:7px 10px; gap:8px; }
@@ -452,9 +453,7 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
   .ust-orta{ order:3; width:100%; }
   .ust-sag{ order:2; margin-left:auto; }
   .hafta-gezinti{ flex-direction:column; gap:10px; }
-  .gez-sag,.rutin-blok{ border-left:none; border-top:1px solid var(--cizgi); padding-left:0; padding-top:10px; }
-  .panel-ayarlanabilir{ width:auto !important; }
-  .panel-tutamak.sag,.panel-tutamak.kose{ display:none; }
+
   .duyuru-satir{ white-space:normal; }
   .hafta-listesi{ gap:6px; }
   .hafta-tablo{ min-width:640px; font-size:.74rem; }
