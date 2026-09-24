@@ -28,6 +28,11 @@
     cursor:pointer; font-size:.82rem; font-weight:600; border-bottom:3px solid transparent;
   }
   .tab-btn.active{ background:#fff; color:var(--dark); border-bottom:3px solid var(--accent); }
+  .surum-rozet{
+    display:inline-block; margin-left:5px; padding:1px 6px; border-radius:8px; background:#f1efe9;
+    color:#8a6a3f; font-size:.66rem; font-weight:700; cursor:pointer; vertical-align:1px;
+  }
+  .surum-rozet:hover{ background:var(--accent); color:#fff; }
   .tab-btn:hover:not(.active){ background:#e8e5dd; }
 
   .araclar-page{ margin:0; padding:16px; }
@@ -65,6 +70,173 @@
   .tool-tile.add-tile .tool-cap{ color:#bbb; font-size:1.6rem; }
   .tool-tile.add-tile .tool-foot{ border-top:none; color:#aaa; justify-content:center; }
   .tool-tile.add-tile .tool-name{ color:#aaa; }
+
+  .transfer-page{ margin:0; padding:16px; }
+  .tr-wrap{ max-width:620px; margin:0 auto; }
+  .tr-seg{ display:flex; gap:6px; margin-bottom:12px; }
+  .tr-seg-btn{
+    flex:1; background:#f1efe9; color:#666; border:none; padding:10px; border-radius:10px;
+    font-size:.85rem; font-weight:600; cursor:pointer; border-bottom:3px solid transparent;
+  }
+  .tr-seg-btn.active{ background:#fff; color:var(--dark); border-bottom-color:var(--accent); }
+  .tr-card{ background:#fff; border:1px solid var(--line); border-radius:12px; padding:14px; margin-bottom:12px; }
+  .tr-card-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
+  .tr-card-title{ font-size:.9rem; font-weight:700; color:var(--dark); }
+  .tr-hint{ font-size:.7rem; color:#999; font-weight:400; }
+  .kirik-slots{ display:grid; grid-template-columns:repeat(5, 1fr); gap:8px; margin:10px 0; }
+  .kirik-slot{
+    position:relative; aspect-ratio:3/4; border:2px dashed #ccc; border-radius:10px; background:#faf9f6;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer;
+    color:#aaa; font-size:.7rem; overflow:hidden; padding:0;
+  }
+  .kirik-slot .ks-no{ font-size:1.5rem; font-weight:700; color:#bbb; }
+  .kirik-slot.dolu{ border:2px solid var(--green); }
+  .kirik-slot img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .kirik-slot .ks-badge{
+    position:absolute; top:4px; left:4px; background:var(--dark); color:#fff; border-radius:6px;
+    font-size:.7rem; font-weight:700; padding:1px 6px; z-index:1;
+  }
+  .kirik-slot .ks-sil{
+    position:absolute; top:3px; right:3px; background:rgba(255,255,255,.9); color:var(--red); border:none;
+    border-radius:6px; width:22px; height:22px; font-size:.8rem; cursor:pointer; z-index:1;
+  }
+  .tr-foto-row{ display:flex; gap:8px; }
+  .tr-foto-btn{
+    flex:1; background:#fdf6ea; color:#8a6a3f; border:2px dashed var(--accent); border-radius:10px;
+    padding:12px 8px; font-size:.85rem; font-weight:600; cursor:pointer;
+  }
+  .tr-text{
+    width:100%; min-height:80px; margin-top:10px; padding:9px 10px; border-radius:8px; border:1px solid #ddd;
+    font-family:inherit; font-size:.85rem; resize:vertical; -webkit-text-size-adjust:100%; text-size-adjust:100%;
+  }
+  .tr-actions{ display:flex; justify-content:flex-end; gap:8px; margin-top:10px; }
+  .btn.tr-big{ padding:9px 18px; font-size:.82rem; }
+  .btn.tr-go{ background:var(--accent); }
+  .genel-thumbs{ display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+  .genel-thumbs .gt{ position:relative; width:64px; height:64px; border-radius:8px; overflow:hidden; }
+  .genel-thumbs .gt img{ width:100%; height:100%; object-fit:cover; }
+  .tr-item{ border-top:1px solid var(--line); padding:10px 0; }
+  .tr-item:first-child{ border-top:none; padding-top:0; }
+  .tr-item-head{ display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:.75rem; color:#777; }
+  .tr-item-thumbs{ display:flex; gap:5px; margin-top:7px; flex-wrap:wrap; }
+  .tr-item-thumbs img{ width:54px; height:54px; object-fit:cover; border-radius:6px; cursor:pointer; }
+  .tr-item-thumbs .tn{ position:relative; }
+  .tr-item-thumbs .tn span{
+    position:absolute; bottom:2px; left:2px; background:rgba(0,0,0,.65); color:#fff; font-size:.6rem;
+    border-radius:4px; padding:0 4px;
+  }
+  .tr-item-text{
+    margin-top:7px; white-space:pre-wrap; word-break:break-word; background:#faf9f6; border-radius:8px;
+    padding:8px 10px; font-size:.82rem; color:#333;
+  }
+  .tr-item-acts{ display:flex; gap:6px; }
+  .tr-empty{ font-size:.78rem; color:#aaa; text-align:center; padding:10px 0; }
+  .tr-klasor{ font-size:.72rem; color:#666; text-align:right; line-height:1.6; }
+  .tr-klasor b{ color:var(--dark); }
+  .tr-link{ background:none; border:none; color:var(--accent); cursor:pointer; font-size:.72rem; padding:0; text-decoration:underline; }
+
+  /* Uygulama içi pencereler ve bildirimler. --k telefonda ekranı büyütme oranıdır. */
+  :root{ --k:1; }
+  .ui-ov{
+    position:fixed; inset:0; z-index:2000; background:rgba(34,28,20,.45); backdrop-filter:blur(3px);
+    display:flex; align-items:center; justify-content:center; padding:calc(var(--k)*16px);
+    animation:uiFade .15s ease-out; -webkit-text-size-adjust:100%; text-size-adjust:100%;
+  }
+  .ui-dlg{
+    background:#fff; border-radius:calc(var(--k)*20px); width:calc(var(--k)*360px); max-width:100%;
+    padding:calc(var(--k)*24px) calc(var(--k)*20px) calc(var(--k)*18px); text-align:center;
+    box-shadow:0 20px 50px rgba(0,0,0,.25); animation:uiPop .2s cubic-bezier(.2,.9,.3,1.15);
+  }
+  .ui-ikon{
+    width:calc(var(--k)*54px); height:calc(var(--k)*54px); border-radius:50%; margin:0 auto calc(var(--k)*12px);
+    display:flex; align-items:center; justify-content:center; font-size:calc(var(--k)*26px); background:#fbf1e1;
+  }
+  .ui-dlg.tehlike .ui-ikon{ background:#fbe9e9; }
+  .ui-baslik{ font-size:calc(var(--k)*17px); font-weight:700; color:var(--dark); margin-bottom:calc(var(--k)*6px); }
+  .ui-mesaj{ font-size:calc(var(--k)*13.5px); color:#6b6b6b; line-height:1.5; white-space:pre-line; }
+  .ui-input{
+    width:100%; margin-top:calc(var(--k)*14px); padding:calc(var(--k)*11px) calc(var(--k)*12px);
+    border:1.5px solid var(--line); border-radius:calc(var(--k)*12px); font-size:calc(var(--k)*16px);
+    text-align:center; font-family:inherit; background:#fdfcfa;
+  }
+  .ui-input:focus{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(200,160,102,.18); }
+  .ui-btns{ display:flex; gap:calc(var(--k)*8px); margin-top:calc(var(--k)*20px); }
+  .ui-dlg.dikey .ui-btns{ flex-direction:column; }
+  .ui-btn{
+    flex:1; border:none; border-radius:calc(var(--k)*13px); padding:calc(var(--k)*12px) calc(var(--k)*10px);
+    font-size:calc(var(--k)*14.5px); font-weight:600; cursor:pointer; background:#f1efe9; color:#555;
+    font-family:inherit; transition:filter .15s, transform .1s;
+  }
+  .ui-btn:hover{ filter:brightness(.96); }
+  .ui-btn:active{ transform:scale(.97); }
+  .ui-btn.birincil{ background:var(--accent); color:#fff; }
+  .ui-btn.tehlike{ background:var(--red); color:#fff; }
+  .ui-btn.sade{ background:none; color:#999; }
+  @keyframes uiFade{ from{ opacity:0; } }
+  @keyframes uiPop{ from{ opacity:0; transform:scale(.92) translateY(8px); } }
+
+  .ui-toast{
+    position:fixed; left:50%; bottom:calc(var(--k)*24px); z-index:2100; transform:translate(-50%, 160%);
+    opacity:0; transition:transform .28s cubic-bezier(.2,.9,.3,1.1), opacity .2s; pointer-events:none;
+    background:var(--dark); color:#fff; padding:calc(var(--k)*11px) calc(var(--k)*18px);
+    border-radius:calc(var(--k)*14px); font-size:calc(var(--k)*13.5px); font-weight:500;
+    box-shadow:0 10px 30px rgba(0,0,0,.25); max-width:calc(100% - 32px); text-align:center;
+    -webkit-text-size-adjust:100%; text-size-adjust:100%;
+  }
+  .ui-toast.acik{ transform:translate(-50%, 0); opacity:1; }
+  .ui-toast.basari{ background:#2f6b3a; }
+  .ui-toast.hata{ background:var(--red); }
+
+  /* Uygulama içi kamera (kırık fotoğrafları art arda çekmek için) */
+  .kam-ov{
+    position:fixed; inset:0; z-index:1500; background:#000; display:flex; flex-direction:column;
+    -webkit-text-size-adjust:100%; text-size-adjust:100%; animation:uiFade .15s;
+  }
+  .kam-goruntu{ position:relative; flex:1; min-height:0; overflow:hidden; }
+  .kam-goruntu video{ width:100%; height:100%; object-fit:cover; display:block; background:#000; }
+  .kam-flas{ position:absolute; inset:0; background:#fff; opacity:0; pointer-events:none; }
+  .kam-flas.on{ animation:kamFlas .3s ease-out; }
+  @keyframes kamFlas{ 0%{ opacity:.85; } 100%{ opacity:0; } }
+  .kam-ust{
+    position:absolute; top:0; left:0; right:0; display:flex; justify-content:space-between; align-items:center;
+    padding:calc(var(--k)*14px) calc(var(--k)*16px) calc(var(--k)*30px);
+    background:linear-gradient(rgba(0,0,0,.6), transparent); color:#fff;
+  }
+  .kam-baslik{ font-size:calc(var(--k)*16px); font-weight:700; }
+  .kam-baslik small{ display:block; font-size:calc(var(--k)*12px); font-weight:400; opacity:.75; margin-top:2px; }
+  .kam-kapat{
+    width:calc(var(--k)*40px); height:calc(var(--k)*40px); border-radius:50%; border:none; cursor:pointer;
+    background:rgba(255,255,255,.18); color:#fff; font-size:calc(var(--k)*18px);
+  }
+  .kam-alt{ background:#111; padding:calc(var(--k)*14px) calc(var(--k)*18px) calc(var(--k)*24px); }
+  .kam-serit{ display:flex; gap:calc(var(--k)*8px); justify-content:center; margin-bottom:calc(var(--k)*16px); }
+  .kam-mini{
+    position:relative; width:calc(var(--k)*52px); height:calc(var(--k)*52px); border-radius:calc(var(--k)*11px);
+    border:2px solid rgba(255,255,255,.22); background:#222; overflow:hidden; cursor:pointer; padding:0;
+    color:rgba(255,255,255,.45); font-size:calc(var(--k)*17px); font-weight:700; font-family:inherit;
+    transition:transform .15s, border-color .15s;
+  }
+  .kam-mini img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .kam-mini .km-no{
+    position:absolute; left:3px; bottom:3px; z-index:1; background:rgba(0,0,0,.6); color:#fff;
+    font-size:calc(var(--k)*10px); border-radius:5px; padding:0 5px; line-height:1.5;
+  }
+  .kam-mini.aktif{ border-color:var(--accent); transform:scale(1.1); box-shadow:0 0 0 3px rgba(200,160,102,.35); }
+  .kam-kontrol{ display:flex; align-items:center; justify-content:space-between; }
+  .kam-yan{
+    width:calc(var(--k)*80px); background:none; border:none; color:#fff; cursor:pointer;
+    font-size:calc(var(--k)*14px); font-weight:600; font-family:inherit; padding:calc(var(--k)*8px) 0;
+  }
+  .kam-yan.bitti{ color:var(--accent); }
+  .kam-deklansor{
+    width:calc(var(--k)*76px); height:calc(var(--k)*76px); border-radius:50%; cursor:pointer;
+    border:calc(var(--k)*4px) solid #fff; background:transparent; padding:calc(var(--k)*5px);
+  }
+  .kam-deklansor::after{
+    content:''; display:block; width:100%; height:100%; border-radius:50%; background:#fff; transition:transform .1s;
+  }
+  .kam-deklansor:active::after{ transform:scale(.88); }
+  .kam-deklansor:disabled{ opacity:.5; }
 
   .icon-picker{ display:flex; flex-wrap:wrap; gap:7px; margin-top:2px; }
   .icon-picker .ip-item{
@@ -295,6 +467,21 @@
   .profile-back:hover{ border-color:#fff; color:#fff; }
   .profile-note{ color:#e0a94a; font-size:.78rem; margin-top:14px; min-height:16px; }
 
+  .pin-box{ text-align:center; color:#fff; }
+  .pin-box .profile-av{ margin:0 auto; }
+  .pin-title{ font-size:1.15rem; margin-top:14px; }
+  .pin-hint{ color:#9a9a9a; font-size:.8rem; margin-top:5px; }
+  .pin-dots{ display:flex; gap:15px; justify-content:center; margin:20px 0 24px; }
+  .pin-dot{ width:15px; height:15px; border-radius:50%; border:2px solid #6e6e6e; }
+  .pin-dot.on{ background:#fff; border-color:#fff; }
+  .pin-pad{ display:grid; grid-template-columns:repeat(3,74px); gap:12px; justify-content:center; }
+  .pin-pad button{
+    height:58px; border-radius:10px; border:1px solid #3a3a3a; background:#232323; color:#fff;
+    font-size:1.25rem; cursor:pointer; font-family:inherit;
+  }
+  .pin-pad button:hover{ background:#333; }
+  .pin-pad button.wide{ font-size:.85rem; color:#b3b3b3; }
+  .pin-err{ color:#e07b7b; font-size:.8rem; min-height:18px; margin-top:14px; }
 
   .profile-chip{
     display:flex; align-items:center; gap:7px; margin-left:10px; align-self:center;
@@ -356,34 +543,7 @@
   .pe-icons span.sel{ border-color:var(--accent); }
   .pe-colors span{ width:34px; height:34px; border-radius:50%; cursor:pointer; border:2px solid transparent; }
   .pe-colors span.sel{ border-color:#fff; }
-  .pe-err{ color:#e07b7b; font-size:.78rem; min-height:18px; margin-top:12px; white-space:pre-line; }
-  .pe-hint{ color:#8b8b8b; font-size:.72rem; margin-top:8px; line-height:1.4; }
-  .login-box{ width:340px; }
-  .login-logo{ font-size:2.2rem; text-align:center; }
-  .profile-back.login-main{ width:100%; padding:10px; margin-top:16px; }
-  .login-link{
-    display:block; width:100%; margin-top:10px; background:none; border:none;
-    color:#8b8b8b; font-size:.75rem; cursor:pointer; font-family:inherit; text-decoration:underline;
-  }
-  .login-link:hover{ color:#fff; }
-  .profile-search{ width:320px; max-width:86vw; margin:0 auto 22px; display:block; text-align:center; }
-  .profile-bos{ color:#8b8b8b; font-size:.82rem; text-align:center; padding:18px 0; }
-  .izin-list{ display:flex; flex-wrap:wrap; gap:8px; }
-  .izin-row{ display:inline-flex; align-items:center; gap:6px; background:#1e1e1e; border:1px solid #333; border-radius:20px; padding:4px 5px 4px 12px; }
-  .izin-ad{ color:#fff; font-size:.8rem; }
-  .izin-row button{ background:none; border:1px solid #444; color:#9a9a9a; border-radius:12px; cursor:pointer; font-family:inherit; }
-  .izin-ben{ font-size:.62rem; padding:2px 7px; }
-  .izin-ben.sel{ border-color:var(--accent); color:var(--accent); }
-  .izin-sil{ font-size:.66rem; width:20px; height:20px; padding:0; line-height:1; border-radius:50%; }
-  .izin-sil:hover{ border-color:#c26565; color:#e28a8a; }
-  .izin-bos{ color:#6d6d6d; font-size:.76rem; }
-  .izin-add{ display:flex; gap:8px; margin-top:10px; }
-  .izin-add .pe-input{ flex:1; }
-  .izin-add .profile-back{ white-space:nowrap; }
-  .pb-text{ height:180px; resize:vertical; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:.78rem; line-height:1.5; }
-  .pb-log{ max-height:170px; overflow:auto; margin-top:10px; font-size:.75rem; line-height:1.6; }
-  .pb-log .iyi{ color:#7fb77f; }
-  .pb-log .kotu{ color:#e07b7b; }
+  .pe-err{ color:#e07b7b; font-size:.78rem; min-height:18px; margin-top:12px; }
   .profile-back.pe-save{ border-color:var(--accent); color:var(--accent); }
   .profile-back.pe-save:hover{ background:var(--accent); color:#1a1a1a; }
   .profile-foot .profile-back + .profile-back{ margin-left:8px; }
@@ -412,108 +572,73 @@
 </div>
 
 <div id="profileScreen" class="profile-screen" style="display:none;">
-
-  <div id="loginView" style="display:none;">
-    <div class="pe-box login-box">
-      <div class="login-logo">🏪</div>
-      <h2 style="text-align:center;margin:0 0 4px;">Mağaza Raporu</h2>
-      <div class="pe-hint" style="text-align:center;">Devam etmek için giriş yapın</div>
-      <label class="pe-label">E-posta</label>
-      <input type="email" id="loginEmail" class="pe-input" autocomplete="username">
-      <label class="pe-label">Şifre</label>
-      <input type="password" id="loginPass" class="pe-input" autocomplete="current-password">
-      <div class="pe-err" id="loginErr"></div>
-      <button class="profile-back pe-save login-main" id="loginBtn" type="button">Giriş yap</button>
-      <button class="login-link" id="loginForgotBtn" type="button">Şifremi unuttum</button>
-    </div>
-  </div>
-
-  <div id="profilePickView" style="display:none;">
-    <h2 id="profilePickTitle">Hangi mağaza?</h2>
-    <input type="text" id="profileSearch" class="pe-input profile-search" placeholder="Mağaza ara...">
+  <div id="profilePickView">
+    <h2 id="profilePickTitle">Kim kullanıyor?</h2>
     <div class="profile-list" id="profileList"></div>
     <div class="profile-note" id="profileNote"></div>
     <div class="profile-foot">
-      <button class="profile-back" id="profileResetBtn" type="button">⚙ Mağazaları yönet</button>
-      <button class="profile-back" id="pickLogoutBtn" type="button">Çıkış yap</button>
+      <button class="profile-back" id="profileResetBtn" type="button">⚙ Profilleri yönet</button>
     </div>
   </div>
 
   <div id="profileManageView" style="display:none;">
-    <h2>Mağazaları yönet</h2>
+    <h2>Profilleri yönet</h2>
     <div class="pm-list" id="pmList"></div>
     <div class="profile-note" id="pmNote"></div>
     <div class="profile-foot">
-      <button class="profile-back pe-save" id="pmAddBtn" type="button">+ Yeni mağaza</button>
-      <button class="profile-back" id="pmBulkBtn" type="button">⇪ Toplu ekle</button>
+      <button class="profile-back pe-save" id="pmAddBtn" type="button">+ Yeni profil</button>
       <button class="profile-back" id="pmBackBtn" type="button">← Geri</button>
     </div>
   </div>
 
   <div id="profileEditView" style="display:none;">
     <div class="pe-box">
-      <h2 id="peTitle" style="margin-bottom:6px;">Mağaza ayarları</h2>
-      <label class="pe-label">Mağaza adı</label>
-      <input type="text" id="peName" class="pe-input" maxlength="32" placeholder="ör. Mağaza 2367">
+      <h2 id="peTitle" style="text-align:left;margin-bottom:6px;">Profili düzenle</h2>
+      <label class="pe-label">Ad</label>
+      <input type="text" id="peName" class="pe-input" maxlength="24" placeholder="ör. Mağaza 2367">
       <label class="pe-label">Simge</label>
       <div class="pe-icons" id="peIcons"></div>
       <label class="pe-label">Renk</label>
       <div class="pe-colors" id="peColors"></div>
-
-      <div id="peUserWrap" style="display:none;">
-        <label class="pe-label">Kullanıcı e-postası</label>
-        <input type="email" id="peUserMail" class="pe-input" placeholder="magaza2367@ornek.com">
-        <label class="pe-label">Geçici şifre (en az 6 karakter)</label>
-        <input type="text" id="peUserPass" class="pe-input" placeholder="ilk giriş şifresi">
-      </div>
-
-      <label class="pe-label">İzinli listesinde çıkacak kişiler</label>
-      <div class="izin-list" id="peIzinList"></div>
-      <div class="izin-add">
-        <input type="text" id="peIzinYeni" class="pe-input" maxlength="24" placeholder="Kişi adı">
-        <button class="profile-back" id="peIzinAddBtn" type="button">+ Ekle</button>
-      </div>
-      <div class="pe-hint">“ben” işaretli kişi seçilirse akşam mesajında “ben izinliyim” yazar.</div>
-
       <div class="pe-err" id="peErr"></div>
-      <div class="profile-foot" style="margin-top:12px;">
+      <div class="profile-foot" style="text-align:left;margin-top:10px;">
         <button class="profile-back pe-save" id="peSaveBtn" type="button">Kaydet</button>
         <button class="profile-back" id="peCancelBtn" type="button">İptal</button>
       </div>
     </div>
   </div>
 
-  <div id="profileBulkView" style="display:none;">
-    <div class="pe-box">
-      <h2 style="margin-bottom:6px;">Toplu mağaza ekle</h2>
-      <div class="pe-hint">Her satıra bir mağaza: <b>Mağaza adı ; e-posta ; şifre</b></div>
-      <textarea id="pbText" class="pe-input pb-text" placeholder="Mağaza 2367 ; m2367@ornek.com ; Gecici1234
-Mağaza 2410 ; m2410@ornek.com ; Gecici1234"></textarea>
-      <div class="pe-err" id="pbErr"></div>
-      <div class="pb-log" id="pbLog"></div>
-      <div class="profile-foot" style="margin-top:12px;">
-        <button class="profile-back pe-save" id="pbRunBtn" type="button">Hepsini oluştur</button>
-        <button class="profile-back" id="pbBackBtn" type="button">← Geri</button>
+  <div id="pinView" style="display:none;">
+    <div class="pin-box">
+      <div class="profile-av" id="pinAvatar"></div>
+      <div class="pin-title" id="pinName"></div>
+      <div class="pin-hint" id="pinHint"></div>
+      <div class="pin-dots" id="pinDots"></div>
+      <div class="pin-pad" id="pinPad"></div>
+      <div class="pin-err" id="pinErr"></div>
+      <div class="profile-foot" style="margin-top:16px;">
+        <button class="profile-back" id="pinBackBtn" type="button">← Geri</button>
       </div>
     </div>
   </div>
 </div>
+
 <div id="appRoot" style="display:none;">
 
 <header>
   <div class="tab-bar">
-    <button class="tab-btn active" id="tabRaporBtn" onclick="showTab('rapor')">📊 Rapor</button>
+    <button class="tab-btn active" id="tabRaporBtn" onclick="showTab('rapor')">📊 Rapor<span class="surum-rozet" id="surumRozet" title="Güncelleme kontrol et" onclick="event.stopPropagation(); guncellemeKontrol()"></span></button>
     <button class="tab-btn" id="tabAraclarBtn" onclick="showTab('araclar')">🧰 Araçlar</button>
+    <button class="tab-btn" id="tabTransferBtn" onclick="showTab('transfer')">📤 Transfer</button>
     <span class="chip-wrap">
       <button class="profile-chip" id="profileChip" type="button" title="Profil menüsü">
         <span class="pc-av" id="profileChipAv"></span><span id="profileChipName"></span>
       </button>
       <div class="chip-menu" id="chipMenu" style="display:none;">
-        <button type="button" id="chipEditBtn">⚙️ Mağaza ayarları</button>
-        <button type="button" id="chipManageBtn">🗂️ Mağazaları yönet</button>
-        <button type="button" id="chipSwitchBtn">🔄 Mağaza değiştir</button>
+        <button type="button" id="chipEditBtn">✏️ Profili düzenle</button>
+        <button type="button" id="chipPinBtn">🔑 PIN değiştir</button>
         <div class="sep"></div>
-        <button type="button" id="chipLogoutBtn">🚪 Çıkış yap</button>
+        <button type="button" id="chipSwitchBtn">🔄 Profil değiştir</button>
       </div>
     </span>
   </div>
@@ -559,6 +684,64 @@ Mağaza 2410 ; m2410@ornek.com ; Gecici1234"></textarea>
   </div>
 </div>
 
+<div class="transfer-page" id="transferPage" style="display:none;">
+  <div class="tr-wrap" id="transferWrap">
+    <div class="tr-seg">
+      <button class="tr-seg-btn active" id="trSegKirik" type="button" onclick="transferAltSekmeSec('kirik')">🔧 Kırık</button>
+      <button class="tr-seg-btn" id="trSegGenel" type="button" onclick="transferAltSekmeSec('genel')">📝 Genel</button>
+    </div>
+
+    <div id="trKirikView">
+      <div class="tr-card">
+        <div class="tr-card-title">Kırık fotoğrafları <span class="tr-hint" id="kirikIpucu">— sırayla 1'den 5'e</span></div>
+        <div class="kirik-slots" id="kirikSlots"></div>
+        <div class="tr-foto-row">
+          <button class="tr-foto-btn" type="button" onclick="kirikGaleridenEkle()">🖼️ Galeriden sırayla ekle</button>
+        </div>
+        <textarea class="tr-text" id="kirikNot" placeholder="Not (isteğe bağlı)"></textarea>
+        <div class="tr-actions">
+          <button class="btn tr-big" type="button" onclick="kirikTemizle()">Temizle</button>
+          <button class="btn tr-big tr-go" id="kirikGonderBtn" type="button" onclick="kirikGonder()">📤 Gönder</button>
+        </div>
+      </div>
+      <div class="tr-card">
+        <div class="tr-card-head">
+          <div class="tr-card-title">Gelen kırık kayıtları</div>
+          <div class="tr-klasor" id="kirikKlasorBilgi"></div>
+        </div>
+        <div id="kirikListe"></div>
+        <div class="tr-actions">
+          <button class="btn tr-big tr-go" id="kirikHepsiBtn" type="button" onclick="kirikHepsiniIndir()">⬇ Hepsini masaüstüne indir</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="trGenelView" style="display:none;">
+      <div class="tr-card">
+        <div class="tr-foto-row">
+          <button class="tr-foto-btn" type="button" onclick="document.getElementById('genelKameraInput').click()">📷 Fotoğraf çek</button>
+          <button class="tr-foto-btn" type="button" onclick="document.getElementById('genelGaleriInput').click()">🖼️ Fotoğraf ekle</button>
+        </div>
+        <div class="genel-thumbs" id="genelThumbs"></div>
+        <textarea class="tr-text" id="genelText" placeholder="Metin yazın veya yapıştırın..."></textarea>
+        <div class="tr-actions">
+          <button class="btn tr-big" type="button" onclick="genelTemizle()">Temizle</button>
+          <button class="btn tr-big tr-go" id="genelGonderBtn" type="button" onclick="genelGonder()">📤 Gönder</button>
+        </div>
+      </div>
+      <div class="tr-card">
+        <div class="tr-card-head"><div class="tr-card-title">Gelenler</div></div>
+        <div id="genelListe"></div>
+      </div>
+    </div>
+
+  </div>
+  <input type="file" id="kirikSlotInput" accept="image/*" style="display:none;">
+  <input type="file" id="kirikGaleriInput" accept="image/*" multiple style="display:none;">
+  <input type="file" id="genelKameraInput" accept="image/*" capture="environment" style="display:none;">
+  <input type="file" id="genelGaleriInput" accept="image/*" multiple style="display:none;">
+</div>
+
 <input type="file" id="ghbhrGhFile" accept=".xlsx,.xls" style="display:none;">
 <input type="file" id="ghbhrBhFile" accept=".xlsx,.xls" style="display:none;">
 
@@ -599,7 +782,132 @@ Mağaza 2410 ; m2410@ornek.com ; Gecici1234"></textarea>
 
 <script>
 
+// Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
+// sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
+const APP_SURUM = 2;
+
+// ==================== ARAYÜZ: pencere, onay, bildirim ====================
+// Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
+// Sayfa telefonda 1300px genişlikte açıldığı için --k ile büyütülerek gösterilir.
+function telefonMu(){
+  return window.matchMedia('(pointer:coarse)').matches && screen.width < 900;
+}
+function arayuzOlcek(){
+  const sayfaGen = document.documentElement.clientWidth;
+  const k = (telefonMu() && sayfaGen > screen.width) ? sayfaGen / screen.width : 1;
+  document.documentElement.style.setProperty('--k', String(k));
+  return k;
+}
+arayuzOlcek();
+window.addEventListener('resize', arayuzOlcek);
+
+function uiDialog(o){
+  return new Promise(res=>{
+    const ov = document.createElement('div');
+    ov.className = 'ui-ov';
+    const dlg = document.createElement('div');
+    dlg.className = 'ui-dlg' + (o.tehlike ? ' tehlike' : '') + (o.dikey ? ' dikey' : '');
+    if(o.ikon){
+      const ik = document.createElement('div');
+      ik.className = 'ui-ikon';
+      ik.textContent = o.ikon;
+      dlg.appendChild(ik);
+    }
+    if(o.baslik){
+      const b = document.createElement('div');
+      b.className = 'ui-baslik';
+      b.textContent = o.baslik;
+      dlg.appendChild(b);
+    }
+    if(o.mesaj){
+      const m = document.createElement('div');
+      m.className = 'ui-mesaj';
+      m.textContent = o.mesaj;
+      dlg.appendChild(m);
+    }
+    let input = null;
+    if(o.input){
+      input = document.createElement('input');
+      input.className = 'ui-input';
+      input.type = o.input.tip || 'text';
+      if(input.type === 'number') input.inputMode = 'numeric';
+      input.value = o.input.deger !== undefined && o.input.deger !== null ? String(o.input.deger) : '';
+      input.placeholder = o.input.placeholder || '';
+      dlg.appendChild(input);
+    }
+    const btns = document.createElement('div');
+    btns.className = 'ui-btns';
+    let birincil = null;
+    const kapat = deger=>{
+      document.removeEventListener('keydown', tus, true);
+      ov.remove();
+      res(deger);
+    };
+    const degerAl = b=> b.deger === '__input' ? (input ? input.value : '') : b.deger;
+    o.butonlar.forEach(b=>{
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'ui-btn' + (b.tip ? ' ' + b.tip : '');
+      btn.textContent = b.metin;
+      btn.addEventListener('click', ()=> kapat(degerAl(b)));
+      if(b.tip === 'birincil' || b.tip === 'tehlike') birincil = {btn, b};
+      btns.appendChild(btn);
+    });
+    dlg.appendChild(btns);
+    ov.appendChild(dlg);
+    ov.addEventListener('click', e=>{ if(e.target === ov) kapat(o.iptalDeger); });
+    function tus(e){
+      if(e.key === 'Escape'){ e.preventDefault(); e.stopPropagation(); kapat(o.iptalDeger); }
+      else if(e.key === 'Enter' && birincil){ e.preventDefault(); e.stopPropagation(); kapat(degerAl(birincil.b)); }
+    }
+    document.addEventListener('keydown', tus, true);
+    document.body.appendChild(ov);
+    if(input){ input.focus(); input.select(); }
+    else if(birincil) birincil.btn.focus();
+  });
+}
+function uiUyari(mesaj, o){
+  o = o || {};
+  return uiDialog({ikon:o.ikon || 'ℹ️', baslik:o.baslik || 'Bilgi', mesaj,
+    butonlar:[{metin:'Tamam', deger:true, tip:'birincil'}], iptalDeger:true});
+}
+function uiOnay(mesaj, o){
+  o = o || {};
+  return uiDialog({ikon:o.ikon || (o.tehlike ? '⚠️' : '❓'), baslik:o.baslik || 'Emin misiniz?', mesaj,
+    tehlike:!!o.tehlike,
+    butonlar:[{metin:o.hayir || 'Vazgeç', deger:false},
+              {metin:o.evet || 'Devam et', deger:true, tip:o.tehlike ? 'tehlike' : 'birincil'}],
+    iptalDeger:false});
+}
+function uiSor(mesaj, varsayilan, o){
+  o = o || {};
+  return uiDialog({ikon:o.ikon || '✏️', baslik:o.baslik || '', mesaj, tehlike:!!o.tehlike,
+    input:{deger:varsayilan, tip:o.tip, placeholder:o.placeholder},
+    butonlar:[{metin:'Vazgeç', deger:null}, {metin:o.evet || 'Tamam', deger:'__input', tip:o.tehlike ? 'tehlike' : 'birincil'}],
+    iptalDeger:null});
+}
+
+let uiToastZamanlayici = null;
+// sure: ms; 0 verilirse kendiliğinden kapanmaz (ilerleme mesajları için).
+function uiBildirim(mesaj, tip, sure){
+  let el = document.getElementById('uiToast');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'uiToast';
+    document.body.appendChild(el);
+  }
+  clearTimeout(uiToastZamanlayici);
+  if(!mesaj){ el.classList.remove('acik'); return; }
+  el.className = 'ui-toast' + (tip ? ' ' + tip : '');
+  el.textContent = mesaj;
+  void el.offsetWidth;
+  el.classList.add('acik');
+  if(sure === 0) return;
+  uiToastZamanlayici = setTimeout(()=> el.classList.remove('acik'), sure || (tip === 'hata' ? 4500 : 2600));
+}
+
 const GUN_ADLARI = ['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar'];
+const IZINLI_SECENEKLER = ['','Onur','Fatma','Zeynep'];
 let yorumDraft = '';
 const GUN_KISA = ['Pzt','Sal','Çar','Per','Cum','Cmt','Paz'];
 const NUMERIC_FIELDS = ['ciro','mgs','fbu','fbs','toplu_satis','hedef'];
@@ -719,7 +1027,8 @@ async function migrateLocalDataToCloud(){
     setStatus('Bu tarayıcıda yerel (eski) veri bulunamadı. Bu butonu, verinin kayıp olduğu ORİJİNAL bilgisayarda/dosyada çalıştırmanız gerekiyor.', true);
     return;
   }
-  if(!confirm(localKeys.length + ' yerel kayıt bulundu. Bunlar buluta yüklenecek (mevcut bulut verisinin üzerine yazabilir, en güncel/dolu veri kazanır). Devam edilsin mi?')) return;
+  if(!await uiOnay(localKeys.length + ' yerel kayıt bulundu. Bunlar buluta yüklenecek; mevcut bulut verisinin üzerine yazabilir, en güncel/dolu veri kazanır.',
+                    {baslik:'Buluta yüklensin mi?', ikon:'☁️', evet:'Yükle'})) return;
 
   const btn = document.getElementById('migrateBtn');
   btn.disabled = true;
@@ -909,9 +1218,6 @@ async function loadCloudCache(){
 // Bu tarayıcıda duran eski verileri (araçlar, personel hedefleri, GH/BH ham verisi)
 // bir kereye mahsus buluta taşır. Buluttaki kaydın üzerine yazmaz, sadece eksikleri ekler.
 async function migrateBrowserDataToCloud(){
-  // Bu tarayıcıdaki eski yerel veri yalnızca mağaza ayrımından önceki asıl
-  // mağazaya aittir; yeni açılan mağazalara sızmamalı.
-  if(!aktifProfil || !aktifProfil.legacy) return;
   if(localStorage.getItem(CLOUD_MIGRATION_KEY)) return;
   let tasinan = [];
 
@@ -982,6 +1288,7 @@ function resetStoreCaches(){
   Object.keys(ghbhrReportsCache).forEach(k=> delete ghbhrReportsCache[k]);
   undoStack.length = 0;
   cloudReady = false;
+  transferSifirla();
 }
 function listenCloudChanges(){
   cloudUnsubs.push(sdb('entries').onSnapshot(snap=>{
@@ -1002,6 +1309,7 @@ function listenCloudChanges(){
     });
     if(changed && cloudReady) renderAll();
   }));
+  listenTransferChanges();
   cloudUnsubs.push(sdb('settings').doc('general').onSnapshot(doc=>{
     if(doc.exists && doc.data().gunlukHedef !== undefined){
       cloudCache['gunlukHedef'] = String(doc.data().gunlukHedef);
@@ -1017,232 +1325,68 @@ function bootStatus(msg, isError){
   el.classList.toggle('error', !!isError);
 }
 
-// ==================== KİMLİK, MAĞAZA VE OTURUM ====================
-// Giriş artık Firebase e-posta/şifre ile. Her mağazanın tek kullanıcısı vardır;
-// kullanıcı ↔ mağaza eşlemesi users/{uid} dokümanında tutulur.
-// Yönetici bütün mağazaları görür ve yönetir.
-const YONETICI_EPOSTALARI = ['osmanonurmrt@gmail.com'];
-const SON_MAGAZA_KEY = 'sonMagaza';
-const VARSAYILAN_IZINLI = ['Onur','Fatma','Zeynep'];
+// ==================== PROFİL / MAĞAZA OTURUMU (Netflix tarzı) ====================
+// Her profil ayrı bir mağazadır: kendi günlük verisi, hedefleri, personeli,
+// GH/BH kayıtları ve araçları vardır. Bir profilin verisi diğerinde görünmez.
+// PIN gerçek bir güvenlik katmanı değil, yanlış kişinin yanlış mağazaya veri
+// girmesini engelleyen bir kapıdır.
+const PROFILE_SESSION_KEY = 'aktifProfilOturum';
+const PROFILE_SESSION_GUN = 7;      // PIN bu cihazda kaç gün sorulmaz
+const PIN_UZUNLUK = 4;
+const PIN_MAX_DENEME = 5;
+// legacy: uygulamanın ilk verisi (mağaza ayrımı yokken yazılanlar) bu profile taşınır.
+const VARSAYILAN_PROFILLER = [
+  {key:'onur', name:'Onur', emoji:'🧑‍💼', color:'#C8A066', admin:true, legacy:true}
+];
+// Mağaza ayrımından önce oluşturulmuş, verisi olmayan kişi profilleri.
+const ESKI_KISI_PROFILLERI = ['fatma','zeynep'];
 const PROFIL_SIMGELERI = ['🏪','🏬','🛒','🛍️','🧑‍💼','👩','👨','🧕','📊','🏢','⭐','🥇'];
 const PROFIL_RENKLERI  = ['#C8A066','#5f8d6a','#6f6494','#a34141','#3f6b8a','#8a6a3f','#4a4a4a','#9a5f7a'];
 
-let kullanici = null;       // Firebase kullanıcısı
-let yoneticiMi = false;
-let magazalar = [];         // [{key,name,emoji,color,order,izinli,benKim,legacy,legacyTasindi}]
-let aktifProfil = null;     // açık olan mağaza
-let editState = null;       // düzenleme formunun geçici hali
-let magazaArama = '';
+let profilesCache = null;   // key -> {name,emoji,color,admin,legacy,order,pinS,pinF}
+let aktifProfil = null;     // {key,name,emoji,color,...}
+let pinState = null;        // {key, mod, girilen, ilkPin, kalanDeneme}
+let editState = null;       // {key|null, name, emoji, color}
 
-function magazaBul(key){ return magazalar.find(m=> m.key === key) || null; }
-function izinliSecenekleri(){
-  const liste = (aktifProfil && Array.isArray(aktifProfil.izinli) && aktifProfil.izinli.length)
-    ? aktifProfil.izinli : VARSAYILAN_IZINLI;
-  return [''].concat(liste);
-}
-
-// ---------- Ekranlar ----------
-const PROFIL_EKRANLARI = ['loginView','profilePickView','profileManageView','profileEditView','profileBulkView'];
-function showProfileView(id){
-  document.getElementById('bootScreen').style.display = 'none';
-  document.getElementById('profileScreen').style.display = '';
-  PROFIL_EKRANLARI.forEach(v=>{
-    document.getElementById(v).style.display = (v === id) ? '' : 'none';
-  });
-}
-function uygulamayaDon(){
-  document.getElementById('profileScreen').style.display = 'none';
-  document.getElementById('bootScreen').style.display = 'none';
-  document.getElementById('appRoot').style.display = '';
-}
-
-// ---------- Giriş ----------
-function showLogin(mesaj, hataMi){
-  document.getElementById('appRoot').style.display = 'none';
-  showProfileView('loginView');
-  document.getElementById('loginErr').textContent = mesaj || '';
-  document.getElementById('loginErr').style.color = hataMi === false ? '#7fb77f' : '';
-  setTimeout(()=> document.getElementById('loginEmail').focus(), 60);
-}
-function girisHatasi(err){
-  const kodlar = {
-    'auth/invalid-email': 'E-posta adresi geçersiz.',
-    'auth/user-not-found': 'Bu e-posta ile kayıtlı kullanıcı yok.',
-    'auth/wrong-password': 'Şifre yanlış.',
-    'auth/invalid-credential': 'E-posta veya şifre hatalı.',
-    'auth/too-many-requests': 'Çok fazla deneme yapıldı, biraz bekleyin.',
-    'auth/operation-not-allowed': 'Firebase\'de e-posta/şifre girişi kapalı görünüyor.\nConsole → Authentication → Sign-in method → Email/Password → Enable.',
-    'auth/email-already-in-use': 'Bu e-posta zaten kullanılıyor.',
-    'auth/weak-password': 'Şifre en az 6 karakter olmalı.'
-  };
-  return kodlar[err && err.code] || ('Giriş yapılamadı: ' + (err && err.message ? err.message : err));
-}
-async function girisYap(){
-  const mail = document.getElementById('loginEmail').value.trim();
-  const sifre = document.getElementById('loginPass').value;
-  const hata = document.getElementById('loginErr');
-  hata.style.color = '';
-  if(!mail || !sifre){ hata.textContent = 'E-posta ve şifre gerekli.'; return; }
-  const btn = document.getElementById('loginBtn');
-  btn.disabled = true; btn.textContent = 'Giriş yapılıyor...';
-  try{
-    await auth.signInWithEmailAndPassword(mail, sifre);
-    document.getElementById('loginPass').value = '';
-  }catch(e){
-    hata.textContent = girisHatasi(e);
-  }
-  btn.disabled = false; btn.textContent = 'Giriş yap';
-}
-async function sifremiUnuttum(){
-  const mail = document.getElementById('loginEmail').value.trim();
-  const hata = document.getElementById('loginErr');
-  if(!mail){ hata.style.color = ''; hata.textContent = 'Önce e-posta adresinizi yazın.'; return; }
-  try{
-    await auth.sendPasswordResetEmail(mail);
-    hata.style.color = '#7fb77f';
-    hata.textContent = 'Şifre sıfırlama bağlantısı ' + mail + ' adresine gönderildi.';
-  }catch(e){
-    hata.style.color = '';
-    hata.textContent = girisHatasi(e);
-  }
-}
-async function cikisYap(){
-  kapatChipMenu();
-  stopCloudListeners();
-  resetStoreCaches();
-  aktifProfil = null;
-  magazalar = [];
-  yoneticiMi = false;
-  try{ localStorage.removeItem(SON_MAGAZA_KEY); }catch(e){ /* sorun değil */ }
-  document.getElementById('appRoot').style.display = 'none';
-  await auth.signOut();
-}
-
-// ---------- Kullanıcı bağlamı ----------
-async function kullaniciBaglami(user){
-  const uid = user.uid;
-  const eposta = (user.email || '').toLowerCase();
-  const sabitYonetici = YONETICI_EPOSTALARI.indexOf(eposta) !== -1;
-  let doc = await db.collection('users').doc(uid).get();
-  if(!doc.exists && sabitYonetici){
-    await db.collection('users').doc(uid).set({email: eposta, admin: true, storeKey: null});
-    doc = await db.collection('users').doc(uid).get();
-  }
-  const veri = doc.exists ? (doc.data() || {}) : {};
-  return {
-    uid,
-    eposta,
-    admin: sabitYonetici || veri.admin === true,
-    storeKey: veri.storeKey || null,
-    kayitliMi: doc.exists
-  };
-}
-
-// ---------- Mağaza listesi ----------
-async function magazalariYukle(baglam){
-  if(baglam.admin){
-    const snap = await db.collection('stores').get();
-    const liste = [];
-    snap.forEach(d=> liste.push(Object.assign({key:d.id}, d.data())));
-    magazalar = liste.sort((a,b)=> (a.order||0) - (b.order||0));
-    return magazalar;
-  }
-  const doc = await magazaRef(baglam.storeKey).get();
-  magazalar = doc.exists ? [Object.assign({key:baglam.storeKey}, doc.data())] : [];
-  return magazalar;
-}
-
-// Eski settings/profiles kaydındaki mağaza bilgilerini stores/{key} dokümanına taşır.
-// PIN alanları artık kullanılmıyor, taşınmıyor. Yalnızca yönetici çalıştırır.
-async function magazaMetaTasi(){
+async function loadProfiles(){
   const doc = await profilesRef().get();
-  const eski = doc.exists ? (doc.data() || {}) : {};
-  const anahtarlar = Object.keys(eski);
-  for(const key of anahtarlar){
-    if(magazaBul(key)) continue;
-    const p = eski[key] || {};
-    const kayit = {
-      name: p.name || key,
-      emoji: p.emoji || PROFIL_SIMGELERI[0],
-      color: p.color || PROFIL_RENKLERI[0],
-      order: p.order || 0,
-      legacy: !!p.legacy,
-      legacyTasindi: !!p.legacyTasindi,
-      izinli: VARSAYILAN_IZINLI.slice(),
-      benKim: VARSAYILAN_IZINLI[0]
-    };
-    await magazaRef(key).set(kayit, {merge:true});
-    magazalar.push(Object.assign({key}, kayit));
+  let data = (doc.exists ? doc.data() : null) || {};
+  if(!Object.keys(data).length){
+    const seed = {};
+    VARSAYILAN_PROFILLER.forEach((p,i)=>{
+      seed[p.key] = {name:p.name, emoji:p.emoji, color:p.color, admin:!!p.admin, legacy:!!p.legacy, order:i, pinS:null, pinF:null};
+    });
+    await profilesRef().set(seed);
+    data = seed;
   }
-  // Hiç mağaza yoksa, mağaza ayrımından önceki veriyi sahiplenecek ilk mağazayı aç.
-  if(!magazalar.length){
-    const kayit = {
-      name: 'Mağazam', emoji: PROFIL_SIMGELERI[0], color: PROFIL_RENKLERI[0], order: 0,
-      legacy: true, legacyTasindi: false, izinli: VARSAYILAN_IZINLI.slice(), benKim: VARSAYILAN_IZINLI[0]
-    };
-    await magazaRef('magaza1').set(kayit);
-    magazalar.push(Object.assign({key:'magaza1'}, kayit));
-  }
-  magazalar.sort((a,b)=> (a.order||0) - (b.order||0));
+  profilesCache = data;
+  await profilSemasiniGuncelle();
+  return profilesCache;
 }
 
-// ---------- Mağaza seçimi ----------
-function showMagazaSecim(){
-  document.getElementById('appRoot').style.display = 'none';
-  magazaArama = '';
-  document.getElementById('profileSearch').value = '';
-  document.getElementById('profileSearch').style.display = magazalar.length > 8 ? '' : 'none';
-  document.getElementById('profileResetBtn').style.display = yoneticiMi ? '' : 'none';
-  showProfileView('profilePickView');
-  editState = null;
-  renderProfileList();
-}
-function renderProfileList(){
-  const el = document.getElementById('profileList');
-  const ara = magazaArama.toLowerCase().trim();
-  const liste = ara ? magazalar.filter(m=> (m.name||m.key).toLowerCase().includes(ara)) : magazalar;
-  el.innerHTML = liste.length ? liste.map(p=>
-    '<button class="profile-card" type="button" data-key="' + p.key + '">'
-      + '<span class="profile-av" style="background:' + (p.color || '#444') + '">' + (p.emoji || '🏪') + '</span>'
-      + '<span class="profile-name">' + escapeHtml(p.name || p.key) + '</span>'
-    + '</button>').join('') : '<div class="profile-bos">Eşleşen mağaza yok.</div>';
-  el.querySelectorAll('.profile-card').forEach(btn=>{
-    btn.addEventListener('click', ()=> magazaAc(btn.dataset.key, true));
-  });
-}
-function profilNotu(msg){ document.getElementById('profileNote').textContent = msg || ''; }
-
-async function magazaAc(key, hatirla){
-  const magaza = magazaBul(key);
-  if(!magaza){ profilNotu('Mağaza bulunamadı.'); return; }
-  // Mağazalar birbirinden bağımsız: öncekinin önbelleği ve dinleyicileri bırakılır.
-  stopCloudListeners();
-  resetStoreCaches();
-  aktifProfil = magaza;
-  if(hatirla){ try{ localStorage.setItem(SON_MAGAZA_KEY, key); }catch(e){ /* sorun değil */ } }
-
-  document.getElementById('profileScreen').style.display = 'none';
-  document.getElementById('appRoot').style.display = 'none';
-  document.getElementById('bootScreen').style.display = '';
-  bootStatus('Veriler yükleniyor...');
-  try{
-    if(aktifProfil.legacy && !aktifProfil.legacyTasindi){
-      bootStatus('Eski veriler bu mağazaya taşınıyor...');
-      const adet = await eskiVeriyiMagazayaTasi(key);
-      aktifProfil.legacyTasindi = true;
-      if(adet) setTimeout(()=> setStatus(adet + ' kayıt bu mağazanın altına taşındı ✓'), 1200);
+// Profil = mağaza yapısına geçiş: verisi olmayan eski kişi profillerini kaldırır,
+// asıl profili yönetici ve legacy olarak işaretler. Bir kere çalışır.
+async function profilSemasiniGuncelle(){
+  const guncel = {};
+  ESKI_KISI_PROFILLERI.forEach(k=>{
+    if(profilesCache[k]){
+      guncel[k] = firebase.firestore.FieldValue.delete();
+      delete profilesCache[k];
     }
-    await loadCloudCache();
-    listenCloudChanges();
-    uygulamayaDon();
-    renderProfileChip();
-    await startAppAfterLogin();
-  }catch(e){
-    bootStatus('Veriler yüklenemedi: ' + e.message, true);
+  });
+  const ilk = VARSAYILAN_PROFILLER[0];
+  const asil = profilesCache[ilk.key];
+  if(asil && (asil.admin !== true || asil.legacy !== true)){
+    guncel[ilk.key] = {admin:true, legacy:true};
+    asil.admin = true;
+    asil.legacy = true;
   }
+  if(!Object.keys(guncel).length) return;
+  try{ await profilesRef().set(guncel, {merge:true}); }
+  catch(e){ /* şema güncellenemezse uygulama yine de açılsın */ }
 }
 
-// Mağaza ayrımı gelmeden önce kök koleksiyonlara yazılmış veriyi bu mağazaya
+// Mağaza ayrımı gelmeden önce kök koleksiyonlara yazılmış veriyi asıl mağazaya
 // kopyalar. Orijinaller silinmez, yedek olarak yerinde kalır.
 async function eskiVeriyiMagazayaTasi(key){
   const kopyala = async (coll)=>{
@@ -1251,7 +1395,9 @@ async function eskiVeriyiMagazayaTasi(key){
     snap.forEach(d=> docs.push({id:d.id, data:d.data()}));
     for(let i=0;i<docs.length;i+=400){
       const batch = db.batch();
-      docs.slice(i, i+400).forEach(d=> batch.set(magazaRef(key).collection(coll).doc(d.id), d.data));
+      docs.slice(i, i+400).forEach(d=>{
+        batch.set(magazaRef(key).collection(coll).doc(d.id), d.data);
+      });
       await batch.commit();
     }
     return docs.length;
@@ -1267,13 +1413,300 @@ async function eskiVeriyiMagazayaTasi(key){
       toplam++;
     }
   }
-  await magazaRef(key).set({legacyTasindi:true}, {merge:true});
-  const m = magazaBul(key);
-  if(m) m.legacyTasindi = true;
+  await profilesRef().set({[key]: {legacyTasindi:true}}, {merge:true});
+  profilesCache[key].legacyTasindi = true;
   return toplam;
 }
 
-// ---------- Yönetim ----------
+function profilListesi(){
+  return Object.keys(profilesCache || {})
+    .map(k => Object.assign({key:k}, profilesCache[k]))
+    .sort((a,b)=> (a.order||0) - (b.order||0));
+}
+function profilPinliMi(p){ return !!(p && (p.pinS || p.pinF)); }
+
+// PIN'in kendisi buluta yazılmaz, iki ayrı özetle saklanır.
+// SHA-256 güvenli olmayan kökenlerde (bazı tarayıcılarda file://) çalışmayabilir,
+// o yüzden her zaman ikinci bir yedek özet de üretilir.
+function fnvOzet(veri){
+  let h1 = 0x811c9dc5, h2 = 0x01000193;
+  for(let i=0;i<veri.length;i++){
+    h1 = Math.imul(h1 ^ veri.charCodeAt(i), 16777619) >>> 0;
+    h2 = Math.imul(h2 + veri.charCodeAt(i) * (i+7), 2246822519) >>> 0;
+  }
+  return h1.toString(16).padStart(8,'0') + h2.toString(16).padStart(8,'0');
+}
+async function pinOzetleri(pin, key){
+  const veri = 'mcrapor:' + key + ':' + pin;
+  let s256 = null;
+  if(window.crypto && crypto.subtle && crypto.subtle.digest){
+    try{
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(veri));
+      s256 = Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+    }catch(e){ s256 = null; }
+  }
+  return {s: s256, f: fnvOzet(veri)};
+}
+async function pinDogruMu(pin, profil){
+  const o = await pinOzetleri(pin, profil.key);
+  if(profil.pinS && o.s) return profil.pinS === o.s;
+  if(profil.pinF) return profil.pinF === o.f;
+  return false;
+}
+async function pinKaydet(pin, key){
+  const o = await pinOzetleri(pin, key);
+  await profilesRef().set({[key]: {pinS:o.s, pinF:o.f}}, {merge:true});
+  profilesCache[key].pinS = o.s;
+  profilesCache[key].pinF = o.f;
+}
+async function pinSil(key){
+  await profilesRef().set({[key]: {pinS:null, pinF:null}}, {merge:true});
+  profilesCache[key].pinS = null;
+  profilesCache[key].pinF = null;
+}
+
+function kayitliOturum(){
+  try{
+    const o = JSON.parse(localStorage.getItem(PROFILE_SESSION_KEY) || 'null');
+    if(!o || !o.key || !o.ts) return null;
+    if(Date.now() - o.ts > PROFILE_SESSION_GUN * 86400000) return null;
+    return o;
+  }catch(e){ return null; }
+}
+function oturumKaydet(key){
+  try{ localStorage.setItem(PROFILE_SESSION_KEY, JSON.stringify({key, ts:Date.now()})); }catch(e){ /* kota */ }
+}
+function oturumSil(){
+  try{ localStorage.removeItem(PROFILE_SESSION_KEY); }catch(e){ /* sorun değil */ }
+}
+
+const PROFIL_EKRANLARI = ['profilePickView','pinView','profileManageView','profileEditView'];
+function showProfileView(id){
+  PROFIL_EKRANLARI.forEach(v=>{
+    document.getElementById(v).style.display = (v === id) ? '' : 'none';
+  });
+}
+function showProfileScreen(){
+  document.getElementById('bootScreen').style.display = 'none';
+  document.getElementById('appRoot').style.display = 'none';
+  document.getElementById('profileScreen').style.display = '';
+  showProfilePick();
+}
+function showProfilePick(){
+  showProfileView('profilePickView');
+  pinState = null;
+  editState = null;
+  renderProfileList();
+}
+
+function renderProfileList(){
+  const el = document.getElementById('profileList');
+  el.innerHTML = profilListesi().map(p=>
+    '<button class="profile-card" type="button" data-key="' + p.key + '">'
+      + '<span class="profile-av" style="background:' + (p.color || '#444') + '">' + (p.emoji || '👤') + '</span>'
+      + '<span class="profile-name">' + escapeHtml(p.name || p.key)
+      + (profilPinliMi(p) ? '' : '<small>PIN belirlenmedi</small>') + '</span>'
+    + '</button>').join('');
+  el.querySelectorAll('.profile-card').forEach(btn=>{
+    btn.addEventListener('click', ()=> profilKartiTiklandi(btn.dataset.key));
+  });
+}
+function profilNotu(msg){
+  document.getElementById('profileNote').textContent = msg || '';
+}
+
+function profilKartiTiklandi(key){
+  const p = Object.assign({key}, profilesCache[key]);
+  profilNotu('');
+  openPinView(key, profilPinliMi(p) ? 'giris' : 'kur');
+}
+
+function openPinView(key, mod){
+  const p = Object.assign({key}, profilesCache[key]);
+  pinState = {key, mod, girilen:'', ilkPin:null, kalanDeneme:PIN_MAX_DENEME};
+  document.getElementById('profilePickView').style.display = 'none';
+  document.getElementById('pinView').style.display = '';
+  const av = document.getElementById('pinAvatar');
+  av.textContent = p.emoji || '👤';
+  av.style.background = p.color || '#444';
+  document.getElementById('pinName').textContent = p.name || key;
+  document.getElementById('pinErr').textContent = '';
+  renderPinPad();
+  updatePinView();
+}
+function pinIpucu(){
+  if(!pinState) return '';
+  if(pinState.mod === 'kur')          return PIN_UZUNLUK + ' haneli yeni PIN belirle';
+  if(pinState.mod === 'kurTekrar')    return 'PIN\'i tekrar gir';
+  if(pinState.mod === 'yonetici')     return 'Yönetici PIN\'i';
+  if(pinState.mod === 'mevcut')       return 'Önce mevcut PIN\'i gir';
+  if(pinState.mod === 'yeniPin')      return 'Yeni PIN';
+  if(pinState.mod === 'yeniPinTekrar')return 'Yeni PIN\'i tekrar gir';
+  return 'PIN gir';
+}
+function updatePinView(){
+  document.getElementById('pinHint').textContent = pinIpucu();
+  const dots = [];
+  for(let i=0;i<PIN_UZUNLUK;i++){
+    dots.push('<span class="pin-dot' + (i < (pinState ? pinState.girilen.length : 0) ? ' on' : '') + '"></span>');
+  }
+  document.getElementById('pinDots').innerHTML = dots.join('');
+}
+function renderPinPad(){
+  const pad = document.getElementById('pinPad');
+  const tuslar = ['1','2','3','4','5','6','7','8','9','temizle','0','sil'];
+  pad.innerHTML = tuslar.map(t=>{
+    if(t === 'temizle') return '<button type="button" class="wide" data-key="C">Temizle</button>';
+    if(t === 'sil')     return '<button type="button" class="wide" data-key="B">← Sil</button>';
+    return '<button type="button" data-key="' + t + '">' + t + '</button>';
+  }).join('');
+  pad.querySelectorAll('button').forEach(b=>{
+    b.addEventListener('click', ()=> pinTus(b.dataset.key));
+  });
+}
+function pinTus(k){
+  if(!pinState) return;
+  document.getElementById('pinErr').textContent = '';
+  if(k === 'C'){ pinState.girilen = ''; updatePinView(); return; }
+  if(k === 'B'){ pinState.girilen = pinState.girilen.slice(0,-1); updatePinView(); return; }
+  if(pinState.girilen.length >= PIN_UZUNLUK) return;
+  pinState.girilen += k;
+  updatePinView();
+  if(pinState.girilen.length === PIN_UZUNLUK) setTimeout(pinTamamlandi, 120);
+}
+async function pinTamamlandi(){
+  if(!pinState) return;
+  const pin = pinState.girilen;
+  const key = pinState.key;
+  const p = Object.assign({key}, profilesCache[key]);
+  const hata = document.getElementById('pinErr');
+
+  if(pinState.mod === 'kur'){
+    pinState.ilkPin = pin;
+    pinState.mod = 'kurTekrar';
+    pinState.girilen = '';
+    updatePinView();
+    return;
+  }
+  if(pinState.mod === 'kurTekrar'){
+    if(pin !== pinState.ilkPin){
+      hata.textContent = 'İki PIN aynı değil, baştan alalım.';
+      pinState.mod = 'kur';
+      pinState.ilkPin = null;
+      pinState.girilen = '';
+      updatePinView();
+      return;
+    }
+    try{
+      await pinKaydet(pin, key);
+      await profilOnayla(key, true);
+    }catch(e){
+      hata.textContent = 'PIN kaydedilemedi: ' + e.message;
+      pinState.girilen = ''; updatePinView();
+    }
+    return;
+  }
+  if(pinState.mod === 'yeniPin'){
+    pinState.ilkPin = pin;
+    pinState.mod = 'yeniPinTekrar';
+    pinState.girilen = '';
+    updatePinView();
+    return;
+  }
+  if(pinState.mod === 'yeniPinTekrar'){
+    if(pin !== pinState.ilkPin){
+      hata.textContent = 'İki PIN aynı değil, baştan alalım.';
+      pinState.mod = 'yeniPin';
+      pinState.ilkPin = null;
+      pinState.girilen = '';
+      updatePinView();
+      return;
+    }
+    try{
+      await pinKaydet(pin, key);
+      pinState = null;
+      document.getElementById('profileScreen').style.display = 'none';
+      document.getElementById('appRoot').style.display = '';
+      setStatus('PIN değiştirildi ✓');
+    }catch(e){
+      hata.textContent = 'PIN kaydedilemedi: ' + e.message;
+      pinState.girilen = ''; updatePinView();
+    }
+    return;
+  }
+
+  const dogru = await pinDogruMu(pin, p);
+  if(!dogru){
+    pinState.kalanDeneme--;
+    pinState.girilen = '';
+    updatePinView();
+    if(pinState.kalanDeneme <= 0){
+      hata.textContent = 'Çok fazla yanlış deneme. Profil ekranına dönülüyor.';
+      setTimeout(showProfilePick, 1400);
+    } else {
+      hata.textContent = 'PIN yanlış. Kalan deneme: ' + pinState.kalanDeneme;
+    }
+    return;
+  }
+
+  if(pinState.mod === 'yonetici'){
+    pinState = null;
+    showProfileManage();
+    pmNotu('');
+    return;
+  }
+  if(pinState.mod === 'mevcut'){
+    pinState.mod = 'yeniPin';
+    pinState.girilen = '';
+    updatePinView();
+    return;
+  }
+  await profilOnayla(key, true);
+}
+
+async function profilOnayla(key, oturumuHatirla){
+  // Her profil ayrı bir mağaza olduğu için önceki mağazanın verisi ve
+  // dinleyicileri tamamen bırakılır, yenisi sıfırdan yüklenir.
+  stopCloudListeners();
+  resetStoreCaches();
+  aktifProfil = Object.assign({key}, profilesCache[key]);
+  if(oturumuHatirla) oturumKaydet(key);
+
+  document.getElementById('profileScreen').style.display = 'none';
+  document.getElementById('appRoot').style.display = 'none';
+  document.getElementById('bootScreen').style.display = '';
+  bootStatus('Veriler yükleniyor...');
+  try{
+    if(aktifProfil.legacy && !aktifProfil.legacyTasindi){
+      bootStatus('Eski veriler bu mağazaya taşınıyor...');
+      const adet = await eskiVeriyiMagazayaTasi(key);
+      aktifProfil.legacyTasindi = true;
+      if(adet) setTimeout(()=> setStatus(adet + ' kayıt bu mağazanın altına taşındı ✓'), 1200);
+    }
+    await loadCloudCache();
+    listenCloudChanges();
+    document.getElementById('bootScreen').style.display = 'none';
+    document.getElementById('appRoot').style.display = '';
+    renderProfileChip();
+    await startAppAfterLogin();
+  }catch(e){
+    bootStatus('Veriler yüklenemedi: ' + e.message, true);
+  }
+}
+
+function profilDegistir(){
+  kapatChipMenu();
+  oturumSil();
+  stopCloudListeners();
+  aktifProfil = null;
+  document.getElementById('appRoot').style.display = 'none';
+  showProfileScreen();
+}
+
+// ---------- Profil yönetimi (ekle / düzenle / PIN / sil) ----------
+function yoneticiProfili(){
+  return profilListesi().find(p=> p.admin) || profilListesi()[0] || null;
+}
 function showProfileManage(){
   showProfileView('profileManageView');
   renderManageList();
@@ -1282,54 +1715,58 @@ function pmNotu(msg){ document.getElementById('pmNote').textContent = msg || '';
 
 function renderManageList(){
   const el = document.getElementById('pmList');
-  el.innerHTML = magazalar.map(p=>{
+  el.innerHTML = profilListesi().map(p=>{
     const etiketler = [];
-    if(p.kullaniciMaili) etiketler.push(p.kullaniciMaili);
-    else etiketler.push('kullanıcı bağlı değil');
+    if(p.admin) etiketler.push('yönetici');
+    etiketler.push(profilPinliMi(p) ? 'PIN var' : 'PIN yok');
     if(aktifProfil && aktifProfil.key === p.key) etiketler.push('açık olan');
     return '<div class="pm-row">'
-      + '<span class="pm-av" style="background:' + (p.color || '#444') + '">' + (p.emoji || '🏪') + '</span>'
+      + '<span class="pm-av" style="background:' + (p.color || '#444') + '">' + (p.emoji || '👤') + '</span>'
       + '<span class="pm-info"><span class="pm-name">' + escapeHtml(p.name || p.key) + '</span>'
-      + '<span class="pm-sub">' + escapeHtml(etiketler.join(' · ')) + '</span></span>'
+      + '<span class="pm-sub">' + etiketler.join(' · ') + '</span></span>'
       + '<span class="pm-acts">'
       + '<button type="button" data-act="duzenle" data-key="' + p.key + '">Düzenle</button>'
-      + '<button type="button" data-act="sifre" data-key="' + p.key + '">Şifre sıfırla</button>'
-      + '<button type="button" class="tehlike" data-act="sil" data-key="' + p.key + '">Sil</button>'
+      + '<button type="button" data-act="pin" data-key="' + p.key + '">PIN sıfırla</button>'
+      + (p.admin ? '' : '<button type="button" class="tehlike" data-act="sil" data-key="' + p.key + '">Sil</button>')
       + '</span></div>';
-  }).join('') || '<div class="profile-bos">Henüz mağaza yok.</div>';
+  }).join('');
   el.querySelectorAll('button').forEach(b=>{
     b.addEventListener('click', ()=> manageAksiyon(b.dataset.act, b.dataset.key));
   });
 }
 
 async function manageAksiyon(act, key){
-  const p = magazaBul(key);
-  if(!p) return;
-  if(act === 'duzenle'){ openMagazaEdit(key, 'yonetim'); return; }
-  if(act === 'sifre'){
-    if(!p.kullaniciMaili){ pmNotu('Bu mağazaya bağlı kullanıcı yok.'); return; }
+  const p = Object.assign({key}, profilesCache[key]);
+  if(act === 'duzenle'){ openProfileEdit(key, 'yonetim'); return; }
+  if(act === 'pin'){
+    if(!await uiOnay(p.name + ' profilinin PIN\'i silinecek. Bir sonraki girişte yeni PIN belirlenir.',
+                     {baslik:'PIN sıfırlansın mı?', ikon:'🔑', evet:'Sıfırla'})) return;
     try{
-      await auth.sendPasswordResetEmail(p.kullaniciMaili);
-      pmNotu('Sıfırlama bağlantısı ' + p.kullaniciMaili + ' adresine gönderildi.');
-    }catch(e){ pmNotu('Gönderilemedi: ' + girisHatasi(e)); }
+      await pinSil(key);
+      renderManageList();
+      pmNotu(p.name + ' profilinin PIN\'i sıfırlandı.');
+    }catch(e){ pmNotu('Sıfırlanamadı: ' + e.message); }
     return;
   }
   if(act === 'sil'){
-    if(aktifProfil && aktifProfil.key === key){ pmNotu('Şu an açık olan mağaza silinemez.'); return; }
-    if(!confirm(p.name + ' mağazası ve TÜM VERİSİ silinecek. Bu işlem geri alınamaz.')) return;
-    const onay = prompt('Silmeyi onaylamak için mağaza adını yazın: ' + (p.name || key));
+    if(p.admin){ pmNotu('Yönetici profili silinemez.'); return; }
+    if(aktifProfil && aktifProfil.key === key){ pmNotu('Şu an açık olan profil silinemez.'); return; }
+    if(!await uiOnay(p.name + ' profili ve bu mağazaya ait tüm veri silinecek. Bu işlem geri alınamaz.',
+                     {baslik:'Profil silinsin mi?', tehlike:true, evet:'Sil'})) return;
+    const onay = await uiSor('Silmeyi onaylamak için profilin adını yazın: ' + (p.name || key), '',
+                             {baslik:'Son onay', ikon:'🗑️', tehlike:true, evet:'Sil', placeholder:p.name || key});
     if(onay === null) return;
     if(onay.trim() !== (p.name || key)){ pmNotu('Ad eşleşmedi, silme iptal edildi.'); return; }
     pmNotu('Siliniyor...');
     try{
-      await magazaSil(key);
+      await profilSil(key);
       renderManageList();
-      pmNotu(p.name + ' mağazası ve verisi silindi. Kullanıcı hesabı Firebase konsolundan silinebilir.');
+      pmNotu(p.name + ' profili ve verisi silindi.');
     }catch(e){ pmNotu('Silinemedi: ' + e.message); }
   }
 }
 
-async function magazaSil(key){
+async function profilSil(key){
   for(const coll of MAGAZA_KOLEKSIYONLARI){
     const snap = await magazaRef(key).collection(coll).get();
     const ids = [];
@@ -1340,64 +1777,38 @@ async function magazaSil(key){
       await batch.commit();
     }
   }
-  const users = await db.collection('users').get();
-  const silinecek = [];
-  users.forEach(d=>{ if((d.data() || {}).storeKey === key) silinecek.push(d.id); });
-  for(const uid of silinecek){
-    await db.collection('users').doc(uid).set({storeKey:null, magazaSilindi:true}, {merge:true});
-  }
-  await magazaRef(key).delete();
-  magazalar = magazalar.filter(m=> m.key !== key);
+  try{ await magazaRef(key).delete(); }catch(e){ /* mağaza dokümanı hiç yazılmamış olabilir */ }
+  await profilesRef().set({[key]: firebase.firestore.FieldValue.delete()}, {merge:true});
+  delete profilesCache[key];
 }
 
-function yeniMagazaKey(ad){
+function yeniProfilKey(ad){
   const harfler = {'ı':'i','İ':'i','ş':'s','Ş':'s','ğ':'g','Ğ':'g','ü':'u','Ü':'u','ö':'o','Ö':'o','ç':'c','Ç':'c'};
   const slug = String(ad || 'magaza').toLowerCase()
     .replace(/[ıİşŞğĞüÜöÖçÇ]/g, h=> harfler[h] || h)
     .replace(/[^a-z0-9]+/g, '')
     .slice(0,14) || 'magaza';
   let key = slug, i = 2;
-  while(magazaBul(key)) key = slug + (i++);
+  while(profilesCache[key]) key = slug + (i++);
   return key;
 }
 
-// Yeni kullanıcı, ikincil bir Firebase bağlantısıyla açılır; böylece yöneticinin
-// açık oturumu bozulmaz. Ücretsiz planda çalışır, sunucu gerektirmez.
-let ikincilApp = null;
-function ikincilAuth(){
-  if(!ikincilApp) ikincilApp = firebase.initializeApp(firebaseConfig, 'kullaniciOlusturucu');
-  return ikincilApp.auth();
-}
-async function kullaniciOlustur(eposta, sifre, storeKey){
-  const ia = ikincilAuth();
-  const cred = await ia.createUserWithEmailAndPassword(eposta, sifre);
-  const uid = cred.user.uid;
-  try{ await ia.signOut(); }catch(e){ /* zaten kapanmış olabilir */ }
-  await db.collection('users').doc(uid).set({email: eposta.toLowerCase(), storeKey: storeKey, admin: false});
-  return uid;
-}
-
-// ---------- Mağaza düzenleme / ayarlar ----------
-// kaynak: 'yonetim' (yönetici listesinden) | 'uygulama' (rozet menüsünden)
-function openMagazaEdit(key, kaynak){
-  const p = key ? magazaBul(key) : null;
+// kaynak: 'yonetim' (yönetim listesinden) | 'uygulama' (rozet menüsünden)
+function openProfileEdit(key, kaynak){
+  const p = key ? Object.assign({key}, profilesCache[key]) : null;
   editState = {
     key: key || null,
     kaynak: kaynak || 'yonetim',
+    name: p ? (p.name || '') : '',
     emoji: p ? (p.emoji || PROFIL_SIMGELERI[0]) : PROFIL_SIMGELERI[0],
-    color: p ? (p.color || PROFIL_RENKLERI[0]) : PROFIL_RENKLERI[0],
-    izinli: p && Array.isArray(p.izinli) ? p.izinli.slice() : VARSAYILAN_IZINLI.slice(),
-    benKim: p ? (p.benKim || '') : VARSAYILAN_IZINLI[0]
+    color: p ? (p.color || PROFIL_RENKLERI[0]) : PROFIL_RENKLERI[0]
   };
-  document.getElementById('peTitle').textContent = key ? 'Mağaza ayarları' : 'Yeni mağaza';
-  document.getElementById('peName').value = p ? (p.name || '') : '';
-  document.getElementById('peUserWrap').style.display = key ? 'none' : '';
-  document.getElementById('peUserMail').value = '';
-  document.getElementById('peUserPass').value = '';
+  document.getElementById('peTitle').textContent = key ? 'Profili düzenle' : 'Yeni profil';
+  document.getElementById('peName').value = editState.name;
   document.getElementById('peErr').textContent = '';
   renderEditPickers();
-  renderIzinList();
   showProfileView('profileEditView');
+  document.getElementById('profileScreen').style.display = '';
   document.getElementById('appRoot').style.display = 'none';
   setTimeout(()=> document.getElementById('peName').focus(), 50);
 }
@@ -1415,178 +1826,73 @@ function renderEditPickers(){
     editState.color = el.dataset.color; renderEditPickers();
   }));
 }
-function renderIzinList(){
-  const el = document.getElementById('peIzinList');
-  if(!editState.izinli.length){
-    el.innerHTML = '<span class="izin-bos">Henüz kişi eklenmedi.</span>';
-    return;
-  }
-  el.innerHTML = editState.izinli.map((k,i)=>
-    '<span class="izin-row">'
-      + '<span class="izin-ad">' + escapeHtml(k) + '</span>'
-      + '<button type="button" class="izin-ben' + (editState.benKim === k ? ' sel' : '') + '" data-act="ben" data-i="' + i + '" title="Mesajda “ben izinliyim” yazılacak kişi">ben</button>'
-      + '<button type="button" class="izin-sil" data-act="sil" data-i="' + i + '" title="Kaldır">✕</button>'
-    + '</span>').join('');
-  el.querySelectorAll('button').forEach(b=> b.addEventListener('click', ()=>{
-    const i = Number(b.dataset.i);
-    if(b.dataset.act === 'sil'){
-      if(editState.benKim === editState.izinli[i]) editState.benKim = '';
-      editState.izinli.splice(i,1);
-    } else {
-      editState.benKim = (editState.benKim === editState.izinli[i]) ? '' : editState.izinli[i];
-    }
-    renderIzinList();
-  }));
-}
-function izinEkle(){
-  const inp = document.getElementById('peIzinYeni');
-  const ad = inp.value.trim();
-  if(!ad) return;
-  if(editState.izinli.some(k=> k.toLowerCase() === ad.toLowerCase())){
-    document.getElementById('peErr').textContent = 'Bu kişi listede zaten var.';
-    return;
-  }
-  editState.izinli.push(ad);
-  inp.value = '';
-  document.getElementById('peErr').textContent = '';
-  renderIzinList();
-}
-
-async function magazaEditKaydet(){
+async function profilEditKaydet(){
   if(!editState) return;
   const ad = document.getElementById('peName').value.trim();
   const hata = document.getElementById('peErr');
-  if(!ad){ hata.textContent = 'Mağaza adı boş olamaz.'; return; }
-  const cakisma = magazalar.find(p=> p.key !== editState.key && (p.name || '').toLowerCase() === ad.toLowerCase());
-  if(cakisma){ hata.textContent = 'Bu adda bir mağaza zaten var.'; return; }
+  if(!ad){ hata.textContent = 'Ad boş olamaz.'; return; }
+  const cakisma = profilListesi().find(p=> p.key !== editState.key && (p.name || '').toLowerCase() === ad.toLowerCase());
+  if(cakisma){ hata.textContent = 'Bu adda bir profil zaten var.'; return; }
 
   const yeniMi = !editState.key;
-  let eposta = '', sifre = '';
+  const key = editState.key || yeniProfilKey(ad);
+  const kayit = {name: ad, emoji: editState.emoji, color: editState.color};
   if(yeniMi){
-    eposta = document.getElementById('peUserMail').value.trim().toLowerCase();
-    sifre  = document.getElementById('peUserPass').value;
-    if(!eposta || !sifre){ hata.textContent = 'Yeni mağaza için kullanıcı e-postası ve şifresi gerekli.'; return; }
-    if(sifre.length < 6){ hata.textContent = 'Şifre en az 6 karakter olmalı.'; return; }
-  }
-
-  const key = editState.key || yeniMagazaKey(ad);
-  const kayit = {
-    name: ad, emoji: editState.emoji, color: editState.color,
-    izinli: editState.izinli.slice(), benKim: editState.benKim || ''
-  };
-  if(yeniMi){
-    kayit.order = magazalar.reduce((m,p)=> Math.max(m, p.order || 0), 0) + 1;
+    kayit.admin = false;
     kayit.legacy = false;
-    kayit.legacyTasindi = true;
-    kayit.kullaniciMaili = eposta;
+    kayit.pinS = null;
+    kayit.pinF = null;
+    kayit.order = profilListesi().reduce((m,p)=> Math.max(m, p.order || 0), 0) + 1;
   }
-
-  const btn = document.getElementById('peSaveBtn');
-  btn.disabled = true; btn.textContent = 'Kaydediliyor...';
+  hata.textContent = '';
   try{
-    if(yeniMi) await kullaniciOlustur(eposta, sifre, key);
-    await magazaRef(key).set(kayit, {merge:true});
-    const mevcut = magazaBul(key);
-    if(mevcut) Object.assign(mevcut, kayit);
-    else magazalar.push(Object.assign({key}, kayit));
-    magazalar.sort((a,b)=> (a.order||0) - (b.order||0));
+    await profilesRef().set({[key]: kayit}, {merge:true});
+    profilesCache[key] = Object.assign({}, profilesCache[key] || {}, kayit);
     if(aktifProfil && aktifProfil.key === key){
-      aktifProfil = magazaBul(key);
+      aktifProfil = Object.assign({key}, profilesCache[key]);
       renderProfileChip();
-      renderAll();
     }
-  }catch(e){
-    hata.textContent = girisHatasi(e);
-    btn.disabled = false; btn.textContent = 'Kaydet';
-    return;
-  }
-  btn.disabled = false; btn.textContent = 'Kaydet';
+  }catch(e){ hata.textContent = 'Kaydedilemedi: ' + e.message; return; }
 
   const kaynak = editState.kaynak;
   editState = null;
   if(kaynak === 'uygulama' && aktifProfil){
-    uygulamayaDon();
-    setStatus('Mağaza ayarları güncellendi ✓');
+    document.getElementById('profileScreen').style.display = 'none';
+    document.getElementById('appRoot').style.display = '';
+    setStatus('Profil güncellendi ✓');
   } else {
     showProfileManage();
-    pmNotu(yeniMi ? (ad + ' eklendi, kullanıcısı oluşturuldu.') : 'Mağaza güncellendi.');
+    pmNotu(yeniMi ? (ad + ' eklendi. İlk girişinde PIN belirleyecek.') : 'Profil güncellendi.');
   }
 }
-function magazaEditIptal(){
+function profilEditIptal(){
   const kaynak = editState ? editState.kaynak : 'yonetim';
   editState = null;
-  if(kaynak === 'uygulama' && aktifProfil) uygulamayaDon();
-  else showProfileManage();
-}
-
-// ---------- Toplu ekleme ----------
-function showBulkView(){
-  document.getElementById('pbErr').textContent = '';
-  document.getElementById('pbLog').innerHTML = '';
-  showProfileView('profileBulkView');
-}
-async function topluEkle(){
-  const satirlar = document.getElementById('pbText').value.split('\n').map(s=>s.trim()).filter(Boolean);
-  const log = document.getElementById('pbLog');
-  const hata = document.getElementById('pbErr');
-  hata.textContent = '';
-  if(!satirlar.length){ hata.textContent = 'Önce satırları yazın.'; return; }
-
-  const btn = document.getElementById('pbRunBtn');
-  btn.disabled = true; btn.textContent = 'Oluşturuluyor...';
-  log.innerHTML = '';
-  let basarili = 0;
-  for(const satir of satirlar){
-    const parca = satir.split(';').map(s=>s.trim());
-    const ad = parca[0], eposta = (parca[1] || '').toLowerCase(), sifre = parca[2] || '';
-    const yaz = (metin, iyiMi)=>{
-      log.innerHTML += '<div class="' + (iyiMi ? 'iyi' : 'kotu') + '">' + escapeHtml(metin) + '</div>';
-      log.scrollTop = log.scrollHeight;
-    };
-    if(!ad || !eposta || !sifre){ yaz('✕ ' + satir + ' — üç alan da gerekli', false); continue; }
-    if(sifre.length < 6){ yaz('✕ ' + ad + ' — şifre en az 6 karakter olmalı', false); continue; }
-    if(magazalar.some(m=> (m.name||'').toLowerCase() === ad.toLowerCase())){
-      yaz('• ' + ad + ' — zaten var, atlandı', false); continue;
-    }
-    const key = yeniMagazaKey(ad);
-    try{
-      await kullaniciOlustur(eposta, sifre, key);
-      const kayit = {
-        name: ad, emoji: PROFIL_SIMGELERI[0], color: PROFIL_RENKLERI[magazalar.length % PROFIL_RENKLERI.length],
-        order: magazalar.reduce((m,p)=> Math.max(m, p.order || 0), 0) + 1,
-        legacy: false, legacyTasindi: true, izinli: [], benKim: '', kullaniciMaili: eposta
-      };
-      await magazaRef(key).set(kayit);
-      magazalar.push(Object.assign({key}, kayit));
-      basarili++;
-      yaz('✓ ' + ad + ' — ' + eposta, true);
-    }catch(e){
-      yaz('✕ ' + ad + ' — ' + girisHatasi(e), false);
-    }
+  if(kaynak === 'uygulama' && aktifProfil){
+    document.getElementById('profileScreen').style.display = 'none';
+    document.getElementById('appRoot').style.display = '';
+  } else {
+    showProfileManage();
   }
-  btn.disabled = false; btn.textContent = 'Hepsini oluştur';
-  magazalar.sort((a,b)=> (a.order||0) - (b.order||0));
-  if(basarili) document.getElementById('pbText').value = '';
 }
 
-// ---------- Rozet ve menü ----------
+// ---------- Rozet menüsü ----------
+function acChipMenu(){
+  const m = document.getElementById('chipMenu');
+  m.style.display = (m.style.display === 'none') ? '' : 'none';
+}
+function kapatChipMenu(){ document.getElementById('chipMenu').style.display = 'none'; }
+
 function renderProfileChip(){
   const chip = document.getElementById('profileChip');
   if(!chip) return;
   if(!aktifProfil){ chip.style.display = 'none'; return; }
   chip.style.display = '';
   const av = document.getElementById('profileChipAv');
-  av.textContent = aktifProfil.emoji || '🏪';
+  av.textContent = aktifProfil.emoji || '👤';
   av.style.background = aktifProfil.color || '#444';
   document.getElementById('profileChipName').textContent = aktifProfil.name || aktifProfil.key;
-  document.getElementById('chipSwitchBtn').style.display = (yoneticiMi && magazalar.length > 1) ? '' : 'none';
-  document.getElementById('chipManageBtn').style.display = yoneticiMi ? '' : 'none';
 }
-function acChipMenu(){
-  const m = document.getElementById('chipMenu');
-  m.style.display = (m.style.display === 'none') ? '' : 'none';
-}
-function kapatChipMenu(){ document.getElementById('chipMenu').style.display = 'none'; }
 
 function renderLastEditInfo(){
   const el = document.getElementById('lastEditInfo');
@@ -1601,91 +1907,76 @@ function renderLastEditInfo(){
   el.textContent = 'Bugünkü kaydı en son güncelleyen: ' + rec.updatedBy + saat;
 }
 
-// ---------- Olaylar ----------
-document.getElementById('loginBtn').addEventListener('click', girisYap);
-document.getElementById('loginForgotBtn').addEventListener('click', sifremiUnuttum);
-['loginEmail','loginPass'].forEach(id=>{
-  document.getElementById(id).addEventListener('keydown', e=>{
-    if(e.key === 'Enter'){ e.preventDefault(); girisYap(); }
-  });
-});
-document.getElementById('pickLogoutBtn').addEventListener('click', cikisYap);
-document.getElementById('profileSearch').addEventListener('input', function(){
-  magazaArama = this.value;
-  renderProfileList();
-});
-document.getElementById('profileResetBtn').addEventListener('click', ()=>{
-  if(!yoneticiMi){ profilNotu('Bu bölüm yalnızca yöneticide açılır.'); return; }
-  pmNotu('');
-  showProfileManage();
-});
-document.getElementById('pmBackBtn').addEventListener('click', showMagazaSecim);
-document.getElementById('pmAddBtn').addEventListener('click', ()=> openMagazaEdit(null, 'yonetim'));
-document.getElementById('pmBulkBtn').addEventListener('click', showBulkView);
-document.getElementById('pbBackBtn').addEventListener('click', showProfileManage);
-document.getElementById('pbRunBtn').addEventListener('click', topluEkle);
-document.getElementById('peSaveBtn').addEventListener('click', magazaEditKaydet);
-document.getElementById('peCancelBtn').addEventListener('click', magazaEditIptal);
-document.getElementById('peIzinAddBtn').addEventListener('click', izinEkle);
-document.getElementById('peIzinYeni').addEventListener('keydown', e=>{
-  if(e.key === 'Enter'){ e.preventDefault(); izinEkle(); }
-});
-document.getElementById('peName').addEventListener('keydown', e=>{
-  if(e.key === 'Enter'){ e.preventDefault(); magazaEditKaydet(); }
-});
-
 document.getElementById('profileChip').addEventListener('click', e=>{ e.stopPropagation(); acChipMenu(); });
 document.getElementById('chipEditBtn').addEventListener('click', ()=>{
   kapatChipMenu();
-  if(aktifProfil) openMagazaEdit(aktifProfil.key, 'uygulama');
+  if(aktifProfil) openProfileEdit(aktifProfil.key, 'uygulama');
 });
-document.getElementById('chipSwitchBtn').addEventListener('click', ()=>{
+document.getElementById('chipPinBtn').addEventListener('click', ()=>{
   kapatChipMenu();
-  showMagazaSecim();
+  if(!aktifProfil) return;
+  document.getElementById('profileScreen').style.display = '';
+  document.getElementById('appRoot').style.display = 'none';
+  openPinView(aktifProfil.key, profilPinliMi(profilesCache[aktifProfil.key]) ? 'mevcut' : 'yeniPin');
 });
-document.getElementById('chipManageBtn').addEventListener('click', ()=>{
-  kapatChipMenu();
-  if(!yoneticiMi) return;
-  pmNotu('');
-  showProfileManage();
-});
-document.getElementById('chipLogoutBtn').addEventListener('click', cikisYap);
+document.getElementById('chipSwitchBtn').addEventListener('click', profilDegistir);
 document.addEventListener('click', ()=> kapatChipMenu());
 
-// ---------- Açılış ----------
-auth.onAuthStateChanged(async function(user){
-  if(!user){
-    kullanici = null;
-    showLogin('');
+document.getElementById('pinBackBtn').addEventListener('click', ()=>{
+  // PIN değiştirmeden vazgeçildiyse uygulamaya dön, girişteyse profil seçimine.
+  const uygulamaIci = pinState && ['mevcut','yeniPin','yeniPinTekrar'].includes(pinState.mod);
+  pinState = null;
+  if(uygulamaIci && aktifProfil){
+    document.getElementById('profileScreen').style.display = 'none';
+    document.getElementById('appRoot').style.display = '';
     return;
   }
-  kullanici = user;
+  showProfilePick();
+});
+document.getElementById('profileResetBtn').addEventListener('click', ()=>{
+  const yonetici = yoneticiProfili();
+  if(!yonetici){ profilNotu('Yönetici profili bulunamadı.'); return; }
+  if(!profilPinliMi(yonetici)){ showProfileManage(); return; }  // henüz PIN yoksa doğrudan aç
+  openPinView(yonetici.key, 'yonetici');
+});
+document.getElementById('pmBackBtn').addEventListener('click', showProfilePick);
+document.getElementById('pmAddBtn').addEventListener('click', ()=> openProfileEdit(null, 'yonetim'));
+document.getElementById('peSaveBtn').addEventListener('click', profilEditKaydet);
+document.getElementById('peCancelBtn').addEventListener('click', profilEditIptal);
+document.getElementById('peName').addEventListener('keydown', e=>{
+  if(e.key === 'Enter'){ e.preventDefault(); profilEditKaydet(); }
+});
+document.addEventListener('keydown', e=>{
+  if(!pinState || document.getElementById('pinView').style.display === 'none') return;
+  if(e.key >= '0' && e.key <= '9'){ pinTus(e.key); e.preventDefault(); }
+  else if(e.key === 'Backspace'){ pinTus('B'); e.preventDefault(); }
+  else if(e.key === 'Escape'){ showProfilePick(); e.preventDefault(); }
+});
+
+// Firebase'de şifre ekranı yok: arka planda anonim oturum açılır,
+// kullanıcıyı asıl karşılayan ekran yukarıdaki profil seçimidir.
+auth.onAuthStateChanged(async function(user){
+  if(!user){
+    auth.signInAnonymously().catch(err=>{
+      bootStatus(
+        err.code === 'auth/operation-not-allowed'
+          ? 'Firebase\'de anonim giriş kapalı görünüyor.\nConsole → Authentication → Sign-in method → Anonymous → Enable.'
+          : ('Bağlantı kurulamadı: ' + err.message)
+      , true);
+    });
+    return;
+  }
   try{
-    bootStatus('Mağazalar yükleniyor...');
-    document.getElementById('profileScreen').style.display = 'none';
-    document.getElementById('bootScreen').style.display = '';
-
-    const baglam = await kullaniciBaglami(user);
-    yoneticiMi = baglam.admin;
-    await magazalariYukle(baglam);
-
-    if(yoneticiMi) await magazaMetaTasi();
-
-    if(!magazalar.length){
-      await auth.signOut();
-      showLogin('Bu hesap henüz bir mağazaya bağlanmamış. Yöneticinize başvurun.');
-      return;
+    bootStatus('Profiller yükleniyor...');
+    await loadProfiles();
+    const oturum = kayitliOturum();
+    if(oturum && profilesCache[oturum.key] && profilPinliMi(profilesCache[oturum.key])){
+      await profilOnayla(oturum.key, true);
+    } else {
+      showProfileScreen();
     }
-    if(magazalar.length === 1){
-      await magazaAc(magazalar[0].key, true);
-      return;
-    }
-    let son = null;
-    try{ son = localStorage.getItem(SON_MAGAZA_KEY); }catch(e){ son = null; }
-    if(son && magazaBul(son)) await magazaAc(son, true);
-    else showMagazaSecim();
   }catch(e){
-    bootStatus('Açılamadı: ' + e.message + '\nGüvenlik kuralları bu hesaba izin vermiyor olabilir.', true);
+    bootStatus('Profiller yüklenemedi: ' + e.message, true);
   }
 });
 
@@ -2026,7 +2317,7 @@ function buildWeekBlock(monday){
     days.map((d,i)=>{
       const dk = dateStr(d);
       const izinli = izinliOf(records[i]);
-      const opts = izinliSecenekleri()
+      const opts = IZINLI_SECENEKLER
         .map(kisi=>`<option value="${kisi}"${kisi===izinli?' selected':''}>${kisi===''?'—':kisi}</option>`)
         .join('');
       return `<th class="${isToday(d)?'today-col':''}">${GUN_KISA[i]}<br>` +
@@ -2331,7 +2622,7 @@ function ghbhrBuildReportText(weekKey, save){
 }
 
 // GH veya BH verisini (ve o haftanın buluttaki kayıtlı raporunu) siler.
-function ghbhrDelete(weekKey, kind){
+async function ghbhrDelete(weekKey, kind){
   const etiket = kind.toUpperCase();
   const entry = ghbhrGetWeekly(weekKey);
   const raporVar = !!ghbhrReportsCache[weekKey];
@@ -2339,9 +2630,9 @@ function ghbhrDelete(weekKey, kind){
     setStatus('Hafta ' + weekKey + ' için silinecek ' + etiket + ' verisi yok.', true);
     return;
   }
-  if(!confirm('Hafta ' + weekKey + ' ' + etiket + ' verisi silinecek.' +
-              (raporVar ? '\nBu haftanın kayıtlı kıyas raporu da silinecek.' : '') +
-              '\nDevam edilsin mi?')) return;
+  if(!await uiOnay('Hafta ' + weekKey + ' ' + etiket + ' verisi silinecek.' +
+                   (raporVar ? '\nBu haftanın kayıtlı kıyas raporu da silinecek.' : ''),
+                   {baslik:etiket + ' verisi silinsin mi?', tehlike:true, evet:'Sil'})) return;
 
   entry[kind] = null;
   ghbhrSetWeekly(weekKey, entry);
@@ -2442,8 +2733,7 @@ function izinliOf(rec){
 }
 function izinliMetni(kisi){
   if(!kisi) return 'yoktur';
-  // Mağaza ayarlarında "ben" işaretlenen kişi raporu yazan kişidir.
-  if(aktifProfil && aktifProfil.benKim && kisi === aktifProfil.benKim) return 'ben izinliyim';
+  if(kisi === 'Onur') return 'ben izinliyim';
   return kisi;
 }
 function fmtKShort(n){
@@ -2992,29 +3282,22 @@ async function startAppAfterLogin(){
 // ==================== SEKMELER (Rapor / Araçlar) ====================
 
 function showTab(tab){
-  const raporPage = document.getElementById('raporPage');
-  const araclarPage = document.getElementById('araclarPage');
-  const raporControls = document.getElementById('raporControls');
-  const headerCenter = document.getElementById('headerCenter');
-  const tabRaporBtn = document.getElementById('tabRaporBtn');
-  const tabAraclarBtn = document.getElementById('tabAraclarBtn');
+  const raporMu = tab === 'rapor';
+  document.getElementById('raporPage').style.display = raporMu ? '' : 'none';
+  document.getElementById('raporControls').style.display = raporMu ? '' : 'none';
+  document.getElementById('headerCenter').style.display = raporMu ? '' : 'none';
+  document.getElementById('araclarPage').style.display = tab === 'araclar' ? '' : 'none';
+  document.getElementById('transferPage').style.display = tab === 'transfer' ? '' : 'none';
+  document.getElementById('tabRaporBtn').classList.toggle('active', raporMu);
+  document.getElementById('tabAraclarBtn').classList.toggle('active', tab === 'araclar');
+  document.getElementById('tabTransferBtn').classList.toggle('active', tab === 'transfer');
 
-  if(tab === 'rapor'){
-    raporPage.style.display = '';
-    raporControls.style.display = '';
-    headerCenter.style.display = '';
-    araclarPage.style.display = 'none';
-    tabRaporBtn.classList.add('active');
-    tabAraclarBtn.classList.remove('active');
-  } else {
-    raporPage.style.display = 'none';
-    raporControls.style.display = 'none';
-    headerCenter.style.display = 'none';
-    araclarPage.style.display = '';
-    tabRaporBtn.classList.remove('active');
-    tabAraclarBtn.classList.add('active');
+  if(tab === 'araclar'){
     closeToolViewer();
     renderToolsGrid();
+  } else if(tab === 'transfer'){
+    transferMobilOlcek();
+    renderTransfer();
   }
 }
 
@@ -3136,7 +3419,7 @@ function closeEditToolModal(){
 }
 function saveToolEdit(){
   const name = document.getElementById('editToolName').value.trim();
-  if(!name){ alert('Lütfen araç için bir isim yazın.'); return; }
+  if(!name){ uiUyari('Lütfen araç için bir isim yazın.', {baslik:'İsim eksik', ikon:'✏️'}); return; }
   const tools = getTools();
   const tool = tools.find(t => t.id === editToolId);
   if(!tool){ closeEditToolModal(); return; }
@@ -3219,8 +3502,8 @@ function downloadToolFile(id){
 function saveNewTool(){
   const name = document.getElementById('newToolName').value.trim();
   const code = document.getElementById('newToolCode').value;
-  if(!name){ alert('Lütfen araç için bir isim yazın.'); return; }
-  if(!code.trim()){ alert('Lütfen HTML kodunu yapıştırın veya bir dosya sürükleyin.'); return; }
+  if(!name){ uiUyari('Lütfen araç için bir isim yazın.', {baslik:'İsim eksik', ikon:'✏️'}); return; }
+  if(!code.trim()){ uiUyari('Lütfen HTML kodunu yapıştırın veya bir dosya sürükleyin.', {baslik:'Kod eksik', ikon:'📄'}); return; }
   const tools = getTools();
   tools.push({
     id: 'tool_' + Date.now(),
@@ -3233,8 +3516,8 @@ function saveNewTool(){
   renderToolsGrid();
 }
 
-function deleteTool(id){
-  if(!confirm('Bu aracı silmek istediğinize emin misiniz?')) return;
+async function deleteTool(id){
+  if(!await uiOnay('Bu araç kalıcı olarak silinecek.', {baslik:'Araç silinsin mi?', tehlike:true, evet:'Sil'})) return;
   let tools = getTools();
   tools = tools.filter(t => t.id !== id);
   saveTools(tools);
@@ -3267,6 +3550,815 @@ function closeToolViewer(){
   document.getElementById('toolFrameHolder').innerHTML = '';
   currentToolId = null;
   renderToolsGrid();
+}
+
+// ==================== TRANSFER (Telefon → Bilgisayar) ====================
+// Telefonda çekilen fotoğraflar ve yazılan notlar küçültülüp buluta yazılır,
+// bilgisayarda aynı sekmeden indirilir. Firestore'da bir belge en fazla 1 MB
+// olabildiği için her fotoğraf ayrı belgede durur (transferFotos/{kayitId}_{sira}),
+// ana kayıtta (transfers) yalnızca küçük önizlemeler tutulur.
+// Kırık kayıtları masaüstünde seçilen klasörün altına 1, 2, 3... adlı klasörlere
+// kaydedilir; son numara buluta yazılır (settings/transfer.kirikSayac).
+const KIRIK_FOTO_SAYISI = 5;
+const FOTO_MAX_KENAR = 1600;
+const FOTO_MAX_BOYUT = 900000;   // dataURL uzunluğu; belge sınırının altında kalsın
+const THUMB_KENAR = 160;
+const KLASOR_DESTEGI = typeof window.showDirectoryPicker === 'function';
+
+let transferCache = [];          // [{id, tip, text, siralar, thumbs, createdAtMs, by}]
+let transferAltSekme = 'kirik';
+let kirikSlotlar = new Array(KIRIK_FOTO_SAYISI).fill(null);   // {full, thumb}
+let kirikHedefSlot = 0;
+let genelFotolar = [];           // [{full, thumb}]
+let kirikSayac = null;           // en son oluşturulan klasör numarası
+let kirikKlasor = null;          // FileSystemDirectoryHandle (bu bilgisayarda hatırlanır)
+let transferMesgul = false;
+
+function transferSifirla(){
+  transferCache = [];
+  kirikSayac = null;
+  kirikSlotlar = new Array(KIRIK_FOTO_SAYISI).fill(null);
+  genelFotolar = [];
+  const kn = document.getElementById('kirikNot');
+  const gt = document.getElementById('genelText');
+  if(kn) kn.value = '';
+  if(gt) gt.value = '';
+}
+
+function listenTransferChanges(){
+  cloudUnsubs.push(sdb('transfers').onSnapshot(snap=>{
+    const liste = [];
+    snap.forEach(d=> liste.push(Object.assign({id:d.id}, d.data())));
+    liste.sort((a,b)=> (a.createdAtMs||0) - (b.createdAtMs||0));
+    transferCache = liste;
+    renderTransferListeleri();
+  }, err=> setTransferDurum('Transferler okunamadı: ' + err.message, true)));
+  cloudUnsubs.push(sdb('settings').doc('transfer').onSnapshot(doc=>{
+    kirikSayac = doc.exists ? (Number(doc.data().kirikSayac) || 0) : 0;
+    renderKirikKlasorBilgi();
+  }, err=> setTransferDurum('Klasör sayacı okunamadı: ' + err.message, true)));
+}
+
+function setTransferDurum(msg, isError){
+  if(!msg){ uiBildirim(''); return; }
+  const tip = isError ? 'hata' : (msg.startsWith('✓') ? 'basari' : '');
+  uiBildirim(msg.replace(/^✓\s*/, ''), tip, msg.includes('...') ? 0 : undefined);
+}
+
+// Sayfa telefonda 1300px genişlikte açıldığı için Transfer ekranı
+// telefonun gerçek genişliğine göre büyütülür.
+function transferMobilOlcek(){
+  const wrap = document.getElementById('transferWrap');
+  const sayfaGen = document.documentElement.clientWidth;
+  const olcek = arayuzOlcek();
+  if(olcek > 1){
+    wrap.style.zoom = String(olcek);
+    wrap.style.maxWidth = 'none';
+    wrap.style.width = Math.floor((sayfaGen - 32) / olcek) + 'px';
+  } else {
+    wrap.style.zoom = '';
+    wrap.style.maxWidth = '';
+    wrap.style.width = '';
+  }
+}
+window.addEventListener('resize', ()=>{
+  if(document.getElementById('transferPage').style.display !== 'none') transferMobilOlcek();
+});
+
+function transferAltSekmeSec(sekme){
+  transferAltSekme = sekme;
+  renderTransfer();
+}
+
+function renderTransfer(){
+  document.getElementById('trSegKirik').classList.toggle('active', transferAltSekme === 'kirik');
+  document.getElementById('trSegGenel').classList.toggle('active', transferAltSekme === 'genel');
+  document.getElementById('trKirikView').style.display = transferAltSekme === 'kirik' ? '' : 'none';
+  document.getElementById('trGenelView').style.display = transferAltSekme === 'genel' ? '' : 'none';
+  renderKirikSlotlar();
+  renderGenelThumbs();
+  renderKirikKlasorBilgi();
+  renderTransferListeleri();
+}
+
+// ---------- Fotoğraf hazırlama ----------
+function resmiAc(file){
+  return new Promise((res, rej)=>{
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = ()=>{ URL.revokeObjectURL(url); res(img); };
+    img.onerror = ()=>{ URL.revokeObjectURL(url); rej(new Error('Fotoğraf açılamadı: ' + file.name)); };
+    img.src = url;
+  });
+}
+function resmiKucult(kaynak, gen, yuk, maxKenar, kalite){
+  const oran = Math.min(1, maxKenar / Math.max(gen, yuk));
+  const c = document.createElement('canvas');
+  c.width = Math.max(1, Math.round(gen * oran));
+  c.height = Math.max(1, Math.round(yuk * oran));
+  c.getContext('2d').drawImage(kaynak, 0, 0, c.width, c.height);
+  return c.toDataURL('image/jpeg', kalite);
+}
+function kaynaktanFoto(kaynak, gen, yuk){
+  let kenar = FOTO_MAX_KENAR, kalite = 0.85;
+  let full = resmiKucult(kaynak, gen, yuk, kenar, kalite);
+  while(full.length > FOTO_MAX_BOYUT && kalite > 0.5){
+    kalite -= 0.1;
+    full = resmiKucult(kaynak, gen, yuk, kenar, kalite);
+  }
+  while(full.length > FOTO_MAX_BOYUT && kenar > 400){
+    kenar = Math.round(kenar * 0.8);
+    full = resmiKucult(kaynak, gen, yuk, kenar, kalite);
+  }
+  return {full, thumb: resmiKucult(kaynak, gen, yuk, THUMB_KENAR, 0.7)};
+}
+async function fotoHazirla(file){
+  const img = await resmiAc(file);
+  return kaynaktanFoto(img, img.naturalWidth, img.naturalHeight);
+}
+
+// ---------- Kırık: telefon tarafı ----------
+function renderKirikSlotlar(){
+  const holder = document.getElementById('kirikSlots');
+  holder.innerHTML = '';
+  kirikSlotlar.forEach((foto, i)=>{
+    const slot = document.createElement('div');
+    slot.className = 'kirik-slot' + (foto ? ' dolu' : '');
+    if(foto){
+      slot.innerHTML = '<img alt=""><span class="ks-badge">' + (i+1) + '</span>' +
+                       '<button class="ks-sil" type="button" title="Kaldır">✕</button>';
+      slot.querySelector('img').src = foto.thumb;
+      slot.querySelector('.ks-sil').addEventListener('click', e=>{
+        e.stopPropagation();
+        kirikSlotlar[i] = null;
+        renderKirikSlotlar();
+      });
+    } else {
+      slot.innerHTML = '<span class="ks-no">' + (i+1) + '</span><span>📷</span>';
+    }
+    slot.addEventListener('click', ()=> kirikSlotTikla(i));
+    holder.appendChild(slot);
+  });
+  const dolu = kirikSlotlar.filter(Boolean).length;
+  document.getElementById('kirikIpucu').textContent = telefonMu()
+    ? '— 1\'e dokunun, 5 fotoğrafı art arda çekin'
+    : '— sırayla 1\'den 5\'e';
+  document.getElementById('kirikGonderBtn').textContent = '📤 Gönder (' + dolu + '/' + KIRIK_FOTO_SAYISI + ')';
+}
+
+function kirikDosyadanSec(slot){
+  kirikHedefSlot = slot;
+  document.getElementById('kirikSlotInput').click();
+}
+
+// Boş kutu: telefonda kamera açılır ve boş kutular sırayla çekilir.
+// Dolu kutu: yeniden çekme / galeriden seçme / kaldırma seçenekleri.
+async function kirikSlotTikla(i){
+  if(!kirikSlotlar[i]){
+    if(telefonMu()) kameraAc(i, false);
+    else kirikDosyadanSec(i);
+    return;
+  }
+  const secim = await uiDialog({
+    ikon:'📷', baslik:(i+1) + '. fotoğraf', dikey:true,
+    butonlar:[
+      {metin:'📷  Yeniden çek', deger:'cek', tip:'birincil'},
+      {metin:'🖼️  Galeriden seç', deger:'galeri'},
+      {metin:'🗑  Kaldır', deger:'sil'},
+      {metin:'Vazgeç', deger:null, tip:'sade'}
+    ],
+    iptalDeger:null
+  });
+  if(secim === 'cek'){
+    if(telefonMu()) kameraAc(i, true);
+    else kirikDosyadanSec(i);
+  } else if(secim === 'galeri'){
+    kirikDosyadanSec(i);
+  } else if(secim === 'sil'){
+    kirikSlotlar[i] = null;
+    renderKirikSlotlar();
+  }
+}
+
+// ---------- Uygulama içi kamera ----------
+let kamera = null;   // {ov, video, stream, aktif, tek, mesgul}
+
+async function kameraAc(slot, tek){
+  if(kamera) return;
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){ kameraYok(slot, null); return; }
+  let stream;
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({
+      audio:false,
+      video:{facingMode:{ideal:'environment'}, width:{ideal:1920}, height:{ideal:1920}}
+    });
+  }catch(e){
+    kameraYok(slot, e);
+    return;
+  }
+  arayuzOlcek();
+  const ov = document.createElement('div');
+  ov.className = 'kam-ov';
+  ov.innerHTML =
+    '<div class="kam-goruntu">' +
+      '<video autoplay playsinline muted></video>' +
+      '<div class="kam-flas"></div>' +
+      '<div class="kam-ust"><div class="kam-baslik"></div>' +
+        '<button class="kam-kapat" type="button" title="Kapat">✕</button></div>' +
+    '</div>' +
+    '<div class="kam-alt">' +
+      '<div class="kam-serit"></div>' +
+      '<div class="kam-kontrol">' +
+        '<button class="kam-yan" type="button" data-act="galeri">🖼️ Galeri</button>' +
+        '<button class="kam-deklansor" type="button" title="Çek"></button>' +
+        '<button class="kam-yan bitti" type="button" data-act="bitti">Bitti</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(ov);
+  const video = ov.querySelector('video');
+  video.srcObject = stream;
+  try{ await video.play(); }catch(e){ /* autoplay ile zaten oynar */ }
+  kamera = {ov, video, stream, aktif:slot, tek, mesgul:false};
+  ov.querySelector('.kam-kapat').addEventListener('click', kameraKapat);
+  ov.querySelector('[data-act="bitti"]').addEventListener('click', kameraKapat);
+  ov.querySelector('[data-act="galeri"]').addEventListener('click', ()=>{
+    kirikHedefSlot = kamera.aktif;
+    document.getElementById('kirikSlotInput').click();
+  });
+  ov.querySelector('.kam-deklansor').addEventListener('click', kameraCek);
+  renderKamera();
+}
+
+function kameraYok(slot, hata){
+  const izinYok = hata && (hata.name === 'NotAllowedError' || hata.name === 'SecurityError');
+  uiDialog({
+    ikon:'📷', baslik:'Kamera açılamadı',
+    mesaj: izinYok
+      ? 'Tarayıcı kamera iznini vermedi. Adres çubuğundaki kilit simgesinden kameraya izin verebilir ya da fotoğrafı dosyadan seçebilirsiniz.'
+      : 'Bu cihazda uygulama içi kamera açılamadı. Fotoğrafı telefonun kendi kamerasıyla çekebilirsiniz.',
+    butonlar:[{metin:'Vazgeç', deger:false}, {metin:'Fotoğraf çek / seç', deger:true, tip:'birincil'}],
+    iptalDeger:false
+  }).then(evet=>{ if(evet) kirikDosyadanSec(slot); });
+}
+
+function renderKamera(){
+  if(!kamera) return;
+  const dolu = kirikSlotlar.filter(Boolean).length;
+  kamera.ov.querySelector('.kam-baslik').innerHTML =
+    (kamera.aktif + 1) + '. fotoğraf<small>' + dolu + ' / ' + KIRIK_FOTO_SAYISI + ' hazır</small>';
+  const serit = kamera.ov.querySelector('.kam-serit');
+  serit.innerHTML = '';
+  kirikSlotlar.forEach((f, i)=>{
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'kam-mini' + (i === kamera.aktif ? ' aktif' : '');
+    if(f){
+      b.innerHTML = '<img alt=""><span class="km-no">' + (i+1) + '</span>';
+      b.querySelector('img').src = f.thumb;
+    } else {
+      b.textContent = String(i+1);
+    }
+    // Şeritten bir kutuya dokunmak o fotoğrafı yeniden çekmeyi sağlar.
+    b.addEventListener('click', ()=>{ kamera.aktif = i; renderKamera(); });
+    serit.appendChild(b);
+  });
+}
+
+// Sıradaki boş kutu: önce çekilenin sağına, yoksa baştan bakar.
+function siradakiBosSlot(sonra){
+  for(let i=sonra+1;i<KIRIK_FOTO_SAYISI;i++) if(!kirikSlotlar[i]) return i;
+  for(let i=0;i<=sonra;i++) if(!kirikSlotlar[i]) return i;
+  return -1;
+}
+
+async function kameraCek(){
+  if(!kamera || kamera.mesgul) return;
+  const v = kamera.video;
+  if(!v.videoWidth){ uiBildirim('Kamera henüz hazır değil', 'hata'); return; }
+  kamera.mesgul = true;
+  const flas = kamera.ov.querySelector('.kam-flas');
+  flas.classList.remove('on'); void flas.offsetWidth; flas.classList.add('on');
+  const c = document.createElement('canvas');
+  c.width = v.videoWidth;
+  c.height = v.videoHeight;
+  c.getContext('2d').drawImage(v, 0, 0);
+  const cekilen = kamera.aktif;
+  kirikSlotlar[cekilen] = kaynaktanFoto(c, c.width, c.height);
+  renderKirikSlotlar();
+  const sonraki = kamera.tek ? -1 : siradakiBosSlot(cekilen);
+  if(sonraki < 0){
+    renderKamera();
+    setTimeout(()=>{
+      kameraKapat();
+      const dolu = kirikSlotlar.filter(Boolean).length;
+      if(dolu === KIRIK_FOTO_SAYISI) uiBildirim('5 fotoğraf hazır, kontrol edip gönderebilirsiniz', 'basari');
+    }, 350);
+    return;
+  }
+  kamera.aktif = sonraki;
+  renderKamera();
+  kamera.mesgul = false;
+}
+
+function kameraKapat(){
+  if(!kamera) return;
+  kamera.stream.getTracks().forEach(t=> t.stop());
+  kamera.ov.remove();
+  kamera = null;
+}
+
+function kirikGaleridenEkle(){
+  document.getElementById('kirikGaleriInput').click();
+}
+
+// Seçilen dosyaları, verilen slottan başlayarak boş slotlara sırayla yerleştirir.
+async function kirikSlotlaraYerlestir(files, baslangic){
+  let slot = baslangic, fazla = false;
+  for(const f of files){
+    while(slot < KIRIK_FOTO_SAYISI && kirikSlotlar[slot] && slot !== baslangic) slot++;
+    if(slot >= KIRIK_FOTO_SAYISI){ fazla = true; break; }
+    setTransferDurum('Fotoğraf hazırlanıyor (' + (slot+1) + ')...');
+    try{
+      kirikSlotlar[slot] = await fotoHazirla(f);
+    }catch(e){
+      setTransferDurum(e.message, true);
+      return;
+    }
+    renderKirikSlotlar();
+    slot++;
+  }
+  if(kamera){
+    const sonraki = siradakiBosSlot(Math.min(slot, KIRIK_FOTO_SAYISI) - 1);
+    if(sonraki < 0) kameraKapat();
+    else { kamera.aktif = sonraki; renderKamera(); }
+  }
+  setTransferDurum(fazla ? '5 fotoğraf doldu, fazlası eklenmedi.' : '', fazla);
+}
+
+document.getElementById('kirikSlotInput').addEventListener('change', async e=>{
+  const files = Array.from(e.target.files || []);
+  e.target.value = '';
+  if(files.length) await kirikSlotlaraYerlestir(files, kirikHedefSlot);
+});
+document.getElementById('kirikGaleriInput').addEventListener('change', async e=>{
+  const files = Array.from(e.target.files || []);
+  e.target.value = '';
+  const ilkBos = kirikSlotlar.findIndex(f=> !f);
+  if(ilkBos < 0){ setTransferDurum('5 fotoğraf zaten dolu.', true); return; }
+  if(files.length) await kirikSlotlaraYerlestir(files, ilkBos);
+});
+
+function kirikTemizle(){
+  kirikSlotlar = new Array(KIRIK_FOTO_SAYISI).fill(null);
+  document.getElementById('kirikNot').value = '';
+  renderKirikSlotlar();
+  setTransferDurum('');
+}
+
+async function transferKaydet(tip, fotolar, text){
+  const ref = sdb('transfers').doc();
+  for(let i=0;i<fotolar.length;i++){
+    setTransferDurum('Gönderiliyor ' + (i+1) + '/' + fotolar.length + '...');
+    await sdb('transferFotos').doc(ref.id + '_' + fotolar[i].sira).set({
+      tid: ref.id, sira: fotolar[i].sira, data: fotolar[i].full
+    });
+  }
+  // Ana kayıt en son yazılır; bilgisayar yarım kalmış bir kaydı görmez.
+  await ref.set({
+    tip, text: text || '',
+    siralar: fotolar.map(f=> f.sira),
+    thumbs: fotolar.map(f=> f.thumb),
+    createdAtMs: Date.now(),
+    by: aktifProfil ? (aktifProfil.name || aktifProfil.key) : ''
+  });
+}
+
+async function kirikGonder(){
+  if(transferMesgul) return;
+  const fotolar = [];
+  kirikSlotlar.forEach((f,i)=>{ if(f) fotolar.push({sira:i+1, full:f.full, thumb:f.thumb}); });
+  if(!fotolar.length){ setTransferDurum('Önce fotoğraf ekleyin.', true); return; }
+  if(fotolar.length < KIRIK_FOTO_SAYISI &&
+     !await uiOnay(KIRIK_FOTO_SAYISI + ' fotoğraftan ' + fotolar.length + ' tanesi hazır. Eksik haliyle gönderilsin mi?',
+                   {baslik:'Eksik fotoğraf', ikon:'📷', evet:'Gönder', hayir:'Geri dön'})) return;
+  transferMesgul = true;
+  document.getElementById('kirikGonderBtn').disabled = true;
+  try{
+    await transferKaydet('kirik', fotolar, document.getElementById('kirikNot').value.trim());
+    kirikTemizle();
+    setTransferDurum('✓ Kırık kaydı gönderildi.');
+  }catch(e){
+    setTransferDurum('Gönderilemedi: ' + e.message, true);
+  }finally{
+    transferMesgul = false;
+    document.getElementById('kirikGonderBtn').disabled = false;
+    renderTransferListeleri();
+  }
+}
+
+// ---------- Genel: telefon tarafı ----------
+function renderGenelThumbs(){
+  const holder = document.getElementById('genelThumbs');
+  holder.innerHTML = '';
+  genelFotolar.forEach((f, i)=>{
+    const d = document.createElement('div');
+    d.className = 'kirik-slot dolu gt';
+    d.innerHTML = '<img alt=""><button class="ks-sil" type="button" title="Kaldır">✕</button>';
+    d.querySelector('img').src = f.thumb;
+    d.querySelector('.ks-sil').addEventListener('click', ()=>{
+      genelFotolar.splice(i, 1);
+      renderGenelThumbs();
+    });
+    holder.appendChild(d);
+  });
+}
+
+async function genelFotoEkle(e){
+  const files = Array.from(e.target.files || []);
+  e.target.value = '';
+  for(let i=0;i<files.length;i++){
+    setTransferDurum('Fotoğraf hazırlanıyor ' + (i+1) + '/' + files.length + '...');
+    try{ genelFotolar.push(await fotoHazirla(files[i])); }
+    catch(err){ setTransferDurum(err.message, true); return; }
+    renderGenelThumbs();
+  }
+  setTransferDurum('');
+}
+document.getElementById('genelKameraInput').addEventListener('change', genelFotoEkle);
+document.getElementById('genelGaleriInput').addEventListener('change', genelFotoEkle);
+
+function genelTemizle(){
+  genelFotolar = [];
+  document.getElementById('genelText').value = '';
+  renderGenelThumbs();
+  setTransferDurum('');
+}
+
+async function genelGonder(){
+  if(transferMesgul) return;
+  const text = document.getElementById('genelText').value.trim();
+  if(!text && !genelFotolar.length){ setTransferDurum('Gönderilecek bir şey yok.', true); return; }
+  transferMesgul = true;
+  document.getElementById('genelGonderBtn').disabled = true;
+  try{
+    await transferKaydet('genel', genelFotolar.map((f,i)=> ({sira:i+1, full:f.full, thumb:f.thumb})), text);
+    genelTemizle();
+    setTransferDurum('✓ Gönderildi.');
+  }catch(e){
+    setTransferDurum('Gönderilemedi: ' + e.message, true);
+  }finally{
+    transferMesgul = false;
+    document.getElementById('genelGonderBtn').disabled = false;
+    renderTransferListeleri();
+  }
+}
+
+// ---------- Bilgisayar tarafı: listeler ----------
+function transferZaman(ms){
+  if(!ms) return '';
+  const d = new Date(ms);
+  return shortDate(d) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+}
+
+function transferKartiOlustur(t, butonlar){
+  const item = document.createElement('div');
+  item.className = 'tr-item';
+  const bilgi = [transferZaman(t.createdAtMs), t.by, (t.siralar||[]).length ? (t.siralar.length + ' fotoğraf') : '']
+    .filter(Boolean).join(' · ');
+  item.innerHTML = '<div class="tr-item-head"><span>' + escapeHtml(bilgi) + '</span><span class="tr-item-acts"></span></div>';
+  const acts = item.querySelector('.tr-item-acts');
+  butonlar.forEach(b=>{
+    const btn = document.createElement('button');
+    btn.className = 'btn';
+    btn.type = 'button';
+    btn.textContent = b.ad;
+    btn.disabled = transferMesgul;
+    btn.addEventListener('click', b.fn);
+    acts.appendChild(btn);
+  });
+  if((t.thumbs||[]).length){
+    const row = document.createElement('div');
+    row.className = 'tr-item-thumbs';
+    t.thumbs.forEach((th, i)=>{
+      const tn = document.createElement('div');
+      tn.className = 'tn';
+      tn.innerHTML = '<img alt="" title="İndir"><span>' + (t.siralar[i]) + '</span>';
+      tn.querySelector('img').src = th;
+      tn.querySelector('img').addEventListener('click', ()=> tekFotoIndir(t, t.siralar[i]));
+      row.appendChild(tn);
+    });
+    item.appendChild(row);
+  }
+  if(t.text){
+    const tx = document.createElement('div');
+    tx.className = 'tr-item-text';
+    tx.textContent = t.text;
+    item.appendChild(tx);
+  }
+  return item;
+}
+
+function renderTransferListeleri(){
+  const kirikListe = document.getElementById('kirikListe');
+  const genelListe = document.getElementById('genelListe');
+  if(!kirikListe) return;
+  const kiriklar = transferCache.filter(t=> t.tip === 'kirik');
+  const geneller = transferCache.filter(t=> t.tip !== 'kirik').reverse();
+
+  kirikListe.innerHTML = '';
+  if(!kiriklar.length) kirikListe.innerHTML = '<div class="tr-empty">Bekleyen kırık kaydı yok.</div>';
+  kiriklar.forEach(t=>{
+    kirikListe.appendChild(transferKartiOlustur(t, [
+      {ad:'⬇ İndir', fn: ()=> kirikIndir([t.id])},
+      {ad:'🗑', fn: ()=> transferSilOnayli(t)}
+    ]));
+  });
+  const hepsiBtn = document.getElementById('kirikHepsiBtn');
+  hepsiBtn.style.display = kiriklar.length > 1 ? '' : 'none';
+  hepsiBtn.disabled = transferMesgul;
+  hepsiBtn.textContent = '⬇ Hepsini masaüstüne indir (' + kiriklar.length + ')';
+
+  genelListe.innerHTML = '';
+  if(!geneller.length) genelListe.innerHTML = '<div class="tr-empty">Gelen bir şey yok.</div>';
+  geneller.forEach(t=>{
+    const butonlar = [];
+    if(t.text) butonlar.push({ad:'📋 Kopyala', fn: ()=> metniKopyala(t.text)});
+    if((t.siralar||[]).length) butonlar.push({ad:'⬇ Fotoğraflar', fn: ()=> genelFotolariIndir(t)});
+    butonlar.push({ad:'🗑', fn: ()=> transferSilOnayli(t)});
+    genelListe.appendChild(transferKartiOlustur(t, butonlar));
+  });
+}
+
+function renderKirikKlasorBilgi(){
+  const el = document.getElementById('kirikKlasorBilgi');
+  if(!el) return;
+  const sonraki = (kirikSayac === null) ? '…' : (kirikSayac + 1);
+  let html = 'Sıradaki klasör: <b>' + sonraki + '</b> <button class="tr-link" type="button" onclick="kirikSayacDegistir()">değiştir</button><br>';
+  if(KLASOR_DESTEGI){
+    html += 'Kayıt yeri: <b>' + (kirikKlasor ? escapeHtml(kirikKlasor.name) : 'seçilmedi') + '</b> ' +
+            '<button class="tr-link" type="button" onclick="kirikKlasorSec()">' + (kirikKlasor ? 'değiştir' : 'seç') + '</button>';
+  } else {
+    html += '<span style="color:#999;">Bu tarayıcı klasöre yazamıyor, dosyalar tek tek iner (ör. 7-1.jpg)</span>';
+  }
+  el.innerHTML = html;
+}
+
+async function kirikSayacDegistir(){
+  const mevcut = kirikSayac || 0;
+  const v = await uiSor('Son oluşturulan klasör numarasını yazın. Bir sonraki kayıt bunun bir fazlası olur.', String(mevcut),
+                        {baslik:'Klasör numarası', ikon:'📁', tip:'number', evet:'Kaydet'});
+  if(v === null) return;
+  const n = parseInt(v, 10);
+  if(isNaN(n) || n < 0){ setTransferDurum('Geçerli bir sayı girin.', true); return; }
+  try{
+    await sdb('settings').doc('transfer').set({kirikSayac:n}, {merge:true});
+    kirikSayac = n;
+    renderKirikKlasorBilgi();
+  }catch(e){ setTransferDurum('Sayaç kaydedilemedi: ' + e.message, true); }
+}
+
+// ---------- Klasör erişimi (Chrome / Edge) ----------
+function idbAc(){
+  return new Promise((res, rej)=>{
+    const r = indexedDB.open('magazaRaporTransfer', 1);
+    r.onupgradeneeded = ()=> r.result.createObjectStore('kv');
+    r.onsuccess = ()=> res(r.result);
+    r.onerror = ()=> rej(r.error);
+  });
+}
+async function idbOku(k){
+  const idb = await idbAc();
+  return new Promise((res, rej)=>{
+    const q = idb.transaction('kv').objectStore('kv').get(k);
+    q.onsuccess = ()=> res(q.result);
+    q.onerror = ()=> rej(q.error);
+  });
+}
+async function idbYaz(k, v){
+  const idb = await idbAc();
+  return new Promise((res, rej)=>{
+    const tx = idb.transaction('kv', 'readwrite');
+    tx.objectStore('kv').put(v, k);
+    tx.oncomplete = ()=> res();
+    tx.onerror = ()=> rej(tx.error);
+  });
+}
+async function kayitliKlasoruYukle(){
+  if(!KLASOR_DESTEGI || kirikKlasor) return;
+  try{ kirikKlasor = (await idbOku('kirikKlasor')) || null; }catch(e){ /* IndexedDB yoksa her seferinde sorulur */ }
+  renderKirikKlasorBilgi();
+}
+kayitliKlasoruYukle();
+
+async function kirikKlasorSec(){
+  try{
+    kirikKlasor = await window.showDirectoryPicker({id:'kirik', mode:'readwrite', startIn:'desktop'});
+    try{ await idbYaz('kirikKlasor', kirikKlasor); }catch(e){ /* hatırlanamazsa bir dahakine yine sorulur */ }
+    renderKirikKlasorBilgi();
+    return kirikKlasor;
+  }catch(e){
+    if(e.name === 'AbortError') return null;
+    throw e;
+  }
+}
+
+async function kirikKlasorAl(){
+  await kayitliKlasoruYukle();
+  if(!kirikKlasor) return kirikKlasorSec();
+  const izin = {mode:'readwrite'};
+  if(await kirikKlasor.queryPermission(izin) === 'granted') return kirikKlasor;
+  if(await kirikKlasor.requestPermission(izin) === 'granted') return kirikKlasor;
+  throw new Error('Klasöre yazma izni verilmedi.');
+}
+
+// Aynı adlı bir klasör zaten varsa üzerine yazmamak için sonraki boş numarayı bulur.
+async function bosKlasorNo(ana, no){
+  while(true){
+    try{
+      await ana.getDirectoryHandle(String(no));
+      no++;
+    }catch(e){
+      if(e.name === 'NotFoundError') return no;
+      if(e.name === 'TypeMismatchError'){ no++; continue; }
+      throw e;
+    }
+  }
+}
+
+async function dataUrlBlob(dataUrl){
+  return (await fetch(dataUrl)).blob();
+}
+async function dosyaYaz(klasor, ad, icerik){
+  const fh = await klasor.getFileHandle(ad, {create:true});
+  const w = await fh.createWritable();
+  await w.write(icerik);
+  await w.close();
+}
+
+async function transferFotolariGetir(t){
+  const docs = await Promise.all((t.siralar||[]).map(s=> sdb('transferFotos').doc(t.id + '_' + s).get()));
+  return docs.filter(d=> d.exists).map(d=> ({sira: d.data().sira, data: d.data().data}));
+}
+
+async function transferSil(t){
+  const batch = db.batch();
+  (t.siralar||[]).forEach(s=> batch.delete(sdb('transferFotos').doc(t.id + '_' + s)));
+  batch.delete(sdb('transfers').doc(t.id));
+  await batch.commit();
+}
+async function transferSilOnayli(t){
+  if(!await uiOnay('Bu kayıt ve fotoğrafları silinecek.', {baslik:'Kayıt silinsin mi?', tehlike:true, evet:'Sil'})) return;
+  try{ await transferSil(t); }
+  catch(e){ setTransferDurum('Silinemedi: ' + e.message, true); }
+}
+
+function dosyaIndir(href, ad){
+  const a = document.createElement('a');
+  a.href = href;
+  a.download = ad;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+const bekle = ms => new Promise(r=> setTimeout(r, ms));
+
+// Klasöre yazılamayan tarayıcılarda (ör. telefon) dosyalar tek tek iner:
+// 7-1.jpg, 7-2.jpg ... 7-not.txt. Art arda inişler tarayıcıda kaybolmasın diye aralıklı.
+async function dosyalariTekTekIndir(onEk, fotolar, not){
+  for(const f of fotolar){
+    dosyaIndir(f.data, onEk + f.sira + '.jpg');
+    await bekle(400);
+  }
+  if(not){
+    const url = URL.createObjectURL(new Blob([not], {type:'text/plain;charset=utf-8'}));
+    dosyaIndir(url, onEk + 'not.txt');
+    setTimeout(()=> URL.revokeObjectURL(url), 5000);
+    await bekle(400);
+  }
+}
+
+// ---------- Kırık: bilgisayar tarafı ----------
+function kirikHepsiniIndir(){
+  kirikIndir(transferCache.filter(t=> t.tip === 'kirik').map(t=> t.id));
+}
+
+async function kirikIndir(ids){
+  if(transferMesgul || !ids.length) return;
+  transferMesgul = true;
+  renderTransferListeleri();
+  let adet = 0, no = null, hedef = null;
+  try{
+    if(KLASOR_DESTEGI){
+      hedef = await kirikKlasorAl();
+      if(!hedef){ setTransferDurum('Klasör seçilmedi.', true); return; }
+    }
+    const sayacDoc = await sdb('settings').doc('transfer').get();
+    no = sayacDoc.exists ? (Number(sayacDoc.data().kirikSayac) || 0) : 0;
+    for(const id of ids){
+      const t = transferCache.find(x=> x.id === id);
+      if(!t) continue;
+      setTransferDurum('İndiriliyor... (' + (adet+1) + '/' + ids.length + ')');
+      const fotolar = await transferFotolariGetir(t);
+      if(hedef){
+        no = await bosKlasorNo(hedef, no + 1);
+        const klasor = await hedef.getDirectoryHandle(String(no), {create:true});
+        for(const f of fotolar) await dosyaYaz(klasor, f.sira + '.jpg', await dataUrlBlob(f.data));
+        if(t.text) await dosyaYaz(klasor, 'not.txt', t.text);
+      } else {
+        no = no + 1;
+        await dosyalariTekTekIndir(no + '-', fotolar, t.text);
+      }
+      await sdb('settings').doc('transfer').set({kirikSayac:no}, {merge:true});
+      kirikSayac = no;
+      await transferSil(t);
+      adet++;
+    }
+    setTransferDurum('✓ ' + adet + ' kayıt indirildi' +
+      (hedef ? ' → ' + hedef.name : '') + ' (son klasör: ' + no + ')');
+  }catch(e){
+    setTransferDurum('İndirilemedi: ' + e.message + (adet ? ' (' + adet + ' kayıt indirildi)' : ''), true);
+  }finally{
+    transferMesgul = false;
+    renderTransferListeleri();
+    renderKirikKlasorBilgi();
+  }
+}
+
+// ---------- Genel: bilgisayar tarafı ----------
+async function tekFotoIndir(t, sira){
+  try{
+    const d = await sdb('transferFotos').doc(t.id + '_' + sira).get();
+    if(!d.exists){ setTransferDurum('Fotoğraf bulunamadı.', true); return; }
+    const ad = (t.tip === 'kirik' ? 'kirik-' : 'foto-') + transferDosyaZamani(t.createdAtMs) + '-' + sira + '.jpg';
+    dosyaIndir(d.data().data, ad);
+  }catch(e){ setTransferDurum('İndirilemedi: ' + e.message, true); }
+}
+
+function transferDosyaZamani(ms){
+  const d = new Date(ms || Date.now());
+  return dateStr(d) + '_' + pad(d.getHours()) + pad(d.getMinutes());
+}
+
+async function genelFotolariIndir(t){
+  try{
+    const fotolar = await transferFotolariGetir(t);
+    const zaman = transferDosyaZamani(t.createdAtMs);
+    await dosyalariTekTekIndir('foto-' + zaman + '-', fotolar, '');
+  }catch(e){ setTransferDurum('İndirilemedi: ' + e.message, true); }
+}
+
+async function metniKopyala(text){
+  try{
+    await navigator.clipboard.writeText(text);
+  }catch(e){
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    ta.remove();
+  }
+  setTransferDurum('✓ Metin kopyalandı.');
+}
+
+// ==================== SÜRÜM / GÜNCELLEME ====================
+function renderSurumRozet(metin){
+  document.getElementById('surumRozet').textContent = metin || ('v' + APP_SURUM);
+}
+renderSurumRozet();
+
+let guncellemeKontrolde = false;
+async function guncellemeKontrol(){
+  if(guncellemeKontrolde) return;
+  if(location.protocol === 'file:'){
+    uiUyari('Sayfa bilgisayardaki bir dosyadan açılmış, güncelleme buradan kontrol edilemiyor. Güncel sürüm için sayfayı internet adresinden açın.',
+            {baslik:'Kontrol edilemiyor', ikon:'🔄'});
+    return;
+  }
+  guncellemeKontrolde = true;
+  renderSurumRozet('⟳ kontrol');
+  try{
+    // cache:'reload' sunucudan taze kopyayı alır ve tarayıcı önbelleğini de günceller,
+    // böylece ardından yapılan yenileme yeni sürümü açar.
+    const r = await fetch(location.href.split('#')[0], {cache:'reload'});
+    if(!r.ok) throw new Error('Sunucu yanıtı: ' + r.status);
+    const html = await r.text();
+    const m = html.match(/const APP_SURUM = (\d+);/);
+    const sunucuSurum = m ? Number(m[1]) : 0;
+    if(sunucuSurum > APP_SURUM){
+      renderSurumRozet('v' + sunucuSurum + ' yükleniyor');
+      location.reload();
+      return;
+    }
+    renderSurumRozet();
+    uiBildirim('Son sürümü kullanıyorsunuz (v' + APP_SURUM + ')', 'basari');
+  }catch(e){
+    renderSurumRozet();
+    uiBildirim('Güncelleme kontrol edilemedi: ' + e.message, 'hata');
+  }finally{
+    guncellemeKontrolde = false;
+  }
 }
 </script>
 
