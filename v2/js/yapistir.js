@@ -146,7 +146,7 @@ function grupTablosunuCozumle(veri, topluEsik){
 
 // secenekler: {topluEsik}
 export function metniCozumle(metin, secenekler = {}){
-  const topluEsik = secenekler.topluEsik ?? 2200;
+  const topluEsik = secenekler.topluEsik ?? 2700;
   let veri;
   try{ veri = JSON.parse(metin); }
   catch(e){ return {hata:'Yapıştırılan metin JSON değil. Yer imine tıklayıp çıkan kutudaki metni kopyalayın.'}; }
@@ -169,8 +169,10 @@ export function metniCozumle(metin, secenekler = {}){
     harita.get(tarih).toplu = grup.topluSatis;
   }
 
+  // Rapor gününden önceki günler artık değişmez: "kesin" işaretlenir.
+  // Rapor günü akşama kadar değişebilir, kesin sayılmaz.
   const yazilacak = [...harita.entries()]
-    .map(([t, degerler]) => ({tarih: t, degerler}))
+    .map(([t, degerler]) => ({tarih: t, degerler, kesin: t < tarih}))
     .sort((a,b) => a.tarih.localeCompare(b.tarih));
 
   if(!yazilacak.length){

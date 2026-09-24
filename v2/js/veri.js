@@ -112,6 +112,44 @@ export function duyuruEkle(metin){
 }
 export function duyuruSil(id){ yaz('duyurular', duyurularGetir().filter(d => d.id !== id)); }
 
+// ---------------- Haftalık rutin ----------------
+// Liste mağazanın sabit rutinidir; işaretlemeler hafta hafta tutulur.
+export const VARSAYILAN_RUTIN = [
+  {id:'r_pzt1', gun:0, metin:'Örneklem'},
+  {id:'r_pzt2', gun:0, metin:'Ürün talebi gönder'},
+  {id:'r_car1', gun:2, metin:'Stok sayımı'},
+  {id:'r_cum1', gun:4, metin:'Shift'},
+  {id:'r_cmt1', gun:5, metin:'Vitrin düzeni'},
+  {id:'r_paz1', gun:6, metin:'Ürün Excel yükle'},
+  {id:'r_paz2', gun:6, metin:'Haftalık rapor'}
+];
+export function rutinGetir(magaza){ return oku('rutin:' + magaza, VARSAYILAN_RUTIN.map(r => ({...r}))); }
+export function rutinYaz(magaza, liste){ yaz('rutin:' + magaza, liste); }
+export function rutinDurumGetir(magaza, haftaAnahtari){ return oku('rutinDurum:' + magaza + ':' + haftaAnahtari, {}); }
+export function rutinDurumDegistir(magaza, haftaAnahtari, maddeId){
+  const d = rutinDurumGetir(magaza, haftaAnahtari);
+  if(d[maddeId]) delete d[maddeId]; else d[maddeId] = true;
+  yaz('rutinDurum:' + magaza + ':' + haftaAnahtari, d);
+  return d;
+}
+
+// ---------------- Panel yerleşimi ----------------
+// Her mağaza panellerin sırasını ve boyutunu kendi ayarlar.
+export function yerlesimGetir(magaza){ return oku('yerlesim:' + magaza, {sira:{}, boyut:{}}); }
+export function yerlesimYaz(magaza, v){ yaz('yerlesim:' + magaza, v); }
+export function yerlesimBoyutYaz(magaza, panelId, boyut){
+  const y = yerlesimGetir(magaza);
+  y.boyut = y.boyut || {};
+  y.boyut[panelId] = Object.assign({}, y.boyut[panelId], boyut);
+  yerlesimYaz(magaza, y);
+}
+export function yerlesimSiraYaz(magaza, kapId, sira){
+  const y = yerlesimGetir(magaza);
+  y.sira = y.sira || {};
+  y.sira[kapId] = sira;
+  yerlesimYaz(magaza, y);
+}
+
 // ---------------- Görünüm ayarları ----------------
 export function bolgeGorunumGetir(){
   return oku('gorunum:bolge', {metrikler:['ciro','mdo','fbu'], kiyas:'gecenHafta'});
@@ -123,7 +161,7 @@ export function satirAyariGetir(){
 export function satirAyariYaz(v){ yaz('gorunum:satirlar', v); }
 export function etiketleriGetir(){ return oku('etiketler', [{anahtar:'halı', kart:'Halı satışı'}]); }
 // Bu tutarın üzerindeki faturalar "toplu satış" sayılır.
-export function topluEsikGetir(){ return oku('topluEsik', 2200); }
+export function topluEsikGetir(){ return oku('topluEsik', 2700); }
 export function topluEsikYaz(v){ yaz('topluEsik', v); }
 export function etiketleriYaz(v){ yaz('etiketler', v); }
 

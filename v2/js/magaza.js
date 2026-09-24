@@ -5,6 +5,8 @@ import { haftaTablosu, haftaOzeti } from './hafta.js';
 import { panelOlustur } from './panel.js';
 import { metniCozumle } from './yapistir.js';
 import { pencere, kapat } from './pencere.js';
+import { rutinBlogu } from './rutin.js';
+import { panelleriHazirla } from './yerlesim.js';
 
 let seciliPzt = null;
 
@@ -17,7 +19,10 @@ export function magazaEkrani(magazaKey, secenekler = {}){
   const yenile = secenekler.yenile || (() => {});
 
   const kok = U.el('<div class="magaza-ekran"></div>');
-  kok.appendChild(haftaGezinti(pzt, yenile));
+  const gezinti = haftaGezinti(pzt, yenile);
+  gezinti.appendChild(rutinBlogu(magazaKey, pzt, {duzenlenebilir, yenile}));
+  kok.appendChild(gezinti);
+  panelleriHazirla(gezinti, {kapId:'gezinti', magaza:magazaKey, yon:'yatay'});
 
   const govde = U.el('<div class="ekran-govde"></div>');
   const sol = U.el('<div class="ana-alan"></div>');
@@ -31,6 +36,11 @@ export function magazaEkrani(magazaKey, secenekler = {}){
     urunAc: p => urunPenceresi(magazaKey, p, duzenlenebilir, yenile),
     personelDuzenle: () => personelPenceresi(magazaKey, yenile)
   }));
+  const bloklar = sol.querySelectorAll('.hafta-blok');
+  if(bloklar[0]) bloklar[0].dataset.panel = 'haftaSecili';
+  if(bloklar[1]) bloklar[1].dataset.panel = 'haftaOnceki';
+  panelleriHazirla(sol, {kapId:'anaAlan', magaza:magazaKey, yon:'dikey'});
+
   sol.appendChild(simuleSatiri(yenile));
   govde.appendChild(sol);
   govde.appendChild(panelOlustur(magazaKey, {duzenlenebilir, yenile}));
@@ -47,7 +57,7 @@ function haftaGezinti(pzt, yenile){
 
   const duyurular = V.duyurularGetir();
   const kok = U.el(`<div class="hafta-gezinti">
-    <div class="gez-sol">
+    <div class="gez-sol" data-panel="hafta">
       <div class="ay-satir">
         ${U.AY_KISA.map((a,i) => `<button class="ay ${i+1===ay?'secili':''}" data-ay="${i+1}">${a}</button>`).join('')}
         <select class="yil-sec">
@@ -66,7 +76,7 @@ function haftaGezinti(pzt, yenile){
         <button class="mini" data-bugun="1">Bu hafta</button>
       </div>
     </div>
-    <div class="gez-sag">
+    <div class="gez-sag" data-panel="duyuru">
       <div class="duyuru-baslik">📢 Duyurular</div>
       <div class="duyuru-serit">
         ${duyurular.length
@@ -150,7 +160,7 @@ export function yapistirPenceresi(magazaKey, yenile){
       const mevcut = V.gunGetir(magazaKey, g.tarih);
       const uzerineMi = mevcut && ONIZLEME_ALANLARI.some(a => mevcut[a.alan] !== undefined && mevcut[a.alan] !== null);
       return `<tr>
-        <td class="on-gun">${U.GUN_KISA[(d.getDay()+6)%7]} ${U.kisaTarih(d)}${uzerineMi ? ' <span class="on-uyari" title="Bu günde zaten veri var, üzerine yazılacak">●</span>' : ''}</td>
+        <td class="on-gun">${U.GUN_KISA[(d.getDay()+6)%7]} ${U.kisaTarih(d)}${g.kesin ? ' <span class="on-kesin" title="Gün kapandı, bu veri kesinleşti">✓</span>' : ' <span class="on-gecici" title="Gün devam ediyor, akşam değişebilir">~</span>'}${uzerineMi ? ' <span class="on-uyari" title="Bu günde zaten veri var, üzerine yazılacak">●</span>' : ''}</td>
         ${gelen.map(a => `<td>${g.degerler[a.alan] === undefined ? '–' : U.fmtSayi(g.degerler[a.alan], a.basamak)}</td>`).join('')}
       </tr>`;
     }).join('');
@@ -165,7 +175,9 @@ export function yapistirPenceresi(magazaKey, yenile){
       ${ozet.length ? `<div class="bulgu-not">Kaynaktaki özetler (yazılmaz, kıyas için):
         ${ozet.map(k => U.esc(k) + ' ' + U.fmtSayi(c.haftaToplamlari[k], 0)).join(' · ')}</div>` : ''}
       ${grupNotu(c)}
-      <div class="bulgu-not">${c.yazilacak.length} gün yazılacak. ● işaretli günlerde mevcut veri var, üzerine yazılır.</div>
+      <div class="bulgu-not">${c.yazilacak.length} gün yazılacak.
+        <b>✓</b> kapanmış gün, veri kesin · <b>~</b> devam eden gün, akşam değişebilir ·
+        <b>●</b> bu günde mevcut veri var, üzerine yazılır. Geçen haftaya dokunulmaz.</div>
     </div>`;
   };
   alan.addEventListener('input', () => { clearTimeout(alan._z); alan._z = setTimeout(cozumle, 300); });
@@ -180,6 +192,7 @@ export function yapistirPenceresi(magazaKey, yenile){
       cozum.yazilacak.forEach(g => {
         const kayit = V.gunGetir(magazaKey, g.tarih) || {};
         Object.keys(g.degerler).forEach(a => { kayit[a] = g.degerler[a]; });
+        if(g.kesin) kayit.kesin = true;
         V.gunYaz(magazaKey, g.tarih, kayit);
       });
       // Yazılan günlerin haftasına geç ki sonuç hemen görünsün.

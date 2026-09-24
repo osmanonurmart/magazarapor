@@ -80,6 +80,8 @@ Profil rozeti → "Örnek veriyi yenile" ile her şey sıfırlanıp yeniden üre
 | Duyuru panosu | ✅ |
 | Ürün talep sistemi: kategori, sepet, gönderim, pazartesi raporu | ✅ |
 | Kurucu: mağaza görünümü, ürün/kategori, kullanıcılar, KPI satırları, etiketler | ✅ |
+| Haftalık rutin listesi (7 gün, tıklayınca yeşile döner, hafta başında sıfırlanır) | ✅ |
+| Panelleri sürükleyip yerini değiştirme ve kenarlarından boyutlandırma (mağaza bazlı) | ✅ |
 | Mobil yerleşim (üst gezinme / orta tablo / alt kartlar) | ✅ |
 | PWA (manifest + service worker, çevrimdışı kabuk) | ✅ |
 

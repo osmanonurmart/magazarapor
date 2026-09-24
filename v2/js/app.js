@@ -6,6 +6,7 @@ import { bolgePaneli } from './bolge.js';
 import { kurucuPaneli } from './kurucu.js';
 import { talepEkrani } from './talep.js';
 import { pencere, kapat } from './pencere.js';
+import { yerlesimSifirla } from './yerlesim.js';
 
 const kokEl = document.getElementById('kok');
 let aktif = null;        // aktif profil
@@ -125,12 +126,14 @@ function profilMenusu(e){
   document.querySelectorAll('.acilir-menu').forEach(m => m.remove());
   const menu = U.el(`<div class="acilir-menu profil-menu">
     ${aktif.rol === V.ROLLER.MAGAZA ? '<button data-act="personel">👥 Personel</button>' : ''}
+    <button data-act="yerlesim">🧩 Panel yerleşimini sıfırla</button>
     <button data-act="sifirla">♻ Örnek veriyi yenile</button>
     <button data-act="cikis">🚪 Profil değiştir</button>
   </div>`);
   menu.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
     menu.remove();
     if(b.dataset.act === 'personel') personelPenceresi(aktifMagaza(), uygulamaCiz);
+    if(b.dataset.act === 'yerlesim'){ yerlesimSifirla(aktifMagaza()); uygulamaCiz(); }
     if(b.dataset.act === 'cikis'){ V.oturumSil(); aktif = null; kurucuMagaza = null; ciz(girisEkrani(null)); }
     if(b.dataset.act === 'sifirla'){
       if(!confirm('Bütün yerel veri silinip örnek veri yeniden üretilecek. Devam?')) return;

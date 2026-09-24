@@ -28,3 +28,18 @@ html = html
 
 await writeFile('tek-dosya.html', html, 'utf8');
 console.log('tek-dosya.html yazıldı — ' + Math.round(html.length/1024) + ' KB');
+
+// --- Yer imi: kaynaktan tek satırlık sürüm üretip kurulum sayfasına göm ---
+const yerimi = await build({
+  entryPoints: ['yerimi/kaynak.js'],
+  bundle: true, format: 'iife', minify: true,
+  target: ['chrome100','firefox100','safari15'], charset: 'utf8', write: false
+});
+const yerimiKodu = 'javascript:' + yerimi.outputFiles[0].text.trim().replace(/;?\s*$/, ';');
+let kurulum = await readFile('yer-imi.html', 'utf8');
+kurulum = kurulum.replace(
+  /(<script type="text\/plain" id="yerimiKodu">)[\s\S]*?(<\/script>)/,
+  (_, a, b) => a + yerimiKodu + b
+);
+await writeFile('yer-imi.html', kurulum, 'utf8');
+console.log('yer-imi.html güncellendi — kod ' + yerimiKodu.length + ' karakter');
