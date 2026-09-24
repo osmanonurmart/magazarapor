@@ -173,7 +173,9 @@ table{ border-collapse:collapse; }
 
 /* ---------- Notion tarzı tuval ---------- */
 .tuval{ display:flex; flex-direction:column; gap:12px; }
-.tuval-satir{ display:flex; align-items:stretch; gap:0; min-width:0; }
+/* Bloklar yukarıdan hizalanır: her biri kendi içeriği kadar yer kaplar,
+   kısa blokların altında boşluk kalmaz. */
+.tuval-satir{ display:flex; align-items:flex-start; gap:0; min-width:0; }
 .tuval-blok{
   position:relative; display:flex; flex-direction:column; min-width:0; min-height:70px;
   background:var(--kagit); border:1px solid var(--cizgi); border-radius:var(--r);
@@ -204,6 +206,8 @@ table{ border-collapse:collapse; }
 .tuval.tasima-modu{ user-select:none; }
 
 /* Sütunlar arasındaki tutamaç */
+/* Yığın: bir sütunda alt alta duran bloklar. Her biri kendi boyu kadar. */
+.tuval-yigin{ display:flex; flex-direction:column; gap:12px; min-width:0; }
 /* Yerleşim kilitliyken sütunlar arasında sadece boşluk kalır. */
 .tuval-aralik{ flex:0 0 12px; }
 .tuval-ayirac{ flex:0 0 12px; cursor:col-resize; position:relative; }
@@ -492,7 +496,9 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
 /* ---------- Mobil: üst gezinme / orta tablo / alt kartlar ---------- */
 @media (max-width: 900px){
   /* Dar ekranda bütün bloklar alt alta. */
-  .tuval-satir{ flex-direction:column; gap:12px; }
+  /* Dikey dizilişte bloklar kapsayıcıyı doldursun, içerik genişliğine büyümesin. */
+  .tuval-satir{ flex-direction:column; gap:12px; align-items:stretch; }
+  .tuval-yigin{ flex:1 1 auto !important; width:100%; }
   .tuval-blok{ flex:1 1 auto !important; height:auto !important; }
   .tuval-ayirac{ display:none; }
   .talep-ekran{ grid-template-columns:1fr; }
@@ -1754,17 +1760,35 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
   var EN_KUCUK_YUKSEKLIK = 80;
   var VARSAYILAN_DUZEN = [
     { bloklar: [{ panel: "hafta", yuzde: 34 }, { panel: "duyuru", yuzde: 28 }, { panel: "rutin", yuzde: 38 }] },
-    { bloklar: [{ panel: "haftaSecili", yuzde: 71 }, { panel: "ozet", yuzde: 29 }] },
-    { bloklar: [{ panel: "haftaOnceki", yuzde: 71 }, { panel: "yorum", yuzde: 29 }] }
+    { bloklar: [{ yigin: ["haftaSecili", "haftaOnceki"], yuzde: 71 }, { yigin: ["ozet", "yorum"], yuzde: 29 }] }
   ];
+  function yiginlariAc(satirlar) {
+    const cikti = [];
+    satirlar.forEach((satir) => {
+      const duz = [];
+      satir.bloklar.forEach((b) => {
+        if (!b.yigin) {
+          duz.push(b);
+          return;
+        }
+        b.yigin.forEach((panel, i) => duz.push({ panel, yuzde: i === 0 ? b.yuzde : b.yuzde }));
+      });
+      cikti.push({ bloklar: duz });
+    });
+    return cikti;
+  }
   function duzeniOku(magaza, panelAdlari) {
     const kayit = yerlesimGetir(magaza);
     let satirlar = TASINABILIR && Array.isArray(kayit.satirlar) && kayit.satirlar.length ? JSON.parse(JSON.stringify(kayit.satirlar)) : JSON.parse(JSON.stringify(VARSAYILAN_DUZEN));
+    if (TASINABILIR) satirlar = yiginlariAc(satirlar);
     satirlar.forEach((s) => {
-      s.bloklar = (s.bloklar || []).filter((b) => panelAdlari.includes(b.panel));
+      s.bloklar = (s.bloklar || []).map((b) => {
+        if (!b.yigin) return b;
+        return { ...b, yigin: b.yigin.filter((x) => panelAdlari.includes(x)) };
+      }).filter((b) => b.yigin ? b.yigin.length : panelAdlari.includes(b.panel));
     });
     satirlar = satirlar.filter((s) => s.bloklar.length);
-    const yerlesmis = satirlar.flatMap((s) => s.bloklar.map((b) => b.panel));
+    const yerlesmis = satirlar.flatMap((s) => s.bloklar.flatMap((b) => b.yigin || [b.panel]));
     panelAdlari.filter((a) => !yerlesmis.includes(a)).forEach((a) => satirlar.push({ bloklar: [{ panel: a, yuzde: 100 }] }));
     satirlar.forEach(duzeltYuzdeler);
     return satirlar;
@@ -1787,35 +1811,49 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
       y.satirlar = satirlar;
       yerlesimYaz(magaza, y);
     };
+    function blokKur(blok, govde) {
+      const sarmal = el(`<div class="tuval-blok" data-panel="${blok.panel}"></div>`);
+      sarmal.appendChild(el(`<div class="blok-baslik">
+      ${TASINABILIR ? '<button class="panel-tut" title="Basılı tutup sürükleyin">⠿</button>' : ""}
+      <span class="blok-ad">${adlar[blok.panel] || blok.panel}</span>
+    </div>`));
+      sarmal.appendChild(govde);
+      if (TASINABILIR) {
+        const b = boyutlar[blok.panel];
+        if (b && b.yukseklik) sarmal.style.height = b.yukseklik + "px";
+        sarmal.appendChild(el('<span class="blok-tutamak alt" title="Yükseklik"></span>'));
+        sarmal.querySelector(".panel-tut").addEventListener(
+          "pointerdown",
+          (e) => tasimayaBasla(e, blok.panel)
+        );
+        sarmal.querySelector(".blok-tutamak.alt").addEventListener(
+          "pointerdown",
+          (e) => yukseklikBasla(e, sarmal, blok.panel)
+        );
+      }
+      return sarmal;
+    }
     function ciz2() {
       tuval.innerHTML = "";
       satirlar.forEach((satir, si) => {
         const satirEl = el(`<div class="tuval-satir" data-satir="${si}"></div>`);
         satir.bloklar.forEach((blok, bi) => {
+          if (blok.yigin) {
+            const yiginEl = el('<div class="tuval-yigin"></div>');
+            yiginEl.style.flex = `0 1 ${blok.yuzde}%`;
+            blok.yigin.forEach((panelAdi) => {
+              const g = panelHaritasi[panelAdi];
+              if (!g) return;
+              yiginEl.appendChild(blokKur({ panel: panelAdi }, g, null));
+            });
+            satirEl.appendChild(yiginEl);
+            if (bi < satir.bloklar.length - 1) satirEl.appendChild(el('<div class="tuval-aralik"></div>'));
+            return;
+          }
           const govde = panelHaritasi[blok.panel];
           if (!govde) return;
-          const sarmal = el(`<div class="tuval-blok" data-panel="${blok.panel}"></div>`);
+          const sarmal = blokKur(blok, govde);
           sarmal.style.flex = `0 1 ${blok.yuzde}%`;
-          if (TASINABILIR) {
-            const b = boyutlar[blok.panel];
-            if (b && b.yukseklik) sarmal.style.height = b.yukseklik + "px";
-          }
-          sarmal.appendChild(el(`<div class="blok-baslik">
-          ${TASINABILIR ? '<button class="panel-tut" title="Basılı tutup sürükleyin">⠿</button>' : ""}
-          <span class="blok-ad">${adlar[blok.panel] || blok.panel}</span>
-        </div>`));
-          sarmal.appendChild(govde);
-          if (TASINABILIR) {
-            sarmal.appendChild(el('<span class="blok-tutamak alt" title="Yükseklik"></span>'));
-            sarmal.querySelector(".panel-tut").addEventListener(
-              "pointerdown",
-              (e) => tasimayaBasla(e, blok.panel)
-            );
-            sarmal.querySelector(".blok-tutamak.alt").addEventListener(
-              "pointerdown",
-              (e) => yukseklikBasla(e, sarmal, blok.panel)
-            );
-          }
           satirEl.appendChild(sarmal);
           if (TASINABILIR && bi < satir.bloklar.length - 1) {
             const ayirac = el('<div class="tuval-ayirac" title="Genişliği ayarla"></div>');

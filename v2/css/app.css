@@ -164,7 +164,9 @@ table{ border-collapse:collapse; }
 
 /* ---------- Notion tarzı tuval ---------- */
 .tuval{ display:flex; flex-direction:column; gap:12px; }
-.tuval-satir{ display:flex; align-items:stretch; gap:0; min-width:0; }
+/* Bloklar yukarıdan hizalanır: her biri kendi içeriği kadar yer kaplar,
+   kısa blokların altında boşluk kalmaz. */
+.tuval-satir{ display:flex; align-items:flex-start; gap:0; min-width:0; }
 .tuval-blok{
   position:relative; display:flex; flex-direction:column; min-width:0; min-height:70px;
   background:var(--kagit); border:1px solid var(--cizgi); border-radius:var(--r);
@@ -195,6 +197,8 @@ table{ border-collapse:collapse; }
 .tuval.tasima-modu{ user-select:none; }
 
 /* Sütunlar arasındaki tutamaç */
+/* Yığın: bir sütunda alt alta duran bloklar. Her biri kendi boyu kadar. */
+.tuval-yigin{ display:flex; flex-direction:column; gap:12px; min-width:0; }
 /* Yerleşim kilitliyken sütunlar arasında sadece boşluk kalır. */
 .tuval-aralik{ flex:0 0 12px; }
 .tuval-ayirac{ flex:0 0 12px; cursor:col-resize; position:relative; }
@@ -483,7 +487,9 @@ td.hesaplanan{ color:var(--soluk); font-size:.76rem; }
 /* ---------- Mobil: üst gezinme / orta tablo / alt kartlar ---------- */
 @media (max-width: 900px){
   /* Dar ekranda bütün bloklar alt alta. */
-  .tuval-satir{ flex-direction:column; gap:12px; }
+  /* Dikey dizilişte bloklar kapsayıcıyı doldursun, içerik genişliğine büyümesin. */
+  .tuval-satir{ flex-direction:column; gap:12px; align-items:stretch; }
+  .tuval-yigin{ flex:1 1 auto !important; width:100%; }
   .tuval-blok{ flex:1 1 auto !important; height:auto !important; }
   .tuval-ayirac{ display:none; }
   .talep-ekran{ grid-template-columns:1fr; }
