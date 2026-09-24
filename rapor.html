@@ -6,7 +6,6 @@
 <title>Mağaza Performans Raporu</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -29,6 +28,11 @@
     cursor:pointer; font-size:.82rem; font-weight:600; border-bottom:3px solid transparent;
   }
   .tab-btn.active{ background:#fff; color:var(--dark); border-bottom:3px solid var(--accent); }
+  .surum-rozet{
+    display:inline-block; margin-left:5px; padding:1px 6px; border-radius:8px; background:#f1efe9;
+    color:#8a6a3f; font-size:.66rem; font-weight:700; cursor:pointer; vertical-align:1px;
+  }
+  .surum-rozet:hover{ background:var(--accent); color:#fff; }
   .tab-btn:hover:not(.active){ background:#e8e5dd; }
 
   .araclar-page{ margin:0; padding:16px; }
@@ -522,7 +526,7 @@
 
 <header>
   <div class="tab-bar">
-    <button class="tab-btn active" id="tabRaporBtn" onclick="showTab('rapor')">📊 Rapor</button>
+    <button class="tab-btn active" id="tabRaporBtn" onclick="showTab('rapor')">📊 Rapor<span class="surum-rozet" id="surumRozet" title="Güncelleme kontrol et" onclick="event.stopPropagation(); guncellemeKontrol()"></span></button>
     <button class="tab-btn" id="tabAraclarBtn" onclick="showTab('araclar')">🧰 Araçlar</button>
     <button class="tab-btn" id="tabTransferBtn" onclick="showTab('transfer')">📤 Transfer</button>
     <span class="chip-wrap">
@@ -677,6 +681,10 @@
 </div>
 
 <script>
+
+// Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
+// sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
+const APP_SURUM = 1;
 
 const GUN_ADLARI = ['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar'];
 const IZINLI_SECENEKLER = ['','Onur','Fatma','Zeynep'];
@@ -3699,7 +3707,7 @@ function renderKirikKlasorBilgi(){
     html += 'Kayıt yeri: <b>' + (kirikKlasor ? escapeHtml(kirikKlasor.name) : 'seçilmedi') + '</b> ' +
             '<button class="tr-link" type="button" onclick="kirikKlasorSec()">' + (kirikKlasor ? 'değiştir' : 'seç') + '</button>';
   } else {
-    html += '<span style="color:#999;">Bu tarayıcı klasöre yazamıyor, .zip olarak iner</span>';
+    html += '<span style="color:#999;">Bu tarayıcı klasöre yazamıyor, dosyalar tek tek iner (ör. 7-1.jpg)</span>';
   }
   el.innerHTML = html;
 }
@@ -3821,16 +3829,21 @@ function dosyaIndir(href, ad){
   a.remove();
 }
 
-async function zipIndir(no, fotolar, not){
-  if(typeof JSZip === 'undefined') throw new Error('Zip kütüphanesi yüklenemedi.');
-  const zip = new JSZip();
-  const klasor = zip.folder(String(no));
-  fotolar.forEach(f=> klasor.file(f.sira + '.jpg', f.data.split(',')[1], {base64:true}));
-  if(not) klasor.file('not.txt', not);
-  const blob = await zip.generateAsync({type:'blob'});
-  const url = URL.createObjectURL(blob);
-  dosyaIndir(url, no + '.zip');
-  setTimeout(()=> URL.revokeObjectURL(url), 5000);
+const bekle = ms => new Promise(r=> setTimeout(r, ms));
+
+// Klasöre yazılamayan tarayıcılarda (ör. telefon) dosyalar tek tek iner:
+// 7-1.jpg, 7-2.jpg ... 7-not.txt. Art arda inişler tarayıcıda kaybolmasın diye aralıklı.
+async function dosyalariTekTekIndir(onEk, fotolar, not){
+  for(const f of fotolar){
+    dosyaIndir(f.data, onEk + f.sira + '.jpg');
+    await bekle(400);
+  }
+  if(not){
+    const url = URL.createObjectURL(new Blob([not], {type:'text/plain;charset=utf-8'}));
+    dosyaIndir(url, onEk + 'not.txt');
+    setTimeout(()=> URL.revokeObjectURL(url), 5000);
+    await bekle(400);
+  }
 }
 
 // ---------- Kırık: bilgisayar tarafı ----------
@@ -3862,7 +3875,7 @@ async function kirikIndir(ids){
         if(t.text) await dosyaYaz(klasor, 'not.txt', t.text);
       } else {
         no = no + 1;
-        await zipIndir(no, fotolar, t.text);
+        await dosyalariTekTekIndir(no + '-', fotolar, t.text);
       }
       await sdb('settings').doc('transfer').set({kirikSayac:no}, {merge:true});
       kirikSayac = no;
@@ -3899,7 +3912,7 @@ async function genelFotolariIndir(t){
   try{
     const fotolar = await transferFotolariGetir(t);
     const zaman = transferDosyaZamani(t.createdAtMs);
-    fotolar.forEach(f=> dosyaIndir(f.data, 'foto-' + zaman + '-' + f.sira + '.jpg'));
+    await dosyalariTekTekIndir('foto-' + zaman + '-', fotolar, '');
   }catch(e){ setTransferDurum('İndirilemedi: ' + e.message, true); }
 }
 
@@ -3915,6 +3928,44 @@ async function metniKopyala(text){
     ta.remove();
   }
   setTransferDurum('✓ Metin kopyalandı.');
+}
+
+// ==================== SÜRÜM / GÜNCELLEME ====================
+function renderSurumRozet(metin){
+  document.getElementById('surumRozet').textContent = metin || ('v' + APP_SURUM);
+}
+renderSurumRozet();
+
+let guncellemeKontrolde = false;
+async function guncellemeKontrol(){
+  if(guncellemeKontrolde) return;
+  if(location.protocol === 'file:'){
+    alert('Sayfa bilgisayardaki bir dosyadan açılmış, güncelleme buradan kontrol edilemiyor.\nGüncel sürüm için sayfayı internet adresinden açın.');
+    return;
+  }
+  guncellemeKontrolde = true;
+  renderSurumRozet('⟳ kontrol');
+  try{
+    // cache:'reload' sunucudan taze kopyayı alır ve tarayıcı önbelleğini de günceller,
+    // böylece ardından yapılan yenileme yeni sürümü açar.
+    const r = await fetch(location.href.split('#')[0], {cache:'reload'});
+    if(!r.ok) throw new Error('Sunucu yanıtı: ' + r.status);
+    const html = await r.text();
+    const m = html.match(/const APP_SURUM = (\d+);/);
+    const sunucuSurum = m ? Number(m[1]) : 0;
+    if(sunucuSurum > APP_SURUM){
+      renderSurumRozet('v' + sunucuSurum + ' yükleniyor');
+      location.reload();
+      return;
+    }
+    renderSurumRozet('v' + APP_SURUM + ' ✓ güncel');
+    setTimeout(()=> renderSurumRozet(), 2500);
+  }catch(e){
+    renderSurumRozet();
+    alert('Güncelleme kontrol edilemedi: ' + e.message);
+  }finally{
+    guncellemeKontrolde = false;
+  }
 }
 </script>
 
