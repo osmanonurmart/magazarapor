@@ -1,0 +1,29 @@
+rules_version = '2';
+
+// Mağaza Raporu (v1) — Firestore güvenlik kuralları
+//
+// rapor.html anonim girişle çalışır. Kullandığı yollar:
+//   settings/{belge}                 — profil listesi
+//   stores/{magaza}/{alt yollar}     — mağazanın bütün verisi
+//   entries, weekgoals, tools, ghbhr* — mağaza ayrımından önceki eski kayıtlar
+//
+// DİKKAT: v2 (mcrapor2) hâlâ aynı Firebase projesindeyse bu dosyayı
+// yayınlamayın — v2'nin mc2_ koleksiyonları kapanır ve uygulama açılmaz.
+// Önce v2'yi kendi Firebase projesine taşıyın, sonra bunu yayınlayın.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function girisli(){ return request.auth != null; }
+
+    match /settings/{belge}     { allow read, write: if girisli(); }
+    match /stores/{magaza}/{belge=**} { allow read, write: if girisli(); }
+
+    // Mağaza ayrımından önce köke yazılmış eski veriler.
+    match /entries/{belge}      { allow read, write: if girisli(); }
+    match /weekgoals/{belge}    { allow read, write: if girisli(); }
+    match /tools/{belge}        { allow read, write: if girisli(); }
+    match /ghbhrWeekly/{belge}  { allow read, write: if girisli(); }
+    match /ghbhrReports/{belge} { allow read, write: if girisli(); }
+  }
+}
