@@ -30,6 +30,9 @@
 <link rel="apple-touch-icon" href="simge-180.png?v=2">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#2d2d2d">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Mağaza Rapor">
 <meta name="application-name" content="Mağaza Rapor">
 <script>
@@ -723,6 +726,93 @@ if(!document.documentElement.classList.contains('tel')){
 
   /* Pencereler */
   html.tel .modal-box{ width:100%; max-width:calc(100vw - 24px); max-height:calc(100vh - 40px); overflow:auto; }
+
+  /* ---------- Telefon: ek parçalar (masaüstünde gizli) ---------- */
+  .sadece-tel{ display:none !important; }
+  .tel-yenile{ display:none; }
+  html.tel .sadece-tel{ display:block !important; }
+  html.tel, html.tel body{ overscroll-behavior-y:contain; }
+  html.tel .tel-buyuk-btn{
+    display:block; width:100%; border:none; border-radius:12px; background:#a67c3d; color:#fff;
+    font-size:.95rem; font-weight:700; padding:14px; margin:0 0 10px; cursor:pointer; font-family:inherit;
+  }
+  html.tel .tel-buyuk-btn:disabled{ opacity:.6; }
+  html.tel .wp-btn{ background:#1f8a4c; }
+
+  /* Gün kartları */
+  html.tel .tel-hafta{ background:#fff; border:1px solid var(--line); border-radius:14px; padding:12px; margin-bottom:12px; }
+  html.tel .th-ust{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin-bottom:10px; }
+  html.tel .th-ust b{ font-size:1rem; }
+  html.tel .th-ust span{ font-size:.75rem; color:#888; }
+  html.tel .th-ozet{ display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-bottom:10px; }
+  html.tel .th-ozet div{ background:#f7f4ee; border-radius:9px; padding:7px 8px; font-size:.7rem; color:#777; }
+  html.tel .th-ozet b{ display:block; font-size:.95rem; color:#222; margin-top:2px; }
+  html.tel .tg-satir{
+    display:grid; grid-template-columns:54px 1fr auto; align-items:center; gap:4px 10px; width:100%;
+    background:none; border:none; border-top:1px solid #f0ece5; padding:10px 2px; text-align:left;
+    font-family:inherit; color:#222; cursor:pointer;
+  }
+  html.tel .tg-satir:first-of-type{ border-top:none; }
+  html.tel .tg-satir.bugun{ background:#fbf3e6; border-radius:10px; }
+  html.tel .tg-gun b{ display:block; font-size:.9rem; }
+  html.tel .tg-gun small{ font-size:.7rem; color:#888; }
+  html.tel .tg-ciro{ font-size:1.05rem; font-weight:700; }
+  html.tel .tg-oran{ font-size:.8rem; font-weight:700; padding:3px 8px; border-radius:20px; background:#eee; color:#555; }
+  html.tel .tg-oran.iyi{ background:#e3f1e4; color:var(--green); }
+  html.tel .tg-detay{ grid-column:2 / 4; font-size:.72rem; color:#777; }
+  html.tel .tg-bos{ grid-column:2 / 4; font-size:.8rem; color:#aaa; }
+
+  /* Veri girişi penceresi */
+  html.tel .tvf-arka{
+    position:fixed; inset:0; z-index:1500; background:rgba(0,0,0,.4);
+    display:flex; align-items:flex-end; justify-content:center;
+  }
+  html.tel .tvf-kutu{
+    background:#fff; width:100%; max-height:92vh; overflow:auto; border-radius:18px 18px 0 0;
+    padding:16px 16px calc(16px + env(safe-area-inset-bottom));
+  }
+  html.tel .tvf-ust{ display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+  html.tel .tvf-ust b{ font-size:1.05rem; }
+  html.tel .tvf-kapat{ border:none; background:#f1efe9; width:34px; height:34px; border-radius:50%; font-size:1rem; cursor:pointer; }
+  html.tel .tvf-kutu label{ display:block; font-size:.75rem; color:#666; font-weight:600; }
+  html.tel .tvf-kutu input, html.tel .tvf-kutu select{
+    display:block; width:100%; margin-top:4px; padding:11px 12px; font-size:16px; border:1.5px solid #d8d2c8;
+    border-radius:10px; font-family:inherit; background:#fff; color:#222;
+  }
+  html.tel .tvf-kutu input:focus, html.tel .tvf-kutu select:focus{ outline:none; border-color:#a67c3d; }
+  html.tel .tvf-tarih{ margin-bottom:12px; }
+  html.tel .tvf-alanlar{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
+  html.tel .tvf-hata{ color:var(--red); font-size:.8rem; min-height:18px; margin-bottom:6px; }
+
+  /* Bölge paneli: mağaza kartları */
+  html.tel #bpOzet .bp-kutu{ display:none; }
+  html.tel .bp-tel-sirala{ display:flex !important; align-items:center; gap:8px; margin-bottom:10px; font-size:.8rem; color:#666; }
+  html.tel .bp-tel-sirala select{ flex:1; padding:8px 10px; border-radius:9px; border:1px solid #d8d2c8; font-size:.85rem; background:#fff; font-family:inherit; }
+  html.tel .bp-kart{
+    background:#fff; border:1px solid var(--line); border-radius:14px; padding:12px 14px; margin-bottom:10px; cursor:pointer;
+  }
+  html.tel .bp-kart.toplam{ background:#fbfaf7; cursor:default; }
+  html.tel .bpk-ust{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
+  html.tel .bpk-ad{ font-weight:700; font-size:.95rem; }
+  html.tel .bpk-ad small{ font-weight:400; color:#999; font-size:.72rem; margin-left:4px; }
+  html.tel .bpk-ciro{ font-size:1.1rem; font-weight:700; }
+  html.tel .bpk-bar{ height:8px; background:#efebe4; border-radius:4px; margin:10px 0 6px; overflow:hidden; }
+  html.tel .bpk-bar i{ display:block; height:100%; background:#C8A066; border-radius:4px; }
+  html.tel .bpk-orta{ display:flex; justify-content:space-between; font-size:.78rem; color:#555; }
+  html.tel .bpk-orta .artis{ color:var(--green); font-weight:600; }
+  html.tel .bpk-orta .dusus{ color:var(--red); font-weight:600; }
+  html.tel .bpk-alt{ font-size:.72rem; color:#888; margin-top:6px; line-height:1.5; }
+  html.tel .bpk-hata{ font-size:.78rem; color:var(--red); margin-top:6px; }
+
+  /* Aşağı çekip yenileme göstergesi */
+  html.tel .tel-yenile{
+    display:flex; position:fixed; top:0; left:0; right:0; z-index:60; justify-content:center;
+    transform:translateY(-60px); transition:transform .15s; pointer-events:none;
+  }
+  html.tel .tel-yenile span{
+    margin-top:10px; background:#2d2d2d; color:#fff; font-size:.8rem; padding:8px 14px; border-radius:20px;
+    box-shadow:0 4px 14px rgba(0,0,0,.2);
+  }
 </style>
 </head>
 <body>
@@ -781,6 +871,11 @@ if(!document.documentElement.classList.contains('tel')){
 </header>
 <main class="bp-icerik" id="bpIcerik">
   <section id="bpOzet">
+    <div class="sadece-tel bp-tel-sirala">
+      <label for="bpTelSirala">Sırala</label>
+      <select id="bpTelSirala"></select>
+    </div>
+    <div class="bp-kartlar sadece-tel" id="bpKartlar"></div>
     <div class="bp-kutu">
       <table class="bp-tablo" id="bpTablo"></table>
     </div>
@@ -797,6 +892,30 @@ if(!document.documentElement.classList.contains('tel')){
     </div>
   </section>
 </main>
+</div>
+
+<div class="tel-yenile" id="telYenile"><span id="telYenileYazi">↓ Yenilemek için çek</span></div>
+
+<div class="tvf-arka" id="telVeriFormu" style="display:none;">
+  <form class="tvf-kutu" id="tvfForm" novalidate>
+    <div class="tvf-ust">
+      <b id="tvfBaslik">Gün verisi</b>
+      <button type="button" class="tvf-kapat" id="tvfKapat" aria-label="Kapat">✕</button>
+    </div>
+    <label class="tvf-tarih">Tarih <input type="date" id="tvfTarih"></label>
+    <div class="tvf-alanlar">
+      <label>Ciro (TL)<input id="tvf_ciro" inputmode="decimal" autocomplete="off"></label>
+      <label>Mdo (%)<input id="tvf_mdo" inputmode="decimal" autocomplete="off"></label>
+      <label>Fbü<input id="tvf_fbu" inputmode="decimal" autocomplete="off"></label>
+      <label>Mgs<input id="tvf_mgs" inputmode="decimal" autocomplete="off"></label>
+      <label>Fbs (TL)<input id="tvf_fbs" inputmode="decimal" autocomplete="off"></label>
+      <label>Toplu satış (K)<input id="tvf_toplu_satis" inputmode="decimal" autocomplete="off"></label>
+      <label>Hedef (TL)<input id="tvf_hedef" inputmode="decimal" autocomplete="off"></label>
+      <label>İzinli<select id="tvf_izinli"></select></label>
+    </div>
+    <div class="tvf-hata" id="tvfHata"></div>
+    <button type="submit" class="tel-buyuk-btn" id="tvfKaydet">Kaydet</button>
+  </form>
 </div>
 
 <div id="appRoot" style="display:none;">
@@ -851,6 +970,7 @@ if(!document.documentElement.classList.contains('tel')){
   </div>
 
   <div class="right-col">
+    <button type="button" class="tel-buyuk-btn sadece-tel" id="telVeriGirBtn">＋ Bugünün verisini gir</button>
     <div class="report-panel" id="reportPanel"></div>
   </div>
 </div>
@@ -953,7 +1073,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 13;
+const APP_SURUM = 14;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -1339,6 +1459,8 @@ const db = firebase.firestore();
 const TELEFON = document.documentElement.classList.contains('tel');
 if(TELEFON){
   try{ db.settings({experimentalAutoDetectLongPolling:true}); }catch(e){ /* eski sürüm: varsayılanla devam */ }
+  // İnternet zayıfken / yokken son okunan veriler telefonda görünsün.
+  try{ db.enablePersistence({synchronizeTabs:true}).catch(()=>{}); }catch(e){ /* desteklenmiyor */ }
 }
 
 // Telefonda sonradan yüklenen kütüphaneler; masaüstünde zaten yüklü olduğu için hemen döner.
@@ -2187,6 +2309,275 @@ if(TELEFON){
   sar('refreshWeekBlockByKey', ()=> document.getElementById('monthContainer'));
   sar('renderReportPanel', ()=> document.getElementById('reportPanel'));
   sar('bpCiz', ()=> document.getElementById('bpTablo'));
+  const asilBpCiz = window.bpCiz;
+  window.bpCiz = function(){ const r = asilBpCiz.apply(this, arguments); bpKartlariCiz(); return r; };
+}
+
+// ==================== TELEFON: HAFTA KARTLARI ====================
+function telHaftaHtml(monday, baslik){
+  const d = computeWeekDerived(monday);
+  const son = d.days[6];
+  const kisa = x => pad(x.getDate()) + '.' + pad(x.getMonth()+1);
+  // Gerçekleşme yalnızca cirosu girilmiş günlerin hedefiyle hesaplanır.
+  const girilenHedef = d.records.reduce((t, r)=> t + (r && bpDolu(r.ciro) ? effectiveHedef(r) : 0), 0);
+  const ozet = (etiket, deger, sinif) => '<div>' + etiket + '<b' + (sinif ? ' class="' + sinif + '"' : '') + '>' + (deger || '–') + '</b></div>';
+  const satirlar = d.days.map((gun, i)=>{
+    const r = d.records[i];
+    const dk = dateStr(gun);
+    const bugun = isToday(gun);
+    const ust = '<span class="tg-gun"><b>' + GUN_KISA[i] + '</b><small>' + kisa(gun) + '</small></span>';
+    if(!r || r.ciro === undefined || r.ciro === null || r.ciro === ''){
+      return '<button type="button" class="tg-satir' + (bugun ? ' bugun' : '') + '" data-tarih="' + dk + '">' + ust
+        + '<span class="tg-bos">' + (gun > getNow() ? '–' : 'Veri yok · eklemek için dokun') + '</span></button>';
+    }
+    const oran = Number(r.ciro) / effectiveHedef(r) * 100;
+    const detay = [
+      r.mdo ? 'Mdo ' + r.mdo : null,
+      bpDolu(r.fbu) ? 'Fbü <span class="fbu">' + fmtNum(r.fbu) + '</span>' : null,
+      bpDolu(r.mgs) ? 'Mgs ' + fmtNum(r.mgs) : null,
+      bpDolu(r.fbs) ? 'Fbs ' + fmtTL(r.fbs) : null,
+      bpDolu(r.toplu_satis) ? 'TS ' + fmtK(r.toplu_satis) : null,
+      r.izinli ? 'İzinli: ' + escapeHtml(r.izinli) : null
+    ].filter(Boolean).join(' · ');
+    return '<button type="button" class="tg-satir' + (bugun ? ' bugun' : '') + '" data-tarih="' + dk + '">' + ust
+      + '<span class="tg-ciro">' + fmtTL(r.ciro) + '</span>'
+      + '<span class="tg-oran' + (oran >= 100 ? ' iyi' : '') + '">' + fmtPctInt(oran) + '</span>'
+      + '<span class="tg-detay">' + detay + '</span></button>';
+  }).join('');
+  return '<section class="tel-hafta">'
+    + '<div class="th-ust"><b>' + baslik + '</b><span>' + kisa(monday) + ' – ' + kisa(son) + ' · Hafta ' + d.week + '</span></div>'
+    + '<div class="th-ozet">'
+    +   ozet('Ciro', d.ciroToplam ? fmtTL(d.ciroToplam) : null)
+    +   ozet('Gerçekleşme', girilenHedef ? fmtPctInt(d.ciroToplam / girilenHedef * 100) : null)
+    +   ozet('Mdo ort.', d.mdoAvg !== null ? '% ' + d.mdoAvg.toFixed(2).replace('.', ',') : null)
+    +   ozet('Fbü ort.', d.fbuAvg !== null ? '<span class="fbu">' + fmtNum(d.fbuAvg) + '</span>' : null)
+    +   ozet('Mgs top.', d.mgsTotal !== null ? fmtNum(d.mgsTotal) : null)
+    +   ozet('Toplu S.', d.topluToplam !== null ? fmtK(d.topluToplam) : null)
+    + '</div>' + satirlar + '</section>';
+}
+
+// ==================== TELEFON: VERİ GİRİŞİ ====================
+const TVF_ALANLAR = ['ciro','mdo','fbu','mgs','fbs','toplu_satis','hedef'];
+function tvfSayi(metin){
+  metin = String(metin || '').trim().replace(/TL|K|%/gi, '').trim();
+  if(metin === '') return null;
+  // "4.5" gibi noktalı yazım ondalık sayılır; "35.000" binlik ayırıcıdır.
+  if(!metin.includes(',') && /^\d+\.\d{1,2}$/.test(metin)) return Number(metin);
+  return parseNumberInput(metin);
+}
+function tvfYaz(v){ return (v === null || v === undefined || v === '') ? '' : String(v).replace('.', ','); }
+function telVeriFormuAc(tarih){
+  tarih = tarih || todayStr(0);
+  document.getElementById('tvfTarih').value = tarih;
+  const sec = document.getElementById('tvf_izinli');
+  sec.innerHTML = IZINLI_SECENEKLER.map(k=> '<option value="' + k + '">' + (k === '' ? '— yok —' : k) + '</option>').join('');
+  tvfDoldur(tarih);
+  document.getElementById('tvfHata').textContent = '';
+  document.getElementById('telVeriFormu').style.display = '';
+}
+function tvfDoldur(tarih){
+  const r = getRecord(tarih) || {};
+  const t = tarihOku(tarih);
+  document.getElementById('tvfBaslik').textContent = GUN_ADLARI[(t.getDay() + 6) % 7] + ' · ' + kisaTarih(t);
+  TVF_ALANLAR.forEach(f=>{
+    let v = r[f];
+    if(f === 'mdo') v = mdoToNumber(v);
+    document.getElementById('tvf_' + f).value = tvfYaz(v);
+  });
+  document.getElementById('tvf_izinli').value = r.izinli || '';
+}
+function telVeriFormuKapat(){ document.getElementById('telVeriFormu').style.display = 'none'; }
+function telVeriKaydet(e){
+  e.preventDefault();
+  const tarih = document.getElementById('tvfTarih').value;
+  if(!tarih){ document.getElementById('tvfHata').textContent = 'Tarih seçin.'; return; }
+  const eski = getRecord(tarih);
+  const rec = Object.assign({date: tarih}, eski || {});
+  for(const f of TVF_ALANLAR){
+    const metin = document.getElementById('tvf_' + f).value;
+    if(f === 'mdo'){
+      const n = tvfSayi(metin);
+      rec.mdo = n === null ? null : '% ' + n.toFixed(2).replace('.', ',');
+    } else {
+      const n = tvfSayi(metin);
+      if(metin.trim() !== '' && (n === null || isNaN(n))){
+        document.getElementById('tvfHata').textContent = 'Sayı anlaşılamadı: ' + metin;
+        return;
+      }
+      if(f === 'hedef' && n === null) delete rec.hedef; else rec[f] = n;
+    }
+  }
+  rec.izinli = document.getElementById('tvf_izinli').value || null;
+  pushUndo({type:'gun', date: tarih, oldRec: eski ? JSON.parse(JSON.stringify(eski)) : null});
+  setRecord(tarih, rec);
+  telVeriFormuKapat();
+  renderAll();
+  uiBildirim(kisaTarih(tarihOku(tarih)) + ' kaydedildi', 'basari');
+}
+if(TELEFON){
+  document.getElementById('telVeriGirBtn').addEventListener('click', ()=> telVeriFormuAc(todayStr(0)));
+  document.getElementById('tvfKapat').addEventListener('click', telVeriFormuKapat);
+  document.getElementById('telVeriFormu').addEventListener('click', e=>{ if(e.target.id === 'telVeriFormu') telVeriFormuKapat(); });
+  document.getElementById('tvfForm').addEventListener('submit', telVeriKaydet);
+  document.getElementById('tvfTarih').addEventListener('change', function(){ if(this.value) tvfDoldur(this.value); });
+}
+
+// ==================== TELEFON: PAYLAŞIM ====================
+// Mesaj doğrudan WhatsApp'ta açılır; rapor görseli telefonun paylaşım menüsüyle gönderilir.
+// Görsel hazırlanması birkaç saniye sürebildiği için iki adımlıdır: önce hazırlanır,
+// sonra "Görseli paylaş"a dokununca paylaşım menüsü açılır (tarayıcılar paylaşımı
+// yalnızca doğrudan dokunuşla açtırır).
+let telHazirGorsel = null;
+if(TELEFON){
+  document.addEventListener('click', async e=>{
+    const wp = e.target.closest && e.target.closest('#wpMsgBtn');
+    if(wp){
+      e.preventDefault();
+      const metin = buildDailyMessage();
+      window.location.href = 'https://wa.me/?text=' + encodeURIComponent(metin);
+      return;
+    }
+    const btn = e.target.closest && e.target.closest('#sendBtn');
+    if(!btn) return;
+    e.preventDefault();
+    e.stopPropagation();
+    if(telHazirGorsel){
+      const dosya = telHazirGorsel;
+      try{
+        if(navigator.canShare && navigator.canShare({files:[dosya]})){
+          await navigator.share({files:[dosya], title:'Günlük rapor'});
+        } else {
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(dosya); a.download = dosya.name; a.click();
+          setTimeout(()=> URL.revokeObjectURL(a.href), 4000);
+        }
+      }catch(err){ if(err && err.name !== 'AbortError') uiBildirim('Paylaşılamadı: ' + err.message, 'hata'); }
+      telHazirGorsel = null;
+      btn.textContent = '📷 Fotoğrafını Al';
+      return;
+    }
+    const eskiMetin = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Hazırlanıyor...';
+    try{
+      const canvas = await generateReportCanvas();
+      const blob = await new Promise(res=> canvas.toBlob(res, 'image/png'));
+      telHazirGorsel = new File([blob], 'rapor-' + todayStr(0) + '.png', {type:'image/png'});
+      btn.textContent = '📤 Görseli paylaş';
+    }catch(err){
+      uiBildirim('Görsel hazırlanamadı: ' + err.message, 'hata');
+      btn.textContent = eskiMetin;
+    }finally{
+      btn.disabled = false;
+    }
+  }, true);
+}
+
+// ==================== TELEFON: BÖLGE PANELİ KARTLARI ====================
+function bpKartlariCiz(){
+  if(!TELEFON) return;
+  const kutu = document.getElementById('bpKartlar');
+  const secim = document.getElementById('bpTelSirala');
+  if(!secim.options.length){
+    secim.innerHTML = BP_KOLONLAR.filter(c=> c.k !== 'hedef' && c.k !== 'sonGiris' && c.k !== 'gun')
+      .map(c=> '<option value="' + c.k + '">' + c.t + '</option>').join('');
+    secim.addEventListener('change', function(){
+      bp.sirala = {kol:this.value, yon: this.value === 'ad' ? 1 : -1};
+      bpCiz();
+    });
+  }
+  secim.value = bp.sirala.kol;
+  if(!oturum || !oturum.magazalar.length || !bp.yuklendi){ kutu.innerHTML = ''; return; }
+  const ar = bpAraligi();
+  const satirlar = bpSatirlar(ar);
+  const {kol, yon} = bp.sirala;
+  satirlar.sort((a,b)=>{
+    if(a.hata || b.hata) return a.hata ? 1 : -1;
+    const x = a[kol], y = b[kol];
+    if(kol === 'ad') return String(x).localeCompare(String(y), 'tr') * yon;
+    if(x === null || x === undefined) return 1;
+    if(y === null || y === undefined) return -1;
+    return (x < y ? -1 : x > y ? 1 : 0) * yon;
+  });
+  const deger = (v, f)=> (v === null || v === undefined) ? '–' : f(v);
+  const kart = (s, toplamMi)=>{
+    if(s.hata){
+      return '<div class="bp-kart" data-m="' + escapeHtml(s.m) + '"><div class="bpk-ust"><span class="bpk-ad">' + escapeHtml(s.ad)
+        + '</span></div><div class="bpk-hata">Okunamadı: ' + escapeHtml(s.hata) + '</div></div>';
+    }
+    const oran = s.oran === null || s.oran === undefined ? 0 : Math.max(0, Math.min(100, s.oran));
+    const deg = s.degisim;
+    return '<div class="bp-kart' + (toplamMi ? ' toplam' : '') + '"' + (toplamMi ? '' : ' data-m="' + escapeHtml(s.m) + '"') + '>'
+      + '<div class="bpk-ust"><span class="bpk-ad">' + escapeHtml(s.ad)
+      + (!toplamMi && s.ad !== magazaAdi(s.m) ? '<small>' + escapeHtml(magazaAdi(s.m)) + '</small>' : '') + '</span>'
+      + '<span class="bpk-ciro">' + deger(s.ciro, fmtTL) + '</span></div>'
+      + '<div class="bpk-bar" role="img" aria-label="Gerçekleşme ' + deger(s.oran, fmtPctInt) + '"><i style="width:' + oran.toFixed(1) + '%"></i></div>'
+      + '<div class="bpk-orta"><span>Gerçekleşme <b>' + deger(s.oran, fmtPctInt) + '</b></span>'
+      + '<span class="' + (deg === null || deg === undefined ? '' : (deg >= 0 ? 'artis' : 'dusus')) + '">' + (deg === null || deg === undefined ? '–' : fmtDegisim(deg)) + '</span></div>'
+      + '<div class="bpk-alt">Mdo ' + deger(s.mdo, fmtYuzde) + ' · Fbü <span class="fbu">' + deger(s.fbu, fmtNum) + '</span> · Mgs ' + deger(s.mgs, fmtNum)
+      + ' · Fbs ' + deger(s.fbs, fmtTL) + ' · TS ' + deger(s.toplu, fmtK)
+      + (toplamMi ? '' : '<br>Son giriş: ' + (s.sonGiris ? kisaTarih(tarihOku(s.sonGiris)) : '–') + ' · ' + s.gun + ' gün veri')
+      + '</div></div>';
+  };
+  kutu.innerHTML = (satirlar.length > 1 ? kart(bpToplam(satirlar), true) : '') + satirlar.map(x=> kart(x, false)).join('');
+  kutu.querySelectorAll('.bp-kart[data-m]').forEach(k=> k.addEventListener('click', ()=> magazayiAc(k.dataset.m)));
+  telKisalt(kutu);
+}
+
+// ==================== TELEFON: AŞAĞI ÇEKİP YENİLEME ====================
+let telYenileniyor = false;
+async function telVerileriYenile(){
+  if(telYenileniyor) return;
+  telYenileniyor = true;
+  try{
+    if(document.getElementById('bolgePaneli').style.display !== 'none'){
+      await bpVeriYukle();
+    } else if(aktifProfil && document.getElementById('appRoot').style.display !== 'none'){
+      const profil = aktifProfil;
+      stopCloudListeners();
+      resetStoreCaches();
+      aktifProfil = profil;
+      await loadCloudCache();
+      listenCloudChanges();
+      renderAll();
+    }
+    uiBildirim('Güncellendi', 'basari');
+  }catch(e){
+    uiBildirim('Yenilenemedi: ' + e.message, 'hata');
+  }finally{
+    telYenileniyor = false;
+  }
+}
+if(TELEFON){
+  const gosterge = document.getElementById('telYenile');
+  const yazi = document.getElementById('telYenileYazi');
+  let basY = null, fark = 0;
+  const ESIK = 80;
+  document.addEventListener('touchstart', e=>{
+    const acik = document.getElementById('appRoot').style.display !== 'none' || document.getElementById('bolgePaneli').style.display !== 'none';
+    const pencereAcik = document.getElementById('telVeriFormu').style.display !== 'none';
+    basY = (acik && !pencereAcik && window.scrollY <= 0 && e.touches.length === 1) ? e.touches[0].clientY : null;
+    fark = 0;
+  }, {passive:true});
+  document.addEventListener('touchmove', e=>{
+    if(basY === null) return;
+    fark = e.touches[0].clientY - basY;
+    if(fark <= 0 || window.scrollY > 0){ gosterge.style.transform = ''; return; }
+    gosterge.style.transform = 'translateY(' + (Math.min(fark, ESIK + 20) - 60) + 'px)';
+    yazi.textContent = fark >= ESIK ? '↻ Bırak, yenilensin' : '↓ Yenilemek için çek';
+  }, {passive:true});
+  document.addEventListener('touchend', ()=>{
+    if(basY !== null && fark >= ESIK) telVerileriYenile();
+    basY = null; fark = 0;
+    gosterge.style.transform = '';
+  }, {passive:true});
+}
+
+// ==================== TELEFON: UYGULAMA GİBİ AÇILMA ====================
+// Ana ekrana eklenince tam ekran açılır; uygulama dosyaları önbelleğe alınır, internet
+// zayıfken de açılır (sw.js). Yalnızca telefonda kaydedilir.
+if(TELEFON && 'serviceWorker' in navigator && location.protocol === 'https:'){
+  window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
 }
 
 // Firebase oturumu tarayıcıda hatırlanır; çıkış yapılmadıkça şifre tekrar sorulmaz.
@@ -2306,6 +2697,8 @@ function undoLast(){
     setRecord(entry.yest, entry.oldYest);
   } else if(entry.type === 'hedef'){
     setGunlukHedef(entry.oldValue);
+  } else if(entry.type === 'gun'){
+    setRecord(entry.date, entry.oldRec || {date: entry.date});
   }
   document.getElementById('undoBtn').disabled = undoStack.length===0;
   setStatus('Son işlem geri alındı.');
@@ -2627,6 +3020,11 @@ function renderMonth(){
     weeks = weeksInMonth(getMonthVal());
   }
   const container = document.getElementById('monthContainer');
+  if(TELEFON){
+    container.innerHTML = weeks.map((m,i)=> telHaftaHtml(m, i === 0 ? 'Bu hafta' : 'Geçen hafta')).join('');
+    container.querySelectorAll('.tg-satir').forEach(b=> b.addEventListener('click', ()=> telVeriFormuAc(b.dataset.tarih)));
+    return;
+  }
   container.innerHTML = '';
   for(const monday of weeks){
     container.appendChild(buildWeekBlock(monday));
@@ -3156,6 +3554,7 @@ function renderReportPanel(){
     <span class="msg-label">Yorum (mesaja eklenecek):</span>
     <textarea id="yorumBox" placeholder="Yorumunuzu buraya yazın..."></textarea>
     <button class="send-btn" id="copyMsgBtn">📋 Mesajı Kopyala</button>
+    <button class="send-btn wp-btn sadece-tel" id="wpMsgBtn">💬 WhatsApp'a gönder</button>
   </div>
   ${(function(){
     const now = getNow();
