@@ -51,6 +51,17 @@ service cloud.firestore {
       allow write: if duzenleyici();
     }
 
+    // Öneri / geri bildirim: herkes yazar (yalnızca kendi adıyla), yalnızca m583 okur ve "okundu" işaretler.
+    match /geribildirim/{id} {
+      allow create: if girisli() && yetkiVar()
+                    && request.resource.data.kimden == kadi()
+                    && request.resource.data.okundu == false
+                    && request.resource.data.metin is string && request.resource.data.metin.size() <= 4000;
+      allow read: if girisli() && kadi() == 'm583';
+      allow update: if girisli() && kadi() == 'm583'
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['okundu','okunduTarih']);
+    }
+
     match /stores/{magaza} {
       allow read, write: if magazaErisimi(magaza);
     }
