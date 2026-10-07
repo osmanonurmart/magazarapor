@@ -4,24 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=1300, user-scalable=yes">
 <script>
-// Yalnızca telefonda: sayfa 1300px genişliğinde ekrana sığdırılır ve yakınlaştırma
-// tamamen kapatılır (iki parmak, çift dokunma, kutuya dokununca otomatik büyüme).
+// Yalnızca telefonda: sayfa telefonun kendi genişliğinde açılır (html.tel ile
+// telefona özel düzen devreye girer) ve yakınlaştırma tamamen kapatılır
+// (iki parmak, çift dokunma, kutuya dokununca otomatik büyüme).
 // Masaüstünde hiçbir şey yapmaz.
 (function(){
   var tel = window.matchMedia && matchMedia('(pointer:coarse)').matches
             && Math.min(screen.width, screen.height) < 900;
   if(!tel) return;
   document.documentElement.classList.add('tel');
-  var meta = document.querySelector('meta[name=viewport]');
-  function ayarla(){
-    var yatay = matchMedia('(orientation: landscape)').matches;
-    var gen = yatay ? Math.max(screen.width, screen.height) : Math.min(screen.width, screen.height);
-    var o = Math.min(1, gen / 1300).toFixed(4);
-    meta.setAttribute('content', 'width=1300, initial-scale=' + o + ', minimum-scale=' + o
-      + ', maximum-scale=' + o + ', user-scalable=no');
-  }
-  ayarla();
-  window.addEventListener('orientationchange', function(){ setTimeout(ayarla, 250); });
+  document.querySelector('meta[name=viewport]').setAttribute('content',
+    'width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover');
   // iOS Safari user-scalable=no'yu yok sayar; parmak hareketleri ayrıca engellenir.
   ['gesturestart','gesturechange','gestureend'].forEach(function(ad){
     document.addEventListener(ad, function(e){ e.preventDefault(); }, {passive:false});
@@ -627,6 +620,98 @@ if(!document.documentElement.classList.contains('tel')){
   .chip-menu button:hover{ background:#f1efe9; color:var(--dark); }
   .chip-menu .sep{ height:1px; background:var(--line); margin:4px 2px; }
 
+
+  /* ==================== TELEFON DÜZENİ ====================
+     Yalnızca html.tel (dokunmatik, kısa kenarı 900px altı) için geçerlidir;
+     masaüstündeki görünüm bu bloktan etkilenmez. */
+  html.tel body{ font-size:14px; -webkit-text-size-adjust:100%; }
+  html.tel #appRoot, html.tel #bolgePaneli{ padding-bottom:calc(64px + env(safe-area-inset-bottom)); }
+
+  /* Giriş */
+  html.tel .giris-ekrani{ padding:20px; }
+  html.tel .giris-kart{ width:100%; padding:34px 26px 30px; }
+
+  /* Üst çubuk: simge + hesap; sekmeler alttaki gezinme çubuğuna iner */
+  html.tel .ust-bar{ padding:8px 12px; gap:8px; flex-wrap:nowrap; }
+  html.tel .ust-sol, html.tel .ust-sag{ flex-wrap:nowrap; gap:8px; min-width:0; }
+  html.tel .ust-sag{ margin-left:auto; }
+  html.tel .surum-rozet{ display:none; }
+  html.tel .profile-chip{ max-width:150px; overflow:hidden; white-space:nowrap; }
+  html.tel .tab-bar{
+    position:fixed; left:0; right:0; bottom:0; z-index:50; margin:0; gap:0;
+    display:flex; background:#fff; border-top:1px solid var(--line);
+    padding:4px 4px calc(4px + env(safe-area-inset-bottom)); box-shadow:0 -4px 16px rgba(0,0,0,.05);
+  }
+  html.tel .tab-btn{
+    flex:1 1 0; display:flex; flex-direction:column; align-items:center; gap:2px;
+    padding:6px 2px; border-radius:10px; font-size:.68rem; font-weight:600; color:#666; background:none;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  html.tel .tab-btn{ font-size:0; }
+  html.tel .tab-btn::before{ content:attr(data-ikon); font-size:1.25rem; line-height:1.2; }
+  html.tel .tab-btn::after{ content:attr(data-kisa); font-size:.7rem; }
+  html.tel .tab-btn.active{ background:#f3e9d7; color:#9a7438; }
+  html.tel .bp-baslik{ font-size:.95rem; }
+
+  /* Mağaza üst işlemleri: telefonda gerekli olanlar */
+  html.tel #exportBtn, html.tel #migrateBtn{ display:none; }
+  html.tel .top-controls{ flex-wrap:nowrap; gap:6px; }
+  html.tel .ust-btn{ padding:8px 10px; font-size:.78rem; }
+  html.tel #addDataBtn{ font-size:0; padding:8px 12px; }
+  html.tel #addDataBtn::after{ content:'＋ Veri'; font-size:.8rem; }
+  html.tel #undoBtn{ font-size:0; padding:8px 10px; }
+  html.tel #undoBtn::after{ content:'↩'; font-size:.9rem; }
+  html.tel #bolgePanelBtn{ font-size:0; padding:8px 10px; }
+  html.tel #bolgePanelBtn::after{ content:'◀ Panel'; font-size:.78rem; }
+
+  /* Ay seçimi yatay kaydırılır; simüle tarih telefonda gizli */
+  html.tel .alt-bar{ padding:6px 10px; flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  html.tel .alt-bar::-webkit-scrollbar{ display:none; }
+  html.tel .month-year-picker, html.tel .my-months{ flex-wrap:nowrap; }
+  html.tel .my-month-btn{ padding:6px 11px 7px; font-size:.82rem; }
+  html.tel .sim-date-picker{ display:none; }
+
+  /* Rapor: önce günün özeti, sonra haftalar; tablolar yana kaydırılır */
+  html.tel .page-layout{ flex-direction:column; padding:10px; gap:10px; }
+  html.tel .right-col{ order:-1; flex:1 1 auto; width:100%; }
+  html.tel .left-col{ width:100%; }
+  html.tel .month-grid{ grid-template-columns:1fr; grid-auto-flow:row; }
+  html.tel .week-block{ overflow-x:auto; -webkit-overflow-scrolling:touch; padding:10px; }
+  html.tel table.grid{ min-width:820px; font-size:.72rem; }
+  /* Yana kaydırırken KPI adları solda sabit kalır */
+  html.tel table.grid tbody th, html.tel table.grid thead th:first-child{ position:sticky; left:0; z-index:2; }
+  html.tel table.grid thead th:first-child{ background:var(--dark); }
+  html.tel table.grid thead th{ font-size:.66rem; }
+  html.tel table.grid tbody th{ font-size:.7rem; }
+  html.tel table.grid th, html.tel table.grid td{ padding:6px 3px; }
+  html.tel .week-head .title{ font-size:.85rem; }
+  html.tel .weekgoal-input{ width:80px; font-size:.78rem; padding:4px 6px; }
+  html.tel .ghbhr-icon{ width:28px; height:28px; font-size:.6rem; }
+  html.tel .employee-targets-row{ flex-direction:column; }
+  html.tel .status-msg{ font-size:.8rem; }
+
+  /* Araçlar, Kurumsal hafıza */
+  html.tel .araclar-page{ padding:12px; }
+  html.tel .hk-grid{ grid-template-columns:1fr; gap:10px; }
+  html.tel .hk-kart{ min-height:0; }
+  html.tel .hk-islem{ opacity:1; }
+  html.tel .hk-detay{ padding:16px; }
+  html.tel #toolFrameHolder{ height:calc(100vh - 170px); }
+
+  /* Bölge paneli */
+  html.tel .bp-icerik{ padding:10px 10px 20px; }
+  html.tel #bpYenile{ font-size:0; padding:8px 10px; }
+  html.tel #bpYenile::after{ content:'⟳'; font-size:.95rem; }
+  html.tel #bpDonemBar{ flex-wrap:wrap; overflow:visible; gap:8px; }
+  html.tel .bp-aralik{ flex-basis:100%; margin:0; font-size:.82rem; }
+  html.tel .bp-tablo{ font-size:.8rem; }
+  html.tel .bp-tablo th:first-child, html.tel .bp-tablo td:first-child{ position:sticky; left:0; z-index:1; background:#fff; }
+  html.tel .bp-tablo tfoot td:first-child{ background:#fbfaf7; }
+  html.tel #bpBugun{ padding:6px 10px; }
+  html.tel .bp-ayar-kutu{ max-width:none; }
+
+  /* Pencereler */
+  html.tel .modal-box{ width:100%; max-width:calc(100vw - 24px); max-height:calc(100vh - 40px); overflow:auto; }
 </style>
 </head>
 <body>
@@ -652,10 +737,10 @@ if(!document.documentElement.classList.contains('tel')){
       <img class="ust-logo" src="simge.svg?v=2" alt="" width="30" height="30">
       <span class="bp-baslik">Bölge Paneli</span>
       <nav class="tab-bar">
-        <button class="tab-btn active" id="bpTabOzet" type="button">Özet</button>
-        <button class="tab-btn" id="bpTabAyar" type="button">Mağazalarım</button>
-        <button class="tab-btn" id="bpTabAraclar" type="button">Araçlar</button>
-        <button class="tab-btn" id="bpTabHafiza" type="button">Kurumsal hafıza</button>
+        <button class="tab-btn active" id="bpTabOzet" data-kisa="Özet" data-ikon="📊" type="button">Özet</button>
+        <button class="tab-btn" id="bpTabAyar" data-kisa="Mağazalar" data-ikon="🏪" type="button">Mağazalarım</button>
+        <button class="tab-btn" id="bpTabAraclar" data-kisa="Araçlar" data-ikon="🧰" type="button">Araçlar</button>
+        <button class="tab-btn" id="bpTabHafiza" data-kisa="Hafıza" data-ikon="📚" type="button">Kurumsal hafıza</button>
       </nav>
     </div>
     <div class="ust-sag">
@@ -711,10 +796,10 @@ if(!document.documentElement.classList.contains('tel')){
       <img class="ust-logo" src="simge.svg?v=2" alt="" width="30" height="30">
       <span class="surum-rozet" id="surumRozet" title="Güncelleme kontrol et" onclick="guncellemeKontrol()"></span>
       <nav class="tab-bar">
-        <button class="tab-btn active" id="tabRaporBtn" type="button" onclick="showTab('rapor')">Rapor</button>
-        <button class="tab-btn" id="tabAraclarBtn" type="button" onclick="showTab('araclar')">Araçlar</button>
-        <button class="tab-btn" id="tabHafizaBtn" type="button" onclick="showTab('hafiza')">Kurumsal hafıza</button>
-        <button class="tab-btn" id="tabTransferBtn" type="button" onclick="showTab('transfer')">Transfer</button>
+        <button class="tab-btn active" id="tabRaporBtn" data-kisa="Rapor" data-ikon="📊" type="button" onclick="showTab('rapor')">Rapor</button>
+        <button class="tab-btn" id="tabAraclarBtn" data-kisa="Araçlar" data-ikon="🧰" type="button" onclick="showTab('araclar')">Araçlar</button>
+        <button class="tab-btn" id="tabHafizaBtn" data-kisa="Hafıza" data-ikon="📚" type="button" onclick="showTab('hafiza')">Kurumsal hafıza</button>
+        <button class="tab-btn" id="tabTransferBtn" data-kisa="Transfer" data-ikon="📤" type="button" onclick="showTab('transfer')">Transfer</button>
       </nav>
     </div>
     <div class="ust-sag">
@@ -899,7 +984,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 8;
+const APP_SURUM = 9;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -3340,6 +3425,12 @@ function renderMonthYearPicker(){
   }).join('');
 
   el.innerHTML = `<div class="my-months">${monthsHtml}</div>${yearsHtml}`;
+  // Telefonda ay listesi yana kaydığı için seçili ay görünür yere getirilir.
+  if(TELEFON){
+    const secili = el.querySelector('.my-month-btn.active');
+    const bar = document.getElementById('headerCenter');
+    if(secili && bar) bar.scrollLeft = Math.max(0, secili.offsetLeft - bar.clientWidth/2 + secili.offsetWidth/2);
+  }
 
   el.querySelectorAll('.my-month-btn').forEach(btn=>{
     btn.addEventListener('click', function(){
