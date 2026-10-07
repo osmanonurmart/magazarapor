@@ -572,6 +572,29 @@ if(!document.documentElement.classList.contains('tel')){
   .giris-btn:disabled{ opacity:.6; cursor:default; }
   .giris-hata{ color:#a34141; font-size:.85rem; min-height:20px; margin-top:14px; text-align:center; line-height:1.4; }
   .giris-hata.bilgi{ color:#777; }
+  /* Açılış / giriş sonrası yükleme: şifre ekranı yerine simge ve dönen halka */
+  .giris-yukleme{ display:flex; flex-direction:column; align-items:center; gap:18px; }
+  .gy-halka{
+    position:relative; width:104px; height:104px; display:flex; align-items:center; justify-content:center;
+  }
+  .gy-halka::before{
+    content:''; position:absolute; inset:0; border-radius:50%;
+    border:3px solid rgba(255,255,255,.22); border-top-color:#fff; border-right-color:rgba(255,255,255,.6);
+    filter:drop-shadow(0 2px 8px rgba(20,15,40,.35));
+    animation:gyDon 1s linear infinite;
+  }
+  .gy-halka img{ width:64px; height:64px; border-radius:16px; box-shadow:0 10px 30px rgba(20,15,40,.4); }
+  .gy-yazi{
+    color:#fff; font-size:.95rem; font-weight:600; letter-spacing:.08em; text-align:center; max-width:280px;
+    line-height:1.45; text-shadow:0 2px 12px rgba(20,15,40,.5);
+  }
+  .gy-yazi::after{ content:''; display:inline-block; width:1.2em; text-align:left; animation:gyNokta 1.2s steps(4) infinite; }
+  .gy-yenile{
+    background:rgba(255,255,255,.9); border:none; border-radius:20px; padding:9px 18px; font-weight:700;
+    color:#2d2d2d; font-family:inherit; cursor:pointer;
+  }
+  @keyframes gyDon{ to{ transform:rotate(360deg); } }
+  @keyframes gyNokta{ 0%{ content:''; } 25%{ content:'.'; } 50%{ content:'..'; } 75%{ content:'...'; } }
   .giris-link{
     display:block; margin:10px auto 0; background:none; border:none; color:#555; font-size:.85rem;
     cursor:pointer; text-decoration:underline; font-family:inherit;
@@ -847,7 +870,13 @@ if(!document.documentElement.classList.contains('tel')){
 <body>
 
 <div id="girisEkrani" class="giris-ekrani">
-  <form class="giris-kart" id="girisForm" autocomplete="on" novalidate>
+  <div class="giris-yukleme" id="girisYukleme">
+    <div class="gy-halka"><img src="simge.svg?v=2" alt="" width="64" height="64"></div>
+    <div class="gy-yazi" id="girisYuklemeYazi">Yükleniyor</div>
+    <button type="button" class="gy-yenile" id="girisYenile" style="display:none;" onclick="location.reload()">Sayfayı yenile</button>
+  </div>
+
+  <form class="giris-kart" id="girisForm" autocomplete="on" novalidate style="display:none;">
     <label for="girisKadi">KULLANICI ADI</label>
     <input type="text" id="girisKadi" name="username" autocomplete="username"
            autocapitalize="none" autocorrect="off" spellcheck="false">
@@ -855,7 +884,6 @@ if(!document.documentElement.classList.contains('tel')){
     <input type="password" id="girisSifre" name="password" autocomplete="current-password">
     <button type="submit" class="giris-btn" id="girisBtn" disabled>YÜKLENİYOR...</button>
     <div class="giris-hata" id="girisHata"></div>
-    <button type="button" class="giris-link" id="girisYenile" style="display:none;" onclick="location.reload()">Sayfayı yenile</button>
   </form>
 
 </div>
@@ -1106,7 +1134,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 24;
+const APP_SURUM = 25;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -1672,10 +1700,8 @@ function listenCloudChanges(){
 
 // Yükleme sırasında giriş ekranındaki bilgi satırını günceller.
 function bootStatus(msg){
-  const el = document.getElementById('girisHata');
-  if(!el || document.getElementById('girisEkrani').style.display === 'none') return;
-  el.textContent = msg || '';
-  el.classList.add('bilgi');
+  const el = document.getElementById('girisYuklemeYazi');
+  if(el) el.textContent = String(msg || 'Yükleniyor').replace(/\.+$/, '');
 }
 
 // ==================== GİRİŞ / MAĞAZA OTURUMU ====================
@@ -1730,16 +1756,17 @@ function ekranGoster(ad){
 let girisZamanAsimi = null;
 function girisYukleniyor(mesaj){
   ekranGoster('giris');
-  const btn = document.getElementById('girisBtn');
-  btn.disabled = true;
-  btn.textContent = 'YÜKLENİYOR...';
+  // Kayıtlı oturumla açılışta ya da girişten sonra şifre kutuları gösterilmez.
+  document.getElementById('girisForm').style.display = 'none';
+  document.getElementById('girisYukleme').style.display = '';
   bootStatus(mesaj);
   // Telefonda yükleme uzarsa ekranda takılı kalmasın: durum söylenir, yenileme önerilir.
   if(TELEFON && !girisZamanAsimi){
     girisZamanAsimi = setTimeout(()=>{
       girisZamanAsimi = null;
-      if(document.getElementById('girisEkrani').style.display === 'none' || !btn.disabled) return;
-      bootStatus('Bağlantı yavaş görünüyor. Biraz daha bekleyebilir ya da sayfayı yenileyebilirsin.');
+      if(document.getElementById('girisEkrani').style.display === 'none'
+         || document.getElementById('girisYukleme').style.display === 'none') return;
+      bootStatus('Bağlantı yavaş görünüyor. Biraz daha bekleyebilir ya da sayfayı yenileyebilirsin');
       document.getElementById('girisYenile').style.display = '';
     }, 15000);
   }
@@ -1760,6 +1787,9 @@ async function girisHatasi(mesaj){
 function girisEkraniGoster(hata){
   ekranGoster('giris');
   girisZamanAsiminiKaldir();
+  document.getElementById('girisYukleme').style.display = 'none';
+  document.getElementById('girisForm').style.display = '';
+  girisOlcekle();
   const h = document.getElementById('girisHata');
   h.textContent = hata || '';
   h.classList.remove('bilgi');
