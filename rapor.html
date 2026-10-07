@@ -495,6 +495,7 @@
   .giris-btn:hover{ background:#222; }
   .giris-btn:disabled{ opacity:.6; cursor:default; }
   .giris-hata{ color:#a34141; font-size:.85rem; min-height:20px; margin-top:14px; text-align:center; line-height:1.4; }
+  .giris-hata.bilgi{ color:#777; }
   /* ---------- Bölge paneli ---------- */
   .bp-baslik{ font-weight:700; font-size:.9rem; color:#2d2d2d; }
   .bp-seg{ display:inline-flex; border:1px solid #cfc9bf; border-radius:8px; overflow:hidden; }
@@ -568,30 +569,11 @@
   .chip-menu button:hover{ background:#f1efe9; color:var(--dark); }
   .chip-menu .sep{ height:1px; background:var(--line); margin:4px 2px; }
 
-  .boot-screen{
-    position:fixed; inset:0; background:var(--bg); display:flex; align-items:center; justify-content:center; z-index:1000;
-  }
-  .boot-box{
-    background:#fff; border-radius:16px; padding:34px 32px; width:320px; max-width:90vw; text-align:center;
-    box-shadow:0 6px 24px rgba(0,0,0,.12);
-  }
-  .boot-logo{ font-size:2.2rem; margin-bottom:6px; }
-  .boot-box h2{ font-size:1.05rem; margin:0 0 10px; color:var(--dark); }
-  .boot-msg{ font-size:.78rem; color:#888; line-height:1.45; white-space:pre-line; }
-  .boot-msg.error{ color:var(--red); }
 </style>
 </head>
 <body>
 
-<div id="bootScreen" class="boot-screen">
-  <div class="boot-box">
-    <div class="boot-logo">🏪</div>
-    <h2>Mağaza Performans Raporu</h2>
-    <div class="boot-msg" id="bootMsg">Veriler yükleniyor...</div>
-  </div>
-</div>
-
-<div id="girisEkrani" class="giris-ekrani" style="display:none;">
+<div id="girisEkrani" class="giris-ekrani">
   <div class="giris-logo">Madame Coco</div>
 
   <form class="giris-kart" id="girisForm" autocomplete="on" novalidate>
@@ -600,7 +582,7 @@
            autocapitalize="none" autocorrect="off" spellcheck="false">
     <label for="girisSifre">ŞİFRE</label>
     <input type="password" id="girisSifre" name="password" autocomplete="current-password">
-    <button type="submit" class="giris-btn" id="girisBtn">LOGIN</button>
+    <button type="submit" class="giris-btn" id="girisBtn" disabled>YÜKLENİYOR...</button>
     <div class="giris-hata" id="girisHata"></div>
   </form>
 
@@ -831,7 +813,7 @@
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 4;
+const APP_SURUM = 5;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -1363,11 +1345,12 @@ function listenCloudChanges(){
   }));
 }
 
-function bootStatus(msg, isError){
-  const el = document.getElementById('bootMsg');
-  if(!el) return;
-  el.textContent = msg;
-  el.classList.toggle('error', !!isError);
+// Yükleme sırasında giriş ekranındaki bilgi satırını günceller.
+function bootStatus(msg){
+  const el = document.getElementById('girisHata');
+  if(!el || document.getElementById('girisEkrani').style.display === 'none') return;
+  el.textContent = msg || '';
+  el.classList.add('bilgi');
 }
 
 // ==================== GİRİŞ / MAĞAZA OTURUMU ====================
@@ -1410,15 +1393,35 @@ function girisHatasiMetni(e){
 }
 
 function ekranGoster(ad){
-  document.getElementById('bootScreen').style.display = ad === 'boot' ? '' : 'none';
   document.getElementById('girisEkrani').style.display = ad === 'giris' ? '' : 'none';
   document.getElementById('bolgePaneli').style.display = ad === 'panel' ? '' : 'none';
   document.getElementById('appRoot').style.display = ad === 'uygulama' ? '' : 'none';
 }
+// Giriş ekranı aynı zamanda yükleme ekranıdır: veriler yüklenirken buton kilitlenir,
+// hazır olunca doğrudan uygulama (veya bölge paneli) açılır.
+function girisYukleniyor(mesaj){
+  ekranGoster('giris');
+  const btn = document.getElementById('girisBtn');
+  btn.disabled = true;
+  btn.textContent = 'YÜKLENİYOR...';
+  bootStatus(mesaj);
+}
+let bekleyenGirisHatasi = null;
+// Giriş yapılmış ama uygulama açılamamışsa oturum kapatılır, hata giriş ekranında kalır.
+async function girisHatasi(mesaj){
+  bekleyenGirisHatasi = mesaj;
+  oturum = null;
+  aktifProfil = null;
+  await auth.signOut();
+}
 function girisEkraniGoster(hata){
   ekranGoster('giris');
-  document.getElementById('girisHata').textContent = hata || '';
-  document.getElementById('girisBtn').disabled = false;
+  const h = document.getElementById('girisHata');
+  h.textContent = hata || '';
+  h.classList.remove('bilgi');
+  const btn = document.getElementById('girisBtn');
+  btn.disabled = false;
+  btn.textContent = 'LOGIN';
   document.getElementById('girisSifre').value = '';
   setTimeout(()=>{
     const kadi = document.getElementById('girisKadi');
@@ -1431,16 +1434,19 @@ async function girisYap(e){
   const kadi = document.getElementById('girisKadi').value.trim();
   const sifre = document.getElementById('girisSifre').value;
   const hata = document.getElementById('girisHata');
+  hata.classList.remove('bilgi');
   if(!kadi || !sifre){ hata.textContent = 'Kullanıcı adı ve şifreyi yazın.'; return; }
   hata.textContent = '';
   const btn = document.getElementById('girisBtn');
   btn.disabled = true;
+  btn.textContent = 'YÜKLENİYOR...';
   try{
     await auth.signInWithEmailAndPassword(girisEposta(kadi), sifre);
     // Devamı onAuthStateChanged'de.
   }catch(err){
     hata.textContent = girisHatasiMetni(err);
     btn.disabled = false;
+    btn.textContent = 'LOGIN';
   }
 }
 
@@ -1468,13 +1474,15 @@ async function oturumuKur(user){
   };
 }
 
-async function magazayiAc(key){
+// giristen: giriş ekranından açılıyorsa yükleme orada görünür; bölge panelinden
+// açılıyorsa panel yerinde kalır, altta bildirim çıkar.
+async function magazayiAc(key, giristen){
   // Her mağaza ayrı veriyle yaşar: öncekinin verisi ve dinleyicileri bırakılır.
   stopCloudListeners();
   resetStoreCaches();
   aktifProfil = {key, name: bpMagazaAdi(key), legacy: key === ESKI_PROFIL_YENI_MAGAZA};
-  ekranGoster('boot');
-  bootStatus('Veriler yükleniyor...');
+  if(giristen) girisYukleniyor('Veriler yükleniyor...');
+  else uiBildirim(aktifProfil.name + ' yükleniyor...', '', 0);
   try{
     if(oturum.kadi === ESKI_PROFIL_YENI_MAGAZA && key === ESKI_PROFIL_YENI_MAGAZA){
       const adet = await eskiProfilVerisiniTasi();
@@ -1482,11 +1490,14 @@ async function magazayiAc(key){
     }
     await loadCloudCache();
     listenCloudChanges();
+    if(!giristen) uiBildirim('');
     ekranGoster('uygulama');
     renderProfileChip();
     await startAppAfterLogin();
   }catch(e){
-    bootStatus('Veriler yüklenemedi: ' + e.message, true);
+    if(giristen){ await girisHatasi('Veriler yüklenemedi: ' + e.message); return; }
+    aktifProfil = null;
+    uiBildirim('Veriler yüklenemedi: ' + e.message, 'hata');
   }
 }
 
@@ -1876,15 +1887,22 @@ async function bpAyarKaydet(){
   }
 }
 
-async function bolgePaneliniAc(yenidenYukle){
+// giristen: veriler giriş ekranında yüklenir, panel dolu halde açılır.
+async function bolgePaneliniAc(yenidenYukle, giristen){
   kapatChipMenu();
   stopCloudListeners();
   resetStoreCaches();
   aktifProfil = null;
   if(!bp.tarih) bp.tarih = dateStr(getNow());
   document.getElementById('bpChipAd').textContent = magazaAdi(oturum.kadi);
-  ekranGoster('panel');
   bpSekme('ozet');
+  if(giristen){
+    girisYukleniyor('Veriler yükleniyor...');
+    await bpVeriYukle();
+    ekranGoster('panel');
+    return;
+  }
+  ekranGoster('panel');
   if(yenidenYukle || !bp.yuklendi) await bpVeriYukle();
   else bpCiz();
 }
@@ -1915,24 +1933,25 @@ document.getElementById('bpCikis').addEventListener('click', cikisYap);
 
 // Firebase oturumu tarayıcıda hatırlanır; çıkış yapılmadıkça şifre tekrar sorulmaz.
 auth.onAuthStateChanged(async function(user){
-  if(!user){ girisEkraniGoster(); return; }
+  if(!user){
+    girisEkraniGoster(bekleyenGirisHatasi);
+    bekleyenGirisHatasi = null;
+    return;
+  }
   if(user.isAnonymous || !user.email){
     // Eski sürümden kalan anonim oturum: kapat, giriş ekranına düşer.
     auth.signOut();
     return;
   }
-  ekranGoster('boot');
-  bootStatus('Giriş yapılıyor...');
+  girisYukleniyor('Giriş yapılıyor...');
   try{
     await oturumuKur(user);
   }catch(e){
-    const mesaj = e.yetkiYok ? e.message : ('Yetki okunamadı: ' + e.message);
-    await auth.signOut();
-    girisEkraniGoster(mesaj);
+    await girisHatasi(e.yetkiYok ? e.message : ('Yetki okunamadı: ' + e.message));
     return;
   }
-  if(oturum.rol === 'magaza') await magazayiAc(oturum.kadi);
-  else await bolgePaneliniAc(true);
+  if(oturum.rol === 'magaza') await magazayiAc(oturum.kadi, true);
+  else await bolgePaneliniAc(true, true);
 });
 
 // ==================== Rapor verisi (bulut tabanlı) ====================
