@@ -136,6 +136,15 @@ if(!document.documentElement.classList.contains('tel')){
   .bpd-bos{ font-size:.78rem; color:#999; margin-top:6px; }
   .gb-cevap{ margin-top:8px; background:#f6efe2; border-radius:9px; padding:7px 9px; font-size:.8rem; color:#5b4724; white-space:pre-wrap; }
   .gb-butonlar{ display:flex; gap:6px; flex-wrap:wrap; }
+  .gb-pencere{ width:calc(var(--k)*460px); text-align:left; }
+  .gb-pencere .ui-baslik, .gb-pencere .ui-mesaj{ text-align:center; }
+  .gb-benim-baslik{ font-size:.8rem; font-weight:700; color:#555; margin-top:18px; }
+  .gb-yeni{ color:var(--red); }
+  .oneri-btn{ position:relative; }
+  .oneri-btn.yeni::after{
+    content:''; position:absolute; top:-3px; right:-3px; width:9px; height:9px; border-radius:50%;
+    background:var(--red); border:2px solid #fff;
+  }
   .surum-rozet:hover{ background:var(--accent); border-color:var(--accent); color:#fff; }
   .ust-btn{
     background:#fff; color:#2d2d2d; border:1px solid #2d2d2d; padding:6px 11px; border-radius:7px;
@@ -749,7 +758,7 @@ if(!document.documentElement.classList.contains('tel')){
   html.tel .bp-baslik{ font-size:.95rem; }
 
   /* Mağaza üst işlemleri: telefonda gerekli olanlar */
-  html.tel #exportBtn, html.tel #migrateBtn{ display:none; }
+  html.tel #exportBtn{ display:none; }
   html.tel .top-controls{ flex-wrap:nowrap; gap:6px; }
   html.tel .ust-btn{ padding:8px 10px; font-size:.78rem; }
   html.tel #addDataBtn{ display:none; }
@@ -812,7 +821,7 @@ if(!document.documentElement.classList.contains('tel')){
   html.tel .weekgoal-input{ width:80px; font-size:.78rem; padding:4px 6px; }
   html.tel .ghbhr-icon{ width:28px; height:28px; font-size:.6rem; }
   html.tel .employee-targets-row{ flex-direction:column; }
-  html.tel #statusMsg, html.tel #lastEditInfo{ display:none; }
+  #statusMsg, #lastEditInfo{ display:none; }
 
   /* Araçlar, Kurumsal hafıza */
   html.tel .araclar-page{ padding:12px; }
@@ -1025,7 +1034,7 @@ if(!document.documentElement.classList.contains('tel')){
       <span class="surum-rozet" id="surumRozet" title="Güncelleme kontrol et" onclick="guncellemeKontrol()"></span>
       <button type="button" class="oneri-btn" title="Öneri / geri bildirim gönder" onclick="geriBildirimYaz()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/><path d="M8.5 11h7"/><path d="M8.5 14h4"/></svg><span>Öneri</span></button>
       <nav class="tab-bar">
-        <button class="tab-btn active" id="tabRaporBtn" data-kisa="Rapor" type="button" onclick="showTab('rapor')"><svg class="tab-ikon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V11"/><path d="M10 20V5"/><path d="M16 20v-6"/><path d="M21 20H3"/></svg>Rapor</button>
+        <button class="tab-btn active" id="tabRaporBtn" data-kisa="Ana Sayfa" type="button" onclick="showTab('rapor')"><svg class="tab-ikon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5.5h4V20"/></svg>Ana Sayfa</button>
         <button class="tab-btn" id="tabAraclarBtn" data-kisa="Araçlar" type="button" onclick="showTab('araclar')"><svg class="tab-ikon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7.5" width="18" height="12.5" rx="2.5"/><path d="M9 7.5V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1.5"/><path d="M3 13h18"/><path d="M10.5 13v2h3v-2"/></svg>Araçlar</button>
         <button class="tab-btn" id="tabHafizaBtn" data-kisa="Hafıza" type="button" onclick="showTab('hafiza')"><svg class="tab-ikon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"/><path d="M9 7.5h6"/></svg>Kurumsal hafıza</button>
         <button class="tab-btn" id="tabTransferBtn" data-kisa="Transfer" type="button" onclick="showTab('transfer')"><svg class="tab-ikon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4"/><path d="M7.5 8.5 12 4l4.5 4.5"/><path d="M4 14.5V18a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3.5"/></svg>Transfer</button>
@@ -1035,7 +1044,6 @@ if(!document.documentElement.classList.contains('tel')){
       <div class="top-controls" id="raporControls">
         <button class="ust-btn dolu" id="addDataBtn" type="button">⬇ Yapıştır / Veri Ekle</button>
         <button class="ust-btn" id="exportBtn" type="button">⬇ Dışa aktar</button>
-        <button class="ust-btn" id="migrateBtn" type="button" onclick="migrateLocalDataToCloud()">⬆ Yerel veriyi buluta yükle</button>
         <button class="ust-btn" id="undoBtn" type="button" disabled onclick="undoLast()" title="Geri al"><svg class="tel-ikon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg><span class="masa-metin">↩ Geri al</span></button>
       </div>
       <button class="ust-btn" id="bolgePanelBtn" type="button" style="display:none;">◀ Bölge paneli</button>
@@ -1173,7 +1181,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 26;
+const APP_SURUM = 28;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -1329,8 +1337,10 @@ function setStatus(msg, isError){
   const el = document.getElementById('statusMsg');
   el.textContent = msg;
   el.className = 'status-msg' + (isError ? ' error' : '');
-  // Telefonda durum satırı gizli; hatalar kaybolmasın diye altta bildirim olarak çıkar.
-  if(isError && document.documentElement.classList.contains('tel')) uiBildirim(msg, 'hata');
+  // Durum satırı gizli; mesajlar altta bildirim olarak çıkar (telefonda yalnızca hatalar).
+  const tel = document.documentElement.classList.contains('tel');
+  if(isError) uiBildirim(msg, 'hata');
+  else if(!tel && msg) uiBildirim(msg);
 }
 
 let simulatedToday = null; // null = gerçek gün; aksi halde 'YYYY-MM-DD' formatında simüle edilen gün
@@ -1430,59 +1440,6 @@ function flashSelector(sel, boxMode){
     });
   });
 }
-async function migrateLocalDataToCloud(){
-  const localKeys = [];
-  for(let i=0;i<localStorage.length;i++){
-    const k = localStorage.key(i);
-    if(k.startsWith('entry:') || k.startsWith('weekgoal:') || k === 'gunlukHedef') localKeys.push(k);
-  }
-  if(!localKeys.length){
-    setStatus('Bu tarayıcıda yerel (eski) veri bulunamadı. Bu butonu, verinin kayıp olduğu ORİJİNAL bilgisayarda/dosyada çalıştırmanız gerekiyor.', true);
-    return;
-  }
-  if(!await uiOnay(localKeys.length + ' yerel kayıt bulundu. Bunlar buluta yüklenecek; mevcut bulut verisinin üzerine yazabilir, en güncel/dolu veri kazanır.',
-                    {baslik:'Buluta yüklensin mi?', ikon:'☁️', evet:'Yükle'})) return;
-
-  const btn = document.getElementById('migrateBtn');
-  btn.disabled = true;
-  btn.textContent = 'Yükleniyor...';
-
-  let count = 0;
-  try{
-    const batch = db.batch();
-    let batchCount = 0;
-    for(const k of localKeys){
-      if(k.startsWith('entry:')){
-        const dateKey = k.replace('entry:','');
-        const rec = JSON.parse(localStorage.getItem(k));
-        batch.set(sdb('entries').doc(dateKey), rec, {merge:true});
-        cloudCache[k] = JSON.stringify(rec);
-      } else if(k.startsWith('weekgoal:')){
-        const weekKey = k.replace('weekgoal:','');
-        const val = localStorage.getItem(k);
-        if(val !== ''){
-          batch.set(sdb('weekgoals').doc(weekKey), {value:Number(val)});
-          cloudCache[k] = val;
-        }
-      } else if(k === 'gunlukHedef'){
-        const val = localStorage.getItem(k);
-        batch.set(sdb('settings').doc('general'), {gunlukHedef:Number(val)}, {merge:true});
-        cloudCache[k] = val;
-      }
-      count++;
-      batchCount++;
-      if(batchCount >= 400){ await batch.commit(); batchCount = 0; }
-    }
-    await batch.commit();
-    setStatus('✅ ' + count + ' yerel kayıt buluta yüklendi.');
-    renderAll();
-  }catch(e){
-    setStatus('Yükleme sırasında hata: ' + e.message, true);
-  }
-  btn.disabled = false;
-  btn.textContent = '☁️ Yerel Veriyi Buluta Yükle';
-}
-
 async function exportAllData(){
   const data = {};
   const entryRows = [];
@@ -2386,31 +2343,51 @@ const GERI_BILDIRIM_ALICI = 'm583';
 let gbUnsub = null;
 let gbListe = [];
 
+// "Öneri" butonu: yeni geri bildirim yazma + daha önce yazılanlar ve gelen cevaplar.
+// Cevaplar burada görülür; okunmamış cevap varsa butonda kırmızı nokta çıkar.
 async function geriBildirimYaz(){
   if(!oturum) return;
-  const metin = await uiDialog({
-    ikon:'💬', baslik:'Öneri / geri bildirim',
-    mesaj:'Uygulamayla ilgili öneri, istek ya da sorun yazabilirsin.',
-    input:{tip:'textarea', placeholder:'Yazmak istediğin...'},
-    butonlar:[{metin:'Vazgeç', deger:null}, {metin:'Gönder', deger:'__input', tip:'birincil'}],
-    iptalDeger:null
+  const ov = document.createElement('div');
+  ov.className = 'ui-ov';
+  ov.innerHTML = '<div class="ui-dlg gb-pencere">'
+    + '<div class="ui-baslik">💬 Öneri / geri bildirim</div>'
+    + '<div class="ui-mesaj">Uygulamayla ilgili öneri, istek ya da sorun yazabilirsin.</div>'
+    + '<textarea class="ui-input ui-metin" id="gbYeniMetin" rows="4" placeholder="Yazmak istediğin..."></textarea>'
+    + '<div class="ui-btns"><button type="button" class="ui-btn" data-k="kapat">Kapat</button>'
+    + '<button type="button" class="ui-btn birincil" data-k="gonder">Gönder</button></div>'
+    + '<div class="gb-benim-baslik">Önceki geri bildirimlerim</div>'
+    + '<div class="gb-liste" id="gbBenimListe"></div></div>';
+  const kapat = ()=>{ ov.remove(); document.removeEventListener('keydown', tus, true); };
+  const tus = e=>{ if(e.key === 'Escape'){ e.preventDefault(); kapat(); } };
+  ov.addEventListener('click', e=>{ if(e.target === ov) kapat(); });
+  ov.querySelector('[data-k="kapat"]').addEventListener('click', kapat);
+  ov.querySelector('[data-k="gonder"]').addEventListener('click', async ()=>{
+    const alan = document.getElementById('gbYeniMetin');
+    const metin = alan.value.trim();
+    if(!metin){ uiBildirim('Boş geri bildirim gönderilmedi.', 'hata'); return; }
+    try{
+      await db.collection('geribildirim').add({
+        metin: metin.slice(0, 4000),
+        kimden: oturum.kadi,
+        magaza: aktifProfil ? aktifProfil.key : null,
+        cihaz: TELEFON ? 'telefon' : 'masaüstü',
+        surum: APP_SURUM,
+        tarih: new Date().toISOString(),
+        okundu: false
+      });
+      alan.value = '';
+      uiBildirim('Teşekkürler, geri bildirimin iletildi.', 'basari');
+    }catch(e){
+      uiBildirim('Gönderilemedi: ' + e.message, 'hata');
+    }
   });
-  if(metin === null) return;
-  if(!metin.trim()){ uiBildirim('Boş geri bildirim gönderilmedi.', 'hata'); return; }
-  try{
-    await db.collection('geribildirim').add({
-      metin: metin.trim().slice(0, 4000),
-      kimden: oturum.kadi,
-      magaza: aktifProfil ? aktifProfil.key : null,
-      cihaz: TELEFON ? 'telefon' : 'masaüstü',
-      surum: APP_SURUM,
-      tarih: new Date().toISOString(),
-      okundu: false
-    });
-    uiBildirim('Teşekkürler, geri bildirimin iletildi.', 'basari');
-  }catch(e){
-    uiBildirim('Gönderilemedi: ' + e.message, 'hata');
-  }
+  document.addEventListener('keydown', tus, true);
+  document.body.appendChild(ov);
+  benimGbCiz();
+  // Açılınca görülmemiş cevaplar "görüldü" olur.
+  benimGbListe.filter(g=> g.cevap && g.cevapGoruldu === false).forEach(g=>{
+    db.collection('geribildirim').doc(g.id).update({cevapGoruldu:true}).catch(()=>{});
+  });
 }
 
 function geriBildirimDinle(){
@@ -2430,26 +2407,37 @@ function geriBildirimDinle(){
 }
 // Gönderen: yazdığı geri bildirime cevap gelmişse bir sonraki açılışta (ya da açıkken) görür.
 let cevapUnsub = null;
-let cevapGosteriliyor = false;
+let benimGbListe = [];
 function cevapDinle(){
   if(cevapUnsub || !oturum) return;
   cevapUnsub = db.collection('geribildirim').where('kimden', '==', oturum.kadi).onSnapshot(snap=>{
-    const bekleyen = [];
-    snap.forEach(d=>{ const x = d.data(); if(x.cevap && x.cevapGoruldu === false) bekleyen.push(Object.assign({id:d.id}, x)); });
-    if(bekleyen.length) cevapGoster(bekleyen[0]);
+    benimGbListe = [];
+    snap.forEach(d=> benimGbListe.push(Object.assign({id:d.id}, d.data())));
+    benimGbListe.sort((a,b)=> String(b.tarih || '').localeCompare(String(a.tarih || '')));
+    const yeniCevap = benimGbListe.some(g=> g.cevap && g.cevapGoruldu === false);
+    document.querySelectorAll('.oneri-btn').forEach(b=> b.classList.toggle('yeni', yeniCevap));
+    if(document.getElementById('gbBenimListe')) benimGbCiz();
   }, ()=>{ /* kurallar yayınlanmadıysa sessiz */ });
 }
-function cevapBirak(){ if(cevapUnsub){ try{ cevapUnsub(); }catch(e){} cevapUnsub = null; } }
-async function cevapGoster(g){
-  if(cevapGosteriliyor) return;
-  cevapGosteriliyor = true;
-  await uiDialog({
-    ikon:'💬', baslik:'Geri bildirimine cevap geldi',
-    mesaj: 'Sen: ' + g.metin + '\n\nCevap: ' + g.cevap,
-    butonlar:[{metin:'Tamam', deger:true, tip:'birincil'}], iptalDeger:true
-  });
-  try{ await db.collection('geribildirim').doc(g.id).update({cevapGoruldu:true}); }catch(e){ /* sessiz */ }
-  cevapGosteriliyor = false;
+function cevapBirak(){
+  if(cevapUnsub){ try{ cevapUnsub(); }catch(e){} cevapUnsub = null; }
+  benimGbListe = [];
+  document.querySelectorAll('.oneri-btn').forEach(b=> b.classList.remove('yeni'));
+}
+function benimGbCiz(){
+  const el = document.getElementById('gbBenimListe');
+  if(!el) return;
+  if(!benimGbListe.length){ el.innerHTML = '<div class="gb-bos">Henüz geri bildirim göndermedin.</div>'; return; }
+  el.innerHTML = benimGbListe.map(g=>{
+    const t = g.tarih ? new Date(g.tarih) : null;
+    const zaman = t && !isNaN(t) ? kisaTarih(t) + ' ' + pad(t.getHours()) + ':' + pad(t.getMinutes()) : '';
+    const yeni = g.cevap && g.cevapGoruldu === false;
+    return '<div class="gb-oge">'
+      + '<div class="gb-ust"><span>' + escapeHtml(zaman) + '</span><span>' + (g.cevap ? (yeni ? '<b class="gb-yeni">Yeni cevap</b>' : 'Cevaplandı') : (g.okundu ? 'Okundu' : 'Gönderildi')) + '</span></div>'
+      + '<div class="gb-metin">' + escapeHtml(g.metin || '') + '</div>'
+      + (g.cevap ? '<div class="gb-cevap">↳ ' + escapeHtml(g.cevap) + '</div>' : '')
+      + '</div>';
+  }).join('');
 }
 
 function geriBildirimBirak(){
