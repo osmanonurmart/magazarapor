@@ -495,18 +495,53 @@
   .giris-btn:hover{ background:#222; }
   .giris-btn:disabled{ opacity:.6; cursor:default; }
   .giris-hata{ color:#a34141; font-size:.85rem; min-height:20px; margin-top:14px; text-align:center; line-height:1.4; }
-  .giris-baslik{ font-size:1.05rem; font-weight:600; color:#333; margin:0 0 6px; }
-  .giris-alt{ font-size:.85rem; color:#777; margin:0 0 22px; }
-  .magaza-liste{ display:flex; flex-direction:column; gap:10px; }
-  .magaza-sec-btn{
-    display:block; width:100%; padding:14px 16px; border:2px solid #e2ddd4; border-radius:8px;
-    background:#fff; text-align:left; font-size:1rem; font-weight:600; color:#333; cursor:pointer; font-family:inherit;
+  /* ---------- Bölge paneli ---------- */
+  .bp-baslik{ font-weight:700; font-size:.9rem; color:#2d2d2d; }
+  .bp-seg{ display:inline-flex; border:1px solid #cfc9bf; border-radius:8px; overflow:hidden; }
+  .bp-seg button{
+    background:#fff; border:none; padding:6px 14px; font-size:.76rem; font-weight:600; color:#555;
+    cursor:pointer; font-family:inherit; border-right:1px solid #e2ddd4;
   }
-  .magaza-sec-btn:hover{ border-color:#333; }
-  .giris-link{
-    display:block; margin:18px auto 0; background:none; border:none; color:#777; font-size:.85rem;
-    cursor:pointer; text-decoration:underline; font-family:inherit;
+  .bp-seg button:last-child{ border-right:none; }
+  .bp-seg button.active{ background:#2d2d2d; color:#fff; }
+  .bp-tarih{ padding:4px 7px; border-radius:6px; border:1px solid #ddd; font-size:.74rem; font-family:inherit; }
+  .bp-aralik{ font-size:.8rem; font-weight:600; color:#555; margin-left:4px; }
+  .bp-icerik{ padding:16px 14px 40px; }
+  .bp-kutu{ background:#fff; border:1px solid var(--line); border-radius:12px; padding:6px; overflow-x:auto; }
+  .bp-tablo{ width:100%; border-collapse:collapse; font-size:.82rem; font-variant-numeric:tabular-nums; }
+  .bp-tablo th{
+    text-align:right; padding:9px 10px; font-size:.72rem; color:#666; font-weight:600;
+    border-bottom:2px solid var(--line); cursor:pointer; user-select:none; white-space:nowrap;
   }
+  .bp-tablo th:first-child, .bp-tablo td:first-child{ text-align:left; }
+  .bp-tablo th:hover{ color:#2d2d2d; }
+  .bp-tablo th.sirali{ color:#9a7438; }
+  .bp-tablo td{ text-align:right; padding:9px 10px; border-bottom:1px solid #f0ece5; white-space:nowrap; }
+  .bp-tablo tbody tr{ cursor:pointer; }
+  .bp-tablo tbody tr:hover td{ background:#faf7f1; }
+  .bp-tablo td.bp-ad{ font-weight:700; color:#2d2d2d; }
+  .bp-tablo td.bp-ad small{ display:block; font-weight:400; color:#999; font-size:.68rem; }
+  .bp-tablo td.en-iyi{ color:#2e7d32; font-weight:700; background:#eef7ef; }
+  .bp-tablo td.en-kotu{ color:#a34141; font-weight:700; background:#fbefef; }
+  .bp-tablo td.artis{ color:#2e7d32; }
+  .bp-tablo td.dusus{ color:#a34141; }
+  .bp-tablo td.bos{ color:#bbb; }
+  .bp-tablo td.hata{ color:#a34141; text-align:left; white-space:normal; }
+  .bp-tablo tfoot td{ font-weight:700; border-top:2px solid var(--line); border-bottom:none; background:#fbfaf7; cursor:default; }
+  .bp-not{ font-size:.76rem; color:#888; margin-top:10px; line-height:1.5; }
+  .bp-ayar-kutu{ max-width:520px; padding:18px 20px; }
+  .bp-ayar-baslik{ font-weight:700; font-size:.88rem; margin-bottom:12px; }
+  .bp-ayar-liste{ display:flex; flex-direction:column; gap:6px; }
+  .bp-ayar-liste label{
+    display:flex; align-items:center; gap:10px; padding:9px 12px; border:1px solid #e2ddd4; border-radius:8px;
+    cursor:pointer; font-size:.84rem; font-weight:600;
+  }
+  .bp-ayar-liste label:hover{ border-color:#2d2d2d; }
+  .bp-ayar-liste input{ width:16px; height:16px; accent-color:#2d2d2d; }
+  .bp-ayar-liste small{ color:#999; font-weight:400; margin-left:auto; }
+  .bp-ayar-alt{ display:flex; align-items:center; gap:12px; margin-top:16px; }
+  .bp-ayar-alt .bp-not{ margin-top:0; }
+
 
   .profile-chip{
     display:flex; align-items:center; gap:7px; align-self:center;
@@ -569,13 +604,62 @@
     <div class="giris-hata" id="girisHata"></div>
   </form>
 
-  <div class="giris-kart" id="magazaSecKart" style="display:none;">
-    <div class="giris-baslik">Mağaza seç</div>
-    <div class="giris-alt" id="magazaSecAlt"></div>
-    <div class="magaza-liste" id="magazaListe"></div>
-    <div class="giris-hata" id="magazaSecHata"></div>
-    <button type="button" class="giris-link" id="magazaSecCikis">Çıkış yap</button>
+</div>
+
+<div id="bolgePaneli" style="display:none;">
+<header>
+  <div class="ust-bar">
+    <div class="ust-sol">
+      <img class="ust-logo" src="simge.svg" alt="" width="30" height="30">
+      <span class="bp-baslik">Bölge Paneli</span>
+      <nav class="tab-bar">
+        <button class="tab-btn active" id="bpTabOzet" type="button">Özet</button>
+        <button class="tab-btn" id="bpTabAyar" type="button">Mağazalarım</button>
+      </nav>
+    </div>
+    <div class="ust-sag">
+      <button class="ust-btn" id="bpYenile" type="button">⟳ Yenile</button>
+      <span class="chip-wrap">
+        <button class="profile-chip" id="bpChip" type="button" title="Hesap menüsü">
+          <span class="pc-av" style="background:#3f6b8a">📊</span><span id="bpChipAd"></span>
+        </button>
+        <div class="chip-menu" id="bpChipMenu" style="display:none;">
+          <button type="button" id="bpCikis">🚪 Çıkış yap</button>
+        </div>
+      </span>
+    </div>
   </div>
+  <div class="alt-bar" id="bpDonemBar">
+    <div class="bp-seg" id="bpSeg">
+      <button type="button" data-donem="gun">Gün</button>
+      <button type="button" data-donem="hafta">Hafta</button>
+      <button type="button" data-donem="ay">Ay</button>
+    </div>
+    <button class="btn-mini" id="bpGeri" type="button" title="Önceki dönem">◀</button>
+    <input type="date" id="bpTarih" class="bp-tarih">
+    <button class="btn-mini" id="bpIleri" type="button" title="Sonraki dönem">▶</button>
+    <button class="ust-btn" id="bpBugun" type="button">Bugün</button>
+    <span class="bp-aralik" id="bpAralik"></span>
+  </div>
+</header>
+<main class="bp-icerik">
+  <section id="bpOzet">
+    <div class="bp-kutu">
+      <table class="bp-tablo" id="bpTablo"></table>
+    </div>
+    <div class="bp-not" id="bpNot"></div>
+  </section>
+  <section id="bpAyar" style="display:none;">
+    <div class="bp-kutu bp-ayar-kutu">
+      <div class="bp-ayar-baslik">Panelde görmek istediğin mağazaları seç</div>
+      <div class="bp-ayar-liste" id="bpAyarListe"></div>
+      <div class="bp-ayar-alt">
+        <button class="ust-btn dolu" id="bpAyarKaydet" type="button">Kaydet</button>
+        <span class="bp-not" id="bpAyarNot"></span>
+      </div>
+    </div>
+  </section>
+</main>
 </div>
 
 <div id="appRoot" style="display:none;">
@@ -598,12 +682,13 @@
         <button class="ust-btn" id="migrateBtn" type="button" onclick="migrateLocalDataToCloud()">⬆ Yerel veriyi buluta yükle</button>
         <button class="ust-btn" id="undoBtn" type="button" disabled onclick="undoLast()">↩ Geri al</button>
       </div>
+      <button class="ust-btn" id="bolgePanelBtn" type="button" style="display:none;">◀ Bölge paneli</button>
       <span class="chip-wrap">
         <button class="profile-chip" id="profileChip" type="button" title="Hesap menüsü">
           <span class="pc-av" id="profileChipAv"></span><span id="profileChipName"></span>
         </button>
         <div class="chip-menu" id="chipMenu" style="display:none;">
-          <button type="button" id="chipMagazaBtn">🔄 Mağaza değiştir</button>
+          <button type="button" id="chipMagazaBtn">◀ Bölge paneline dön</button>
           <div class="sep" id="chipMagazaSep"></div>
           <button type="button" id="chipCikisBtn">🚪 Çıkış yap</button>
         </div>
@@ -746,7 +831,7 @@
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 3;
+const APP_SURUM = 4;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -1291,10 +1376,9 @@ function bootStatus(msg, isError){
 // ekranda yalnızca kullanıcı adı yazılır.
 // Kimin ne yapabileceği Firestore'daki yetkiler/{kullaniciAdi} belgesinde durur:
 //   { rol: "magaza" }                          — yalnızca kendi mağazası (stores/{kullaniciAdi})
-//   { rol: "bolge", magazalar: ["m583", ...] } — listedeki mağazalar
+//   { rol: "bolge", magazalar: ["m583", ...] } — bölge paneli + listedeki mağazalar
 // Asıl koruma firestore.rules'tadır; buradaki kontroller yalnızca ekran içindir.
 const GIRIS_ALAN_ADI = '@mcrapor.app';
-const MAGAZA_SECIM_KEY = 'bolgeSonMagaza';
 // Mağaza ayrımından önceki "onur" profilinin verisi bu mağazaya taşınır.
 const ESKI_PROFIL = 'onur';
 const ESKI_PROFIL_YENI_MAGAZA = 'm583';
@@ -1327,10 +1411,9 @@ function girisHatasiMetni(e){
 
 function ekranGoster(ad){
   document.getElementById('bootScreen').style.display = ad === 'boot' ? '' : 'none';
-  document.getElementById('girisEkrani').style.display = (ad === 'giris' || ad === 'magazaSec') ? '' : 'none';
+  document.getElementById('girisEkrani').style.display = ad === 'giris' ? '' : 'none';
+  document.getElementById('bolgePaneli').style.display = ad === 'panel' ? '' : 'none';
   document.getElementById('appRoot').style.display = ad === 'uygulama' ? '' : 'none';
-  document.getElementById('girisForm').style.display = ad === 'giris' ? '' : 'none';
-  document.getElementById('magazaSecKart').style.display = ad === 'magazaSec' ? '' : 'none';
 }
 function girisEkraniGoster(hata){
   ekranGoster('giris');
@@ -1367,7 +1450,8 @@ async function cikisYap(){
   resetStoreCaches();
   aktifProfil = null;
   oturum = null;
-  try{ localStorage.removeItem(MAGAZA_SECIM_KEY); }catch(e){ /* sorun değil */ }
+  bp.yuklendi = false;
+  bp.veri = {};
   await auth.signOut();
 }
 
@@ -1384,28 +1468,11 @@ async function oturumuKur(user){
   };
 }
 
-function magazaSecimiGoster(){
-  ekranGoster('magazaSec');
-  const liste = oturum.magazalar.slice().sort();
-  document.getElementById('magazaSecAlt').textContent =
-    magazaAdi(oturum.kadi) + ' · ' + (liste.length ? 'açmak istediğin mağazayı seç' : 'listende mağaza yok');
-  document.getElementById('magazaSecHata').textContent = liste.length ? ''
-    : 'Firestore\'da yetkiler/' + oturum.kadi + ' belgesindeki "magazalar" listesine mağaza ekleyin.';
-  const el = document.getElementById('magazaListe');
-  el.innerHTML = liste.map(m=>
-    '<button type="button" class="magaza-sec-btn" data-key="' + escapeHtml(m) + '">' + escapeHtml(magazaAdi(m)) + '</button>'
-  ).join('');
-  el.querySelectorAll('button').forEach(b=> b.addEventListener('click', ()=> magazayiAc(b.dataset.key)));
-}
-
 async function magazayiAc(key){
   // Her mağaza ayrı veriyle yaşar: öncekinin verisi ve dinleyicileri bırakılır.
   stopCloudListeners();
   resetStoreCaches();
-  aktifProfil = {key, name: magazaAdi(key), legacy: key === ESKI_PROFIL_YENI_MAGAZA};
-  if(oturum.rol === 'bolge'){
-    try{ localStorage.setItem(MAGAZA_SECIM_KEY, key); }catch(e){ /* kota */ }
-  }
+  aktifProfil = {key, name: bpMagazaAdi(key), legacy: key === ESKI_PROFIL_YENI_MAGAZA};
   ekranGoster('boot');
   bootStatus('Veriler yükleniyor...');
   try{
@@ -1471,7 +1538,10 @@ function acChipMenu(){
   const m = document.getElementById('chipMenu');
   m.style.display = (m.style.display === 'none') ? '' : 'none';
 }
-function kapatChipMenu(){ document.getElementById('chipMenu').style.display = 'none'; }
+function kapatChipMenu(){
+  document.getElementById('chipMenu').style.display = 'none';
+  document.getElementById('bpChipMenu').style.display = 'none';
+}
 
 function renderProfileChip(){
   const chip = document.getElementById('profileChip');
@@ -1486,6 +1556,7 @@ function renderProfileChip(){
     aktifProfil.name + (bolge ? ' · ' + magazaAdi(oturum.kadi) : '');
   document.getElementById('chipMagazaBtn').style.display = bolge ? '' : 'none';
   document.getElementById('chipMagazaSep').style.display = bolge ? '' : 'none';
+  document.getElementById('bolgePanelBtn').style.display = bolge ? '' : 'none';
 }
 
 function renderLastEditInfo(){
@@ -1502,18 +1573,345 @@ function renderLastEditInfo(){
 }
 
 document.getElementById('profileChip').addEventListener('click', e=>{ e.stopPropagation(); acChipMenu(); });
-document.getElementById('chipMagazaBtn').addEventListener('click', ()=>{
+// Panele dönüşte veriler tazelenir; mağazada yapılan düzeltmeler tabloya yansır.
+document.getElementById('chipMagazaBtn').addEventListener('click', ()=> bolgePaneliniAc(true));
+document.getElementById('bolgePanelBtn').addEventListener('click', ()=> bolgePaneliniAc(true));
+document.getElementById('chipCikisBtn').addEventListener('click', cikisYap);
+document.addEventListener('click', ()=> kapatChipMenu());
+document.getElementById('girisForm').addEventListener('submit', girisYap);
+
+// ==================== BÖLGE PANELİ ====================
+// Bölge müdürünün listesindeki mağazaları tek tabloda yan yana gösterir.
+// Veriler her mağazanın kendi entries koleksiyonundan okunur; bir satıra
+// tıklanınca o mağazanın normal rapor ekranı açılır.
+const bp = {
+  donem: 'ay',           // 'gun' | 'hafta' | 'ay'
+  tarih: null,           // 'YYYY-MM-DD'
+  sekme: 'ozet',
+  yuklendi: false,
+  veri: {},              // magaza -> {tarih: kayit}
+  hatalar: {},           // magaza -> mesaj
+  tumMagazalar: null,    // yetkiler'de rol=magaza olanlar: id -> belge
+  sirala: {kol:'ciro', yon:-1}
+};
+
+function tarihOku(s){ const p = String(s).split('-').map(Number); return new Date(p[0], p[1]-1, p[2]); }
+function gunEkle(d, n){ const x = new Date(d); x.setDate(x.getDate()+n); return x; }
+function kisaTarih(d){ return pad(d.getDate()) + '.' + pad(d.getMonth()+1) + '.' + d.getFullYear(); }
+const AY_TAM_ADLARI = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+
+// Seçili dönemin günleri ve kıyas için önceki dönemin aynı uzunluktaki günleri.
+// Bugünden sonraki günler hesaba katılmaz (dönem henüz bitmediyse "bugüne kadar").
+function bpAraligi(){
+  const t = tarihOku(bp.tarih);
+  const bugun = getNow(); bugun.setHours(0,0,0,0);
+  let bas, son, oncekiBas, etiket, kiyasEtiket;
+  if(bp.donem === 'gun'){
+    bas = son = t;
+    oncekiBas = gunEkle(t, -7);
+    etiket = kisaTarih(t) + ' ' + ['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'][t.getDay()];
+    kiyasEtiket = 'geçen hafta aynı güne göre';
+  } else if(bp.donem === 'hafta'){
+    bas = mondayOf(t); son = gunEkle(bas, 6);
+    oncekiBas = gunEkle(bas, -7);
+    etiket = kisaTarih(bas) + ' – ' + kisaTarih(son) + ' (Hafta ' + isoWeekInfo(bas).week + ')';
+    kiyasEtiket = 'geçen haftanın aynı günlerine göre';
+  } else {
+    bas = new Date(t.getFullYear(), t.getMonth(), 1);
+    son = new Date(t.getFullYear(), t.getMonth()+1, 0);
+    oncekiBas = new Date(t.getFullYear(), t.getMonth()-1, 1);
+    etiket = AY_TAM_ADLARI[t.getMonth()] + ' ' + t.getFullYear();
+    kiyasEtiket = 'geçen ayın aynı günlerine göre';
+  }
+  const kesim = son > bugun ? bugun : son;
+  const gunSayisi = Math.round((kesim - bas) / 86400000) + 1;   // 0 veya eksi: dönem henüz başlamadı
+  let oncekiSon = gunEkle(oncekiBas, Math.max(gunSayisi, 1) - 1);
+  if(bp.donem === 'ay'){
+    const oncekiAySonu = new Date(oncekiBas.getFullYear(), oncekiBas.getMonth()+1, 0);
+    if(oncekiSon > oncekiAySonu) oncekiSon = oncekiAySonu;
+  }
+  if(gunSayisi > 0 && kesim < son) etiket += ' · ' + gunSayisi + '. güne kadar';
+  return {bas, kesim, gunSayisi, oncekiBas, oncekiSon, etiket, kiyasEtiket};
+}
+
+function bpDolu(v){ return v !== undefined && v !== null && v !== ''; }
+
+function bpHesapla(kayitlar, bas, son){
+  let gun = 0, ciro = 0, hedef = 0;
+  const mdo = [], fbu = [], fbs = [], mgs = [], toplu = [];
+  for(let d = new Date(bas); d <= son; d = gunEkle(d, 1)){
+    const r = kayitlar[dateStr(d)];
+    if(!r) continue;
+    if(bpDolu(r.ciro)){ gun++; ciro += Number(r.ciro); hedef += effectiveHedef(r); }
+    if(bpDolu(r.mdo)){ const n = mdoToNumber(r.mdo); if(n !== null) mdo.push(n); }
+    if(bpDolu(r.fbu)) fbu.push(Number(r.fbu));
+    if(bpDolu(r.fbs)) fbs.push(Number(r.fbs));
+    if(bpDolu(r.mgs)) mgs.push(Number(r.mgs));
+    if(bpDolu(r.toplu_satis)) toplu.push(Number(r.toplu_satis));
+  }
+  const top = a => a.reduce((x,y)=> x+y, 0);
+  const ort = a => a.length ? top(a)/a.length : null;
+  return {
+    gun,
+    ciro: gun ? ciro : null,
+    hedef: gun ? hedef : null,
+    oran: gun && hedef ? ciro/hedef*100 : null,
+    mdo: ort(mdo), fbu: ort(fbu), fbs: ort(fbs),
+    mgs: mgs.length ? top(mgs) : null,
+    toplu: toplu.length ? top(toplu) : null
+  };
+}
+
+function bpSonGiris(kayitlar){
+  let son = null;
+  Object.keys(kayitlar).forEach(k=>{ if(bpDolu(kayitlar[k].ciro) && (!son || k > son)) son = k; });
+  return son;
+}
+
+function bpMagazaAdi(m){
+  const b = bp.tumMagazalar && bp.tumMagazalar[m];
+  return (b && b.ad) ? b.ad : magazaAdi(m);
+}
+
+const fmtYuzde = v => (v === null || v === undefined) ? null : '% ' + v.toFixed(2).replace('.', ',');
+const fmtDegisim = v => (v === null || v === undefined) ? null : (v > 0 ? '+' : '') + fmtPct(v);
+// iyi: 1 → yüksek olan en iyi; 0 → renklendirilmez
+const BP_KOLONLAR = [
+  {k:'ad',       t:'Mağaza',      iyi:0},
+  {k:'gun',      t:'Gün',         iyi:0, fmt: v => String(v), ipucu:'Veri girilmiş gün sayısı'},
+  {k:'ciro',     t:'Ciro',        iyi:1, fmt: fmtTL},
+  {k:'hedef',    t:'Hedef',       iyi:0, fmt: fmtTL, ipucu:'Veri girilmiş günlerin hedef toplamı'},
+  {k:'oran',     t:'Gerç. %',     iyi:1, fmt: fmtPct},
+  {k:'degisim',  t:'Ciro değ.',   iyi:1, fmt: fmtDegisim},
+  {k:'mdo',      t:'Mdo',         iyi:1, fmt: fmtYuzde, ipucu:'Günlük ortalama'},
+  {k:'fbu',      t:'Fbü',         iyi:1, fmt: fmtNum, ipucu:'Günlük ortalama'},
+  {k:'mgs',      t:'Mgs',         iyi:1, fmt: fmtNum, ipucu:'Toplam'},
+  {k:'fbs',      t:'Fbs',         iyi:1, fmt: fmtTL, ipucu:'Günlük ortalama'},
+  {k:'toplu',    t:'Toplu S.',    iyi:1, fmt: fmtK, ipucu:'Toplam'},
+  {k:'sonGiris', t:'Son giriş',   iyi:0, fmt: v => kisaTarih(tarihOku(v)), ipucu:'Ciro girilen son gün'}
+];
+
+function bpSatirlar(ar){
+  return oturum.magazalar.map(m=>{
+    if(bp.hatalar[m]) return {m, ad: bpMagazaAdi(m), hata: bp.hatalar[m]};
+    const kayitlar = bp.veri[m] || {};
+    const s = ar.gunSayisi > 0 ? bpHesapla(kayitlar, ar.bas, ar.kesim) : bpHesapla({}, ar.bas, ar.bas);
+    const o = ar.gunSayisi > 0 ? bpHesapla(kayitlar, ar.oncekiBas, ar.oncekiSon) : {ciro:null};
+    s.oncekiCiro = o.ciro;
+    s.degisim = (s.ciro !== null && o.ciro) ? (s.ciro - o.ciro) / o.ciro * 100 : null;
+    s.sonGiris = bpSonGiris(kayitlar);
+    s.m = m;
+    s.ad = bpMagazaAdi(m);
+    return s;
+  });
+}
+
+function bpToplam(satirlar){
+  const gecerli = satirlar.filter(s=> !s.hata);
+  const top = k => { const v = gecerli.map(s=> s[k]).filter(x=> x !== null && x !== undefined); return v.length ? v.reduce((a,b)=>a+b,0) : null; };
+  const ort = k => { const v = gecerli.map(s=> s[k]).filter(x=> x !== null && x !== undefined); return v.length ? v.reduce((a,b)=>a+b,0)/v.length : null; };
+  const ciro = top('ciro'), hedef = top('hedef');
+  // Değişim yalnızca iki dönemde de cirosu olan mağazalardan hesaplanır;
+  // veri girmemiş bir mağaza bölgeyi düşüşte göstermesin.
+  const kiyas = gecerli.filter(s=> s.ciro !== null && s.oncekiCiro);
+  const kiyasSimdi = kiyas.reduce((a,s)=> a + s.ciro, 0);
+  const kiyasOnce = kiyas.reduce((a,s)=> a + s.oncekiCiro, 0);
+  return {
+    ad: 'Bölge', gun: null, ciro, hedef,
+    oran: ciro !== null && hedef ? ciro/hedef*100 : null,
+    degisim: kiyasOnce ? (kiyasSimdi - kiyasOnce)/kiyasOnce*100 : null,
+    mdo: ort('mdo'), fbu: ort('fbu'), fbs: ort('fbs'), mgs: top('mgs'), toplu: top('toplu'), sonGiris: null
+  };
+}
+
+function bpCiz(){
+  document.querySelectorAll('#bpSeg button').forEach(b=> b.classList.toggle('active', b.dataset.donem === bp.donem));
+  document.getElementById('bpTarih').value = bp.tarih;
+  const ar = bpAraligi();
+  document.getElementById('bpAralik').textContent = ar.etiket;
+
+  const tablo = document.getElementById('bpTablo');
+  const not = document.getElementById('bpNot');
+  if(!oturum.magazalar.length){
+    tablo.innerHTML = '';
+    not.textContent = 'Listende mağaza yok. "Mağazalarım" sekmesinden mağaza seç.';
+    return;
+  }
+  if(!bp.yuklendi){ tablo.innerHTML = ''; not.textContent = 'Veriler yükleniyor...'; return; }
+
+  const satirlar = bpSatirlar(ar);
+  const {kol, yon} = bp.sirala;
+  satirlar.sort((a,b)=>{
+    if(a.hata || b.hata) return a.hata ? 1 : -1;
+    const x = a[kol], y = b[kol];
+    if(kol === 'ad') return String(x).localeCompare(String(y), 'tr') * yon;
+    if(x === null || x === undefined) return 1;
+    if(y === null || y === undefined) return -1;
+    return (x < y ? -1 : x > y ? 1 : 0) * yon;
+  });
+
+  // En iyi / en kötü: en az iki mağazada değer varsa işaretlenir.
+  const uclar = {};
+  BP_KOLONLAR.filter(c=> c.iyi).forEach(c=>{
+    const v = satirlar.filter(s=> !s.hata && s[c.k] !== null && s[c.k] !== undefined).map(s=> s[c.k]);
+    if(v.length >= 2 && Math.max(...v) !== Math.min(...v)) uclar[c.k] = {max: Math.max(...v), min: Math.min(...v)};
+  });
+
+  const hucre = (c, s, toplamMi)=>{
+    if(c.k === 'ad'){
+      return '<td class="bp-ad">' + escapeHtml(s.ad) + (!toplamMi && s.ad !== magazaAdi(s.m) ? '<small>' + escapeHtml(magazaAdi(s.m)) + '</small>' : '') + '</td>';
+    }
+    const v = s[c.k];
+    const metin = (v === null || v === undefined) ? null : c.fmt(v);
+    const sinif = [];
+    if(metin === null) sinif.push('bos');
+    else if(!toplamMi && uclar[c.k]){
+      if(v === uclar[c.k].max) sinif.push('en-iyi');
+      else if(v === uclar[c.k].min) sinif.push('en-kotu');
+    }
+    if(c.k === 'degisim' && metin !== null && !sinif.length) sinif.push(v >= 0 ? 'artis' : 'dusus');
+    return '<td class="' + sinif.join(' ') + '">' + (metin === null ? '–' : escapeHtml(metin)) + '</td>';
+  };
+
+  const thead = '<thead><tr>' + BP_KOLONLAR.map(c=>{
+    const ok = c.k === kol ? (yon < 0 ? ' ▼' : ' ▲') : '';
+    const ipucu = c.k === 'degisim' ? 'Ciro, ' + ar.kiyasEtiket : (c.ipucu || '');
+    return '<th data-kol="' + c.k + '" class="' + (c.k === kol ? 'sirali' : '') + '" title="' + escapeHtml(ipucu) + '">' + c.t + ok + '</th>';
+  }).join('') + '</tr></thead>';
+
+  const tbody = '<tbody>' + satirlar.map(s=>{
+    if(s.hata){
+      return '<tr data-m="' + escapeHtml(s.m) + '"><td class="bp-ad">' + escapeHtml(s.ad) + '</td>'
+        + '<td class="hata" colspan="' + (BP_KOLONLAR.length - 1) + '">Okunamadı: ' + escapeHtml(s.hata) + '</td></tr>';
+    }
+    return '<tr data-m="' + escapeHtml(s.m) + '" title="' + escapeHtml(s.ad) + ' raporunu aç">'
+      + BP_KOLONLAR.map(c=> hucre(c, s, false)).join('') + '</tr>';
+  }).join('') + '</tbody>';
+
+  const toplam = bpToplam(satirlar);
+  const tfoot = satirlar.length > 1
+    ? '<tfoot><tr>' + BP_KOLONLAR.map(c=> hucre(c, toplam, true)).join('') + '</tr></tfoot>'
+    : '';
+
+  tablo.innerHTML = thead + tbody + tfoot;
+  tablo.querySelectorAll('th').forEach(th=> th.addEventListener('click', ()=>{
+    const k = th.dataset.kol;
+    bp.sirala = (bp.sirala.kol === k) ? {kol:k, yon:-bp.sirala.yon} : {kol:k, yon: k === 'ad' ? 1 : -1};
+    bpCiz();
+  }));
+  tablo.querySelectorAll('tbody tr').forEach(tr=> tr.addEventListener('click', ()=> magazayiAc(tr.dataset.m)));
+
+  not.textContent = (ar.gunSayisi <= 0 ? 'Bu dönem henüz başlamadı. ' : '')
+    + 'Ciro değişimi ' + ar.kiyasEtiket + '. Mdo, Fbü ve Fbs günlük ortalama; Mgs ve Toplu satış toplamdır. '
+    + 'Yeşil en iyi, kırmızı en düşük değer. Bölge satırında Mdo, Fbü ve Fbs mağaza ortalamasıdır. '
+    + 'Bir mağazanın raporunu açmak için satırına tıkla.';
+}
+
+async function bpVeriYukle(){
+  bp.yuklendi = false;
+  bpCiz();
+  try{
+    const snap = await db.collection('yetkiler').where('rol', '==', 'magaza').get();
+    bp.tumMagazalar = {};
+    snap.forEach(d=>{ bp.tumMagazalar[d.id] = d.data() || {}; });
+  }catch(e){ bp.tumMagazalar = null; }
+  bp.veri = {};
+  bp.hatalar = {};
+  await Promise.all(oturum.magazalar.map(async m=>{
+    try{
+      const snap = await magazaRef(m).collection('entries').get();
+      const kayitlar = {};
+      snap.forEach(d=>{ kayitlar[d.id] = d.data(); });
+      bp.veri[m] = kayitlar;
+    }catch(e){ bp.hatalar[m] = e.message; }
+  }));
+  bp.yuklendi = true;
+  bpCiz();
+}
+
+function bpSekme(ad){
+  bp.sekme = ad;
+  document.getElementById('bpTabOzet').classList.toggle('active', ad === 'ozet');
+  document.getElementById('bpTabAyar').classList.toggle('active', ad === 'ayar');
+  document.getElementById('bpOzet').style.display = ad === 'ozet' ? '' : 'none';
+  document.getElementById('bpAyar').style.display = ad === 'ayar' ? '' : 'none';
+  document.getElementById('bpDonemBar').style.display = ad === 'ozet' ? '' : 'none';
+  if(ad === 'ayar') bpAyarCiz();
+}
+
+function bpAyarCiz(){
+  const liste = document.getElementById('bpAyarListe');
+  document.getElementById('bpAyarNot').textContent = '';
+  if(!bp.tumMagazalar){
+    liste.innerHTML = '<div class="bp-not">Mağaza listesi okunamadı. Sayfayı yenileyip tekrar dene.</div>';
+    return;
+  }
+  const hepsi = Array.from(new Set(Object.keys(bp.tumMagazalar).concat(oturum.magazalar))).sort();
+  if(!hepsi.length){
+    liste.innerHTML = '<div class="bp-not">Henüz tanımlı mağaza yok. Firestore\'da yetkiler koleksiyonuna rol: "magaza" olan bir belge ekleyin.</div>';
+    return;
+  }
+  liste.innerHTML = hepsi.map(m=>
+    '<label><input type="checkbox" value="' + escapeHtml(m) + '"' + (oturum.magazalar.includes(m) ? ' checked' : '') + '>'
+    + escapeHtml(bpMagazaAdi(m))
+    + (bpMagazaAdi(m) !== magazaAdi(m) ? '<small>' + escapeHtml(magazaAdi(m)) + '</small>' : '')
+    + '</label>').join('');
+}
+
+async function bpAyarKaydet(){
+  const secili = Array.from(document.querySelectorAll('#bpAyarListe input:checked')).map(i=> i.value).sort();
+  const not = document.getElementById('bpAyarNot');
+  const btn = document.getElementById('bpAyarKaydet');
+  btn.disabled = true;
+  not.textContent = 'Kaydediliyor...';
+  try{
+    await db.collection('yetkiler').doc(oturum.kadi).update({magazalar: secili});
+    oturum.magazalar = secili;
+    not.textContent = 'Kaydedildi ✓ (' + secili.length + ' mağaza)';
+    await bpVeriYukle();
+  }catch(e){
+    not.textContent = 'Kaydedilemedi: ' + e.message;
+  }finally{
+    btn.disabled = false;
+  }
+}
+
+async function bolgePaneliniAc(yenidenYukle){
   kapatChipMenu();
   stopCloudListeners();
   resetStoreCaches();
   aktifProfil = null;
-  try{ localStorage.removeItem(MAGAZA_SECIM_KEY); }catch(e){ /* sorun değil */ }
-  magazaSecimiGoster();
+  if(!bp.tarih) bp.tarih = dateStr(getNow());
+  document.getElementById('bpChipAd').textContent = magazaAdi(oturum.kadi);
+  ekranGoster('panel');
+  bpSekme('ozet');
+  if(yenidenYukle || !bp.yuklendi) await bpVeriYukle();
+  else bpCiz();
+}
+
+function bpKaydir(yon){
+  const t = tarihOku(bp.tarih);
+  if(bp.donem === 'gun') bp.tarih = dateStr(gunEkle(t, yon));
+  else if(bp.donem === 'hafta') bp.tarih = dateStr(gunEkle(t, 7*yon));
+  else bp.tarih = dateStr(new Date(t.getFullYear(), t.getMonth()+yon, 1));
+  bpCiz();
+}
+
+document.querySelectorAll('#bpSeg button').forEach(b=> b.addEventListener('click', ()=>{ bp.donem = b.dataset.donem; bpCiz(); }));
+document.getElementById('bpGeri').addEventListener('click', ()=> bpKaydir(-1));
+document.getElementById('bpIleri').addEventListener('click', ()=> bpKaydir(1));
+document.getElementById('bpBugun').addEventListener('click', ()=>{ bp.tarih = dateStr(getNow()); bpCiz(); });
+document.getElementById('bpTarih').addEventListener('change', function(){ if(this.value){ bp.tarih = this.value; bpCiz(); } });
+document.getElementById('bpYenile').addEventListener('click', bpVeriYukle);
+document.getElementById('bpTabOzet').addEventListener('click', ()=> bpSekme('ozet'));
+document.getElementById('bpTabAyar').addEventListener('click', ()=> bpSekme('ayar'));
+document.getElementById('bpAyarKaydet').addEventListener('click', bpAyarKaydet);
+document.getElementById('bpChip').addEventListener('click', e=>{
+  e.stopPropagation();
+  const m = document.getElementById('bpChipMenu');
+  m.style.display = (m.style.display === 'none') ? '' : 'none';
 });
-document.getElementById('chipCikisBtn').addEventListener('click', cikisYap);
-document.getElementById('magazaSecCikis').addEventListener('click', cikisYap);
-document.addEventListener('click', ()=> kapatChipMenu());
-document.getElementById('girisForm').addEventListener('submit', girisYap);
+document.getElementById('bpCikis').addEventListener('click', cikisYap);
 
 // Firebase oturumu tarayıcıda hatırlanır; çıkış yapılmadıkça şifre tekrar sorulmaz.
 auth.onAuthStateChanged(async function(user){
@@ -1533,11 +1931,8 @@ auth.onAuthStateChanged(async function(user){
     girisEkraniGoster(mesaj);
     return;
   }
-  if(oturum.rol === 'magaza'){ await magazayiAc(oturum.kadi); return; }
-  let son = null;
-  try{ son = localStorage.getItem(MAGAZA_SECIM_KEY); }catch(e){ /* sorun değil */ }
-  if(son && oturum.magazalar.includes(son)) await magazayiAc(son);
-  else magazaSecimiGoster();
+  if(oturum.rol === 'magaza') await magazayiAc(oturum.kadi);
+  else await bolgePaneliniAc(true);
 });
 
 // ==================== Rapor verisi (bulut tabanlı) ====================

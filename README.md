@@ -15,7 +15,9 @@ Veri Firebase'de (Firestore) durur. Herkes aynı ekrandan kullanıcı adı ve
    Ekranda yalnızca `kullaniciadi` yazılır.
 2. Firestore → `yetkiler` koleksiyonu → belge kimliği kullanıcı adı (küçük harf):
    - mağaza: `{ rol: "magaza" }` — `stores/{kullaniciadi}` verisini görür
-   - bölge müdürü: `{ rol: "bolge", magazalar: ["m583", ...] }`
+   - bölge müdürü: `{ rol: "bolge", magazalar: ["m583", ...] }` — girişte
+     bölge paneli açılır; listeyi panelin "Mağazalarım" sekmesinden kendisi değiştirir
+   - isteğe bağlı `ad` alanı (ör. `"Kadıköy"`) panelde kodun yerine görünür
 
 `m583` ilk girişte eski `onur` profilinin verisini kendi altına kopyalar
 (kaynak silinmez).
