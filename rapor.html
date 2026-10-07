@@ -943,7 +943,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 10;
+const APP_SURUM = 11;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -3324,16 +3324,6 @@ function copyCanvasToClipboard(canvas){
   });
 }
 
-async function autoDownloadIfNeeded(){
-  const dow = getNow().getDay(); // 0=Paz,1=Pzt,2=Sal,3=Çar
-  if(dow !== 1 && dow !== 3) return;
-  const key = 'autoExported:' + todayStr(0);
-  if(localStorage.getItem(key)) return;
-  exportAllData();
-  localStorage.setItem(key, '1');
-  setStatus('Bugün Pazartesi/Çarşamba olduğu için tüm veriler otomatik dışa aktarıldı.');
-}
-
 function renderEmployeeTargetsRow(){
   const el = document.getElementById('employeeTargetsRow');
   if(!el) return;
@@ -3442,7 +3432,6 @@ async function startAppAfterLogin(){
   await seedTemmuz2026IfNeeded();
   renderAll();
   renderEmployeeTargetsRow();
-  setTimeout(autoDownloadIfNeeded, 800);
 }
 
 // ==================== SEKMELER (Rapor / Araçlar) ====================
