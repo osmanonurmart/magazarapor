@@ -640,7 +640,7 @@ if(!document.documentElement.classList.contains('tel')){
   html.tel .ust-bar{ padding:8px 12px; gap:8px; flex-wrap:nowrap; }
   html.tel .ust-sol, html.tel .ust-sag{ flex-wrap:nowrap; gap:8px; min-width:0; }
   html.tel .ust-sag{ margin-left:auto; }
-  html.tel .surum-rozet{ display:none; }
+  html.tel .surum-rozet{ padding:4px 10px; font-size:.75rem; }
   html.tel .profile-chip{ max-width:150px; overflow:hidden; white-space:nowrap; }
   html.tel .tab-bar{
     position:fixed; left:0; right:0; bottom:0; z-index:50; margin:0; gap:0;
@@ -814,6 +814,7 @@ if(!document.documentElement.classList.contains('tel')){
   <div class="ust-bar">
     <div class="ust-sol">
       <img class="ust-logo" src="simge.svg?v=2" alt="" width="30" height="30">
+      <span class="surum-rozet bp-surum" title="Güncelleme kontrol et" onclick="guncellemeKontrol()"></span>
       <span class="bp-baslik">Bölge Paneli</span>
       <nav class="tab-bar">
         <button class="tab-btn active" id="bpTabOzet" data-kisa="Özet" type="button"><svg class="tab-ikon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V11"/><path d="M10 20V5"/><path d="M16 20v-6"/><path d="M21 20H3"/></svg>Özet</button>
@@ -1051,7 +1052,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 16;
+const APP_SURUM = 17;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -4757,7 +4758,7 @@ async function metniKopyala(text){
 
 // ==================== SÜRÜM / GÜNCELLEME ====================
 function renderSurumRozet(metin){
-  document.getElementById('surumRozet').textContent = metin || ('v' + APP_SURUM);
+  document.querySelectorAll('#surumRozet, .bp-surum').forEach(el=>{ el.textContent = metin || ('v' + APP_SURUM); });
 }
 renderSurumRozet();
 
