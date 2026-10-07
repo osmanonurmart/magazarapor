@@ -19,10 +19,9 @@ Veri Firebase'de (Firestore) durur. Herkes aynı ekrandan kullanıcı adı ve
      bölge paneli açılır; listeyi panelin "Mağazalarım" sekmesinden kendisi değiştirir
    - isteğe bağlı `ad` alanı (ör. `"Kadıköy"`) panelde kodun yerine görünür
 
-Ortak araçları (Araçlar sekmesi, tüm mağazalarda aynı) bölge müdürü ve
-yetki belgesinde `yonetici: true` (boolean) olan kullanıcı düzenler.
-Kurumsal hafıza bölümlerinin içeriği `rapor.html` içindeki
-`KURUMSAL_HAFIZA` listesinde durur; mağaza not defteri mağazaya özeldir.
+Araçlar (tüm mağazalarda aynı) `rapor.html` içindeki `ARACLAR` listesinde,
+Kurumsal hafıza bölümleri `KURUMSAL_HAFIZA` listesinde kodla tanımlanır;
+arayüzden eklenmez. Mağaza not defteri mağazaya özeldir.
 
 `m583` ilk girişte eski `onur` profilinin verisini kendi altına kopyalar
 (kaynak silinmez).
