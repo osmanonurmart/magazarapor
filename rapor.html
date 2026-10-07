@@ -96,7 +96,7 @@ if(!document.documentElement.classList.contains('tel')){
   .ust-btn:disabled{ opacity:.4; cursor:default; }
 
   .araclar-page{ margin:0; padding:16px; }
-  .tab-ikon{ display:none; }
+  .tab-ikon, .tel-ikon{ display:none; }
 
   /* Araçlar ve Kurumsal hafıza: aynı kart düzeni */
   .sayfa-baslik{ display:flex; align-items:baseline; gap:12px; max-width:1100px; margin:4px auto 18px; }
@@ -672,8 +672,23 @@ if(!document.documentElement.classList.contains('tel')){
   html.tel .top-controls{ flex-wrap:nowrap; gap:6px; }
   html.tel .ust-btn{ padding:8px 10px; font-size:.78rem; }
   html.tel #addDataBtn{ display:none; }
-  html.tel #undoBtn{ font-size:0; padding:8px 10px; }
-  html.tel #undoBtn::after{ content:'↩'; font-size:.9rem; }
+  html.tel .masa-metin{ display:none; }
+  html.tel .tel-ikon{
+    display:block; width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:1.9;
+    stroke-linecap:round; stroke-linejoin:round;
+  }
+  /* Geri al ve Yenile: temaya uygun yuvarlak buton */
+  html.tel #undoBtn, html.tel #bpYenile{
+    width:40px; height:40px; padding:0; border-radius:50%; border:none;
+    display:flex; align-items:center; justify-content:center;
+    background:#f3ede3; color:#9a7438;
+  }
+  html.tel #undoBtn:disabled{ opacity:.4; }
+  html.tel #undoBtn:active:not(:disabled), html.tel #bpYenile:active{ background:#e9dcc6; }
+  /* Hesap rozetindeki simge: altın tonlu çizgi simge */
+  html.tel .profile-chip{ padding:3px 12px 3px 3px; border-color:#e2d6c2; }
+  html.tel .profile-chip .pc-av{ width:30px; height:30px; background:#f3ede3 !important; color:#9a7438; }
+  html.tel .profile-chip .pc-av .tel-ikon{ width:17px; height:17px; }
   html.tel #bolgePanelBtn{ font-size:0; padding:8px 10px; }
   html.tel #bolgePanelBtn::after{ content:'◀ Panel'; font-size:.78rem; }
 
@@ -728,8 +743,6 @@ if(!document.documentElement.classList.contains('tel')){
 
   /* Bölge paneli */
   html.tel .bp-icerik{ padding:10px 10px 20px; }
-  html.tel #bpYenile{ font-size:0; padding:8px 10px; }
-  html.tel #bpYenile::after{ content:'⟳'; font-size:.95rem; }
   html.tel #bpDonemBar{ flex-wrap:wrap; overflow:visible; gap:8px; }
   html.tel .bp-aralik{ flex-basis:100%; margin:0; font-size:.82rem; }
   html.tel .bp-tablo{ font-size:.8rem; }
@@ -837,10 +850,10 @@ if(!document.documentElement.classList.contains('tel')){
       </nav>
     </div>
     <div class="ust-sag">
-      <button class="ust-btn" id="bpYenile" type="button">⟳ Yenile</button>
+      <button class="ust-btn" id="bpYenile" type="button" title="Yenile"><svg class="tel-ikon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg><span class="masa-metin">⟳ Yenile</span></button>
       <span class="chip-wrap">
         <button class="profile-chip" id="bpChip" type="button" title="Hesap menüsü">
-          <span class="pc-av" style="background:#3f6b8a">📊</span><span id="bpChipAd"></span>
+          <span class="pc-av" style="background:#3f6b8a"><span class="masa-metin">📊</span><svg class="tel-ikon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V11"/><path d="M10 20V5"/><path d="M16 20v-6"/><path d="M21 20H3"/></svg></span><span id="bpChipAd"></span>
         </button>
         <div class="chip-menu" id="bpChipMenu" style="display:none;">
           <button type="button" id="bpCikis">🚪 Çıkış yap</button>
@@ -929,7 +942,7 @@ if(!document.documentElement.classList.contains('tel')){
         <button class="ust-btn dolu" id="addDataBtn" type="button">⬇ Yapıştır / Veri Ekle</button>
         <button class="ust-btn" id="exportBtn" type="button">⬇ Dışa aktar</button>
         <button class="ust-btn" id="migrateBtn" type="button" onclick="migrateLocalDataToCloud()">⬆ Yerel veriyi buluta yükle</button>
-        <button class="ust-btn" id="undoBtn" type="button" disabled onclick="undoLast()">↩ Geri al</button>
+        <button class="ust-btn" id="undoBtn" type="button" disabled onclick="undoLast()" title="Geri al"><svg class="tel-ikon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg><span class="masa-metin">↩ Geri al</span></button>
       </div>
       <button class="ust-btn" id="bolgePanelBtn" type="button" style="display:none;">◀ Bölge paneli</button>
       <span class="chip-wrap">
@@ -1064,7 +1077,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 19;
+const APP_SURUM = 20;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -1857,7 +1870,8 @@ function renderProfileChip(){
   chip.style.display = '';
   const bolge = oturum && oturum.rol === 'bolge';
   const av = document.getElementById('profileChipAv');
-  av.textContent = bolge ? '📊' : '🏪';
+  av.innerHTML = '<span class="masa-metin">' + (bolge ? '📊' : '🏪') + '</span>'
+    + '<svg class="tel-ikon" viewBox="0 0 24 24" aria-hidden="true">' + (bolge ? '<path d="M4 20V11"/><path d="M10 20V5"/><path d="M16 20v-6"/><path d="M21 20H3"/>' : '<path d="M4 10v10h16V10"/><path d="M3 10 4.8 4h14.4L21 10z"/><path d="M10 20v-5h4v5"/>') + '</svg>';
   av.style.background = bolge ? '#3f6b8a' : '#C8A066';
   document.getElementById('profileChipName').textContent =
     aktifProfil.name + (bolge ? ' · ' + magazaAdi(oturum.kadi) : '');
