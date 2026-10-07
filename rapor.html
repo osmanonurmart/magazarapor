@@ -85,6 +85,30 @@ if(!document.documentElement.classList.contains('tel')){
     display:inline-block; padding:2px 9px; border-radius:10px; background:#eeebe5; border:1px solid #dcd7ce;
     color:#555; font-size:.68rem; font-weight:700; cursor:pointer;
   }
+  .oneri-btn{
+    display:inline-flex; align-items:center; gap:5px; padding:2px 10px 2px 8px; border-radius:10px;
+    background:#fff; border:1px solid #dcd7ce; color:#9a7438; font-size:.68rem; font-weight:700;
+    cursor:pointer; font-family:inherit;
+  }
+  .oneri-btn svg{ width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .oneri-btn:hover{ background:#f3ede3; }
+  html.tel .oneri-btn{ padding:4px 9px; font-size:.75rem; }
+  html.tel .oneri-btn span{ display:none; }
+  html.tel .oneri-btn svg{ width:18px; height:18px; }
+  .ui-input.ui-metin{ text-align:left; resize:vertical; min-height:110px; line-height:1.45; }
+  .profile-chip{ position:relative; }
+  .gb-nokta{ position:absolute; top:0; right:0; width:10px; height:10px; border-radius:50%; background:var(--red); border:2px solid #fff; }
+  .gb-sayi{ display:inline-block; min-width:18px; padding:0 5px; border-radius:9px; background:var(--red); color:#fff; font-size:.68rem; text-align:center; margin-left:4px; }
+  .gb-sayi:empty{ display:none; }
+  .gb-liste{ max-height:55vh; overflow:auto; text-align:left; margin-top:12px; display:flex; flex-direction:column; gap:8px; }
+  .gb-oge{ border:1px solid var(--line); border-radius:12px; padding:10px 12px; background:#fff; }
+  .gb-oge.okundu{ background:#f7f5f1; color:#888; }
+  .gb-ust{ display:flex; justify-content:space-between; gap:8px; font-size:.72rem; color:#888; margin-bottom:5px; }
+  .gb-ust b{ color:#2d2d2d; }
+  .gb-metin{ font-size:.85rem; line-height:1.45; white-space:pre-wrap; word-break:break-word; color:#2d2d2d; }
+  .gb-oge.okundu .gb-metin{ color:#888; }
+  .gb-okundu-btn{ margin-top:8px; border:none; background:#f3ede3; color:#9a7438; font-weight:700; font-size:.75rem; padding:6px 12px; border-radius:8px; cursor:pointer; font-family:inherit; }
+  .gb-bos{ color:#999; font-size:.85rem; text-align:center; padding:14px 0; }
   .surum-rozet:hover{ background:var(--accent); border-color:var(--accent); color:#fff; }
   .ust-btn{
     background:#fff; color:#2d2d2d; border:1px solid #2d2d2d; padding:6px 11px; border-radius:7px;
@@ -842,6 +866,7 @@ if(!document.documentElement.classList.contains('tel')){
     <div class="ust-sol">
       <img class="ust-logo" src="simge.svg?v=2" alt="" width="30" height="30">
       <span class="surum-rozet bp-surum" title="Güncelleme kontrol et" onclick="guncellemeKontrol()"></span>
+      <button type="button" class="oneri-btn" title="Öneri / geri bildirim gönder" onclick="geriBildirimYaz()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/><path d="M8.5 11h7"/><path d="M8.5 14h4"/></svg><span>Öneri</span></button>
       <span class="bp-baslik">Bölge Paneli</span>
       <nav class="tab-bar">
         <button class="tab-btn active" id="bpTabOzet" data-kisa="Özet" type="button"><svg class="tab-ikon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V11"/><path d="M10 20V5"/><path d="M16 20v-6"/><path d="M21 20H3"/></svg>Özet</button>
@@ -931,6 +956,7 @@ if(!document.documentElement.classList.contains('tel')){
     <div class="ust-sol">
       <img class="ust-logo" src="simge.svg?v=2" alt="" width="30" height="30">
       <span class="surum-rozet" id="surumRozet" title="Güncelleme kontrol et" onclick="guncellemeKontrol()"></span>
+      <button type="button" class="oneri-btn" title="Öneri / geri bildirim gönder" onclick="geriBildirimYaz()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/><path d="M8.5 11h7"/><path d="M8.5 14h4"/></svg><span>Öneri</span></button>
       <nav class="tab-bar">
         <button class="tab-btn active" id="tabRaporBtn" data-kisa="Rapor" type="button" onclick="showTab('rapor')"><svg class="tab-ikon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V11"/><path d="M10 20V5"/><path d="M16 20v-6"/><path d="M21 20H3"/></svg>Rapor</button>
         <button class="tab-btn" id="tabAraclarBtn" data-kisa="Araçlar" type="button" onclick="showTab('araclar')"><svg class="tab-ikon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7.5" width="18" height="12.5" rx="2.5"/><path d="M9 7.5V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1.5"/><path d="M3 13h18"/><path d="M10.5 13v2h3v-2"/></svg>Araçlar</button>
@@ -947,12 +973,14 @@ if(!document.documentElement.classList.contains('tel')){
       </div>
       <button class="ust-btn" id="bolgePanelBtn" type="button" style="display:none;">◀ Bölge paneli</button>
       <span class="chip-wrap">
-        <button class="profile-chip" id="profileChip" type="button" title="Hesap menüsü">
+        <button class="profile-chip" id="profileChip" type="button" title="Hesap menüsü"><span class="gb-nokta" id="gbNokta" style="display:none;"></span>
           <span class="pc-av" id="profileChipAv"></span><span id="profileChipName"></span>
         </button>
         <div class="chip-menu" id="chipMenu" style="display:none;">
           <button type="button" id="chipMagazaBtn">◀ Bölge paneline dön</button>
           <div class="sep" id="chipMagazaSep"></div>
+          <button type="button" id="chipGbBtn" style="display:none;">💬 Geri bildirimler <b class="gb-sayi" id="gbSayi"></b></button>
+          <div class="sep" id="chipGbSep" style="display:none;"></div>
           <button type="button" id="chipCikisBtn">🚪 Çıkış yap</button>
         </div>
       </span>
@@ -1078,7 +1106,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 23;
+const APP_SURUM = 24;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -1135,7 +1163,14 @@ function uiDialog(o){
       dlg.appendChild(m);
     }
     let input = null;
-    if(o.input){
+    if(o.input && o.input.tip === 'textarea'){
+      input = document.createElement('textarea');
+      input.className = 'ui-input ui-metin';
+      input.rows = 5;
+      input.value = o.input.deger || '';
+      input.placeholder = o.input.placeholder || '';
+      dlg.appendChild(input);
+    } else if(o.input){
       input = document.createElement('input');
       input.className = 'ui-input';
       input.type = o.input.tip || 'text';
@@ -1167,7 +1202,7 @@ function uiDialog(o){
     ov.addEventListener('click', e=>{ if(e.target === ov) kapat(o.iptalDeger); });
     function tus(e){
       if(e.key === 'Escape'){ e.preventDefault(); e.stopPropagation(); kapat(o.iptalDeger); }
-      else if(e.key === 'Enter' && birincil){ e.preventDefault(); e.stopPropagation(); kapat(degerAl(birincil.b)); }
+      else if(e.key === 'Enter' && birincil && !(e.target && e.target.tagName === 'TEXTAREA')){ e.preventDefault(); e.stopPropagation(); kapat(degerAl(birincil.b)); }
     }
     document.addEventListener('keydown', tus, true);
     document.body.appendChild(ov);
@@ -1765,6 +1800,7 @@ async function cikisYap(){
   resetStoreCaches();
   aktifProfil = null;
   oturum = null;
+  geriBildirimBirak();
   bp.yuklendi = false;
   bp.veri = {};
   await auth.signOut();
@@ -2259,6 +2295,101 @@ document.querySelectorAll('.ust-logo').forEach(img=> img.addEventListener('click
   if(TELEFON) window.scrollTo({top:0, behavior:'smooth'});
 }));
 
+// ==================== GERİ BİLDİRİM / ÖNERİ ====================
+// Herkes "Öneri" butonundan yazar; kayıtlar geribildirim koleksiyonuna düşer ve
+// yalnızca alıcı (m583) hesap menüsünde görür, okundu olarak işaretler.
+const GERI_BILDIRIM_ALICI = 'm583';
+let gbUnsub = null;
+let gbListe = [];
+
+async function geriBildirimYaz(){
+  if(!oturum) return;
+  const metin = await uiDialog({
+    ikon:'💬', baslik:'Öneri / geri bildirim',
+    mesaj:'Uygulamayla ilgili öneri, istek ya da sorun yazabilirsin.',
+    input:{tip:'textarea', placeholder:'Yazmak istediğin...'},
+    butonlar:[{metin:'Vazgeç', deger:null}, {metin:'Gönder', deger:'__input', tip:'birincil'}],
+    iptalDeger:null
+  });
+  if(metin === null) return;
+  if(!metin.trim()){ uiBildirim('Boş geri bildirim gönderilmedi.', 'hata'); return; }
+  try{
+    await db.collection('geribildirim').add({
+      metin: metin.trim().slice(0, 4000),
+      kimden: oturum.kadi,
+      magaza: aktifProfil ? aktifProfil.key : null,
+      cihaz: TELEFON ? 'telefon' : 'masaüstü',
+      surum: APP_SURUM,
+      tarih: new Date().toISOString(),
+      okundu: false
+    });
+    uiBildirim('Teşekkürler, geri bildirimin iletildi.', 'basari');
+  }catch(e){
+    uiBildirim('Gönderilemedi: ' + e.message, 'hata');
+  }
+}
+
+function geriBildirimDinle(){
+  if(gbUnsub || !oturum || oturum.kadi !== GERI_BILDIRIM_ALICI) return;
+  document.getElementById('chipGbBtn').style.display = '';
+  document.getElementById('chipGbSep').style.display = '';
+  gbUnsub = db.collection('geribildirim').onSnapshot(snap=>{
+    gbListe = [];
+    snap.forEach(d=> gbListe.push(Object.assign({id:d.id}, d.data())));
+    gbListe.sort((a,b)=> String(b.tarih || '').localeCompare(String(a.tarih || '')));
+    const okunmamis = gbListe.filter(x=> !x.okundu).length;
+    document.getElementById('gbSayi').textContent = okunmamis ? String(okunmamis) : '';
+    document.getElementById('gbNokta').style.display = okunmamis ? '' : 'none';
+    const acik = document.getElementById('gbListe');
+    if(acik) gbListeCiz(acik);
+  }, ()=>{ /* yetki yoksa sessiz */ });
+}
+function geriBildirimBirak(){
+  if(gbUnsub){ try{ gbUnsub(); }catch(e){} gbUnsub = null; }
+  gbListe = [];
+  document.getElementById('chipGbBtn').style.display = 'none';
+  document.getElementById('chipGbSep').style.display = 'none';
+  document.getElementById('gbNokta').style.display = 'none';
+}
+
+function gbListeCiz(el){
+  if(!gbListe.length){ el.innerHTML = '<div class="gb-bos">Henüz geri bildirim yok.</div>'; return; }
+  el.innerHTML = gbListe.map(g=>{
+    const t = g.tarih ? new Date(g.tarih) : null;
+    const zaman = t && !isNaN(t) ? kisaTarih(t) + ' ' + pad(t.getHours()) + ':' + pad(t.getMinutes()) : '';
+    const kim = magazaAdi(g.kimden) + (g.magaza && g.magaza !== g.kimden ? ' · ' + magazaAdi(g.magaza) : '');
+    return '<div class="gb-oge' + (g.okundu ? ' okundu' : '') + '">'
+      + '<div class="gb-ust"><b>' + escapeHtml(kim) + '</b><span>' + escapeHtml(zaman) + (g.cihaz ? ' · ' + escapeHtml(g.cihaz) : '') + '</span></div>'
+      + '<div class="gb-metin">' + escapeHtml(g.metin || '') + '</div>'
+      + (g.okundu ? '<div class="gb-ust" style="margin:6px 0 0;">✓ okundu</div>'
+                  : '<button type="button" class="gb-okundu-btn" data-id="' + g.id + '">✓ Okundu</button>')
+      + '</div>';
+  }).join('');
+  el.querySelectorAll('.gb-okundu-btn').forEach(b=> b.addEventListener('click', ()=>{
+    b.disabled = true;
+    db.collection('geribildirim').doc(b.dataset.id).update({okundu:true, okunduTarih:new Date().toISOString()})
+      .catch(e=>{ b.disabled = false; uiBildirim('İşaretlenemedi: ' + e.message, 'hata'); });
+  }));
+}
+
+function geriBildirimleriAc(){
+  kapatChipMenu();
+  const ov = document.createElement('div');
+  ov.className = 'ui-ov';
+  ov.innerHTML = '<div class="ui-dlg" style="width:calc(var(--k)*460px);">'
+    + '<div class="ui-baslik">💬 Geri bildirimler</div>'
+    + '<div class="gb-liste" id="gbListe"></div>'
+    + '<div class="ui-btns"><button type="button" class="ui-btn">Kapat</button></div></div>';
+  const kapat = ()=>{ ov.remove(); document.removeEventListener('keydown', tus, true); };
+  const tus = e=>{ if(e.key === 'Escape'){ e.preventDefault(); kapat(); } };
+  ov.querySelector('.ui-btn').addEventListener('click', kapat);
+  ov.addEventListener('click', e=>{ if(e.target === ov) kapat(); });
+  document.addEventListener('keydown', tus, true);
+  document.body.appendChild(ov);
+  gbListeCiz(document.getElementById('gbListe'));
+}
+document.getElementById('chipGbBtn').addEventListener('click', geriBildirimleriAc);
+
 // ==================== YUVARLANMIŞ SAYILAR ====================
 // Fbü dışındaki bütün sayılar küsuratsız gösterilir ("20.372,45 TL" → "20.372 TL",
 // "% 49,21" → "% 49"); telefonda ayrıca "TL" yazılmaz. Yalnızca görünüm değişir;
@@ -2619,6 +2750,7 @@ auth.onAuthStateChanged(async function(user){
     await girisHatasi(e.yetkiYok ? e.message : ('Yetki okunamadı: ' + e.message));
     return;
   }
+  geriBildirimDinle();
   if(oturum.rol === 'magaza') await magazayiAc(oturum.kadi, true);
   else await bolgePaneliniAc(true, true);
 });
