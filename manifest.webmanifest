@@ -1,6 +1,6 @@
 {
-  "name": "Mağaza Raporu",
-  "short_name": "Mağaza Raporu",
+  "name": "Mağaza Rapor",
+  "short_name": "Mağaza Rapor",
   "start_url": "rapor.html",
   "display": "standalone",
   "background_color": "#f6f4f1",
