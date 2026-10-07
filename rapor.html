@@ -731,7 +731,7 @@ if(!document.documentElement.classList.contains('tel')){
   html.tel .weekgoal-input{ width:80px; font-size:.78rem; padding:4px 6px; }
   html.tel .ghbhr-icon{ width:28px; height:28px; font-size:.6rem; }
   html.tel .employee-targets-row{ flex-direction:column; }
-  html.tel .status-msg{ font-size:.8rem; }
+  html.tel #statusMsg, html.tel #lastEditInfo{ display:none; }
 
   /* Araçlar, Kurumsal hafıza */
   html.tel .araclar-page{ padding:12px; }
@@ -1078,7 +1078,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 22;
+const APP_SURUM = 23;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -1227,6 +1227,8 @@ function setStatus(msg, isError){
   const el = document.getElementById('statusMsg');
   el.textContent = msg;
   el.className = 'status-msg' + (isError ? ' error' : '');
+  // Telefonda durum satırı gizli; hatalar kaybolmasın diye altta bildirim olarak çıkar.
+  if(isError && document.documentElement.classList.contains('tel')) uiBildirim(msg, 'hata');
 }
 
 let simulatedToday = null; // null = gerçek gün; aksi halde 'YYYY-MM-DD' formatında simüle edilen gün
