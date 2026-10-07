@@ -9,6 +9,9 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@500&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root{ --accent:#C8A066; --dark:#2d2d2d; --bg:#f6f4f1; --line:#e2ddd4; --pasif:#aaa;
          --grey:#d9d9d9; --yellow:#fff2a8; --green:#2e7d32; --red:#a34141; }
@@ -440,48 +443,50 @@
   }
   .msg-area textarea:focus{ outline:none; border-color:var(--accent); }
 
-  /* ---------- Profil (oturum) ekranı ---------- */
-  .profile-screen{
-    position:fixed; inset:0; background:#141414; z-index:1100;
-    display:flex; align-items:center; justify-content:center; padding:24px;
+  /* ---------- Giriş ekranı ---------- */
+  .giris-ekrani{
+    position:fixed; inset:0; z-index:1100; overflow:auto;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px;
+    background:#e9e1d6 url('giris-arka.jpg') center/cover no-repeat;
+    font-family:'Inter', 'Segoe UI', system-ui, sans-serif;
   }
-  .profile-screen h2{
-    color:#fff; font-weight:400; font-size:1.65rem; margin:0 0 30px; text-align:center; letter-spacing:.3px;
+  .giris-logo{
+    position:absolute; top:18px; left:0; right:0; text-align:center;
+    font-family:'Bodoni Moda', 'Didot', 'Times New Roman', serif; font-weight:500;
+    font-size:3.4rem; letter-spacing:.06em; color:#4e3f30; text-transform:uppercase;
   }
-  .profile-list{ display:flex; gap:26px; flex-wrap:wrap; justify-content:center; }
-  .profile-card{ background:none; border:none; cursor:pointer; padding:0; width:132px; }
-  .profile-av{
-    width:132px; height:132px; border-radius:10px; display:flex; align-items:center; justify-content:center;
-    font-size:3.2rem; color:#fff; border:3px solid transparent;
-    transition:border-color .15s, transform .15s;
+  .giris-kart{
+    background:#fff; border-radius:16px; padding:46px 49px 49px; width:440px; max-width:100%;
+    box-shadow:0 10px 40px rgba(60,45,30,.12);
   }
-  .profile-card:hover .profile-av{ border-color:#fff; transform:scale(1.04); }
-  .profile-name{ display:block; margin-top:10px; color:#8b8b8b; font-size:.95rem; }
-  .profile-card:hover .profile-name{ color:#fff; }
-  .profile-name small{ display:block; font-size:.66rem; color:#6d6d6d; margin-top:2px; }
-  .profile-foot{ text-align:center; margin-top:32px; }
-  .profile-back{
-    background:none; border:1px solid #4a4a4a; color:#b3b3b3; padding:7px 18px;
-    border-radius:6px; cursor:pointer; font-size:.78rem;
+  .giris-kart label{
+    display:block; font-size:.8rem; font-weight:600; letter-spacing:.06em; color:#333; margin:0 0 9px;
   }
-  .profile-back:hover{ border-color:#fff; color:#fff; }
-  .profile-note{ color:#e0a94a; font-size:.78rem; margin-top:14px; min-height:16px; }
-
-  .pin-box{ text-align:center; color:#fff; }
-  .pin-box .profile-av{ margin:0 auto; }
-  .pin-title{ font-size:1.15rem; margin-top:14px; }
-  .pin-hint{ color:#9a9a9a; font-size:.8rem; margin-top:5px; }
-  .pin-dots{ display:flex; gap:15px; justify-content:center; margin:20px 0 24px; }
-  .pin-dot{ width:15px; height:15px; border-radius:50%; border:2px solid #6e6e6e; }
-  .pin-dot.on{ background:#fff; border-color:#fff; }
-  .pin-pad{ display:grid; grid-template-columns:repeat(3,74px); gap:12px; justify-content:center; }
-  .pin-pad button{
-    height:58px; border-radius:10px; border:1px solid #3a3a3a; background:#232323; color:#fff;
-    font-size:1.25rem; cursor:pointer; font-family:inherit;
+  .giris-kart input{
+    display:block; width:100%; height:50px; padding:0 16px; margin:0 0 28px;
+    border:2px solid #cfcfcf; border-radius:8px; font-size:1rem; font-family:inherit; color:#222; background:#fff;
   }
-  .pin-pad button:hover{ background:#333; }
-  .pin-pad button.wide{ font-size:.85rem; color:#b3b3b3; }
-  .pin-err{ color:#e07b7b; font-size:.8rem; min-height:18px; margin-top:14px; }
+  .giris-kart input:focus{ outline:none; border-color:#8a8a8a; }
+  .giris-btn{
+    display:block; width:100%; height:52px; margin-top:4px; border:none; border-radius:8px;
+    background:#333; color:#fff; font-size:.95rem; font-weight:700; letter-spacing:.06em;
+    cursor:pointer; font-family:inherit;
+  }
+  .giris-btn:hover{ background:#222; }
+  .giris-btn:disabled{ opacity:.6; cursor:default; }
+  .giris-hata{ color:#a34141; font-size:.85rem; min-height:20px; margin-top:14px; text-align:center; line-height:1.4; }
+  .giris-baslik{ font-size:1.05rem; font-weight:600; color:#333; margin:0 0 6px; }
+  .giris-alt{ font-size:.85rem; color:#777; margin:0 0 22px; }
+  .magaza-liste{ display:flex; flex-direction:column; gap:10px; }
+  .magaza-sec-btn{
+    display:block; width:100%; padding:14px 16px; border:2px solid #e2ddd4; border-radius:8px;
+    background:#fff; text-align:left; font-size:1rem; font-weight:600; color:#333; cursor:pointer; font-family:inherit;
+  }
+  .magaza-sec-btn:hover{ border-color:#333; }
+  .giris-link{
+    display:block; margin:18px auto 0; background:none; border:none; color:#777; font-size:.85rem;
+    cursor:pointer; text-decoration:underline; font-family:inherit;
+  }
 
   .profile-chip{
     display:flex; align-items:center; gap:7px; margin-left:10px; align-self:center;
@@ -508,46 +513,6 @@
   .chip-menu button:hover{ background:#f1efe9; color:var(--dark); }
   .chip-menu .sep{ height:1px; background:var(--line); margin:4px 2px; }
 
-  .pm-list{ display:flex; flex-direction:column; gap:10px; width:520px; max-width:88vw; margin:0 auto; }
-  .pm-row{
-    display:flex; align-items:center; gap:13px; background:#1e1e1e; border:1px solid #333;
-    border-radius:11px; padding:10px 13px;
-  }
-  .pm-av{
-    width:42px; height:42px; border-radius:9px; display:flex; align-items:center; justify-content:center;
-    font-size:1.35rem; color:#fff; flex:0 0 auto;
-  }
-  .pm-info{ flex:1; min-width:0; display:block; }
-  .pm-name{ display:block; color:#fff; font-size:.92rem; }
-  .pm-sub{ display:block; color:#8b8b8b; font-size:.7rem; margin-top:3px; }
-  .pm-acts{ display:flex; gap:6px; flex-wrap:wrap; }
-  .pm-acts button{
-    background:none; border:1px solid #4a4a4a; color:#b3b3b3; border-radius:6px;
-    padding:5px 10px; font-size:.7rem; cursor:pointer; font-family:inherit;
-  }
-  .pm-acts button:hover{ border-color:#fff; color:#fff; }
-  .pm-acts button.tehlike:hover{ border-color:#c26565; color:#e28a8a; }
-
-  .pe-box{ width:400px; max-width:90vw; margin:0 auto; text-align:left; }
-  .pe-label{ display:block; color:#8b8b8b; font-size:.72rem; margin:14px 0 6px; }
-  .pe-input{
-    width:100%; padding:9px 11px; border-radius:8px; border:1px solid #3a3a3a;
-    background:#1e1e1e; color:#fff; font-size:.88rem; font-family:inherit;
-  }
-  .pe-input:focus{ outline:none; border-color:var(--accent); }
-  .pe-icons, .pe-colors{ display:flex; flex-wrap:wrap; gap:8px; }
-  .pe-icons span{
-    width:40px; height:40px; border-radius:9px; display:flex; align-items:center; justify-content:center;
-    font-size:1.2rem; background:#1e1e1e; border:2px solid transparent; cursor:pointer;
-  }
-  .pe-icons span.sel{ border-color:var(--accent); }
-  .pe-colors span{ width:34px; height:34px; border-radius:50%; cursor:pointer; border:2px solid transparent; }
-  .pe-colors span.sel{ border-color:#fff; }
-  .pe-err{ color:#e07b7b; font-size:.78rem; min-height:18px; margin-top:12px; }
-  .profile-back.pe-save{ border-color:var(--accent); color:var(--accent); }
-  .profile-back.pe-save:hover{ background:var(--accent); color:#1a1a1a; }
-  .profile-foot .profile-back + .profile-back{ margin-left:8px; }
-
   .boot-screen{
     position:fixed; inset:0; background:var(--bg); display:flex; align-items:center; justify-content:center; z-index:1000;
   }
@@ -571,55 +536,25 @@
   </div>
 </div>
 
-<div id="profileScreen" class="profile-screen" style="display:none;">
-  <div id="profilePickView">
-    <h2 id="profilePickTitle">Kim kullanıyor?</h2>
-    <div class="profile-list" id="profileList"></div>
-    <div class="profile-note" id="profileNote"></div>
-    <div class="profile-foot">
-      <button class="profile-back" id="profileResetBtn" type="button">⚙ Profilleri yönet</button>
-    </div>
-  </div>
+<div id="girisEkrani" class="giris-ekrani" style="display:none;">
+  <div class="giris-logo">Madame Coco</div>
 
-  <div id="profileManageView" style="display:none;">
-    <h2>Profilleri yönet</h2>
-    <div class="pm-list" id="pmList"></div>
-    <div class="profile-note" id="pmNote"></div>
-    <div class="profile-foot">
-      <button class="profile-back pe-save" id="pmAddBtn" type="button">+ Yeni profil</button>
-      <button class="profile-back" id="pmBackBtn" type="button">← Geri</button>
-    </div>
-  </div>
+  <form class="giris-kart" id="girisForm" autocomplete="on" novalidate>
+    <label for="girisKadi">KULLANICI ADI</label>
+    <input type="text" id="girisKadi" name="username" autocomplete="username"
+           autocapitalize="none" autocorrect="off" spellcheck="false">
+    <label for="girisSifre">ŞİFRE</label>
+    <input type="password" id="girisSifre" name="password" autocomplete="current-password">
+    <button type="submit" class="giris-btn" id="girisBtn">LOGIN</button>
+    <div class="giris-hata" id="girisHata"></div>
+  </form>
 
-  <div id="profileEditView" style="display:none;">
-    <div class="pe-box">
-      <h2 id="peTitle" style="text-align:left;margin-bottom:6px;">Profili düzenle</h2>
-      <label class="pe-label">Ad</label>
-      <input type="text" id="peName" class="pe-input" maxlength="24" placeholder="ör. Mağaza 2367">
-      <label class="pe-label">Simge</label>
-      <div class="pe-icons" id="peIcons"></div>
-      <label class="pe-label">Renk</label>
-      <div class="pe-colors" id="peColors"></div>
-      <div class="pe-err" id="peErr"></div>
-      <div class="profile-foot" style="text-align:left;margin-top:10px;">
-        <button class="profile-back pe-save" id="peSaveBtn" type="button">Kaydet</button>
-        <button class="profile-back" id="peCancelBtn" type="button">İptal</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="pinView" style="display:none;">
-    <div class="pin-box">
-      <div class="profile-av" id="pinAvatar"></div>
-      <div class="pin-title" id="pinName"></div>
-      <div class="pin-hint" id="pinHint"></div>
-      <div class="pin-dots" id="pinDots"></div>
-      <div class="pin-pad" id="pinPad"></div>
-      <div class="pin-err" id="pinErr"></div>
-      <div class="profile-foot" style="margin-top:16px;">
-        <button class="profile-back" id="pinBackBtn" type="button">← Geri</button>
-      </div>
-    </div>
+  <div class="giris-kart" id="magazaSecKart" style="display:none;">
+    <div class="giris-baslik">Mağaza seç</div>
+    <div class="giris-alt" id="magazaSecAlt"></div>
+    <div class="magaza-liste" id="magazaListe"></div>
+    <div class="giris-hata" id="magazaSecHata"></div>
+    <button type="button" class="giris-link" id="magazaSecCikis">Çıkış yap</button>
   </div>
 </div>
 
@@ -635,9 +570,10 @@
         <span class="pc-av" id="profileChipAv"></span><span id="profileChipName"></span>
       </button>
       <div class="chip-menu" id="chipMenu" style="display:none;">
-        <button type="button" id="chipEditBtn">✏️ Profili düzenle</button>
-        <button type="button" id="chipPinBtn">🔑 PIN değiştir</button>
-        <div class="sep"></div>
+        <button type="button" id="chipMagazaBtn">🔄 Mağaza değiştir</button>
+        <div class="sep" id="chipMagazaSep"></div>
+        <button type="button" id="chipCikisBtn">🚪 Çıkış yap</button>
+      </div>
         <button type="button" id="chipSwitchBtn">🔄 Profil değiştir</button>
       </div>
     </span>
@@ -1151,15 +1087,13 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// Her profil ayrı bir mağazadır ve kendi verisiyle yaşar:
-//   stores/{profilKey}/entries, weekgoals, settings, tools, ghbhrWeekly, ghbhrReports
-// Profillerin listesi tüm mağazalar için ortaktır: settings/profiles
-const MAGAZA_KOLEKSIYONLARI = ['entries','weekgoals','settings','tools','ghbhrWeekly','ghbhrReports'];
-function profilesRef(){ return db.collection('settings').doc('profiles'); }
+// Her mağaza kendi verisiyle yaşar:
+//   stores/{magaza}/entries, weekgoals, settings, tools, ghbhrWeekly, ghbhrReports, transfers, transferFotos
+// Kim hangi mağazaya erişir: yetkiler/{kullaniciAdi}
 function magazaRef(key){ return db.collection('stores').doc(key); }
 function sdb(name){
   const key = aktifProfil && aktifProfil.key;
-  if(!key) throw new Error('Profil seçilmeden veriye erişilemez.');
+  if(!key) throw new Error('Mağaza seçilmeden veriye erişilemez.');
   return magazaRef(key).collection(name);
 }
 
@@ -1325,368 +1259,137 @@ function bootStatus(msg, isError){
   el.classList.toggle('error', !!isError);
 }
 
-// ==================== PROFİL / MAĞAZA OTURUMU (Netflix tarzı) ====================
-// Her profil ayrı bir mağazadır: kendi günlük verisi, hedefleri, personeli,
-// GH/BH kayıtları ve araçları vardır. Bir profilin verisi diğerinde görünmez.
-// PIN gerçek bir güvenlik katmanı değil, yanlış kişinin yanlış mağazaya veri
-// girmesini engelleyen bir kapıdır.
-const PROFILE_SESSION_KEY = 'aktifProfilOturum';
-const PROFILE_SESSION_GUN = 7;      // PIN bu cihazda kaç gün sorulmaz
-const PIN_UZUNLUK = 4;
-const PIN_MAX_DENEME = 5;
-// legacy: uygulamanın ilk verisi (mağaza ayrımı yokken yazılanlar) bu profile taşınır.
-const VARSAYILAN_PROFILLER = [
-  {key:'onur', name:'Onur', emoji:'🧑‍💼', color:'#C8A066', admin:true, legacy:true}
-];
-// Mağaza ayrımından önce oluşturulmuş, verisi olmayan kişi profilleri.
-const ESKI_KISI_PROFILLERI = ['fatma','zeynep'];
-const PROFIL_SIMGELERI = ['🏪','🏬','🛒','🛍️','🧑‍💼','👩','👨','🧕','📊','🏢','⭐','🥇'];
-const PROFIL_RENKLERI  = ['#C8A066','#5f8d6a','#6f6494','#a34141','#3f6b8a','#8a6a3f','#4a4a4a','#9a5f7a'];
+// ==================== GİRİŞ / MAĞAZA OTURUMU ====================
+// Herkes aynı ekrandan kullanıcı adı ve şifreyle girer. Kullanıcılar Firebase
+// Console → Authentication'da "kullaniciadi@mcrapor.app" e-postasıyla açılır;
+// ekranda yalnızca kullanıcı adı yazılır.
+// Kimin ne yapabileceği Firestore'daki yetkiler/{kullaniciAdi} belgesinde durur:
+//   { rol: "magaza" }                          — yalnızca kendi mağazası (stores/{kullaniciAdi})
+//   { rol: "bolge", magazalar: ["m583", ...] } — listedeki mağazalar
+// Asıl koruma firestore.rules'tadır; buradaki kontroller yalnızca ekran içindir.
+const GIRIS_ALAN_ADI = '@mcrapor.app';
+const MAGAZA_SECIM_KEY = 'bolgeSonMagaza';
+// Mağaza ayrımından önceki "onur" profilinin verisi bu mağazaya taşınır.
+const ESKI_PROFIL = 'onur';
+const ESKI_PROFIL_YENI_MAGAZA = 'm583';
 
-let profilesCache = null;   // key -> {name,emoji,color,admin,legacy,order,pinS,pinF}
-let aktifProfil = null;     // {key,name,emoji,color,...}
-let pinState = null;        // {key, mod, girilen, ilkPin, kalanDeneme}
-let editState = null;       // {key|null, name, emoji, color}
+let oturum = null;      // {kadi, rol, magazalar}
+let aktifProfil = null; // açık olan mağaza: {key, name, legacy}
 
-async function loadProfiles(){
-  const doc = await profilesRef().get();
-  let data = (doc.exists ? doc.data() : null) || {};
-  if(!Object.keys(data).length){
-    const seed = {};
-    VARSAYILAN_PROFILLER.forEach((p,i)=>{
-      seed[p.key] = {name:p.name, emoji:p.emoji, color:p.color, admin:!!p.admin, legacy:!!p.legacy, order:i, pinS:null, pinF:null};
-    });
-    await profilesRef().set(seed);
-    data = seed;
-  }
-  profilesCache = data;
-  await profilSemasiniGuncelle();
-  return profilesCache;
+function kullaniciAdiOf(user){
+  return String((user && user.email) || '').split('@')[0].toLowerCase();
+}
+function girisEposta(kadi){
+  kadi = String(kadi || '').trim().toLowerCase();
+  return kadi.includes('@') ? kadi : kadi + GIRIS_ALAN_ADI;
+}
+function magazaAdi(key){ return String(key || '').toUpperCase(); }
+function guncelleyenAdi(){
+  return oturum ? magazaAdi(oturum.kadi) : (aktifProfil ? aktifProfil.name : '');
 }
 
-// Profil = mağaza yapısına geçiş: verisi olmayan eski kişi profillerini kaldırır,
-// asıl profili yönetici ve legacy olarak işaretler. Bir kere çalışır.
-async function profilSemasiniGuncelle(){
-  const guncel = {};
-  ESKI_KISI_PROFILLERI.forEach(k=>{
-    if(profilesCache[k]){
-      guncel[k] = firebase.firestore.FieldValue.delete();
-      delete profilesCache[k];
-    }
-  });
-  const ilk = VARSAYILAN_PROFILLER[0];
-  const asil = profilesCache[ilk.key];
-  if(asil && (asil.admin !== true || asil.legacy !== true)){
-    guncel[ilk.key] = {admin:true, legacy:true};
-    asil.admin = true;
-    asil.legacy = true;
-  }
-  if(!Object.keys(guncel).length) return;
-  try{ await profilesRef().set(guncel, {merge:true}); }
-  catch(e){ /* şema güncellenemezse uygulama yine de açılsın */ }
+function girisHatasiMetni(e){
+  const k = (e && e.code) || '';
+  if(['auth/invalid-credential','auth/wrong-password','auth/user-not-found',
+      'auth/invalid-email','auth/invalid-login-credentials'].includes(k)) return 'Kullanıcı adı veya şifre yanlış.';
+  if(k === 'auth/too-many-requests') return 'Çok fazla deneme yapıldı. Biraz bekleyip tekrar deneyin.';
+  if(k === 'auth/network-request-failed') return 'İnternet bağlantısı yok gibi görünüyor.';
+  if(k === 'auth/user-disabled') return 'Bu kullanıcı kapatılmış.';
+  if(k === 'auth/operation-not-allowed') return 'Firebase\'de e-posta/şifre girişi açık değil.';
+  return 'Giriş yapılamadı: ' + ((e && e.message) || k);
 }
 
-// Mağaza ayrımı gelmeden önce kök koleksiyonlara yazılmış veriyi asıl mağazaya
-// kopyalar. Orijinaller silinmez, yedek olarak yerinde kalır.
-async function eskiVeriyiMagazayaTasi(key){
-  const kopyala = async (coll)=>{
-    const snap = await db.collection(coll).get();
-    const docs = [];
-    snap.forEach(d=> docs.push({id:d.id, data:d.data()}));
-    for(let i=0;i<docs.length;i+=400){
-      const batch = db.batch();
-      docs.slice(i, i+400).forEach(d=>{
-        batch.set(magazaRef(key).collection(coll).doc(d.id), d.data);
-      });
-      await batch.commit();
-    }
-    return docs.length;
-  };
-  let toplam = 0;
-  for(const coll of ['entries','weekgoals','tools','ghbhrWeekly','ghbhrReports']){
-    toplam += await kopyala(coll);
-  }
-  for(const d of ['general','employees']){
-    const doc = await db.collection('settings').doc(d).get();
-    if(doc.exists){
-      await magazaRef(key).collection('settings').doc(d).set(doc.data());
-      toplam++;
-    }
-  }
-  await profilesRef().set({[key]: {legacyTasindi:true}}, {merge:true});
-  profilesCache[key].legacyTasindi = true;
-  return toplam;
+function ekranGoster(ad){
+  document.getElementById('bootScreen').style.display = ad === 'boot' ? '' : 'none';
+  document.getElementById('girisEkrani').style.display = (ad === 'giris' || ad === 'magazaSec') ? '' : 'none';
+  document.getElementById('appRoot').style.display = ad === 'uygulama' ? '' : 'none';
+  document.getElementById('girisForm').style.display = ad === 'giris' ? '' : 'none';
+  document.getElementById('magazaSecKart').style.display = ad === 'magazaSec' ? '' : 'none';
+}
+function girisEkraniGoster(hata){
+  ekranGoster('giris');
+  document.getElementById('girisHata').textContent = hata || '';
+  document.getElementById('girisBtn').disabled = false;
+  document.getElementById('girisSifre').value = '';
+  setTimeout(()=>{
+    const kadi = document.getElementById('girisKadi');
+    (kadi.value ? document.getElementById('girisSifre') : kadi).focus();
+  }, 50);
 }
 
-function profilListesi(){
-  return Object.keys(profilesCache || {})
-    .map(k => Object.assign({key:k}, profilesCache[k]))
-    .sort((a,b)=> (a.order||0) - (b.order||0));
-}
-function profilPinliMi(p){ return !!(p && (p.pinS || p.pinF)); }
-
-// PIN'in kendisi buluta yazılmaz, iki ayrı özetle saklanır.
-// SHA-256 güvenli olmayan kökenlerde (bazı tarayıcılarda file://) çalışmayabilir,
-// o yüzden her zaman ikinci bir yedek özet de üretilir.
-function fnvOzet(veri){
-  let h1 = 0x811c9dc5, h2 = 0x01000193;
-  for(let i=0;i<veri.length;i++){
-    h1 = Math.imul(h1 ^ veri.charCodeAt(i), 16777619) >>> 0;
-    h2 = Math.imul(h2 + veri.charCodeAt(i) * (i+7), 2246822519) >>> 0;
-  }
-  return h1.toString(16).padStart(8,'0') + h2.toString(16).padStart(8,'0');
-}
-async function pinOzetleri(pin, key){
-  const veri = 'mcrapor:' + key + ':' + pin;
-  let s256 = null;
-  if(window.crypto && crypto.subtle && crypto.subtle.digest){
-    try{
-      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(veri));
-      s256 = Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
-    }catch(e){ s256 = null; }
-  }
-  return {s: s256, f: fnvOzet(veri)};
-}
-async function pinDogruMu(pin, profil){
-  const o = await pinOzetleri(pin, profil.key);
-  if(profil.pinS && o.s) return profil.pinS === o.s;
-  if(profil.pinF) return profil.pinF === o.f;
-  return false;
-}
-async function pinKaydet(pin, key){
-  const o = await pinOzetleri(pin, key);
-  await profilesRef().set({[key]: {pinS:o.s, pinF:o.f}}, {merge:true});
-  profilesCache[key].pinS = o.s;
-  profilesCache[key].pinF = o.f;
-}
-async function pinSil(key){
-  await profilesRef().set({[key]: {pinS:null, pinF:null}}, {merge:true});
-  profilesCache[key].pinS = null;
-  profilesCache[key].pinF = null;
-}
-
-function kayitliOturum(){
+async function girisYap(e){
+  e.preventDefault();
+  const kadi = document.getElementById('girisKadi').value.trim();
+  const sifre = document.getElementById('girisSifre').value;
+  const hata = document.getElementById('girisHata');
+  if(!kadi || !sifre){ hata.textContent = 'Kullanıcı adı ve şifreyi yazın.'; return; }
+  hata.textContent = '';
+  const btn = document.getElementById('girisBtn');
+  btn.disabled = true;
   try{
-    const o = JSON.parse(localStorage.getItem(PROFILE_SESSION_KEY) || 'null');
-    if(!o || !o.key || !o.ts) return null;
-    if(Date.now() - o.ts > PROFILE_SESSION_GUN * 86400000) return null;
-    return o;
-  }catch(e){ return null; }
-}
-function oturumKaydet(key){
-  try{ localStorage.setItem(PROFILE_SESSION_KEY, JSON.stringify({key, ts:Date.now()})); }catch(e){ /* kota */ }
-}
-function oturumSil(){
-  try{ localStorage.removeItem(PROFILE_SESSION_KEY); }catch(e){ /* sorun değil */ }
+    await auth.signInWithEmailAndPassword(girisEposta(kadi), sifre);
+    // Devamı onAuthStateChanged'de.
+  }catch(err){
+    hata.textContent = girisHatasiMetni(err);
+    btn.disabled = false;
+  }
 }
 
-const PROFIL_EKRANLARI = ['profilePickView','pinView','profileManageView','profileEditView'];
-function showProfileView(id){
-  PROFIL_EKRANLARI.forEach(v=>{
-    document.getElementById(v).style.display = (v === id) ? '' : 'none';
-  });
-}
-function showProfileScreen(){
-  document.getElementById('bootScreen').style.display = 'none';
-  document.getElementById('appRoot').style.display = 'none';
-  document.getElementById('profileScreen').style.display = '';
-  showProfilePick();
-}
-function showProfilePick(){
-  showProfileView('profilePickView');
-  pinState = null;
-  editState = null;
-  renderProfileList();
-}
-
-function renderProfileList(){
-  const el = document.getElementById('profileList');
-  el.innerHTML = profilListesi().map(p=>
-    '<button class="profile-card" type="button" data-key="' + p.key + '">'
-      + '<span class="profile-av" style="background:' + (p.color || '#444') + '">' + (p.emoji || '👤') + '</span>'
-      + '<span class="profile-name">' + escapeHtml(p.name || p.key)
-      + (profilPinliMi(p) ? '' : '<small>PIN belirlenmedi</small>') + '</span>'
-    + '</button>').join('');
-  el.querySelectorAll('.profile-card').forEach(btn=>{
-    btn.addEventListener('click', ()=> profilKartiTiklandi(btn.dataset.key));
-  });
-}
-function profilNotu(msg){
-  document.getElementById('profileNote').textContent = msg || '';
-}
-
-function profilKartiTiklandi(key){
-  const p = Object.assign({key}, profilesCache[key]);
-  profilNotu('');
-  openPinView(key, profilPinliMi(p) ? 'giris' : 'kur');
-}
-
-function openPinView(key, mod){
-  const p = Object.assign({key}, profilesCache[key]);
-  pinState = {key, mod, girilen:'', ilkPin:null, kalanDeneme:PIN_MAX_DENEME};
-  document.getElementById('profilePickView').style.display = 'none';
-  document.getElementById('pinView').style.display = '';
-  const av = document.getElementById('pinAvatar');
-  av.textContent = p.emoji || '👤';
-  av.style.background = p.color || '#444';
-  document.getElementById('pinName').textContent = p.name || key;
-  document.getElementById('pinErr').textContent = '';
-  renderPinPad();
-  updatePinView();
-}
-function pinIpucu(){
-  if(!pinState) return '';
-  if(pinState.mod === 'kur')          return PIN_UZUNLUK + ' haneli yeni PIN belirle';
-  if(pinState.mod === 'kurTekrar')    return 'PIN\'i tekrar gir';
-  if(pinState.mod === 'yonetici')     return 'Yönetici PIN\'i';
-  if(pinState.mod === 'mevcut')       return 'Önce mevcut PIN\'i gir';
-  if(pinState.mod === 'yeniPin')      return 'Yeni PIN';
-  if(pinState.mod === 'yeniPinTekrar')return 'Yeni PIN\'i tekrar gir';
-  return 'PIN gir';
-}
-function updatePinView(){
-  document.getElementById('pinHint').textContent = pinIpucu();
-  const dots = [];
-  for(let i=0;i<PIN_UZUNLUK;i++){
-    dots.push('<span class="pin-dot' + (i < (pinState ? pinState.girilen.length : 0) ? ' on' : '') + '"></span>');
-  }
-  document.getElementById('pinDots').innerHTML = dots.join('');
-}
-function renderPinPad(){
-  const pad = document.getElementById('pinPad');
-  const tuslar = ['1','2','3','4','5','6','7','8','9','temizle','0','sil'];
-  pad.innerHTML = tuslar.map(t=>{
-    if(t === 'temizle') return '<button type="button" class="wide" data-key="C">Temizle</button>';
-    if(t === 'sil')     return '<button type="button" class="wide" data-key="B">← Sil</button>';
-    return '<button type="button" data-key="' + t + '">' + t + '</button>';
-  }).join('');
-  pad.querySelectorAll('button').forEach(b=>{
-    b.addEventListener('click', ()=> pinTus(b.dataset.key));
-  });
-}
-function pinTus(k){
-  if(!pinState) return;
-  document.getElementById('pinErr').textContent = '';
-  if(k === 'C'){ pinState.girilen = ''; updatePinView(); return; }
-  if(k === 'B'){ pinState.girilen = pinState.girilen.slice(0,-1); updatePinView(); return; }
-  if(pinState.girilen.length >= PIN_UZUNLUK) return;
-  pinState.girilen += k;
-  updatePinView();
-  if(pinState.girilen.length === PIN_UZUNLUK) setTimeout(pinTamamlandi, 120);
-}
-async function pinTamamlandi(){
-  if(!pinState) return;
-  const pin = pinState.girilen;
-  const key = pinState.key;
-  const p = Object.assign({key}, profilesCache[key]);
-  const hata = document.getElementById('pinErr');
-
-  if(pinState.mod === 'kur'){
-    pinState.ilkPin = pin;
-    pinState.mod = 'kurTekrar';
-    pinState.girilen = '';
-    updatePinView();
-    return;
-  }
-  if(pinState.mod === 'kurTekrar'){
-    if(pin !== pinState.ilkPin){
-      hata.textContent = 'İki PIN aynı değil, baştan alalım.';
-      pinState.mod = 'kur';
-      pinState.ilkPin = null;
-      pinState.girilen = '';
-      updatePinView();
-      return;
-    }
-    try{
-      await pinKaydet(pin, key);
-      await profilOnayla(key, true);
-    }catch(e){
-      hata.textContent = 'PIN kaydedilemedi: ' + e.message;
-      pinState.girilen = ''; updatePinView();
-    }
-    return;
-  }
-  if(pinState.mod === 'yeniPin'){
-    pinState.ilkPin = pin;
-    pinState.mod = 'yeniPinTekrar';
-    pinState.girilen = '';
-    updatePinView();
-    return;
-  }
-  if(pinState.mod === 'yeniPinTekrar'){
-    if(pin !== pinState.ilkPin){
-      hata.textContent = 'İki PIN aynı değil, baştan alalım.';
-      pinState.mod = 'yeniPin';
-      pinState.ilkPin = null;
-      pinState.girilen = '';
-      updatePinView();
-      return;
-    }
-    try{
-      await pinKaydet(pin, key);
-      pinState = null;
-      document.getElementById('profileScreen').style.display = 'none';
-      document.getElementById('appRoot').style.display = '';
-      setStatus('PIN değiştirildi ✓');
-    }catch(e){
-      hata.textContent = 'PIN kaydedilemedi: ' + e.message;
-      pinState.girilen = ''; updatePinView();
-    }
-    return;
-  }
-
-  const dogru = await pinDogruMu(pin, p);
-  if(!dogru){
-    pinState.kalanDeneme--;
-    pinState.girilen = '';
-    updatePinView();
-    if(pinState.kalanDeneme <= 0){
-      hata.textContent = 'Çok fazla yanlış deneme. Profil ekranına dönülüyor.';
-      setTimeout(showProfilePick, 1400);
-    } else {
-      hata.textContent = 'PIN yanlış. Kalan deneme: ' + pinState.kalanDeneme;
-    }
-    return;
-  }
-
-  if(pinState.mod === 'yonetici'){
-    pinState = null;
-    showProfileManage();
-    pmNotu('');
-    return;
-  }
-  if(pinState.mod === 'mevcut'){
-    pinState.mod = 'yeniPin';
-    pinState.girilen = '';
-    updatePinView();
-    return;
-  }
-  await profilOnayla(key, true);
-}
-
-async function profilOnayla(key, oturumuHatirla){
-  // Her profil ayrı bir mağaza olduğu için önceki mağazanın verisi ve
-  // dinleyicileri tamamen bırakılır, yenisi sıfırdan yüklenir.
+async function cikisYap(){
+  kapatChipMenu();
   stopCloudListeners();
   resetStoreCaches();
-  aktifProfil = Object.assign({key}, profilesCache[key]);
-  if(oturumuHatirla) oturumKaydet(key);
+  aktifProfil = null;
+  oturum = null;
+  try{ localStorage.removeItem(MAGAZA_SECIM_KEY); }catch(e){ /* sorun değil */ }
+  await auth.signOut();
+}
 
-  document.getElementById('profileScreen').style.display = 'none';
-  document.getElementById('appRoot').style.display = 'none';
-  document.getElementById('bootScreen').style.display = '';
+async function oturumuKur(user){
+  const kadi = kullaniciAdiOf(user);
+  const doc = await db.collection('yetkiler').doc(kadi).get();
+  const y = doc.exists ? (doc.data() || {}) : null;
+  if(!y || (y.rol !== 'magaza' && y.rol !== 'bolge')){
+    throw Object.assign(new Error('Bu kullanıcıya yetki tanımlanmamış (yetkiler/' + kadi + ').'), {yetkiYok:true});
+  }
+  oturum = {
+    kadi, rol: y.rol,
+    magazalar: Array.isArray(y.magazalar) ? y.magazalar.map(m=> String(m).toLowerCase()) : []
+  };
+}
+
+function magazaSecimiGoster(){
+  ekranGoster('magazaSec');
+  const liste = oturum.magazalar.slice().sort();
+  document.getElementById('magazaSecAlt').textContent =
+    magazaAdi(oturum.kadi) + ' · ' + (liste.length ? 'açmak istediğin mağazayı seç' : 'listende mağaza yok');
+  document.getElementById('magazaSecHata').textContent = liste.length ? ''
+    : 'Firestore\'da yetkiler/' + oturum.kadi + ' belgesindeki "magazalar" listesine mağaza ekleyin.';
+  const el = document.getElementById('magazaListe');
+  el.innerHTML = liste.map(m=>
+    '<button type="button" class="magaza-sec-btn" data-key="' + escapeHtml(m) + '">' + escapeHtml(magazaAdi(m)) + '</button>'
+  ).join('');
+  el.querySelectorAll('button').forEach(b=> b.addEventListener('click', ()=> magazayiAc(b.dataset.key)));
+}
+
+async function magazayiAc(key){
+  // Her mağaza ayrı veriyle yaşar: öncekinin verisi ve dinleyicileri bırakılır.
+  stopCloudListeners();
+  resetStoreCaches();
+  aktifProfil = {key, name: magazaAdi(key), legacy: key === ESKI_PROFIL_YENI_MAGAZA};
+  if(oturum.rol === 'bolge'){
+    try{ localStorage.setItem(MAGAZA_SECIM_KEY, key); }catch(e){ /* kota */ }
+  }
+  ekranGoster('boot');
   bootStatus('Veriler yükleniyor...');
   try{
-    if(aktifProfil.legacy && !aktifProfil.legacyTasindi){
-      bootStatus('Eski veriler bu mağazaya taşınıyor...');
-      const adet = await eskiVeriyiMagazayaTasi(key);
-      aktifProfil.legacyTasindi = true;
-      if(adet) setTimeout(()=> setStatus(adet + ' kayıt bu mağazanın altına taşındı ✓'), 1200);
+    if(oturum.kadi === ESKI_PROFIL_YENI_MAGAZA && key === ESKI_PROFIL_YENI_MAGAZA){
+      const adet = await eskiProfilVerisiniTasi();
+      if(adet) setTimeout(()=> setStatus(adet + ' kayıt ' + magazaAdi(key) + ' altına taşındı ✓'), 1200);
     }
     await loadCloudCache();
     listenCloudChanges();
-    document.getElementById('bootScreen').style.display = 'none';
-    document.getElementById('appRoot').style.display = '';
+    ekranGoster('uygulama');
     renderProfileChip();
     await startAppAfterLogin();
   }catch(e){
@@ -1694,186 +1397,47 @@ async function profilOnayla(key, oturumuHatirla){
   }
 }
 
-function profilDegistir(){
-  kapatChipMenu();
-  oturumSil();
-  stopCloudListeners();
-  aktifProfil = null;
-  document.getElementById('appRoot').style.display = 'none';
-  showProfileScreen();
-}
+// "onur" profilinin verisini bir kereye mahsus m583 mağazasına kopyalar.
+// Kaynak silinmez, yedek olarak yerinde kalır. Profil verisi hiç mağaza altına
+// taşınmamışsa (legacyTasindi yok) kök koleksiyonlardaki ilk veriler kopyalanır.
+async function eskiProfilVerisiniTasi(){
+  const hedef = magazaRef(ESKI_PROFIL_YENI_MAGAZA);
+  const hedefDoc = await hedef.get();
+  if(hedefDoc.exists && hedefDoc.data().tasindi) return 0;
 
-// ---------- Profil yönetimi (ekle / düzenle / PIN / sil) ----------
-function yoneticiProfili(){
-  return profilListesi().find(p=> p.admin) || profilListesi()[0] || null;
-}
-function showProfileManage(){
-  showProfileView('profileManageView');
-  renderManageList();
-}
-function pmNotu(msg){ document.getElementById('pmNote').textContent = msg || ''; }
+  bootStatus('Eski veriler ' + magazaAdi(ESKI_PROFIL_YENI_MAGAZA) + ' mağazasına taşınıyor...');
+  const profiller = await db.collection('settings').doc('profiles').get();
+  const eski = (profiller.exists && profiller.data()[ESKI_PROFIL]) || {};
+  const kaynakKok = !eski.legacyTasindi;
+  const kaynak = kaynakKok ? db : magazaRef(ESKI_PROFIL);
 
-function renderManageList(){
-  const el = document.getElementById('pmList');
-  el.innerHTML = profilListesi().map(p=>{
-    const etiketler = [];
-    if(p.admin) etiketler.push('yönetici');
-    etiketler.push(profilPinliMi(p) ? 'PIN var' : 'PIN yok');
-    if(aktifProfil && aktifProfil.key === p.key) etiketler.push('açık olan');
-    return '<div class="pm-row">'
-      + '<span class="pm-av" style="background:' + (p.color || '#444') + '">' + (p.emoji || '👤') + '</span>'
-      + '<span class="pm-info"><span class="pm-name">' + escapeHtml(p.name || p.key) + '</span>'
-      + '<span class="pm-sub">' + etiketler.join(' · ') + '</span></span>'
-      + '<span class="pm-acts">'
-      + '<button type="button" data-act="duzenle" data-key="' + p.key + '">Düzenle</button>'
-      + '<button type="button" data-act="pin" data-key="' + p.key + '">PIN sıfırla</button>'
-      + (p.admin ? '' : '<button type="button" class="tehlike" data-act="sil" data-key="' + p.key + '">Sil</button>')
-      + '</span></div>';
-  }).join('');
-  el.querySelectorAll('button').forEach(b=>{
-    b.addEventListener('click', ()=> manageAksiyon(b.dataset.act, b.dataset.key));
-  });
-}
-
-async function manageAksiyon(act, key){
-  const p = Object.assign({key}, profilesCache[key]);
-  if(act === 'duzenle'){ openProfileEdit(key, 'yonetim'); return; }
-  if(act === 'pin'){
-    if(!await uiOnay(p.name + ' profilinin PIN\'i silinecek. Bir sonraki girişte yeni PIN belirlenir.',
-                     {baslik:'PIN sıfırlansın mı?', ikon:'🔑', evet:'Sıfırla'})) return;
-    try{
-      await pinSil(key);
-      renderManageList();
-      pmNotu(p.name + ' profilinin PIN\'i sıfırlandı.');
-    }catch(e){ pmNotu('Sıfırlanamadı: ' + e.message); }
-    return;
-  }
-  if(act === 'sil'){
-    if(p.admin){ pmNotu('Yönetici profili silinemez.'); return; }
-    if(aktifProfil && aktifProfil.key === key){ pmNotu('Şu an açık olan profil silinemez.'); return; }
-    if(!await uiOnay(p.name + ' profili ve bu mağazaya ait tüm veri silinecek. Bu işlem geri alınamaz.',
-                     {baslik:'Profil silinsin mi?', tehlike:true, evet:'Sil'})) return;
-    const onay = await uiSor('Silmeyi onaylamak için profilin adını yazın: ' + (p.name || key), '',
-                             {baslik:'Son onay', ikon:'🗑️', tehlike:true, evet:'Sil', placeholder:p.name || key});
-    if(onay === null) return;
-    if(onay.trim() !== (p.name || key)){ pmNotu('Ad eşleşmedi, silme iptal edildi.'); return; }
-    pmNotu('Siliniyor...');
-    try{
-      await profilSil(key);
-      renderManageList();
-      pmNotu(p.name + ' profili ve verisi silindi.');
-    }catch(e){ pmNotu('Silinemedi: ' + e.message); }
-  }
-}
-
-async function profilSil(key){
-  for(const coll of MAGAZA_KOLEKSIYONLARI){
-    const snap = await magazaRef(key).collection(coll).get();
-    const ids = [];
-    snap.forEach(d=> ids.push(d.id));
-    for(let i=0;i<ids.length;i+=400){
+  const kopyala = async (coll, parca)=>{
+    const snap = await kaynak.collection(coll).get();
+    const docs = [];
+    snap.forEach(d=> docs.push({id:d.id, data:d.data()}));
+    for(let i=0;i<docs.length;i+=parca){
       const batch = db.batch();
-      ids.slice(i, i+400).forEach(id=> batch.delete(magazaRef(key).collection(coll).doc(id)));
+      docs.slice(i, i+parca).forEach(d=> batch.set(hedef.collection(coll).doc(d.id), d.data));
       await batch.commit();
     }
-  }
-  try{ await magazaRef(key).delete(); }catch(e){ /* mağaza dokümanı hiç yazılmamış olabilir */ }
-  await profilesRef().set({[key]: firebase.firestore.FieldValue.delete()}, {merge:true});
-  delete profilesCache[key];
-}
-
-function yeniProfilKey(ad){
-  const harfler = {'ı':'i','İ':'i','ş':'s','Ş':'s','ğ':'g','Ğ':'g','ü':'u','Ü':'u','ö':'o','Ö':'o','ç':'c','Ç':'c'};
-  const slug = String(ad || 'magaza').toLowerCase()
-    .replace(/[ıİşŞğĞüÜöÖçÇ]/g, h=> harfler[h] || h)
-    .replace(/[^a-z0-9]+/g, '')
-    .slice(0,14) || 'magaza';
-  let key = slug, i = 2;
-  while(profilesCache[key]) key = slug + (i++);
-  return key;
-}
-
-// kaynak: 'yonetim' (yönetim listesinden) | 'uygulama' (rozet menüsünden)
-function openProfileEdit(key, kaynak){
-  const p = key ? Object.assign({key}, profilesCache[key]) : null;
-  editState = {
-    key: key || null,
-    kaynak: kaynak || 'yonetim',
-    name: p ? (p.name || '') : '',
-    emoji: p ? (p.emoji || PROFIL_SIMGELERI[0]) : PROFIL_SIMGELERI[0],
-    color: p ? (p.color || PROFIL_RENKLERI[0]) : PROFIL_RENKLERI[0]
+    return docs.length;
   };
-  document.getElementById('peTitle').textContent = key ? 'Profili düzenle' : 'Yeni profil';
-  document.getElementById('peName').value = editState.name;
-  document.getElementById('peErr').textContent = '';
-  renderEditPickers();
-  showProfileView('profileEditView');
-  document.getElementById('profileScreen').style.display = '';
-  document.getElementById('appRoot').style.display = 'none';
-  setTimeout(()=> document.getElementById('peName').focus(), 50);
-}
-function renderEditPickers(){
-  const ic = document.getElementById('peIcons');
-  ic.innerHTML = PROFIL_SIMGELERI.map(e=>
-    '<span data-emoji="' + e + '" class="' + (e === editState.emoji ? 'sel' : '') + '">' + e + '</span>').join('');
-  ic.querySelectorAll('span').forEach(el=> el.addEventListener('click', ()=>{
-    editState.emoji = el.dataset.emoji; renderEditPickers();
-  }));
-  const co = document.getElementById('peColors');
-  co.innerHTML = PROFIL_RENKLERI.map(c=>
-    '<span data-color="' + c + '" style="background:' + c + '" class="' + (c === editState.color ? 'sel' : '') + '"></span>').join('');
-  co.querySelectorAll('span').forEach(el=> el.addEventListener('click', ()=>{
-    editState.color = el.dataset.color; renderEditPickers();
-  }));
-}
-async function profilEditKaydet(){
-  if(!editState) return;
-  const ad = document.getElementById('peName').value.trim();
-  const hata = document.getElementById('peErr');
-  if(!ad){ hata.textContent = 'Ad boş olamaz.'; return; }
-  const cakisma = profilListesi().find(p=> p.key !== editState.key && (p.name || '').toLowerCase() === ad.toLowerCase());
-  if(cakisma){ hata.textContent = 'Bu adda bir profil zaten var.'; return; }
-
-  const yeniMi = !editState.key;
-  const key = editState.key || yeniProfilKey(ad);
-  const kayit = {name: ad, emoji: editState.emoji, color: editState.color};
-  if(yeniMi){
-    kayit.admin = false;
-    kayit.legacy = false;
-    kayit.pinS = null;
-    kayit.pinF = null;
-    kayit.order = profilListesi().reduce((m,p)=> Math.max(m, p.order || 0), 0) + 1;
+  let toplam = 0;
+  const koleksiyonlar = kaynakKok
+    ? ['entries','weekgoals','tools','ghbhrWeekly','ghbhrReports']
+    : ['entries','weekgoals','settings','tools','ghbhrWeekly','ghbhrReports','transfers','transferFotos'];
+  for(const coll of koleksiyonlar){
+    // Fotoğraf belgeleri büyük; tek yazımda 10 MB sınırını aşmasın.
+    toplam += await kopyala(coll, coll === 'transferFotos' ? 5 : 400);
   }
-  hata.textContent = '';
-  try{
-    await profilesRef().set({[key]: kayit}, {merge:true});
-    profilesCache[key] = Object.assign({}, profilesCache[key] || {}, kayit);
-    if(aktifProfil && aktifProfil.key === key){
-      aktifProfil = Object.assign({key}, profilesCache[key]);
-      renderProfileChip();
+  if(kaynakKok){
+    for(const d of ['general','employees']){
+      const doc = await db.collection('settings').doc(d).get();
+      if(doc.exists){ await hedef.collection('settings').doc(d).set(doc.data()); toplam++; }
     }
-  }catch(e){ hata.textContent = 'Kaydedilemedi: ' + e.message; return; }
-
-  const kaynak = editState.kaynak;
-  editState = null;
-  if(kaynak === 'uygulama' && aktifProfil){
-    document.getElementById('profileScreen').style.display = 'none';
-    document.getElementById('appRoot').style.display = '';
-    setStatus('Profil güncellendi ✓');
-  } else {
-    showProfileManage();
-    pmNotu(yeniMi ? (ad + ' eklendi. İlk girişinde PIN belirleyecek.') : 'Profil güncellendi.');
   }
-}
-function profilEditIptal(){
-  const kaynak = editState ? editState.kaynak : 'yonetim';
-  editState = null;
-  if(kaynak === 'uygulama' && aktifProfil){
-    document.getElementById('profileScreen').style.display = 'none';
-    document.getElementById('appRoot').style.display = '';
-  } else {
-    showProfileManage();
-  }
+  await hedef.set({tasindi:{kaynak: kaynakKok ? 'kok' : 'stores/' + ESKI_PROFIL, at: new Date().toISOString()}}, {merge:true});
+  return toplam;
 }
 
 // ---------- Rozet menüsü ----------
@@ -1888,10 +1452,14 @@ function renderProfileChip(){
   if(!chip) return;
   if(!aktifProfil){ chip.style.display = 'none'; return; }
   chip.style.display = '';
+  const bolge = oturum && oturum.rol === 'bolge';
   const av = document.getElementById('profileChipAv');
-  av.textContent = aktifProfil.emoji || '👤';
-  av.style.background = aktifProfil.color || '#444';
-  document.getElementById('profileChipName').textContent = aktifProfil.name || aktifProfil.key;
+  av.textContent = bolge ? '📊' : '🏪';
+  av.style.background = bolge ? '#3f6b8a' : '#C8A066';
+  document.getElementById('profileChipName').textContent =
+    aktifProfil.name + (bolge ? ' · ' + magazaAdi(oturum.kadi) : '');
+  document.getElementById('chipMagazaBtn').style.display = bolge ? '' : 'none';
+  document.getElementById('chipMagazaSep').style.display = bolge ? '' : 'none';
 }
 
 function renderLastEditInfo(){
@@ -1908,76 +1476,42 @@ function renderLastEditInfo(){
 }
 
 document.getElementById('profileChip').addEventListener('click', e=>{ e.stopPropagation(); acChipMenu(); });
-document.getElementById('chipEditBtn').addEventListener('click', ()=>{
+document.getElementById('chipMagazaBtn').addEventListener('click', ()=>{
   kapatChipMenu();
-  if(aktifProfil) openProfileEdit(aktifProfil.key, 'uygulama');
+  stopCloudListeners();
+  resetStoreCaches();
+  aktifProfil = null;
+  try{ localStorage.removeItem(MAGAZA_SECIM_KEY); }catch(e){ /* sorun değil */ }
+  magazaSecimiGoster();
 });
-document.getElementById('chipPinBtn').addEventListener('click', ()=>{
-  kapatChipMenu();
-  if(!aktifProfil) return;
-  document.getElementById('profileScreen').style.display = '';
-  document.getElementById('appRoot').style.display = 'none';
-  openPinView(aktifProfil.key, profilPinliMi(profilesCache[aktifProfil.key]) ? 'mevcut' : 'yeniPin');
-});
-document.getElementById('chipSwitchBtn').addEventListener('click', profilDegistir);
+document.getElementById('chipCikisBtn').addEventListener('click', cikisYap);
+document.getElementById('magazaSecCikis').addEventListener('click', cikisYap);
 document.addEventListener('click', ()=> kapatChipMenu());
+document.getElementById('girisForm').addEventListener('submit', girisYap);
 
-document.getElementById('pinBackBtn').addEventListener('click', ()=>{
-  // PIN değiştirmeden vazgeçildiyse uygulamaya dön, girişteyse profil seçimine.
-  const uygulamaIci = pinState && ['mevcut','yeniPin','yeniPinTekrar'].includes(pinState.mod);
-  pinState = null;
-  if(uygulamaIci && aktifProfil){
-    document.getElementById('profileScreen').style.display = 'none';
-    document.getElementById('appRoot').style.display = '';
-    return;
-  }
-  showProfilePick();
-});
-document.getElementById('profileResetBtn').addEventListener('click', ()=>{
-  const yonetici = yoneticiProfili();
-  if(!yonetici){ profilNotu('Yönetici profili bulunamadı.'); return; }
-  if(!profilPinliMi(yonetici)){ showProfileManage(); return; }  // henüz PIN yoksa doğrudan aç
-  openPinView(yonetici.key, 'yonetici');
-});
-document.getElementById('pmBackBtn').addEventListener('click', showProfilePick);
-document.getElementById('pmAddBtn').addEventListener('click', ()=> openProfileEdit(null, 'yonetim'));
-document.getElementById('peSaveBtn').addEventListener('click', profilEditKaydet);
-document.getElementById('peCancelBtn').addEventListener('click', profilEditIptal);
-document.getElementById('peName').addEventListener('keydown', e=>{
-  if(e.key === 'Enter'){ e.preventDefault(); profilEditKaydet(); }
-});
-document.addEventListener('keydown', e=>{
-  if(!pinState || document.getElementById('pinView').style.display === 'none') return;
-  if(e.key >= '0' && e.key <= '9'){ pinTus(e.key); e.preventDefault(); }
-  else if(e.key === 'Backspace'){ pinTus('B'); e.preventDefault(); }
-  else if(e.key === 'Escape'){ showProfilePick(); e.preventDefault(); }
-});
-
-// Firebase'de şifre ekranı yok: arka planda anonim oturum açılır,
-// kullanıcıyı asıl karşılayan ekran yukarıdaki profil seçimidir.
+// Firebase oturumu tarayıcıda hatırlanır; çıkış yapılmadıkça şifre tekrar sorulmaz.
 auth.onAuthStateChanged(async function(user){
-  if(!user){
-    auth.signInAnonymously().catch(err=>{
-      bootStatus(
-        err.code === 'auth/operation-not-allowed'
-          ? 'Firebase\'de anonim giriş kapalı görünüyor.\nConsole → Authentication → Sign-in method → Anonymous → Enable.'
-          : ('Bağlantı kurulamadı: ' + err.message)
-      , true);
-    });
+  if(!user){ girisEkraniGoster(); return; }
+  if(user.isAnonymous || !user.email){
+    // Eski sürümden kalan anonim oturum: kapat, giriş ekranına düşer.
+    auth.signOut();
     return;
   }
+  ekranGoster('boot');
+  bootStatus('Giriş yapılıyor...');
   try{
-    bootStatus('Profiller yükleniyor...');
-    await loadProfiles();
-    const oturum = kayitliOturum();
-    if(oturum && profilesCache[oturum.key] && profilPinliMi(profilesCache[oturum.key])){
-      await profilOnayla(oturum.key, true);
-    } else {
-      showProfileScreen();
-    }
+    await oturumuKur(user);
   }catch(e){
-    bootStatus('Profiller yüklenemedi: ' + e.message, true);
+    const mesaj = e.yetkiYok ? e.message : ('Yetki okunamadı: ' + e.message);
+    await auth.signOut();
+    girisEkraniGoster(mesaj);
+    return;
   }
+  if(oturum.rol === 'magaza'){ await magazayiAc(oturum.kadi); return; }
+  let son = null;
+  try{ son = localStorage.getItem(MAGAZA_SECIM_KEY); }catch(e){ /* sorun değil */ }
+  if(son && oturum.magazalar.includes(son)) await magazayiAc(son);
+  else magazaSecimiGoster();
 });
 
 // ==================== Rapor verisi (bulut tabanlı) ====================
@@ -1988,7 +1522,7 @@ function getRecord(dateKey){
 function setRecord(dateKey,obj){
   if(aktifProfil){
     obj = Object.assign({}, obj, {
-      updatedBy: aktifProfil.name || aktifProfil.key,
+      updatedBy: guncelleyenAdi(),
       updatedAt: new Date().toISOString()
     });
   }
@@ -3929,7 +3463,7 @@ async function transferKaydet(tip, fotolar, text){
     siralar: fotolar.map(f=> f.sira),
     thumbs: fotolar.map(f=> f.thumb),
     createdAtMs: Date.now(),
-    by: aktifProfil ? (aktifProfil.name || aktifProfil.key) : ''
+    by: guncelleyenAdi()
   });
 }
 
