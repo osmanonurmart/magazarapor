@@ -51,15 +51,32 @@ service cloud.firestore {
       allow write: if duzenleyici();
     }
 
-    // Öneri / geri bildirim: herkes yazar (yalnızca kendi adıyla), yalnızca m583 okur ve "okundu" işaretler.
+    // Öneri / geri bildirim: herkes kendi adıyla yazar; m583 okur, okundu işaretler ve cevap yazar;
+    // gönderen kendi kayıtlarını okur ve cevabı "görüldü" yapar.
     match /geribildirim/{id} {
       allow create: if girisli() && yetkiVar()
                     && request.resource.data.kimden == kadi()
                     && request.resource.data.okundu == false
                     && request.resource.data.metin is string && request.resource.data.metin.size() <= 4000;
-      allow read: if girisli() && kadi() == 'm583';
-      allow update: if girisli() && kadi() == 'm583'
-                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['okundu','okunduTarih']);
+      allow read: if girisli() && (kadi() == 'm583' || resource.data.kimden == kadi());
+      allow update: if girisli() && (
+        (kadi() == 'm583'
+          && request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['okundu','okunduTarih','cevap','cevapTarih','cevapGoruldu']))
+        || (resource.data.kimden == kadi()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['cevapGoruldu'])));
+    }
+
+    // Duyurular: bölge müdürü yazar/siler; listedeki mağazalar okur ve yalnızca kendini "okudu" işaretler.
+    match /duyurular/{id} {
+      allow create: if girisli() && yetkiVar() && yetki().rol == 'bolge'
+                    && request.resource.data.kimden == kadi()
+                    && request.resource.data.metin is string && request.resource.data.metin.size() <= 4000;
+      allow read: if girisli() && (resource.data.kimden == kadi() || kadi() in resource.data.magazalar);
+      allow delete: if girisli() && resource.data.kimden == kadi();
+      allow update: if girisli() && kadi() in resource.data.magazalar
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['okuyanlar'])
+                    && request.resource.data.okuyanlar.diff(resource.data.okuyanlar).affectedKeys().hasOnly([kadi()]);
     }
 
     match /stores/{magaza} {

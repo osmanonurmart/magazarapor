@@ -109,6 +109,33 @@ if(!document.documentElement.classList.contains('tel')){
   .gb-oge.okundu .gb-metin{ color:#888; }
   .gb-okundu-btn{ margin-top:8px; border:none; background:#f3ede3; color:#9a7438; font-weight:700; font-size:.75rem; padding:6px 12px; border-radius:8px; cursor:pointer; font-family:inherit; }
   .gb-bos{ color:#999; font-size:.85rem; text-align:center; padding:14px 0; }
+  /* Hedefe kalan */
+  .hedef-kalan{ display:flex; gap:8px; margin-bottom:8px; }
+  .hedef-kalan div{ flex:1; background:#fff; border:1px solid var(--line); border-radius:9px; padding:6px 9px; font-size:.68rem; color:#777; }
+  .hedef-kalan b{ display:block; font-size:.86rem; color:#2d2d2d; margin-top:1px; }
+  .hedef-kalan b.tamam{ color:var(--green); }
+  html.tel .hedef-kalan div{ font-size:.75rem; padding:8px 10px; }
+  html.tel .hedef-kalan b{ font-size:1rem; }
+  /* Rekor gün ve belirgin düşüş */
+  table.grid td.rekor{ background:#fff6dc; font-weight:700; }
+  table.grid td.rekor::after{ content:' ★'; color:#c8962e; font-size:.85em; }
+  table.grid td.dusuk{ background:#fbe9e9; color:#a34141; }
+  /* Bölge: veri girmeyenler, duyurular */
+  .bp-eksik{ font-size:.82rem; padding:9px 12px; border-radius:10px; margin-bottom:10px; background:#fbe9e9; color:#8a3434; }
+  .bp-eksik.tamam{ background:#e8f3ea; color:#2e6b3a; }
+  .bp-duyuru{ background:#fff; border:1px solid var(--line); border-radius:12px; padding:10px 12px; margin-bottom:10px; }
+  .bpd-ust{ display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  .bpd-ust b{ font-size:.88rem; }
+  .bpd-liste{ margin-top:8px; display:flex; flex-direction:column; gap:6px; }
+  .bpd-oge{ border-top:1px solid #f0ece5; padding-top:6px; font-size:.8rem; }
+  .bpd-oge:first-child{ border-top:none; padding-top:0; }
+  .bpd-metin{ white-space:pre-wrap; word-break:break-word; color:#2d2d2d; }
+  .bpd-alt{ font-size:.7rem; color:#888; margin-top:3px; }
+  .bpd-alt .okudu{ color:var(--green); }
+  .bpd-sil{ border:none; background:none; color:#a34141; font-size:.7rem; cursor:pointer; padding:0; margin-left:6px; font-family:inherit; }
+  .bpd-bos{ font-size:.78rem; color:#999; margin-top:6px; }
+  .gb-cevap{ margin-top:8px; background:#f6efe2; border-radius:9px; padding:7px 9px; font-size:.8rem; color:#5b4724; white-space:pre-wrap; }
+  .gb-butonlar{ display:flex; gap:6px; flex-wrap:wrap; }
   .surum-rozet:hover{ background:var(--accent); border-color:var(--accent); color:#fff; }
   .ust-btn{
     background:#fff; color:#2d2d2d; border:1px solid #2d2d2d; padding:6px 11px; border-radius:7px;
@@ -159,6 +186,13 @@ if(!document.documentElement.classList.contains('tel')){
   .hk-detay h3{ font-size:.95rem; margin:18px 0 6px; }
   .hk-detay h3:first-child{ margin-top:0; }
   .hk-detay .hk-bos{ padding:0; }
+  .hk-detay ol, .hk-detay ul{ margin:4px 0 8px; padding-left:22px; }
+  .hk-detay li{ margin:3px 0; }
+  .hk-detay p{ margin:4px 0 8px; }
+  .hk-taslak{ background:#fff6dc; border-radius:8px; padding:7px 10px; font-size:.78rem; color:#7a5a17; }
+  .hk-tablo{ width:100%; border-collapse:collapse; font-size:.8rem; }
+  .hk-tablo th, .hk-tablo td{ border:1px solid var(--line); padding:6px 8px; text-align:left; vertical-align:top; }
+  .hk-tablo th{ background:#f7f4ee; }
   .not-defteri{
     max-width:1100px; margin:14px auto 0; background:#fff; border:1px solid #cfc9bf; border-radius:10px;
     padding:14px 14px 16px; box-sizing:border-box;
@@ -930,6 +964,11 @@ if(!document.documentElement.classList.contains('tel')){
 </header>
 <main class="bp-icerik" id="bpIcerik">
   <section id="bpOzet">
+    <div class="bp-eksik" id="bpEksik" style="display:none;"></div>
+    <div class="bp-duyuru" id="bpDuyuru">
+      <div class="bpd-ust"><b>📢 Duyurular</b><button type="button" class="ust-btn dolu" id="bpDuyuruYeni">＋ Yeni duyuru</button></div>
+      <div class="bpd-liste" id="bpDuyuruListe"></div>
+    </div>
     <div class="sadece-tel bp-tel-sirala">
       <label for="bpTelSirala">Sırala</label>
       <select id="bpTelSirala"></select>
@@ -1134,7 +1173,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 25;
+const APP_SURUM = 26;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -1831,6 +1870,8 @@ async function cikisYap(){
   aktifProfil = null;
   oturum = null;
   geriBildirimBirak();
+  duyurulariBirak();
+  cevapBirak();
   bp.yuklendi = false;
   bp.veri = {};
   await auth.signOut();
@@ -2114,7 +2155,20 @@ function bpToplam(satirlar){
   };
 }
 
+function bpEksikCiz(){
+  const el = document.getElementById('bpEksik');
+  if(!el) return;
+  if(!oturum || !oturum.magazalar.length || !bp.yuklendi){ el.style.display = 'none'; return; }
+  const bugun = todayStr(0);
+  const eksik = oturum.magazalar.filter(m=> !bp.hatalar[m] && !(bp.veri[m] && bp.veri[m][bugun] && bpDolu(bp.veri[m][bugun].ciro)));
+  el.style.display = '';
+  el.classList.toggle('tamam', !eksik.length);
+  el.textContent = eksik.length
+    ? 'Bugün veri girmeyen: ' + eksik.map(bpMagazaAdi).join(', ')
+    : 'Bugün bütün mağazalar veri girdi ✓';
+}
 function bpCiz(){
+  bpEksikCiz();
   document.querySelectorAll('#bpSeg button').forEach(b=> b.classList.toggle('active', b.dataset.donem === bp.donem));
   document.getElementById('bpTarih').value = bp.tarih;
   const ar = bpAraligi();
@@ -2374,6 +2428,30 @@ function geriBildirimDinle(){
     if(acik) gbListeCiz(acik);
   }, ()=>{ /* yetki yoksa sessiz */ });
 }
+// Gönderen: yazdığı geri bildirime cevap gelmişse bir sonraki açılışta (ya da açıkken) görür.
+let cevapUnsub = null;
+let cevapGosteriliyor = false;
+function cevapDinle(){
+  if(cevapUnsub || !oturum) return;
+  cevapUnsub = db.collection('geribildirim').where('kimden', '==', oturum.kadi).onSnapshot(snap=>{
+    const bekleyen = [];
+    snap.forEach(d=>{ const x = d.data(); if(x.cevap && x.cevapGoruldu === false) bekleyen.push(Object.assign({id:d.id}, x)); });
+    if(bekleyen.length) cevapGoster(bekleyen[0]);
+  }, ()=>{ /* kurallar yayınlanmadıysa sessiz */ });
+}
+function cevapBirak(){ if(cevapUnsub){ try{ cevapUnsub(); }catch(e){} cevapUnsub = null; } }
+async function cevapGoster(g){
+  if(cevapGosteriliyor) return;
+  cevapGosteriliyor = true;
+  await uiDialog({
+    ikon:'💬', baslik:'Geri bildirimine cevap geldi',
+    mesaj: 'Sen: ' + g.metin + '\n\nCevap: ' + g.cevap,
+    butonlar:[{metin:'Tamam', deger:true, tip:'birincil'}], iptalDeger:true
+  });
+  try{ await db.collection('geribildirim').doc(g.id).update({cevapGoruldu:true}); }catch(e){ /* sessiz */ }
+  cevapGosteriliyor = false;
+}
+
 function geriBildirimBirak(){
   if(gbUnsub){ try{ gbUnsub(); }catch(e){} gbUnsub = null; }
   gbListe = [];
@@ -2391,11 +2469,28 @@ function gbListeCiz(el){
     return '<div class="gb-oge' + (g.okundu ? ' okundu' : '') + '">'
       + '<div class="gb-ust"><b>' + escapeHtml(kim) + '</b><span>' + escapeHtml(zaman) + (g.cihaz ? ' · ' + escapeHtml(g.cihaz) : '') + '</span></div>'
       + '<div class="gb-metin">' + escapeHtml(g.metin || '') + '</div>'
-      + (g.okundu ? '<div class="gb-ust" style="margin:6px 0 0;">✓ okundu</div>'
+      + (g.cevap ? '<div class="gb-cevap">↳ ' + escapeHtml(g.cevap) + (g.cevapGoruldu ? ' · görüldü' : '') + '</div>' : '')
+      + '<div class="gb-butonlar">'
+      + (g.okundu ? '<div class="gb-ust" style="margin:8px 0 0;">✓ okundu</div>'
                   : '<button type="button" class="gb-okundu-btn" data-id="' + g.id + '">✓ Okundu</button>')
-      + '</div>';
+      + '<button type="button" class="gb-okundu-btn gb-cevap-btn" data-id="' + g.id + '">' + (g.cevap ? '✎ Cevabı değiştir' : '↩ Cevap yaz') + '</button>'
+      + '</div></div>';
   }).join('');
-  el.querySelectorAll('.gb-okundu-btn').forEach(b=> b.addEventListener('click', ()=>{
+  el.querySelectorAll('.gb-cevap-btn').forEach(b=> b.addEventListener('click', async ()=>{
+    const g = gbListe.find(x=> x.id === b.dataset.id);
+    const cevap = await uiDialog({
+      ikon:'↩', baslik:'Cevap · ' + magazaAdi(g.kimden), mesaj: g.metin,
+      input:{tip:'textarea', deger: g.cevap || '', placeholder:'Cevabın...'},
+      butonlar:[{metin:'Vazgeç', deger:null}, {metin:'Gönder', deger:'__input', tip:'birincil'}], iptalDeger:null
+    });
+    if(cevap === null || !cevap.trim()) return;
+    db.collection('geribildirim').doc(g.id).update({
+      cevap: cevap.trim().slice(0, 4000), cevapTarih: new Date().toISOString(), cevapGoruldu: false,
+      okundu: true, okunduTarih: g.okunduTarih || new Date().toISOString()
+    }).then(()=> uiBildirim('Cevap gönderildi.', 'basari'))
+      .catch(e=> uiBildirim('Gönderilemedi: ' + e.message, 'hata'));
+  }));
+  el.querySelectorAll('.gb-okundu-btn:not(.gb-cevap-btn)').forEach(b=> b.addEventListener('click', ()=>{
     b.disabled = true;
     db.collection('geribildirim').doc(b.dataset.id).update({okundu:true, okunduTarih:new Date().toISOString()})
       .catch(e=>{ b.disabled = false; uiBildirim('İşaretlenemedi: ' + e.message, 'hata'); });
@@ -2419,6 +2514,141 @@ function geriBildirimleriAc(){
   gbListeCiz(document.getElementById('gbListe'));
 }
 document.getElementById('chipGbBtn').addEventListener('click', geriBildirimleriAc);
+
+// ==================== DUYURULAR ====================
+// Bölge müdürü duyuru yazar (listesindeki mağazalara gider); mağaza uygulamayı
+// açtığında okunmamış duyuru pencere olarak çıkar, "Okudum" deyince işaretlenir.
+// duyurular/{id}: {metin, kimden, tarih, magazalar:[...], okuyanlar:{magaza: tarih}}
+let duyuruUnsub = null;
+let duyuruListe = [];
+let duyuruGosteriliyor = false;
+
+function duyurulariDinle(){
+  if(duyuruUnsub || !oturum) return;
+  const sorgu = oturum.rol === 'bolge'
+    ? db.collection('duyurular').where('kimden', '==', oturum.kadi)
+    : db.collection('duyurular').where('magazalar', 'array-contains', oturum.kadi);
+  duyuruUnsub = sorgu.onSnapshot(snap=>{
+    duyuruListe = [];
+    snap.forEach(d=> duyuruListe.push(Object.assign({id:d.id}, d.data())));
+    duyuruListe.sort((a,b)=> String(b.tarih || '').localeCompare(String(a.tarih || '')));
+    if(oturum && oturum.rol === 'bolge') bpDuyuruCiz();
+    else okunmamisDuyuruGoster();
+  }, ()=>{ /* kurallar yayınlanmadıysa sessiz */ });
+}
+function duyurulariBirak(){
+  if(duyuruUnsub){ try{ duyuruUnsub(); }catch(e){} duyuruUnsub = null; }
+  duyuruListe = [];
+}
+function duyuruZamani(iso){
+  const t = iso ? new Date(iso) : null;
+  return t && !isNaN(t) ? kisaTarih(t) + ' ' + pad(t.getHours()) + ':' + pad(t.getMinutes()) : '';
+}
+async function okunmamisDuyuruGoster(){
+  if(duyuruGosteriliyor || !oturum || oturum.rol !== 'magaza') return;
+  const d = duyuruListe.slice().reverse().find(x=> !(x.okuyanlar && x.okuyanlar[oturum.kadi]));
+  if(!d) return;
+  duyuruGosteriliyor = true;
+  await uiDialog({
+    ikon:'📢', baslik:'Duyuru · ' + magazaAdi(d.kimden),
+    mesaj: d.metin + '\n\n' + duyuruZamani(d.tarih),
+    butonlar:[{metin:'Okudum', deger:true, tip:'birincil'}], iptalDeger:true
+  });
+  try{
+    await db.collection('duyurular').doc(d.id).update({['okuyanlar.' + oturum.kadi]: new Date().toISOString()});
+  }catch(e){ uiBildirim('İşaretlenemedi: ' + e.message, 'hata'); }
+  duyuruGosteriliyor = false;
+  const kalan = duyuruListe.find(x=> x.id !== d.id && !(x.okuyanlar && x.okuyanlar[oturum.kadi]));
+  if(kalan) setTimeout(okunmamisDuyuruGoster, 300);
+}
+function bpDuyuruCiz(){
+  const el = document.getElementById('bpDuyuruListe');
+  if(!el) return;
+  if(!duyuruListe.length){ el.innerHTML = '<div class="bpd-bos">Henüz duyuru yok.</div>'; return; }
+  el.innerHTML = duyuruListe.slice(0, 5).map(d=>{
+    const okuyan = d.okuyanlar || {};
+    const durum = (d.magazalar || []).map(m=> okuyan[m]
+      ? '<span class="okudu">' + escapeHtml(bpMagazaAdi(m)) + ' ✓</span>'
+      : escapeHtml(bpMagazaAdi(m)) + ' –').join(' · ');
+    return '<div class="bpd-oge"><div class="bpd-metin">' + escapeHtml(d.metin || '') + '</div>'
+      + '<div class="bpd-alt">' + escapeHtml(duyuruZamani(d.tarih)) + ' · ' + durum
+      + '<button type="button" class="bpd-sil" data-id="' + d.id + '">Sil</button></div></div>';
+  }).join('');
+  el.querySelectorAll('.bpd-sil').forEach(b=> b.addEventListener('click', async ()=>{
+    if(!await uiOnay('Bu duyuru silinecek.', {baslik:'Duyuru silinsin mi?', tehlike:true, evet:'Sil'})) return;
+    db.collection('duyurular').doc(b.dataset.id).delete().catch(e=> uiBildirim('Silinemedi: ' + e.message, 'hata'));
+  }));
+}
+async function duyuruYaz(){
+  if(!oturum || oturum.rol !== 'bolge') return;
+  if(!oturum.magazalar.length){ uiBildirim('Listende mağaza yok.', 'hata'); return; }
+  const metin = await uiDialog({
+    ikon:'📢', baslik:'Yeni duyuru',
+    mesaj:'Listendeki mağazalara gider: ' + oturum.magazalar.map(bpMagazaAdi).join(', '),
+    input:{tip:'textarea', placeholder:'Duyuru metni...'},
+    butonlar:[{metin:'Vazgeç', deger:null}, {metin:'Gönder', deger:'__input', tip:'birincil'}],
+    iptalDeger:null
+  });
+  if(metin === null) return;
+  if(!metin.trim()){ uiBildirim('Boş duyuru gönderilmedi.', 'hata'); return; }
+  try{
+    await db.collection('duyurular').add({
+      metin: metin.trim().slice(0, 4000), kimden: oturum.kadi, tarih: new Date().toISOString(),
+      magazalar: oturum.magazalar.slice(), okuyanlar: {}
+    });
+    uiBildirim('Duyuru gönderildi.', 'basari');
+  }catch(e){ uiBildirim('Gönderilemedi: ' + e.message, 'hata'); }
+}
+document.getElementById('bpDuyuruYeni').addEventListener('click', duyuruYaz);
+
+// ==================== REKOR GÜN / DÜŞÜŞ İŞARETİ ====================
+// Ayın en yüksek cirolu günü ★ ile, Mdo veya Fbs'si geçen haftanın ortalamasının
+// %15'ten fazla altında kalan gün açık kırmızıyla işaretlenir.
+const DUSUS_ESIGI = 0.85;
+function haftaIsaretle(){
+  const kok = document.getElementById('monthContainer');
+  if(!kok) return;
+  const ayEnYuksek = {};
+  const ayEnYuksekBul = ay=>{
+    if(ayEnYuksek[ay] !== undefined) return ayEnYuksek[ay];
+    let enY = null;
+    Object.keys(cloudCache).forEach(k=>{
+      if(!k.startsWith('entry:' + ay)) return;
+      const r = getRecord(k.slice(6));
+      if(r && bpDolu(r.ciro) && (enY === null || Number(r.ciro) > enY)) enY = Number(r.ciro);
+    });
+    return (ayEnYuksek[ay] = enY);
+  };
+  const gecenHaftaOrt = {};
+  const ortBul = (pzt, alan)=>{
+    const k = dateStr(pzt) + alan;
+    if(gecenHaftaOrt[k] !== undefined) return gecenHaftaOrt[k];
+    const vals = [];
+    for(let i = 1; i <= 7; i++){
+      const d = new Date(pzt); d.setDate(d.getDate() - i);
+      const r = getRecord(dateStr(d));
+      if(!r) continue;
+      const v = alan === 'mdo' ? mdoToNumber(r.mdo) : (bpDolu(r[alan]) ? Number(r[alan]) : null);
+      if(v !== null && !isNaN(v)) vals.push(v);
+    }
+    return (gecenHaftaOrt[k] = vals.length ? vals.reduce((a,b)=>a+b,0) / vals.length : null);
+  };
+  kok.querySelectorAll('td[data-field="ciro"], td[data-field="mdo"], td[data-field="fbs"]').forEach(td=>{
+    td.classList.remove('rekor', 'dusuk');
+    const tarih = td.dataset.date;
+    const r = tarih ? getRecord(tarih) : null;
+    if(!r) return;
+    const alan = td.dataset.field;
+    if(alan === 'ciro'){
+      const enY = ayEnYuksekBul(tarih.slice(0, 7));
+      if(bpDolu(r.ciro) && enY !== null && Number(r.ciro) === enY) td.classList.add('rekor');
+      return;
+    }
+    const v = alan === 'mdo' ? mdoToNumber(r.mdo) : (bpDolu(r.fbs) ? Number(r.fbs) : null);
+    const ort = ortBul(mondayOf(tarihOku(tarih)), alan);
+    if(v !== null && ort && v < ort * DUSUS_ESIGI) td.classList.add('dusuk');
+  });
+}
 
 // ==================== YUVARLANMIŞ SAYILAR ====================
 // Fbü dışındaki bütün sayılar küsuratsız gösterilir ("20.372,45 TL" → "20.372 TL",
@@ -2476,6 +2706,11 @@ function telKisalt(kok){
   };
   sar('renderMonth', ()=> document.getElementById('monthContainer'));
   sar('refreshWeekBlockByKey', ()=> document.getElementById('monthContainer'));
+  // Rekor gün ve belirgin düşüş işaretleri tablo her çizildiğinde yenilenir.
+  for(const ad of ['renderMonth', 'refreshWeekBlockByKey']){
+    const asil = window[ad];
+    window[ad] = function(){ const r = asil.apply(this, arguments); haftaIsaretle(); return r; };
+  }
   sar('renderReportPanel', ()=> document.getElementById('reportPanel'));
   sar('bpCiz', ()=> document.getElementById('bpTablo'));
   const asilBpCiz = window.bpCiz;
@@ -2781,8 +3016,10 @@ auth.onAuthStateChanged(async function(user){
     return;
   }
   geriBildirimDinle();
+  cevapDinle();
   if(oturum.rol === 'magaza') await magazayiAc(oturum.kadi, true);
   else await bolgePaneliniAc(true, true);
+  duyurulariDinle();
 });
 
 // ==================== Rapor verisi (bulut tabanlı) ====================
@@ -3652,7 +3889,21 @@ function renderReportPanel(){
   const pMdo = pct(mdoToNumber(y.mdo), mdoToNumber(t.mdo));
 
   const panel = document.getElementById('reportPanel');
+  const kalanHtml = (function(){
+    const fmt = v => Math.round(Math.abs(v)).toLocaleString('tr-TR') + ' ₺';
+    const kutu = (etiket, hedef, yapilan)=>{
+      if(!hedef) return '<div>' + etiket + '<b>–</b></div>';
+      const kalan = hedef - (yapilan || 0);
+      return '<div>' + etiket + (kalan > 0 ? '<b>' + fmt(kalan) + '</b>' : '<b class="tamam">Aşıldı +' + fmt(kalan) + '</b>') + '</div>';
+    };
+    const bugunHedef = t.hedef !== undefined && t.hedef !== null ? Number(t.hedef) : gunlukHedef;
+    const hafta = computeWeekDerived(mondayOf(getNow()));
+    const haftaHedef = hafta.weekGoal || hafta.hedefToplam;
+    return '<div class="hedef-kalan">' + kutu('Bugün hedefe kalan', bugunHedef, t.ciro ? Number(t.ciro) : 0)
+      + kutu('Haftalık hedefe kalan', haftaHedef, hafta.ciroToplam) + '</div>';
+  })();
   panel.innerHTML = `
+  ${kalanHtml}
   <div id="rtCaptureArea">
   <table class="rt-table">
     <tr>
@@ -4130,15 +4381,15 @@ function closeToolViewer(){
 // (icerik: HTML). Not defteri ise mağazaya özeldir: stores/{m}/settings/notlar.
 const KURUMSAL_HAFIZA = [
   {id:'surecler', ikon:'📋', baslik:'Süreçler ve talimatlar',
-   aciklama:'Kasa kapanışı, sevkiyat kabulü, iade akışı gibi adım adım anlatımlar.', icerik:''},
+   aciklama:'Kasa kapanışı, sevkiyat kabulü, iade akışı gibi adım adım anlatımlar.', icerik:"<p class=\"hk-taslak\">Taslak — mağaza işleyişine göre düzenlenmeli. Köşeli parantezli [ ] yerler doldurulacak.<\/p>\n<h3>Kasa kapanışı<\/h3>\n<ol>\n<li>Son müşteri çıktıktan sonra kasada bekleyen işlem kalmadığını kontrol et.<\/li>\n<li>Gün sonu raporunu (Z raporu) al.<\/li>\n<li>Nakit, kredi kartı ve diğer ödeme tiplerini ayrı ayrı say; sistemle karşılaştır.<\/li>\n<li>Fark varsa tutarı ve sebebini kasa defterine yaz, [mağaza müdürüne] bildir.<\/li>\n<li>Nakit, belirlenen zarfa/kasaya konur; teslim eden ve teslim alan imzalar.<\/li>\n<li>Günün cirosunu ve KPI'larını bu uygulamaya gir, raporu gönder.<\/li>\n<\/ol>\n<h3>Sevkiyat kabulü<\/h3>\n<ol>\n<li>Gelen koli sayısını irsaliyeyle karşılaştır; eksik/hasarlı koli varsa şoförle tutanak tut.<\/li>\n<li>Koli sayısını RT tablosundaki \"Gelen koli sayısı\" alanına yaz.<\/li>\n<li>Koliler açılınca ürünleri sistemden okut, irsaliye ile fark varsa [ilgili birime] bildir.<\/li>\n<li>Kırık/hasarlı ürünler için Transfer sekmesinden \"Kırık\" kaydı aç, fotoğrafları sırayla ekle.<\/li>\n<li>Ürünleri depoya/reyona yerleştir, boş kolileri ayır.<\/li>\n<\/ol>\n<h3>İade ve değişim<\/h3>\n<ol>\n<li>Fişi/faturayı ve ürünün durumunu kontrol et (etiket, ambalaj, kullanılmamış olması).<\/li>\n<li>İade süresi: [ ] gün. Süre dışı ya da şartlara uymayan ürünlerde [mağaza müdürüne] danış.<\/li>\n<li>İadeyi sistemde fişe bağlı olarak işle, ödeme ilk ödeme tipine yapılır.<\/li>\n<li>Kusurlu ürünler ayrı bölmeye konur, [ilgili birime] bildirilir.<\/li>\n<\/ol>"},
   {id:'formlar', ikon:'📄', baslik:'Form ve şablonlar',
-   aciklama:'Tutanaklar, gider pusulası örnekleri, çalışma çizelgesi şablonları.', icerik:''},
+   aciklama:'Tutanaklar, gider pusulası örnekleri, çalışma çizelgesi şablonları.', icerik:"<p class=\"hk-taslak\">Taslak — mağaza işleyişine göre düzenlenmeli. Köşeli parantezli [ ] yerler doldurulacak.<\/p>\n<h3>Hasarlı ürün tutanağı<\/h3>\n<p>Tarih · Mağaza · İrsaliye no · Ürün kodu ve adı · Adet · Hasar açıklaması · Fotoğraf (Transfer → Kırık) · Teslim eden / teslim alan imzası<\/p>\n<h3>Gider pusulası<\/h3>\n<p>Tarih · Harcamanın konusu · Tutar · Ödeme şekli · Harcamayı yapan · Onaylayan [mağaza müdürü]. Fiş/fatura pusulaya iliştirilir.<\/p>\n<h3>Haftalık çalışma çizelgesi<\/h3>\n<p>Personel adı · Pzt–Paz vardiya saatleri · İzin günü · Toplam saat. İzinler uygulamada günün başlığındaki \"İzinli\" seçimiyle de işaretlenir.<\/p>\n<h3>Sayım formu<\/h3>\n<p>Reyon/raf · Ürün kodu · Sistem adedi · Sayılan adet · Fark · Sayan.<\/p>"},
   {id:'egitim', ikon:'🎓', baslik:'Eğitim notları',
-   aciklama:'Yeni personel için ürün, sistem ve müşteri iletişimi notları.', icerik:''},
+   aciklama:'Yeni personel için ürün, sistem ve müşteri iletişimi notları.', icerik:"<p class=\"hk-taslak\">Taslak — mağaza işleyişine göre düzenlenmeli. Köşeli parantezli [ ] yerler doldurulacak.<\/p>\n<h3>İlk gün<\/h3>\n<ul>\n<li>Mağaza turu: reyonlar, depo, kasa, acil çıkışlar.<\/li>\n<li>Kasa ve satış sistemi kullanıcı açılışı; temel satış ve iade işlemleri.<\/li>\n<li>Kıyafet, saat ve mola düzeni: [ ].<\/li>\n<\/ul>\n<h3>Müşteri karşılama<\/h3>\n<ul>\n<li>Müşteriyi göz teması ve selamla karşıla; ihtiyacını sor, ürünü göster.<\/li>\n<li>Tamamlayıcı ürün öner (ör. nevresim alana yastık kılıfı) — sepet büyüklüğü (Fbü) buradan artar.<\/li>\n<li>Kasada kampanya ve sadakat programını hatırlat.<\/li>\n<\/ul>\n<h3>Uygulamadaki ölçüler<\/h3>\n<ul>\n<li><b>Ciro:<\/b> günün toplam satışı (TL).<\/li>\n<li><b>Mdo:<\/b> mağazaya girenlerin yüzde kaçının alışveriş yaptığı.<\/li>\n<li><b>Fbü:<\/b> fiş başına ürün adedi.<\/li>\n<li><b>Fbs:<\/b> fiş başına satış tutarı (TL).<\/li>\n<li><b>Mgs:<\/b> günün fiş (müşteri) sayısı.<\/li>\n<li><b>Toplu satış:<\/b> büyük tutarlı faturaların toplamı (K = bin TL).<\/li>\n<\/ul>"},
   {id:'sss', ikon:'❓', baslik:'Sık sorulanlar',
-   aciklama:'Mağazalardan en çok gelen sorular ve cevapları.', icerik:''},
+   aciklama:'Mağazalardan en çok gelen sorular ve cevapları.', icerik:"<p class=\"hk-taslak\">Taslak — mağaza işleyişine göre düzenlenmeli. Köşeli parantezli [ ] yerler doldurulacak.<\/p>\n<h3>Fişsiz iade yapılır mı?<\/h3>\n<p>[Mağaza politikasına göre doldurulacak.]<\/p>\n<h3>Kampanyalar birleşir mi?<\/h3>\n<p>[ ]<\/p>\n<h3>Sistem çökerse ne yapılır?<\/h3>\n<p>Satışları kâğıda not al, [teknik destek] ile iletişime geç; sistem gelince işlemleri gir.<\/p>\n<h3>Uygulamada yanlış veri girdim, ne yapmalıyım?<\/h3>\n<p>Üstteki geri al (↩) ile son işlemi geri alabilir ya da hücreye dokunup doğru değeri yazabilirsin.<\/p>\n<h3>Uygulamaya öneri nasıl iletilir?<\/h3>\n<p>Sol üstteki \"Öneri\" butonundan yaz; cevap geldiğinde uygulamayı açınca görürsün.<\/p>"},
   {id:'kime', ikon:'📞', baslik:'Kime sorulur',
-   aciklama:'Hangi konu hangi departmana gider, kim ne zaman aranır.', icerik:''}
+   aciklama:'Hangi konu hangi departmana gider, kim ne zaman aranır.', icerik:"<p class=\"hk-taslak\">Taslak — mağaza işleyişine göre düzenlenmeli. Köşeli parantezli [ ] yerler doldurulacak.<\/p>\n<table class=\"hk-tablo\">\n<tr><th>Konu<\/th><th>Kime<\/th><th>Nasıl / ne zaman<\/th><\/tr>\n<tr><td>Satış, hedef, personel<\/td><td>Bölge müdürü [ad]<\/td><td>[telefon] · mesai saatlerinde<\/td><\/tr>\n<tr><td>Sevkiyat, eksik/hasarlı koli<\/td><td>[Lojistik / depo]<\/td><td>[telefon / e-posta]<\/td><\/tr>\n<tr><td>Kasa, sistem, internet arızası<\/td><td>[Teknik destek]<\/td><td>[telefon] · 7/24 mü?<\/td><\/tr>\n<tr><td>Bina, elektrik, klima<\/td><td>[AVM yönetimi / teknik servis]<\/td><td>[telefon]<\/td><\/tr>\n<tr><td>İnsan kaynakları, bordro, izin<\/td><td>[İK]<\/td><td>[e-posta]<\/td><\/tr>\n<tr><td>Bu uygulama<\/td><td>M583<\/td><td>Uygulamadaki \"Öneri\" butonu<\/td><\/tr>\n<\/table>"}
 ];
 
 function hafizaGoster(){
