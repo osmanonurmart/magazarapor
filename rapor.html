@@ -691,14 +691,24 @@ if(!document.documentElement.classList.contains('tel')){
   html.tel .right-col{ order:-1; flex:1 1 auto; width:100%; }
   html.tel .left-col{ width:100%; }
   html.tel .month-grid{ grid-template-columns:1fr; grid-auto-flow:row; }
-  html.tel .week-block{ overflow-x:auto; -webkit-overflow-scrolling:touch; padding:10px; }
-  html.tel table.grid{ min-width:640px; font-size:.72rem; }
-  /* Yana kaydırırken KPI adları solda sabit kalır */
-  html.tel table.grid tbody th, html.tel table.grid thead th:first-child{ position:sticky; left:0; z-index:2; }
-  html.tel table.grid thead th:first-child{ background:var(--dark); }
-  html.tel table.grid thead th{ font-size:.66rem; }
-  html.tel table.grid tbody th{ font-size:.7rem; }
-  html.tel table.grid th, html.tel table.grid td{ padding:6px 3px; }
+  /* Haftalık tablo yana kaydırmadan ekrana sığar */
+  html.tel .week-block{ padding:8px 6px; }
+  html.tel table.grid{ width:100%; min-width:0; table-layout:fixed; font-size:.6rem; letter-spacing:-.2px; }
+  html.tel table.grid th:first-child, html.tel table.grid td:first-child{ width:26px; }
+  html.tel table.grid th:not(:first-child), html.tel table.grid td:not(:first-child){ width:auto; }
+  html.tel table.grid th.gh, html.tel table.grid td.gh-cell{ width:15%; }
+  html.tel table.grid th, html.tel table.grid td{ padding:5px 1px; text-overflow:clip; }
+  html.tel table.grid thead th{ font-size:.58rem; line-height:1.25; }
+  html.tel table.grid tbody th{ font-size:.56rem; padding-left:3px; color:#777; font-weight:600; }
+  html.tel table.grid .izinli-sel{ display:none; }
+  html.tel table.grid td.gh-cell div{ font-size:.5rem !important; }
+  /* Küçük telefonlar (iPhone SE vb.) */
+  @media (max-width: 360px){
+    html.tel table.grid{ font-size:.52rem; letter-spacing:-.4px; }
+    html.tel table.grid th:first-child, html.tel table.grid td:first-child{ width:22px; }
+    html.tel table.grid th, html.tel table.grid td{ padding:5px 0; }
+    html.tel .week-block{ padding:8px 4px; }
+  }
   html.tel .week-head .title{ font-size:.85rem; }
   html.tel .weekgoal-input{ width:80px; font-size:.78rem; padding:4px 6px; }
   html.tel .ghbhr-icon{ width:28px; height:28px; font-size:.6rem; }
@@ -949,7 +959,6 @@ if(!document.documentElement.classList.contains('tel')){
   </div>
 
   <div class="right-col">
-    <button type="button" class="tel-buyuk-btn sadece-tel" id="telVeriGirBtn">＋ Bugünün verisini gir</button>
     <div class="report-panel" id="reportPanel"></div>
   </div>
 </div>
@@ -1052,7 +1061,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 17;
+const APP_SURUM = 18;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -2372,7 +2381,6 @@ function telVeriKaydet(e){
   uiBildirim(kisaTarih(tarihOku(tarih)) + ' kaydedildi', 'basari');
 }
 if(TELEFON){
-  document.getElementById('telVeriGirBtn').addEventListener('click', ()=> telVeriFormuAc(todayStr(0)));
   document.getElementById('tvfKapat').addEventListener('click', telVeriFormuKapat);
   document.getElementById('telVeriFormu').addEventListener('click', e=>{ if(e.target.id === 'telVeriFormu') telVeriFormuKapat(); });
   document.getElementById('tvfForm').addEventListener('submit', telVeriKaydet);
@@ -2840,7 +2848,7 @@ function buildWeekBlock(monday){
   });
 
   const headRow = block.querySelector(`#head-${weekKey}`);
-  headRow.innerHTML = '<th>KPI</th>' +
+  headRow.innerHTML = '<th>' + (TELEFON ? '' : 'KPI') + '</th>' +
     days.map((d,i)=>{
       const dk = dateStr(d);
       const izinli = izinliOf(records[i]);
@@ -2848,11 +2856,11 @@ function buildWeekBlock(monday){
         .map(kisi=>`<option value="${kisi}"${kisi===izinli?' selected':''}>${kisi===''?'—':kisi}</option>`)
         .join('');
       return `<th class="${isToday(d)?'today-col':''}">${GUN_KISA[i]}<br>` +
-             `<span style="font-weight:400;opacity:.75;">${shortDate(d)}</span>` +
+             `<span style="font-weight:400;opacity:.75;">${TELEFON ? pad(d.getDate()) : shortDate(d)}</span>` +
              `<select class="izinli-sel${izinli?' dolu':''}" data-date="${dk}" title="İzinli personel">${opts}</select>` +
              `</th>`;
     }).join('') +
-    `<th class="gh">Formüller<br><span id="fml-total-${weekKey}" style="font-weight:400;">${ciroToplam?fmtTL(ciroToplam):'-'}</span></th>`;
+    `<th class="gh">${TELEFON ? 'Top.' : 'Formüller'}<br><span id="fml-total-${weekKey}" style="font-weight:400;">${ciroToplam?fmtTL(ciroToplam):'-'}</span></th>`;
 
   headRow.querySelectorAll('.izinli-sel').forEach(sel=>{
     sel.addEventListener('change', function(){
@@ -2868,9 +2876,12 @@ function buildWeekBlock(monday){
     });
   });
 
+  // Telefonda satır adları kısaltılır ki tablo yana kaydırmadan sığsın.
+  const KISA_ETIKET = {'Ciro':'₺', 'Mdo':'Mdo', 'Fbü':'Fbü', 'Mgs':'Mgs', 'Fbs':'Fbs', 'Hedef':'Hdf', 'Oran':'%', 'Toplu S.':'TS'};
+  const etiket = l => TELEFON ? (KISA_ETIKET[l] || l) : l;
   function row(label, field, kind, ghValueHtml, ghId){
     const cells = days.map((d,i) => cellHtml(d, field, records[i] ? records[i][field] : null, kind)).join('');
-    return `<tr><th>${label}</th>${cells}<td class="gh-cell" id="${ghId}">${ghValueHtml}</td></tr>`;
+    return `<tr><th>${etiket(label)}</th>${cells}<td class="gh-cell" id="${ghId}">${ghValueHtml}</td></tr>`;
   }
 
   const hedefCells = days.map((d,i)=>{
@@ -2898,8 +2909,8 @@ function buildWeekBlock(monday){
     row('Fbü','fbu', 'NUM', fbuAvg!==null ? fmtNum(fbuAvg) : '-', `gh-fbu-${weekKey}`),
     row('Mgs','mgs', 'NUM', mgsGhHtml, `gh-mgs-${weekKey}`),
     row('Fbs','fbs', 'TL', fbsAvg!==null ? fmtTL(fbsAvg) : '-', `gh-fbs-${weekKey}`),
-    `<tr><th>Hedef</th>${hedefCells}<td class="gh-cell" id="gh-hedef-${weekKey}">${hedefToplam?fmtTL(hedefToplam):'-'}</td></tr>`,
-    `<tr id="oranrow-${weekKey}"><th>Oran</th>${oranCells}<td class="gh-cell">${haftaOranPct!==null?fmtPctInt(haftaOranPct):'-'}</td></tr>`,
+    `<tr><th>${etiket('Hedef')}</th>${hedefCells}<td class="gh-cell" id="gh-hedef-${weekKey}">${hedefToplam?fmtTL(hedefToplam):'-'}</td></tr>`,
+    `<tr id="oranrow-${weekKey}"><th>${etiket('Oran')}</th>${oranCells}<td class="gh-cell">${haftaOranPct!==null?fmtPctInt(haftaOranPct):'-'}</td></tr>`,
     row('Toplu S.','toplu_satis', 'K', topluToplam!==null?fmtK(topluToplam):'-', `gh-toplu-${weekKey}`)
   ].join('');
 
