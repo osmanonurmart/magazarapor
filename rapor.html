@@ -688,7 +688,7 @@ if(!document.documentElement.classList.contains('tel')){
   html.tel .left-col{ width:100%; }
   html.tel .month-grid{ grid-template-columns:1fr; grid-auto-flow:row; }
   html.tel .week-block{ overflow-x:auto; -webkit-overflow-scrolling:touch; padding:10px; }
-  html.tel table.grid{ min-width:820px; font-size:.72rem; }
+  html.tel table.grid{ min-width:640px; font-size:.72rem; }
   /* Yana kaydırırken KPI adları solda sabit kalır */
   html.tel table.grid tbody th, html.tel table.grid thead th:first-child{ position:sticky; left:0; z-index:2; }
   html.tel table.grid thead th:first-child{ background:var(--dark); }
@@ -953,7 +953,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 12;
+const APP_SURUM = 13;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -1964,6 +1964,7 @@ function bpCiz(){
       else if(v === uclar[c.k].min) sinif.push('en-kotu');
     }
     if(c.k === 'degisim' && metin !== null && !sinif.length) sinif.push(v >= 0 ? 'artis' : 'dusus');
+    if(c.k === 'fbu') sinif.push('fbu');
     return '<td class="' + sinif.join(' ') + '">' + (metin === null ? '–' : escapeHtml(metin)) + '</td>';
   };
 
@@ -2127,6 +2128,66 @@ document.getElementById('bpCikis').addEventListener('click', cikisYap);
 document.querySelectorAll('.ust-logo').forEach(img=> img.addEventListener('click', ()=>{
   if(TELEFON) window.scrollTo({top:0, behavior:'smooth'});
 }));
+
+// ==================== TELEFON: YUVARLANMIŞ SAYILAR ====================
+// Telefonda yer kazanmak için Fbü dışındaki bütün sayılar küsuratsız ve "TL"siz
+// gösterilir (ör. "20.372,45 TL" → "20.372", "% 49,21" → "% 49"). Yalnızca
+// görünüm değişir; düzenlenebilir bir hücreye dokununca tam değer geri gelir.
+function telSayiYuvarla(metin){
+  return metin
+    .replace(/(-?\d{1,3}(?:\.\d{3})+|-?\d+),(\d+)/g, (m, tam, kus)=>{
+      const n = Math.round(Number(tam.replace(/\./g, '') + '.' + kus));
+      return isNaN(n) ? m : n.toLocaleString('tr-TR');
+    })
+    .replace(/\s?TL\b/g, '');
+}
+function telFbuMu(el){
+  if(el.closest('[data-field="fbu"], [id^="gh-fbu-"], .fbu')) return true;
+  const satir = el.closest('tr, .ms-grid > div');
+  if(!satir) return false;
+  const etiket = satir.matches('tr') ? (satir.firstElementChild ? satir.firstElementChild.textContent : '') : satir.textContent;
+  return /fb[üu]/i.test(etiket) && !/fbs/i.test(etiket);
+}
+function telKisalt(kok){
+  if(!TELEFON || !kok) return;
+  const yuruyucu = document.createTreeWalker(kok, NodeFilter.SHOW_TEXT);
+  const dugumler = [];
+  while(yuruyucu.nextNode()) dugumler.push(yuruyucu.currentNode);
+  dugumler.forEach(d=>{
+    const el = d.parentElement;
+    if(!el || el.closest('textarea, select, option, input, script, style')) return;
+    if(!/\d,\d|TL/.test(d.nodeValue) || telFbuMu(el)) return;
+    const hucre = el.closest('[contenteditable="true"]');
+    if(hucre && hucre === document.activeElement) return;
+    if(hucre && !hucre.dataset.tam) hucre.dataset.tam = hucre.textContent;
+    d.nodeValue = telSayiYuvarla(d.nodeValue);
+  });
+}
+if(TELEFON){
+  // Düzenlemeye başlarken tam değer geri gelir; değiştirilmeden bırakılırsa yine kısalır.
+  document.addEventListener('focus', e=>{
+    const el = e.target;
+    if(el && el.dataset && el.dataset.tam !== undefined && el.isContentEditable){
+      el.textContent = el.dataset.tam;
+    }
+  }, true);
+  document.addEventListener('blur', e=>{
+    const el = e.target;
+    if(!el || !el.dataset || el.dataset.tam === undefined) return;
+    setTimeout(()=>{
+      if(el.textContent.trim() === el.dataset.tam.trim()){ delete el.dataset.tam; telKisalt(el); }
+      else delete el.dataset.tam;
+    }, 0);
+  }, true);
+  const sar = (ad, kok)=>{
+    const asil = window[ad];
+    window[ad] = function(){ const r = asil.apply(this, arguments); telKisalt(kok()); return r; };
+  };
+  sar('renderMonth', ()=> document.getElementById('monthContainer'));
+  sar('refreshWeekBlockByKey', ()=> document.getElementById('monthContainer'));
+  sar('renderReportPanel', ()=> document.getElementById('reportPanel'));
+  sar('bpCiz', ()=> document.getElementById('bpTablo'));
+}
 
 // Firebase oturumu tarayıcıda hatırlanır; çıkış yapılmadıkça şifre tekrar sorulmaz.
 auth.onAuthStateChanged(async function(user){
