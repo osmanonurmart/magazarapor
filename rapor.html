@@ -32,14 +32,25 @@
 })();
 </script>
 <title>Mağaza Performans Raporu</title>
-<link rel="icon" type="image/svg+xml" href="simge.svg">
-<link rel="icon" type="image/png" sizes="192x192" href="simge-192.png">
-<link rel="apple-touch-icon" href="simge-180.png">
+<link rel="icon" type="image/svg+xml" href="simge.svg?v=2">
+<link rel="icon" type="image/png" sizes="192x192" href="simge-192.png?v=2">
+<link rel="apple-touch-icon" href="simge-180.png?v=2">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#2d2d2d">
-<meta name="apple-mobile-web-app-title" content="Mağaza Raporu">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<meta name="apple-mobile-web-app-title" content="Mağaza Rapor">
+<meta name="application-name" content="Mağaza Rapor">
+<script>
+// Excel (~900 KB) ve ekran görüntüsü kütüphaneleri: masaüstünde her zamanki gibi
+// açılışta yüklenir; telefonda giriş ekranını geciktirmesin diye sonradan yüklenir.
+var KUTUPHANELER = {
+  html2canvas: 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',
+  xlsx: 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'
+};
+if(!document.documentElement.classList.contains('tel')){
+  document.write('<script src="' + KUTUPHANELER.html2canvas + '"><\/script>'
+               + '<script src="' + KUTUPHANELER.xlsx + '"><\/script>');
+}
+</script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -539,6 +550,10 @@
   .giris-btn:disabled{ opacity:.6; cursor:default; }
   .giris-hata{ color:#a34141; font-size:.85rem; min-height:20px; margin-top:14px; text-align:center; line-height:1.4; }
   .giris-hata.bilgi{ color:#777; }
+  .giris-link{
+    display:block; margin:10px auto 0; background:none; border:none; color:#555; font-size:.85rem;
+    cursor:pointer; text-decoration:underline; font-family:inherit;
+  }
   /* ---------- Bölge paneli ---------- */
   .bp-baslik{ font-weight:700; font-size:.9rem; color:#2d2d2d; }
   .bp-seg{ display:inline-flex; border:1px solid #cfc9bf; border-radius:8px; overflow:hidden; }
@@ -625,6 +640,7 @@
     <input type="password" id="girisSifre" name="password" autocomplete="current-password">
     <button type="submit" class="giris-btn" id="girisBtn" disabled>YÜKLENİYOR...</button>
     <div class="giris-hata" id="girisHata"></div>
+    <button type="button" class="giris-link" id="girisYenile" style="display:none;" onclick="location.reload()">Sayfayı yenile</button>
   </form>
 
 </div>
@@ -633,7 +649,7 @@
 <header>
   <div class="ust-bar">
     <div class="ust-sol">
-      <img class="ust-logo" src="simge.svg" alt="" width="30" height="30">
+      <img class="ust-logo" src="simge.svg?v=2" alt="" width="30" height="30">
       <span class="bp-baslik">Bölge Paneli</span>
       <nav class="tab-bar">
         <button class="tab-btn active" id="bpTabOzet" type="button">Özet</button>
@@ -692,7 +708,7 @@
 <header>
   <div class="ust-bar">
     <div class="ust-sol">
-      <img class="ust-logo" src="simge.svg" alt="" width="30" height="30">
+      <img class="ust-logo" src="simge.svg?v=2" alt="" width="30" height="30">
       <span class="surum-rozet" id="surumRozet" title="Güncelleme kontrol et" onclick="guncellemeKontrol()"></span>
       <nav class="tab-bar">
         <button class="tab-btn active" id="tabRaporBtn" type="button" onclick="showTab('rapor')">Rapor</button>
@@ -883,7 +899,7 @@
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 7;
+const APP_SURUM = 8;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -1184,7 +1200,7 @@ async function migrateLocalDataToCloud(){
   btn.textContent = '☁️ Yerel Veriyi Buluta Yükle';
 }
 
-function exportAllData(){
+async function exportAllData(){
   const data = {};
   const entryRows = [];
   Object.keys(cloudCache).forEach(k=>{
@@ -1230,6 +1246,7 @@ function exportAllData(){
 
   // 2) Excel yedek
   try{
+    await kutuphaneYukle('xlsx');
     const ws = XLSX.utils.json_to_sheet(entryRows);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Günlük Veriler');
@@ -1264,6 +1281,28 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
+// Telefonda bazı mobil ağlarda Firestore'un sürekli bağlantısı takılıp kalabiliyor;
+// gerekirse kendiliğinden uzun yoklamaya (long polling) geçmesi sağlanır.
+const TELEFON = document.documentElement.classList.contains('tel');
+if(TELEFON){
+  try{ db.settings({experimentalAutoDetectLongPolling:true}); }catch(e){ /* eski sürüm: varsayılanla devam */ }
+}
+
+// Telefonda sonradan yüklenen kütüphaneler; masaüstünde zaten yüklü olduğu için hemen döner.
+const kutuphaneSozleri = {};
+function kutuphaneYukle(ad){
+  if((ad === 'xlsx' && window.XLSX) || (ad === 'html2canvas' && window.html2canvas)) return Promise.resolve();
+  if(!kutuphaneSozleri[ad]){
+    kutuphaneSozleri[ad] = new Promise((res, rej)=>{
+      const el = document.createElement('script');
+      el.src = KUTUPHANELER[ad];
+      el.onload = res;
+      el.onerror = ()=>{ delete kutuphaneSozleri[ad]; rej(new Error(ad + ' yüklenemedi')); };
+      document.head.appendChild(el);
+    });
+  }
+  return kutuphaneSozleri[ad];
+}
 
 // Her mağaza kendi verisiyle yaşar:
 //   stores/{magaza}/entries, weekgoals, settings, tools, ghbhrWeekly, ghbhrReports, transfers, transferFotos
@@ -1287,29 +1326,42 @@ let ghbhrWeeklyCache = null;    // { weekKey: {gh,bh} }
 const CLOUD_MIGRATION_KEY = 'cloudMigratedV1';
 
 async function loadCloudCache(){
-  const snap = await sdb('entries').get();
-  snap.forEach(doc => { cloudCache['entry:'+doc.id] = JSON.stringify(doc.data()); });
-
-  const wgSnap = await sdb('weekgoals').get();
-  wgSnap.forEach(doc => { cloudCache['weekgoal:'+doc.id] = String(doc.data().value); });
-
-  const settingsDoc = await sdb('settings').doc('general').get();
-  if(settingsDoc.exists && settingsDoc.data().gunlukHedef !== undefined){
-    cloudCache['gunlukHedef'] = String(settingsDoc.data().gunlukHedef);
-  }
-
-  const reportsSnap = await sdb('ghbhrReports').get();
-  reportsSnap.forEach(doc => { ghbhrReportsCache[doc.id] = doc.data().text; });
-
-  const empDoc = await sdb('settings').doc('employees').get();
-  empCache = empDoc.exists ? (empDoc.data() || {}) : {};
-
-  const weeklySnap = await sdb('ghbhrWeekly').get();
-  ghbhrWeeklyCache = {};
-  weeklySnap.forEach(doc => {
-    const d = doc.data();
-    ghbhrWeeklyCache[doc.id] = {gh: d.gh || null, bh: d.bh || null};
-  });
+  const isler = [
+    async ()=>{
+      const snap = await sdb('entries').get();
+      snap.forEach(doc => { cloudCache['entry:'+doc.id] = JSON.stringify(doc.data()); });
+    },
+    async ()=>{
+      const wgSnap = await sdb('weekgoals').get();
+      wgSnap.forEach(doc => { cloudCache['weekgoal:'+doc.id] = String(doc.data().value); });
+    },
+    async ()=>{
+      const settingsDoc = await sdb('settings').doc('general').get();
+      if(settingsDoc.exists && settingsDoc.data().gunlukHedef !== undefined){
+        cloudCache['gunlukHedef'] = String(settingsDoc.data().gunlukHedef);
+      }
+    },
+    async ()=>{
+      const reportsSnap = await sdb('ghbhrReports').get();
+      reportsSnap.forEach(doc => { ghbhrReportsCache[doc.id] = doc.data().text; });
+    },
+    async ()=>{
+      const empDoc = await sdb('settings').doc('employees').get();
+      empCache = empDoc.exists ? (empDoc.data() || {}) : {};
+    },
+    async ()=>{
+      const weeklySnap = await sdb('ghbhrWeekly').get();
+      ghbhrWeeklyCache = {};
+      weeklySnap.forEach(doc => {
+        const d = doc.data();
+        ghbhrWeeklyCache[doc.id] = {gh: d.gh || null, bh: d.bh || null};
+      });
+    }
+  ];
+  // Telefonda okumalar aynı anda yapılır (her biri ayrı ağ gidiş-dönüşü);
+  // masaüstünde eskisi gibi sırayla.
+  if(TELEFON) await Promise.all(isler.map(f=> f()));
+  else for(const f of isler) await f();
 
   await migrateBrowserDataToCloud();
 
@@ -1453,6 +1505,7 @@ function girisHatasiMetni(e){
 }
 
 function ekranGoster(ad){
+  if(ad !== 'giris') girisZamanAsiminiKaldir();
   document.getElementById('girisEkrani').style.display = ad === 'giris' ? '' : 'none';
   if(ad === 'giris') girisOlcekle();
   document.getElementById('bolgePaneli').style.display = ad === 'panel' ? '' : 'none';
@@ -1460,12 +1513,27 @@ function ekranGoster(ad){
 }
 // Giriş ekranı aynı zamanda yükleme ekranıdır: veriler yüklenirken buton kilitlenir,
 // hazır olunca doğrudan uygulama (veya bölge paneli) açılır.
+let girisZamanAsimi = null;
 function girisYukleniyor(mesaj){
   ekranGoster('giris');
   const btn = document.getElementById('girisBtn');
   btn.disabled = true;
   btn.textContent = 'YÜKLENİYOR...';
   bootStatus(mesaj);
+  // Telefonda yükleme uzarsa ekranda takılı kalmasın: durum söylenir, yenileme önerilir.
+  if(TELEFON && !girisZamanAsimi){
+    girisZamanAsimi = setTimeout(()=>{
+      girisZamanAsimi = null;
+      if(document.getElementById('girisEkrani').style.display === 'none' || !btn.disabled) return;
+      bootStatus('Bağlantı yavaş görünüyor. Biraz daha bekleyebilir ya da sayfayı yenileyebilirsin.');
+      document.getElementById('girisYenile').style.display = '';
+    }, 15000);
+  }
+}
+function girisZamanAsiminiKaldir(){
+  clearTimeout(girisZamanAsimi);
+  girisZamanAsimi = null;
+  document.getElementById('girisYenile').style.display = 'none';
 }
 let bekleyenGirisHatasi = null;
 // Giriş yapılmış ama uygulama açılamamışsa oturum kapatılır, hata giriş ekranında kalır.
@@ -1477,6 +1545,7 @@ async function girisHatasi(mesaj){
 }
 function girisEkraniGoster(hata){
   ekranGoster('giris');
+  girisZamanAsiminiKaldir();
   const h = document.getElementById('girisHata');
   h.textContent = hata || '';
   h.classList.remove('bilgi');
@@ -1556,6 +1625,7 @@ async function magazayiAc(key, giristen){
     if(!giristen) uiBildirim('');
     showTab('rapor');
     ekranGoster('uygulama');
+    if(TELEFON) setTimeout(()=>{ kutuphaneYukle('html2canvas').catch(()=>{}); kutuphaneYukle('xlsx').catch(()=>{}); }, 4000);
     eskiAraclariTasi(key);
     renderProfileChip();
     await startAppAfterLogin();
@@ -2558,7 +2628,9 @@ function refreshGhBhrIcons(){
 
 function ghbhrParseCategoryExcel(file, callback){
   const reader = new FileReader();
-  reader.onload = function(e){
+  reader.onload = async function(e){
+    try{ await kutuphaneYukle('xlsx'); }
+    catch(err){ setStatus('Excel okuyucu yüklenemedi: ' + err.message, true); return; }
     const wb = XLSX.read(e.target.result, {type:'array'});
     const ws = wb.Sheets[wb.SheetNames[0]];
     const rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:null});
@@ -3182,6 +3254,7 @@ async function captureElementWithPadding(el, padding=18){
   const prevBg = el.style.background;
   el.style.padding = padding + 'px';
   el.style.background = '#ffffff';
+  await kutuphaneYukle('html2canvas');
   const canvas = await html2canvas(el, {backgroundColor:'#ffffff', scale:2});
   el.style.padding = prevPadding;
   el.style.background = prevBg;

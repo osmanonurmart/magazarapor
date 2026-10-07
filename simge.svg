@@ -1,6 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="14" fill="#2d2d2d"/>
-  <rect x="14" y="17" width="36" height="7" rx="3.5" fill="#C8A066"/>
-  <rect x="14" y="29" width="28" height="7" rx="3.5" fill="#efe9df"/>
-  <rect x="14" y="41" width="20" height="7" rx="3.5" fill="#6f9a77"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="gok" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2f2e52"/>
+      <stop offset="1" stop-color="#4a4670"/>
+    </linearGradient>
+    <linearGradient id="gunes" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f08a63"/>
+      <stop offset="1" stop-color="#d9694a"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#gok)"/>
+  <circle cx="256" cy="330" r="170" fill="url(#gunes)"/>
+  <rect x="0" y="392" width="512" height="120" fill="#8a5a3c"/>
+  <rect x="146" y="262" width="54" height="150" rx="10" fill="#f7ebe0"/>
+  <rect x="229" y="202" width="54" height="210" rx="10" fill="#f7ebe0"/>
+  <rect x="312" y="142" width="54" height="270" rx="10" fill="#f7ebe0"/>
 </svg>
