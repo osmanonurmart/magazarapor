@@ -648,6 +648,7 @@ if(!document.documentElement.classList.contains('tel')){
     padding:4px 4px calc(4px + env(safe-area-inset-bottom)); box-shadow:0 -4px 16px rgba(0,0,0,.05);
   }
   html.tel .tab-btn{
+    -webkit-tap-highlight-color:transparent; touch-action:manipulation; min-height:54px;
     flex:1 1 0; display:flex; flex-direction:column; align-items:center; gap:2px;
     padding:6px 2px; border-radius:10px; font-size:.68rem; font-weight:600; color:#666; background:none;
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
@@ -738,29 +739,6 @@ if(!document.documentElement.classList.contains('tel')){
   }
   html.tel .tel-buyuk-btn:disabled{ opacity:.6; }
   html.tel .wp-btn{ background:#1f8a4c; }
-
-  /* Gün kartları */
-  html.tel .tel-hafta{ background:#fff; border:1px solid var(--line); border-radius:14px; padding:12px; margin-bottom:12px; }
-  html.tel .th-ust{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin-bottom:10px; }
-  html.tel .th-ust b{ font-size:1rem; }
-  html.tel .th-ust span{ font-size:.75rem; color:#888; }
-  html.tel .th-ozet{ display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-bottom:10px; }
-  html.tel .th-ozet div{ background:#f7f4ee; border-radius:9px; padding:7px 8px; font-size:.7rem; color:#777; }
-  html.tel .th-ozet b{ display:block; font-size:.95rem; color:#222; margin-top:2px; }
-  html.tel .tg-satir{
-    display:grid; grid-template-columns:54px 1fr auto; align-items:center; gap:4px 10px; width:100%;
-    background:none; border:none; border-top:1px solid #f0ece5; padding:10px 2px; text-align:left;
-    font-family:inherit; color:#222; cursor:pointer;
-  }
-  html.tel .tg-satir:first-of-type{ border-top:none; }
-  html.tel .tg-satir.bugun{ background:#fbf3e6; border-radius:10px; }
-  html.tel .tg-gun b{ display:block; font-size:.9rem; }
-  html.tel .tg-gun small{ font-size:.7rem; color:#888; }
-  html.tel .tg-ciro{ font-size:1.05rem; font-weight:700; }
-  html.tel .tg-oran{ font-size:.8rem; font-weight:700; padding:3px 8px; border-radius:20px; background:#eee; color:#555; }
-  html.tel .tg-oran.iyi{ background:#e3f1e4; color:var(--green); }
-  html.tel .tg-detay{ grid-column:2 / 4; font-size:.72rem; color:#777; }
-  html.tel .tg-bos{ grid-column:2 / 4; font-size:.8rem; color:#aaa; }
 
   /* Veri girişi penceresi */
   html.tel .tvf-arka{
@@ -1073,7 +1051,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 15;
+const APP_SURUM = 16;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -2313,47 +2291,25 @@ function telKisalt(kok){
   window.bpCiz = function(){ const r = asilBpCiz.apply(this, arguments); bpKartlariCiz(); return r; };
 }
 
-// ==================== TELEFON: HAFTA KARTLARI ====================
-function telHaftaHtml(monday, baslik){
-  const d = computeWeekDerived(monday);
-  const son = d.days[6];
-  const kisa = x => pad(x.getDate()) + '.' + pad(x.getMonth()+1);
-  // Gerçekleşme yalnızca cirosu girilmiş günlerin hedefiyle hesaplanır.
-  const girilenHedef = d.records.reduce((t, r)=> t + (r && bpDolu(r.ciro) ? effectiveHedef(r) : 0), 0);
-  const ozet = (etiket, deger, sinif) => '<div>' + etiket + '<b' + (sinif ? ' class="' + sinif + '"' : '') + '>' + (deger || '–') + '</b></div>';
-  const satirlar = d.days.map((gun, i)=>{
-    const r = d.records[i];
-    const dk = dateStr(gun);
-    const bugun = isToday(gun);
-    const ust = '<span class="tg-gun"><b>' + GUN_KISA[i] + '</b><small>' + kisa(gun) + '</small></span>';
-    if(!r || r.ciro === undefined || r.ciro === null || r.ciro === ''){
-      return '<button type="button" class="tg-satir' + (bugun ? ' bugun' : '') + '" data-tarih="' + dk + '">' + ust
-        + '<span class="tg-bos">' + (gun > getNow() ? '–' : 'Veri yok · eklemek için dokun') + '</span></button>';
-    }
-    const oran = Number(r.ciro) / effectiveHedef(r) * 100;
-    const detay = [
-      r.mdo ? 'Mdo ' + r.mdo : null,
-      bpDolu(r.fbu) ? 'Fbü <span class="fbu">' + fmtNum(r.fbu) + '</span>' : null,
-      bpDolu(r.mgs) ? 'Mgs ' + fmtNum(r.mgs) : null,
-      bpDolu(r.fbs) ? 'Fbs ' + fmtTL(r.fbs) : null,
-      bpDolu(r.toplu_satis) ? 'TS ' + fmtK(r.toplu_satis) : null,
-      r.izinli ? 'İzinli: ' + escapeHtml(r.izinli) : null
-    ].filter(Boolean).join(' · ');
-    return '<button type="button" class="tg-satir' + (bugun ? ' bugun' : '') + '" data-tarih="' + dk + '">' + ust
-      + '<span class="tg-ciro">' + fmtTL(r.ciro) + '</span>'
-      + '<span class="tg-oran' + (oran >= 100 ? ' iyi' : '') + '">' + fmtPctInt(oran) + '</span>'
-      + '<span class="tg-detay">' + detay + '</span></button>';
-  }).join('');
-  return '<section class="tel-hafta">'
-    + '<div class="th-ust"><b>' + baslik + '</b><span>' + kisa(monday) + ' – ' + kisa(son) + ' · Hafta ' + d.week + '</span></div>'
-    + '<div class="th-ozet">'
-    +   ozet('Ciro', d.ciroToplam ? fmtTL(d.ciroToplam) : null)
-    +   ozet('Gerçekleşme', girilenHedef ? fmtPctInt(d.ciroToplam / girilenHedef * 100) : null)
-    +   ozet('Mdo ort.', d.mdoAvg !== null ? '% ' + d.mdoAvg.toFixed(2).replace('.', ',') : null)
-    +   ozet('Fbü ort.', d.fbuAvg !== null ? '<span class="fbu">' + fmtNum(d.fbuAvg) + '</span>' : null)
-    +   ozet('Mgs top.', d.mgsTotal !== null ? fmtNum(d.mgsTotal) : null)
-    +   ozet('Toplu S.', d.topluToplam !== null ? fmtK(d.topluToplam) : null)
-    + '</div>' + satirlar + '</section>';
+// ==================== TELEFON: ALT ÇUBUK DOKUNUŞU ====================
+// Safari'de ekranın en altına yapılan dokunuş bazen tıklamaya dönüşmüyor (tarayıcı
+// kendi çubuğunu açmaya çalışıyor). Alt çubuktaki sekmeler parmak kalkınca doğrudan açılır.
+if(TELEFON){
+  let sekmeBas = null;
+  document.addEventListener('touchstart', e=>{
+    const b = e.target.closest && e.target.closest('.tab-bar .tab-btn');
+    sekmeBas = b ? {b, x:e.touches[0].clientX, y:e.touches[0].clientY} : null;
+  }, {passive:true});
+  document.addEventListener('touchend', e=>{
+    if(!sekmeBas) return;
+    const t = e.changedTouches[0];
+    const b = sekmeBas.b;
+    const oynadi = Math.abs(t.clientX - sekmeBas.x) > 12 || Math.abs(t.clientY - sekmeBas.y) > 12;
+    sekmeBas = null;
+    if(oynadi) return;
+    e.preventDefault();   // ardından gelecek tıklama ikinci kez açmasın
+    b.click();
+  }, {passive:false});
 }
 
 // ==================== TELEFON: VERİ GİRİŞİ ====================
@@ -3020,11 +2976,6 @@ function renderMonth(){
     weeks = weeksInMonth(getMonthVal());
   }
   const container = document.getElementById('monthContainer');
-  if(TELEFON){
-    container.innerHTML = weeks.map((m,i)=> telHaftaHtml(m, i === 0 ? 'Bu hafta' : 'Geçen hafta')).join('');
-    container.querySelectorAll('.tg-satir').forEach(b=> b.addEventListener('click', ()=> telVeriFormuAc(b.dataset.tarih)));
-    return;
-  }
   container.innerHTML = '';
   for(const monday of weeks){
     container.appendChild(buildWeekBlock(monday));
