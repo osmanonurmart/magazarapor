@@ -7,6 +7,7 @@ rules_version = '2';
 // Kimin neye erişeceği yetkiler/{kullaniciAdi} belgesinde durur:
 //   { rol: "magaza" }                          — yalnızca stores/{kullaniciAdi}
 //   { rol: "bolge", magazalar: ["m583", ...] } — listedeki mağazalar (okur ve düzeltir)
+// Mağaza belgesine yonetici: true eklenirse o kullanıcı da ortak araçları düzenler.
 // Yetki belgelerini Firebase Console'dan siz açarsınız. Bölge müdürü yalnızca
 // kendi belgesindeki "magazalar" listesini değiştirebilir, rolünü değiştiremez.
 
@@ -35,6 +36,19 @@ service cloud.firestore {
       allow read: if girisli() && (k == kadi() || (yetkiVar() && yetki().rol == 'bolge'));
       allow update: if girisli() && k == kadi() && yetkiVar() && yetki().rol == 'bolge'
                     && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['magazalar']);
+    }
+
+    // Ortak araçlar ve ortak ayarlar: herkes okur, bölge müdürü ve yönetici yazar.
+    function duzenleyici(){
+      return girisli() && yetkiVar() && (yetki().rol == 'bolge' || yetki().get('yonetici', false) == true);
+    }
+    match /araclar/{id} {
+      allow read: if girisli() && yetkiVar();
+      allow write: if duzenleyici();
+    }
+    match /ortak/{belge} {
+      allow read: if girisli() && yetkiVar();
+      allow write: if duzenleyici();
     }
 
     match /stores/{magaza} {

@@ -59,40 +59,55 @@
   .ust-btn:disabled{ opacity:.4; cursor:default; }
 
   .araclar-page{ margin:0; padding:16px; }
-  .tools-grid{
-    display:grid; grid-template-columns:repeat(auto-fill, minmax(142px, 1fr)); gap:14px;
-    max-width:1000px; margin:0 auto;
+  /* Araçlar ve Kurumsal hafıza: aynı kart düzeni */
+  .sayfa-baslik{ display:flex; align-items:baseline; gap:12px; max-width:1100px; margin:4px auto 18px; }
+  .sayfa-baslik h2{ margin:0; font-size:1.15rem; color:#1f1f1f; }
+  .sayfa-baslik span{ font-size:.76rem; color:#777; }
+  .hk-grid{ display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:12px; max-width:1100px; margin:0 auto; }
+  @media (max-width: 900px){ .hk-grid{ grid-template-columns:repeat(2, minmax(0,1fr)); } }
+  .hk-kart{
+    background:#fff; border:1px solid #cfc9bf; border-radius:10px; padding:12px 14px 16px; cursor:pointer;
+    min-height:118px; position:relative; transition:border-color .15s, box-shadow .15s;
   }
-  .tool-tile{
-    background:#fff; border:1px solid var(--line); border-radius:14px; overflow:hidden;
-    cursor:pointer; position:relative; transition:transform .15s, box-shadow .15s;
+  .hk-kart:hover{ border-color:#2d2d2d; box-shadow:0 4px 14px rgba(0,0,0,.08); }
+  .hk-ust{ display:flex; justify-content:space-between; align-items:flex-start; min-height:26px; }
+  .hk-ikon{ font-size:1.35rem; line-height:1; }
+  .hk-baslik{ font-weight:700; font-size:.88rem; color:#1f1f1f; margin:8px 0 10px; }
+  .hk-aciklama{ font-size:.76rem; color:#555; line-height:1.5; }
+  .hk-islem{ display:flex; gap:3px; opacity:0; transition:opacity .15s; }
+  .hk-kart:hover .hk-islem{ opacity:1; }
+  .hk-islem button{
+    border:1px solid #e2ddd4; background:#fff; border-radius:6px; width:24px; height:24px; padding:0;
+    cursor:pointer; font-size:.72rem; color:#555; font-family:inherit;
   }
-  .tool-tile:hover{ transform:translateY(-3px); box-shadow:0 6px 16px rgba(0,0,0,.12); }
-  .tool-tile .tool-cap{
-    height:74px; display:flex; align-items:center; justify-content:center; font-size:1.9rem; position:relative;
+  .hk-islem button:hover{ border-color:#2d2d2d; color:#2d2d2d; }
+  .hk-islem button.sil:hover{ border-color:var(--red); color:var(--red); }
+  .hk-kart.ekle{
+    border:2px dashed #cfc9bf; background:transparent; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:4px; color:#888; font-weight:600; font-size:.82rem;
   }
-  .tool-tile .tool-foot{ padding:7px 9px; border-top:1px solid var(--line); text-align:center; }
-  .tool-tile .tool-name{
-    display:block; font-size:.7rem; font-weight:600; color:#3d3d3d; line-height:1.2;
-    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  .hk-kart.ekle b{ font-size:1.5rem; font-weight:400; }
+  .hk-kart.ekle:hover{ color:#2d2d2d; box-shadow:none; }
+  .hk-bos{ grid-column:1/-1; color:#888; font-size:.82rem; padding:18px 2px; }
+  .hk-detay{
+    max-width:900px; margin:0 auto; background:#fff; border:1px solid #cfc9bf; border-radius:10px;
+    padding:20px 24px; font-size:.86rem; line-height:1.65; color:#2d2d2d;
   }
-  .tool-tile .tool-acts{
-    position:absolute; top:5px; right:5px; display:flex; gap:2px;
-    opacity:0; transition:opacity .15s;
+  .hk-detay h3{ font-size:.95rem; margin:18px 0 6px; }
+  .hk-detay h3:first-child{ margin-top:0; }
+  .hk-detay .hk-bos{ padding:0; }
+  .not-defteri{
+    max-width:1100px; margin:14px auto 0; background:#fff; border:1px solid #cfc9bf; border-radius:10px;
+    padding:14px 14px 16px; box-sizing:border-box;
   }
-  .tool-tile:hover .tool-acts{ opacity:1; }
-  .tool-tile .tool-acts button{
-    background:rgba(255,255,255,.85); border:none; color:#5c5c5c; font-size:.62rem; cursor:pointer;
-    width:17px; height:17px; border-radius:5px; padding:0; line-height:1;
+  .nd-baslik{ font-weight:700; font-size:.9rem; color:#1f1f1f; }
+  .nd-alt{ font-size:.74rem; color:#666; margin:12px 0 10px; }
+  .nd-alt span{ color:#2e7d32; margin-left:6px; }
+  .not-defteri textarea{
+    width:100%; height:150px; box-sizing:border-box; padding:10px; border:1px solid #bdb7ad; border-radius:8px;
+    font-family:inherit; font-size:.82rem; line-height:1.5; resize:vertical;
   }
-  .tool-tile .tool-acts .tool-edit:hover{ background:#fff; color:var(--accent); }
-  .tool-tile .tool-acts .tool-dl:hover{ background:#fff; color:var(--accent); }
-  .tool-tile .tool-acts .tool-del:hover{ background:#fff; color:var(--red); }
-  .tool-tile.add-tile{ border:2px dashed #ccc; background:transparent; }
-  .tool-tile.add-tile:hover{ border-color:var(--accent); }
-  .tool-tile.add-tile .tool-cap{ color:#bbb; font-size:1.6rem; }
-  .tool-tile.add-tile .tool-foot{ border-top:none; color:#aaa; justify-content:center; }
-  .tool-tile.add-tile .tool-name{ color:#aaa; }
+  .not-defteri textarea:focus{ outline:none; border-color:#2d2d2d; }
 
   .transfer-page{ margin:0; padding:16px; }
   .tr-wrap{ max-width:620px; margin:0 auto; }
@@ -467,24 +482,22 @@
   .giris-ekrani{
     position:fixed; inset:0; z-index:1100; overflow:auto;
     display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px;
-    background:#e9e1d6 url('giris-arka.jpg') center/cover no-repeat;
+    background:
+      linear-gradient(180deg, rgba(30,28,58,.10) 0%, rgba(30,28,58,.05) 45%, rgba(40,22,12,.35) 100%),
+      #3b3a5e url('giris-arka.jpg') center 42% / cover no-repeat;
     font-family:'Inter', 'Segoe UI', system-ui, sans-serif;
   }
-  .giris-logo{
-    position:absolute; top:18px; left:0; right:0; text-align:center;
-    font-family:'Bodoni Moda', 'Didot', 'Times New Roman', serif; font-weight:500;
-    font-size:3.4rem; letter-spacing:.06em; color:#4e3f30; text-transform:uppercase;
-  }
   .giris-kart{
-    background:#fff; border-radius:16px; padding:46px 49px 49px; width:440px; max-width:100%;
-    box-shadow:0 10px 40px rgba(60,45,30,.12);
+    background:rgba(255,255,255,.86); border-radius:16px; padding:46px 49px 49px; width:440px; max-width:100%;
+    box-shadow:0 18px 50px rgba(20,15,40,.35); border:1px solid rgba(255,255,255,.6);
+    -webkit-backdrop-filter:blur(14px) saturate(1.1); backdrop-filter:blur(14px) saturate(1.1);
   }
   .giris-kart label{
     display:block; font-size:.8rem; font-weight:600; letter-spacing:.06em; color:#333; margin:0 0 9px;
   }
   .giris-kart input{
     display:block; width:100%; height:50px; padding:0 16px; margin:0 0 28px;
-    border:2px solid #cfcfcf; border-radius:8px; font-size:1rem; font-family:inherit; color:#222; background:#fff;
+    border:2px solid #d2cdc6; border-radius:8px; font-size:1rem; font-family:inherit; color:#222; background:#fff;
   }
   .giris-kart input:focus{ outline:none; border-color:#8a8a8a; }
   .giris-btn{
@@ -574,8 +587,6 @@
 <body>
 
 <div id="girisEkrani" class="giris-ekrani">
-  <div class="giris-logo">Madame Coco</div>
-
   <form class="giris-kart" id="girisForm" autocomplete="on" novalidate>
     <label for="girisKadi">KULLANICI ADI</label>
     <input type="text" id="girisKadi" name="username" autocomplete="username"
@@ -597,6 +608,8 @@
       <nav class="tab-bar">
         <button class="tab-btn active" id="bpTabOzet" type="button">Özet</button>
         <button class="tab-btn" id="bpTabAyar" type="button">Mağazalarım</button>
+        <button class="tab-btn" id="bpTabAraclar" type="button">Araçlar</button>
+        <button class="tab-btn" id="bpTabHafiza" type="button">Kurumsal hafıza</button>
       </nav>
     </div>
     <div class="ust-sag">
@@ -624,7 +637,7 @@
     <span class="bp-aralik" id="bpAralik"></span>
   </div>
 </header>
-<main class="bp-icerik">
+<main class="bp-icerik" id="bpIcerik">
   <section id="bpOzet">
     <div class="bp-kutu">
       <table class="bp-tablo" id="bpTablo"></table>
@@ -654,6 +667,7 @@
       <nav class="tab-bar">
         <button class="tab-btn active" id="tabRaporBtn" type="button" onclick="showTab('rapor')">Rapor</button>
         <button class="tab-btn" id="tabAraclarBtn" type="button" onclick="showTab('araclar')">Araçlar</button>
+        <button class="tab-btn" id="tabHafizaBtn" type="button" onclick="showTab('hafiza')">Kurumsal hafıza</button>
         <button class="tab-btn" id="tabTransferBtn" type="button" onclick="showTab('transfer')">Transfer</button>
       </nav>
     </div>
@@ -702,7 +716,8 @@
 
 <div class="araclar-page" id="araclarPage" style="display:none;">
   <div id="toolsGridView">
-    <div class="tools-grid" id="toolsGrid"></div>
+    <div class="sayfa-baslik"><h2>Araçlar</h2><span id="araclarAlt"></span></div>
+    <div class="hk-grid" id="toolsGrid"></div>
   </div>
   <div id="toolViewerView" style="display:none;">
     <div class="tool-viewer-bar">
@@ -710,6 +725,25 @@
       <span id="toolViewerName" class="tool-viewer-title"></span>
     </div>
     <div id="toolFrameHolder"></div>
+  </div>
+</div>
+
+<div class="araclar-page" id="hafizaPage" style="display:none;">
+  <div id="hafizaListe">
+    <div class="sayfa-baslik"><h2>Kurumsal hafıza</h2><span id="hafizaAlt"></span></div>
+    <div class="hk-grid" id="hafizaGrid"></div>
+    <div class="not-defteri" id="notDefteri">
+      <div class="nd-baslik">📝 Mağaza not defteri</div>
+      <div class="nd-alt">Bu mağazaya ait serbest notlar. Yazdıkça kaydedilir; bölge müdürü de görür.<span id="notDurum"></span></div>
+      <textarea id="notMetin" placeholder="Not yazın..."></textarea>
+    </div>
+  </div>
+  <div id="hafizaDetay" style="display:none;">
+    <div class="tool-viewer-bar">
+      <button class="btn" type="button" onclick="hafizaListeyeDon()">← Kurumsal hafıza</button>
+      <span id="hafizaDetayBaslik" class="tool-viewer-title"></span>
+    </div>
+    <div class="hk-detay" id="hafizaDetayIcerik"></div>
   </div>
 </div>
 
@@ -784,6 +818,8 @@
     <div style="text-align:center;font-size:.7rem;color:#aaa;margin:6px 0;">— veya elle doldurun —</div>
     <label>Araç Adı</label>
     <input type="text" id="newToolName" placeholder="ör. Vardiya Yardımcısı">
+    <label>Açıklama</label>
+    <input type="text" id="newToolAciklama" placeholder="Kartta adın altında görünür (1-2 cümle)">
     <label>Simge</label>
     <div class="icon-picker" id="newToolIcons"></div>
     <label>HTML Kodu</label>
@@ -796,12 +832,16 @@
 </div>
 
 <div class="modal-overlay" id="editToolModal" style="display:none;">
-  <div class="modal-box" style="width:420px;">
+  <div class="modal-box">
     <h3>Aracı Düzenle</h3>
     <label>Araç Adı</label>
     <input type="text" id="editToolName">
+    <label>Açıklama</label>
+    <input type="text" id="editToolAciklama">
     <label>Simge</label>
     <div class="icon-picker" id="editToolIcons"></div>
+    <label>HTML Kodu</label>
+    <textarea id="editToolCode"></textarea>
     <div class="modal-actions">
       <button class="btn" onclick="closeEditToolModal()">İptal</button>
       <button class="btn accent" onclick="saveToolEdit()">Kaydet</button>
@@ -813,7 +853,7 @@
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 5;
+const APP_SURUM = 6;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -1195,7 +1235,7 @@ let cloudReady = false;
 
 // Eskiden yalnızca tarayıcıda duran veriler artık buluttan geliyor.
 // localStorage yedek olarak yazılmaya devam ediyor (bulut erişilemezse elde kalsın).
-let toolsCache = null;          // [{id,name,icon,code}]
+let toolsCache = null;          // [{id,name,icon,aciklama,code}] — tüm mağazalarda ortak
 let toolDocJson = {};           // id -> son buluta yazılan JSON (gereksiz yazmayı önler)
 let empCache = null;            // { emp1:{name,ciro,...}, emp2:{...} }
 let ghbhrWeeklyCache = null;    // { weekKey: {gh,bh} }
@@ -1215,17 +1255,6 @@ async function loadCloudCache(){
 
   const reportsSnap = await sdb('ghbhrReports').get();
   reportsSnap.forEach(doc => { ghbhrReportsCache[doc.id] = doc.data().text; });
-
-  const toolsSnap = await sdb('tools').get();
-  const toolList = [];
-  toolsSnap.forEach(doc => {
-    const d = doc.data();
-    toolList.push({id: doc.id, name: d.name, icon: d.icon || undefined, code: d.code, _order: d.order || 0});
-    toolDocJson[doc.id] = JSON.stringify({name:d.name, icon:d.icon||null, code:d.code, order:d.order || 0});
-  });
-  toolList.sort((a,b)=> a._order - b._order);
-  toolList.forEach(t=> delete t._order);
-  toolsCache = toolList;
 
   const empDoc = await sdb('settings').doc('employees').get();
   empCache = empDoc.exists ? (empDoc.data() || {}) : {};
@@ -1247,21 +1276,6 @@ async function loadCloudCache(){
 async function migrateBrowserDataToCloud(){
   if(localStorage.getItem(CLOUD_MIGRATION_KEY)) return;
   let tasinan = [];
-
-  try{
-    const yerelTools = JSON.parse(localStorage.getItem('tools') || '[]');
-    const bulutIds = toolsCache.map(t=>t.id);
-    const eksik = yerelTools.filter(t => t && t.id && !bulutIds.includes(t.id));
-    if(eksik.length){
-      for(const t of eksik){
-        await sdb('tools').doc(t.id).set({
-          name: t.name || 'Araç', icon: t.icon || null, code: t.code || '', order: toolsCache.length
-        });
-        toolsCache.push(t);
-      }
-      tasinan.push(eksik.length + ' araç');
-    }
-  }catch(e){ /* bozuk yerel kayıt, atla */ }
 
   try{
     const empYerel = {};
@@ -1308,8 +1322,7 @@ function stopCloudListeners(){
 // Profil değişince önceki mağazanın verisi elde kalmasın.
 function resetStoreCaches(){
   Object.keys(cloudCache).forEach(k=> delete cloudCache[k]);
-  toolsCache = null;
-  toolDocJson = {};
+  notDefteriSifirla();
   empCache = null;
   ghbhrWeeklyCache = null;
   Object.keys(ghbhrReportsCache).forEach(k=> delete ghbhrReportsCache[k]);
@@ -1377,6 +1390,8 @@ function girisEposta(kadi){
   return kadi.includes('@') ? kadi : kadi + GIRIS_ALAN_ADI;
 }
 function magazaAdi(key){ return String(key || '').toUpperCase(); }
+// Ortak araçları ekleyip değiştirebilenler: bölge müdürü ve yetkiler belgesinde yonetici: true olan.
+function duzenleyebilir(){ return !!oturum && (oturum.rol === 'bolge' || oturum.yonetici); }
 function guncelleyenAdi(){
   return oturum ? magazaAdi(oturum.kadi) : (aktifProfil ? aktifProfil.name : '');
 }
@@ -1456,6 +1471,7 @@ async function cikisYap(){
   resetStoreCaches();
   aktifProfil = null;
   oturum = null;
+  araclariBirak();
   bp.yuklendi = false;
   bp.veri = {};
   await auth.signOut();
@@ -1470,6 +1486,7 @@ async function oturumuKur(user){
   }
   oturum = {
     kadi, rol: y.rol,
+    yonetici: y.yonetici === true,
     magazalar: Array.isArray(y.magazalar) ? y.magazalar.map(m=> String(m).toLowerCase()) : []
   };
 }
@@ -1491,7 +1508,9 @@ async function magazayiAc(key, giristen){
     await loadCloudCache();
     listenCloudChanges();
     if(!giristen) uiBildirim('');
+    showTab('rapor');
     ekranGoster('uygulama');
+    eskiAraclariTasi(key);
     renderProfileChip();
     await startAppAfterLogin();
   }catch(e){
@@ -1842,12 +1861,20 @@ async function bpVeriYukle(){
 
 function bpSekme(ad){
   bp.sekme = ad;
+  ortakSayfalariYerlestir('panel');
   document.getElementById('bpTabOzet').classList.toggle('active', ad === 'ozet');
   document.getElementById('bpTabAyar').classList.toggle('active', ad === 'ayar');
+  document.getElementById('bpTabAraclar').classList.toggle('active', ad === 'araclar');
+  document.getElementById('bpTabHafiza').classList.toggle('active', ad === 'hafiza');
   document.getElementById('bpOzet').style.display = ad === 'ozet' ? '' : 'none';
   document.getElementById('bpAyar').style.display = ad === 'ayar' ? '' : 'none';
+  document.getElementById('araclarPage').style.display = ad === 'araclar' ? '' : 'none';
+  document.getElementById('hafizaPage').style.display = ad === 'hafiza' ? '' : 'none';
   document.getElementById('bpDonemBar').style.display = ad === 'ozet' ? '' : 'none';
+  document.getElementById('bpYenile').style.display = (ad === 'ozet' || ad === 'ayar') ? '' : 'none';
   if(ad === 'ayar') bpAyarCiz();
+  else if(ad === 'araclar') closeToolViewer();
+  else if(ad === 'hafiza') hafizaGoster();
 }
 
 function bpAyarCiz(){
@@ -1923,6 +1950,8 @@ document.getElementById('bpTarih').addEventListener('change', function(){ if(thi
 document.getElementById('bpYenile').addEventListener('click', bpVeriYukle);
 document.getElementById('bpTabOzet').addEventListener('click', ()=> bpSekme('ozet'));
 document.getElementById('bpTabAyar').addEventListener('click', ()=> bpSekme('ayar'));
+document.getElementById('bpTabAraclar').addEventListener('click', ()=> bpSekme('araclar'));
+document.getElementById('bpTabHafiza').addEventListener('click', ()=> bpSekme('hafiza'));
 document.getElementById('bpAyarKaydet').addEventListener('click', bpAyarKaydet);
 document.getElementById('bpChip').addEventListener('click', e=>{
   e.stopPropagation();
@@ -1950,6 +1979,7 @@ auth.onAuthStateChanged(async function(user){
     await girisHatasi(e.yetkiYok ? e.message : ('Yetki okunamadı: ' + e.message));
     return;
   }
+  araclariDinle();
   if(oturum.rol === 'magaza') await magazayiAc(oturum.kadi, true);
   else await bolgePaneliniAc(true, true);
 });
@@ -3260,15 +3290,19 @@ function showTab(tab){
   document.getElementById('raporPage').style.display = raporMu ? '' : 'none';
   document.getElementById('raporControls').style.display = raporMu ? '' : 'none';
   document.getElementById('headerCenter').style.display = raporMu ? '' : 'none';
+  ortakSayfalariYerlestir('uygulama');
   document.getElementById('araclarPage').style.display = tab === 'araclar' ? '' : 'none';
+  document.getElementById('hafizaPage').style.display = tab === 'hafiza' ? '' : 'none';
   document.getElementById('transferPage').style.display = tab === 'transfer' ? '' : 'none';
   document.getElementById('tabRaporBtn').classList.toggle('active', raporMu);
   document.getElementById('tabAraclarBtn').classList.toggle('active', tab === 'araclar');
+  document.getElementById('tabHafizaBtn').classList.toggle('active', tab === 'hafiza');
   document.getElementById('tabTransferBtn').classList.toggle('active', tab === 'transfer');
 
   if(tab === 'araclar'){
     closeToolViewer();
-    renderToolsGrid();
+  } else if(tab === 'hafiza'){
+    hafizaGoster();
   } else if(tab === 'transfer'){
     transferMobilOlcek();
     renderTransfer();
@@ -3277,31 +3311,95 @@ function showTab(tab){
 
 // ==================== ARAÇLAR (Widget Sistemi) ====================
 
-function getTools(){
-  if(toolsCache) return toolsCache;
-  try{ return JSON.parse(localStorage.getItem('tools') || '[]'); }
-  catch(e){ return []; }
+// Araçlar ve Kurumsal hafıza sayfaları hem mağaza ekranında hem bölge panelinde
+// kullanılır; hangisi açıksa sayfa düğümleri oraya taşınır.
+function ortakSayfalariYerlestir(yer){
+  const ar = document.getElementById('araclarPage');
+  const hf = document.getElementById('hafizaPage');
+  if(yer === 'panel'){
+    const hedef = document.getElementById('bpIcerik');
+    if(ar.parentNode !== hedef){ hedef.appendChild(ar); hedef.appendChild(hf); }
+  } else {
+    const tr = document.getElementById('transferPage');
+    if(ar.parentNode !== tr.parentNode){ tr.parentNode.insertBefore(ar, tr); tr.parentNode.insertBefore(hf, tr); }
+  }
 }
-function saveTools(tools){
-  toolsCache = tools;
-  try{ localStorage.setItem('tools', JSON.stringify(tools)); }catch(e){ /* kota dolu olabilir */ }
 
+// Araçlar araclar/{id} koleksiyonunda durur ve bütün mağazalarda aynıdır.
+// Değişiklikler anlık dinlenir; biri araç eklediğinde açık olan herkeste görünür.
+let araclarUnsub = null;
+function araclariDinle(){
+  if(araclarUnsub) return;
+  araclarUnsub = db.collection('araclar').onSnapshot(snap=>{
+    const liste = [];
+    toolDocJson = {};
+    snap.forEach(d=>{
+      const x = d.data() || {};
+      const t = {id:d.id, name:x.name || 'Araç', icon:x.icon || undefined, aciklama:x.aciklama || '', code:x.code || '', order:x.order || 0};
+      liste.push(t);
+      toolDocJson[d.id] = JSON.stringify({name:t.name, icon:t.icon || null, aciklama:t.aciklama, code:t.code, order:t.order});
+    });
+    liste.sort((a,b)=> a.order - b.order);
+    liste.forEach(t=> delete t.order);
+    toolsCache = liste;
+    if(document.getElementById('araclarPage').offsetParent !== null && !currentToolId) renderToolsGrid();
+  }, err=>{
+    toolsCache = toolsCache || [];
+    uiBildirim('Araçlar okunamadı: ' + err.message, 'hata');
+  });
+}
+function araclariBirak(){
+  if(araclarUnsub){ try{ araclarUnsub(); }catch(e){ /* zaten kapalı */ } araclarUnsub = null; }
+  toolsCache = null;
+  toolDocJson = {};
+}
+
+// Ortak araçlara geçmeden önce araçlar mağazanın altında (stores/{m}/tools) duruyordu.
+// Düzenleme yetkisi olan biri ilk açtığında, ortak liste boşsa o mağazanın araçları
+// ortak listeye kopyalanır. Eskiler yedek olarak yerinde kalır.
+async function eskiAraclariTasi(key){
+  if(!duzenleyebilir()) return;
+  try{
+    const durumRef = db.collection('ortak').doc('ayarlar');
+    const durum = await durumRef.get();
+    if(durum.exists && durum.data().araclarTasindi) return;
+    const mevcut = await db.collection('araclar').limit(1).get();
+    if(!mevcut.empty){ await durumRef.set({araclarTasindi:true}, {merge:true}); return; }
+    const eski = await magazaRef(key).collection('tools').get();
+    if(eski.empty) return;
+    const batch = db.batch();
+    eski.forEach(d=>{
+      const x = d.data() || {};
+      batch.set(db.collection('araclar').doc(d.id), {
+        name: x.name || 'Araç', icon: x.icon || null, aciklama: x.aciklama || '', code: x.code || '', order: x.order || 0
+      });
+    });
+    batch.set(durumRef, {araclarTasindi:true, kaynak:'stores/' + key}, {merge:true});
+    await batch.commit();
+    setStatus(eski.size + ' araç tüm mağazalar için ortak listeye taşındı ✓');
+  }catch(e){ /* yetki yoksa ya da bağlantı koptuysa bir sonraki açılışta tekrar denenir */ }
+}
+
+function getTools(){ return toolsCache || []; }
+function saveTools(tools){
+  if(!duzenleyebilir()) return;
+  toolsCache = tools;
   // Buluta yaz: silinenleri sil, değişenleri güncelle.
   const ids = tools.map(t=>t.id);
   Object.keys(toolDocJson).forEach(id=>{
     if(ids.includes(id)) return;
     delete toolDocJson[id];
-    sdb('tools').doc(id).delete().catch(e=>{
-      setStatus('Araç buluttan silinemedi: ' + e.message, true);
+    db.collection('araclar').doc(id).delete().catch(e=>{
+      setStatus('Araç silinemedi: ' + e.message, true);
     });
   });
   tools.forEach((t,i)=>{
-    const veri = {name: t.name, icon: t.icon || null, code: t.code, order: i};
+    const veri = {name: t.name, icon: t.icon || null, aciklama: t.aciklama || '', code: t.code, order: i};
     const json = JSON.stringify(veri);
     if(toolDocJson[t.id] === json) return;
     toolDocJson[t.id] = json;
-    sdb('tools').doc(t.id).set(veri).catch(e=>{
-      setStatus('Araç buluta kaydedilemedi: ' + e.message, true);
+    db.collection('araclar').doc(t.id).set(veri).catch(e=>{
+      setStatus('Araç kaydedilemedi: ' + e.message, true);
     });
   });
 }
@@ -3354,24 +3452,28 @@ function renderIconPicker(containerId, selected, onPick){
 
 function renderToolsGrid(){
   const tools = getTools();
+  const duz = duzenleyebilir();
+  document.getElementById('araclarAlt').textContent = 'Tüm mağazalarda ortak';
   const grid = document.getElementById('toolsGrid');
-  grid.innerHTML = tools.map(t => `
-    <div class="tool-tile" onclick="openTool('${t.id}')">
-      <div class="tool-cap" style="${toolCapStyle(t.icon)}">${toolIconInfo(t.icon).icon}
-        <span class="tool-acts">
-          <button class="tool-edit" onclick="event.stopPropagation(); openEditToolModal('${t.id}')" title="İsmi ve simgeyi düzenle">✎</button>
-          <button class="tool-dl" onclick="event.stopPropagation(); downloadToolFile('${t.id}')" title="Dosya olarak indir">⬇</button>
-          <button class="tool-del" onclick="event.stopPropagation(); deleteTool('${t.id}')" title="Sil">✕</button>
-        </span>
+  let html = tools.map(t => `
+    <div class="hk-kart" onclick="openTool('${t.id}')">
+      <div class="hk-ust">
+        <span class="hk-ikon">${toolIconInfo(t.icon).icon}</span>
+        ${duz ? `<span class="hk-islem">
+          <button type="button" onclick="event.stopPropagation(); openEditToolModal('${t.id}')" title="Düzenle">✎</button>
+          <button type="button" onclick="event.stopPropagation(); downloadToolFile('${t.id}')" title="Dosya olarak indir">⬇</button>
+          <button type="button" class="sil" onclick="event.stopPropagation(); deleteTool('${t.id}')" title="Sil">✕</button>
+        </span>` : ''}
       </div>
-      <div class="tool-foot"><span class="tool-name" title="${escapeHtml(t.name)}">${escapeHtml(t.name)}</span></div>
-    </div>
-  `).join('') + `
-    <div class="tool-tile add-tile" onclick="openAddToolModal()">
-      <div class="tool-cap">＋</div>
-      <div class="tool-foot"><span class="tool-name">Yeni Araç</span></div>
-    </div>
-  `;
+      <div class="hk-baslik">${escapeHtml(t.name)}</div>
+      <div class="hk-aciklama">${escapeHtml(t.aciklama || '')}</div>
+    </div>`).join('');
+  if(duz){
+    html += `<div class="hk-kart ekle" onclick="openAddToolModal()"><b>＋</b>Yeni araç</div>`;
+  } else if(!tools.length){
+    html += `<div class="hk-bos">${toolsCache === null ? 'Araçlar yükleniyor...' : 'Henüz araç eklenmedi.'}</div>`;
+  }
+  grid.innerHTML = html;
 }
 
 let newToolIcon = TOOL_ICONS[0].icon;
@@ -3379,11 +3481,14 @@ let editToolId = null;
 let editToolIcon = TOOL_ICONS[0].icon;
 
 function openEditToolModal(id){
+  if(!duzenleyebilir()) return;
   const tool = getTools().find(t => t.id === id);
   if(!tool) return;
   editToolId = id;
   editToolIcon = toolIconInfo(tool.icon).icon;
   document.getElementById('editToolName').value = tool.name;
+  document.getElementById('editToolAciklama').value = tool.aciklama || '';
+  document.getElementById('editToolCode').value = tool.code || '';
   renderIconPicker('editToolIcons', editToolIcon, function(icon){ editToolIcon = icon; });
   document.getElementById('editToolModal').style.display = 'flex';
 }
@@ -3397,14 +3502,16 @@ function saveToolEdit(){
   const tools = getTools();
   const tool = tools.find(t => t.id === editToolId);
   if(!tool){ closeEditToolModal(); return; }
+  const code = document.getElementById('editToolCode').value;
+  if(!code.trim()){ uiUyari('HTML kodu boş olamaz.', {baslik:'Kod eksik', ikon:'📄'}); return; }
   tool.name = name;
   tool.icon = editToolIcon;
+  tool.aciklama = document.getElementById('editToolAciklama').value.trim();
+  tool.code = code;
   saveTools(tools);
   closeEditToolModal();
   renderToolsGrid();
-  if(currentToolId === tool.id){
-    document.getElementById('toolViewerName').textContent = tool.name;
-  }
+  if(currentToolId === tool.id) openTool(tool.id);
 }
 
 function escapeHtml(s){
@@ -3414,7 +3521,9 @@ function escapeHtml(s){
 }
 
 function openAddToolModal(){
+  if(!duzenleyebilir()) return;
   document.getElementById('newToolName').value = '';
+  document.getElementById('newToolAciklama').value = '';
   document.getElementById('newToolCode').value = '';
   newToolIcon = TOOL_ICONS[0].icon;
   renderIconPicker('newToolIcons', newToolIcon, function(icon){ newToolIcon = icon; });
@@ -3483,6 +3592,7 @@ function saveNewTool(){
     id: 'tool_' + Date.now(),
     name: name,
     icon: newToolIcon,
+    aciklama: document.getElementById('newToolAciklama').value.trim(),
     code: code
   });
   saveTools(tools);
@@ -3491,6 +3601,7 @@ function saveNewTool(){
 }
 
 async function deleteTool(id){
+  if(!duzenleyebilir()) return;
   if(!await uiOnay('Bu araç kalıcı olarak silinecek.', {baslik:'Araç silinsin mi?', tehlike:true, evet:'Sil'})) return;
   let tools = getTools();
   tools = tools.filter(t => t.id !== id);
@@ -3525,6 +3636,95 @@ function closeToolViewer(){
   currentToolId = null;
   renderToolsGrid();
 }
+
+// ==================== KURUMSAL HAFIZA ====================
+// Bölümler bütün mağazalarda ortaktır; içerikleri burada, kodun içinde tutulur
+// (icerik: HTML). Not defteri ise mağazaya özeldir: stores/{m}/settings/notlar.
+const KURUMSAL_HAFIZA = [
+  {id:'surecler', ikon:'📋', baslik:'Süreçler ve talimatlar',
+   aciklama:'Kasa kapanışı, sevkiyat kabulü, iade akışı gibi adım adım anlatımlar.', icerik:''},
+  {id:'formlar', ikon:'📄', baslik:'Form ve şablonlar',
+   aciklama:'Tutanaklar, gider pusulası örnekleri, çalışma çizelgesi şablonları.', icerik:''},
+  {id:'egitim', ikon:'🎓', baslik:'Eğitim notları',
+   aciklama:'Yeni personel için ürün, sistem ve müşteri iletişimi notları.', icerik:''},
+  {id:'sss', ikon:'❓', baslik:'Sık sorulanlar',
+   aciklama:'Mağazalardan en çok gelen sorular ve cevapları.', icerik:''},
+  {id:'kime', ikon:'📞', baslik:'Kime sorulur',
+   aciklama:'Hangi konu hangi departmana gider, kim ne zaman aranır.', icerik:''}
+];
+
+function hafizaGoster(){
+  hafizaListeyeDon();
+  document.getElementById('hafizaAlt').textContent = aktifProfil ? aktifProfil.name : 'Tüm mağazalarda ortak';
+  const grid = document.getElementById('hafizaGrid');
+  grid.innerHTML = KURUMSAL_HAFIZA.map(b => `
+    <div class="hk-kart" data-id="${b.id}">
+      <div class="hk-ust"><span class="hk-ikon">${b.ikon}</span></div>
+      <div class="hk-baslik">${escapeHtml(b.baslik)}</div>
+      <div class="hk-aciklama">${escapeHtml(b.aciklama)}</div>
+    </div>`).join('');
+  grid.querySelectorAll('.hk-kart').forEach(k=> k.addEventListener('click', ()=> hafizaBolumAc(k.dataset.id)));
+  // Not defteri yalnızca bir mağaza açıkken görünür (bölge panelinde gizli).
+  document.getElementById('notDefteri').style.display = aktifProfil ? '' : 'none';
+  if(aktifProfil) notDefteriYukle();
+}
+function hafizaBolumAc(id){
+  const b = KURUMSAL_HAFIZA.find(x=> x.id === id);
+  if(!b) return;
+  document.getElementById('hafizaListe').style.display = 'none';
+  document.getElementById('hafizaDetay').style.display = '';
+  document.getElementById('hafizaDetayBaslik').textContent = b.ikon + ' ' + b.baslik;
+  document.getElementById('hafizaDetayIcerik').innerHTML = b.icerik
+    || '<div class="hk-bos">Bu bölüme henüz içerik eklenmedi.</div>';
+}
+function hafizaListeyeDon(){
+  document.getElementById('hafizaListe').style.display = '';
+  document.getElementById('hafizaDetay').style.display = 'none';
+}
+
+let notYuklenenMagaza = null;
+let notZamanlayici = null;
+function notDurum(msg){ document.getElementById('notDurum').textContent = msg || ''; }
+async function notDefteriYukle(){
+  const key = aktifProfil && aktifProfil.key;
+  if(!key || notYuklenenMagaza === key) return;
+  const alan = document.getElementById('notMetin');
+  alan.value = '';
+  alan.disabled = true;
+  notDurum('');
+  try{
+    const doc = await magazaRef(key).collection('settings').doc('notlar').get();
+    if(!aktifProfil || aktifProfil.key !== key) return;   // bu arada mağaza değişti
+    alan.value = doc.exists ? (doc.data().metin || '') : '';
+    notYuklenenMagaza = key;
+  }catch(e){
+    notDurum('Notlar okunamadı: ' + e.message);
+  }finally{
+    alan.disabled = false;
+  }
+}
+function notDefteriSifirla(){
+  clearTimeout(notZamanlayici);
+  notYuklenenMagaza = null;
+  const alan = document.getElementById('notMetin');
+  if(alan) alan.value = '';
+  notDurum('');
+}
+// Yazmayı bırakınca kaydedilir. Mağaza anahtarı yazarken alınır; kayıt
+// gecikse bile not doğru mağazaya yazılır.
+document.getElementById('notMetin').addEventListener('input', function(){
+  const key = notYuklenenMagaza;
+  if(!key) return;
+  const metin = this.value;
+  notDurum('Kaydediliyor...');
+  clearTimeout(notZamanlayici);
+  notZamanlayici = setTimeout(()=>{
+    magazaRef(key).collection('settings').doc('notlar').set({
+      metin, updatedBy: guncelleyenAdi(), updatedAt: new Date().toISOString()
+    }).then(()=>{ if(notYuklenenMagaza === key) notDurum('Kaydedildi ✓'); })
+      .catch(e=> notDurum('Kaydedilemedi: ' + e.message));
+  }, 700);
+});
 
 // ==================== TRANSFER (Telefon → Bilgisayar) ====================
 // Telefonda çekilen fotoğraflar ve yazılan notlar küçültülüp buluta yazılır,
