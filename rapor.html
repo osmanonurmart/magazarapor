@@ -688,7 +688,10 @@ if(!document.documentElement.classList.contains('tel')){
 
   /* Rapor: önce günün özeti, sonra haftalar; tablolar yana kaydırılır */
   html.tel .page-layout{ flex-direction:column; padding:10px; gap:10px; }
-  html.tel .right-col{ order:-1; flex:1 1 auto; width:100%; }
+  /* Telefonda sıra: iki hafta → yorum/mesaj → RT ve diğerleri */
+  html.tel .right-col{ flex:1 1 auto; width:100%; }
+  html.tel #reportPanel{ display:flex; flex-direction:column; }
+  html.tel #reportPanel > .msg-area{ order:-1; margin:0 0 12px; }
   html.tel .left-col{ width:100%; }
   html.tel .month-grid{ grid-template-columns:1fr; grid-auto-flow:row; }
   /* Haftalık tablo yana kaydırmadan ekrana sığar */
@@ -1061,7 +1064,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 18;
+const APP_SURUM = 19;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
