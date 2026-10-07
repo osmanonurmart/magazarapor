@@ -1,21 +1,27 @@
-# Mağaza Raporu — v1
+# Mağaza Raporu
 
 Akşam yazılan MC raporu için tek dosyalık mağaza takip uygulaması:
 `rapor.html`.
 
 **Canlı:** https://osmanonurmart.github.io/magazarapor/rapor.html
 
-Veri Firebase'de (Firestore) durur, giriş anonimdir; mağaza seçimi
-tarayıcıda profil olarak tutulur.
+Veri Firebase'de (Firestore) durur. Herkes aynı ekrandan kullanıcı adı ve
+şifreyle girer (Firebase Authentication, e-posta/şifre).
 
-## v2 nerede
+## Kullanıcı ekleme
 
-Yeni sürüm ayrı bir depoya taşındı:
-[osmanonurmart/mcrapor2](https://github.com/osmanonurmart/mcrapor2) —
-canlı adresi https://osmanonurmart.github.io/mcrapor2/
+1. Firebase Console → Authentication → Users → Add user:
+   e-posta `kullaniciadi@mcrapor.app`, şifre istediğiniz gibi.
+   Ekranda yalnızca `kullaniciadi` yazılır.
+2. Firestore → `yetkiler` koleksiyonu → belge kimliği kullanıcı adı (küçük harf):
+   - mağaza: `{ rol: "magaza" }` — `stores/{kullaniciadi}` verisini görür
+   - bölge müdürü: `{ rol: "bolge", magazalar: ["m583", ...] }`
 
-İki uygulama birbirinden bağımsız çalışır. Bu depoda v2'ye ait hiçbir
-dosya yoktur.
+`m583` ilk girişte eski `onur` profilinin verisini kendi altına kopyalar
+(kaynak silinmez).
+
+Arka plan fotoğrafı için depoya `giris-arka.jpg` eklenebilir; yoksa düz
+bej zemin görünür.
 
 ## Dosyalar
 
