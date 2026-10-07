@@ -765,7 +765,7 @@ if(!document.documentElement.classList.contains('tel')){
   }
   html.tel .tel-buyuk-btn:disabled{ opacity:.6; }
   html.tel .wp-btn{ background:#1f8a4c; }
-  html.tel #wpMsgBtn{ background:#fff; color:#1f8a4c; border:1.5px solid #1f8a4c; }
+  html.tel #copyMsgBtn{ display:none; }
 
   /* Veri girişi penceresi */
   html.tel .tvf-arka{
@@ -1078,7 +1078,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 21;
+const APP_SURUM = 22;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -2457,13 +2457,6 @@ if(TELEFON){
   }, true);
 
   document.addEventListener('click', async e=>{
-    const wp = e.target.closest && e.target.closest('#wpMsgBtn');
-    if(wp){
-      e.preventDefault();
-      const metin = buildDailyMessage();
-      window.location.href = 'https://wa.me/?text=' + encodeURIComponent(metin);
-      return;
-    }
     const btn = e.target.closest && e.target.closest('#sendBtn');
     if(!btn) return;
     e.preventDefault();
@@ -3578,7 +3571,6 @@ function renderReportPanel(){
     <textarea id="yorumBox" placeholder="Yorumunuzu buraya yazın..."></textarea>
     <button class="send-btn" id="copyMsgBtn">📋 Mesajı Kopyala</button>
     <button class="send-btn wp-btn sadece-tel" id="ikisiBtn">📤 Görsel + mesajı gönder</button>
-    <button class="send-btn wp-btn sadece-tel" id="wpMsgBtn">💬 Sadece mesajı WhatsApp'a gönder</button>
   </div>
   ${(function(){
     const now = getNow();
