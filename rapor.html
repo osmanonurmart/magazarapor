@@ -85,16 +85,6 @@ if(!document.documentElement.classList.contains('tel')){
     display:inline-block; padding:2px 9px; border-radius:10px; background:#eeebe5; border:1px solid #dcd7ce;
     color:#555; font-size:.68rem; font-weight:700; cursor:pointer;
   }
-  .oneri-btn{
-    display:inline-flex; align-items:center; gap:5px; padding:2px 10px 2px 8px; border-radius:10px;
-    background:#fff; border:1px solid #dcd7ce; color:#9a7438; font-size:.68rem; font-weight:700;
-    cursor:pointer; font-family:inherit;
-  }
-  .oneri-btn svg{ width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
-  .oneri-btn:hover{ background:#f3ede3; }
-  html.tel .oneri-btn{ padding:4px 9px; font-size:.75rem; }
-  html.tel .oneri-btn span{ display:none; }
-  html.tel .oneri-btn svg{ width:18px; height:18px; }
   .ui-input.ui-metin{ text-align:left; resize:vertical; min-height:110px; line-height:1.45; }
   .profile-chip{ position:relative; }
   .gb-nokta{ position:absolute; top:0; right:0; width:10px; height:10px; border-radius:50%; background:var(--red); border:2px solid #fff; }
@@ -141,10 +131,14 @@ if(!document.documentElement.classList.contains('tel')){
   .gb-benim-baslik{ font-size:.8rem; font-weight:700; color:#555; margin-top:18px; }
   .gb-yeni{ color:var(--red); }
   .oneri-btn{ position:relative; }
-  .oneri-btn.yeni::after{
-    content:''; position:absolute; top:-3px; right:-3px; width:9px; height:9px; border-radius:50%;
+  .oneri-nokta{ display:none; }
+  html.tel .oneri-btn.yeni .oneri-nokta{ right:calc(50% - 20px); top:4px; }
+  .oneri-btn.yeni .oneri-nokta{
+    display:block; position:absolute; top:3px; right:4px; width:9px; height:9px; border-radius:50%;
     background:var(--red); border:2px solid #fff;
   }
+  .surum-rozet{ display:none !important; }
+  .ust-logo{ cursor:pointer; }
   .surum-rozet:hover{ background:var(--accent); border-color:var(--accent); color:#fff; }
   .ust-btn{
     background:#fff; color:#2d2d2d; border:1px solid #2d2d2d; padding:6px 11px; border-radius:7px;
@@ -206,14 +200,55 @@ if(!document.documentElement.classList.contains('tel')){
     max-width:1100px; margin:14px auto 0; background:#fff; border:1px solid #cfc9bf; border-radius:10px;
     padding:14px 14px 16px; box-sizing:border-box;
   }
-  .nd-baslik{ font-weight:700; font-size:.9rem; color:#1f1f1f; }
+  .nd-baslik{ font-weight:700; font-size:.9rem; color:#1f1f1f; margin-bottom:12px; }
+  .nd-alt-yazi{ font-weight:400; font-size:.72rem; color:#888; margin-left:6px; }
+  /* Keep tarzı notlar */
+  .kp-yeni{
+    max-width:560px; margin:0 auto 6px; background:#fff; border:1px solid #d9d4cb; border-radius:10px;
+    box-shadow:0 1px 4px rgba(0,0,0,.08); padding:4px 4px 4px;
+  }
+  .kp-yeni input, .kp-yeni textarea{
+    display:block; width:100%; border:none; outline:none; background:transparent; resize:none;
+    font-family:inherit; padding:10px 12px; color:#222; box-sizing:border-box;
+  }
+  .kp-yeni-baslik{ font-weight:700; font-size:.95rem; }
+  .kp-yeni-metin{ font-size:.88rem; line-height:1.45; min-height:40px; }
+  .kp-yeni-alt{ display:flex; justify-content:space-between; align-items:center; padding:4px 8px 6px; gap:8px; }
+  .kp-renkler{ display:flex; gap:5px; flex-wrap:wrap; }
+  .kp-renk{ width:22px; height:22px; border-radius:50%; border:1.5px solid rgba(0,0,0,.12); cursor:pointer; padding:0; }
+  .kp-renk.secili{ border:2px solid #2d2d2d; }
+  .kp-kapat{ border:none; background:none; font-weight:700; color:#555; padding:7px 14px; border-radius:6px; cursor:pointer; font-family:inherit; }
+  .kp-kapat:hover{ background:#f1efe9; }
+  .kp-durum{ text-align:center; font-size:.72rem; color:#888; min-height:16px; margin-bottom:6px; }
+  .kp-grup-baslik{ font-size:.66rem; font-weight:700; letter-spacing:.08em; color:#888; margin:8px 2px 6px; }
+  .kp-izgara{ column-width:220px; column-gap:12px; }
+  .kp-not{
+    break-inside:avoid; margin:0 0 12px; border:1px solid #e0dcd4; border-radius:10px; padding:12px 14px;
+    cursor:pointer; position:relative; transition:box-shadow .15s; background:#fff;
+  }
+  .kp-not:hover{ box-shadow:0 2px 10px rgba(0,0,0,.12); }
+  .kp-not-baslik{ font-weight:700; font-size:.9rem; margin-bottom:6px; color:#1f1f1f; word-break:break-word; }
+  .kp-not-metin{ font-size:.84rem; line-height:1.45; color:#333; white-space:pre-wrap; word-break:break-word; max-height:320px; overflow:hidden; }
+  .kp-not-alt{ font-size:.66rem; color:#888; margin-top:8px; }
+  .kp-pin{ position:absolute; top:6px; right:8px; font-size:.8rem; opacity:.75; }
+  .kp-bos{ text-align:center; color:#999; font-size:.82rem; padding:12px 0; }
+  .kp-duzen{ width:calc(var(--k)*520px); text-align:left; padding:0; overflow:hidden; }
+  .kp-duzen input, .kp-duzen textarea{
+    display:block; width:100%; border:none; outline:none; background:transparent; resize:none; box-sizing:border-box;
+    font-family:inherit; padding:14px 16px 6px; color:#222;
+  }
+  .kp-duzen input{ font-weight:700; font-size:1.05rem; }
+  .kp-duzen textarea{ font-size:.92rem; line-height:1.5; min-height:180px; max-height:55vh; overflow:auto; padding-top:6px; }
+  .kp-duzen-alt{ display:flex; justify-content:space-between; align-items:center; gap:8px; padding:8px 12px 12px; flex-wrap:wrap; }
+  .kp-duzen-dugmeler{ display:flex; gap:4px; }
+  .kp-ikon-btn{ border:none; background:none; font-size:.82rem; padding:7px 10px; border-radius:6px; cursor:pointer; font-family:inherit; color:#444; }
+  .kp-ikon-btn:hover{ background:rgba(0,0,0,.06); }
+  .kp-ikon-btn.sil{ color:#a34141; }
+  .kp-duzen-tarih{ font-size:.66rem; color:#888; padding:0 16px; text-align:right; }
+  html.tel .kp-izgara{ column-width:150px; column-gap:8px; }
+  html.tel .kp-not{ margin-bottom:8px; padding:10px 12px; }
   .nd-alt{ font-size:.74rem; color:#666; margin:12px 0 10px; }
   .nd-alt span{ color:#2e7d32; margin-left:6px; }
-  .not-defteri textarea{
-    width:100%; height:150px; box-sizing:border-box; padding:10px; border:1px solid #bdb7ad; border-radius:8px;
-    font-family:inherit; font-size:.82rem; line-height:1.5; resize:vertical;
-  }
-  .not-defteri textarea:focus{ outline:none; border-color:#2d2d2d; }
 
   .transfer-page{ margin:0; padding:16px; }
   .tr-wrap{ max-width:620px; margin:0 auto; }
@@ -937,13 +972,13 @@ if(!document.documentElement.classList.contains('tel')){
     <div class="ust-sol">
       <img class="ust-logo" src="simge.svg?v=2" alt="" width="30" height="30">
       <span class="surum-rozet bp-surum" title="Güncelleme kontrol et" onclick="guncellemeKontrol()"></span>
-      <button type="button" class="oneri-btn" title="Öneri / geri bildirim gönder" onclick="geriBildirimYaz()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/><path d="M8.5 11h7"/><path d="M8.5 14h4"/></svg><span>Öneri</span></button>
       <span class="bp-baslik">Bölge Paneli</span>
       <nav class="tab-bar">
         <button class="tab-btn active" id="bpTabOzet" data-kisa="Özet" type="button"><svg class="tab-ikon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V11"/><path d="M10 20V5"/><path d="M16 20v-6"/><path d="M21 20H3"/></svg>Özet</button>
         <button class="tab-btn" id="bpTabAyar" data-kisa="Mağazalar" type="button"><svg class="tab-ikon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v10h16V10"/><path d="M3 10 4.8 4h14.4L21 10z"/><path d="M10 20v-5h4v5"/></svg>Mağazalarım</button>
         <button class="tab-btn" id="bpTabAraclar" data-kisa="Araçlar" type="button"><svg class="tab-ikon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7.5" width="18" height="12.5" rx="2.5"/><path d="M9 7.5V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1.5"/><path d="M3 13h18"/><path d="M10.5 13v2h3v-2"/></svg>Araçlar</button>
         <button class="tab-btn" id="bpTabHafiza" data-kisa="Hafıza" type="button"><svg class="tab-ikon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"/><path d="M9 7.5h6"/></svg>Kurumsal hafıza</button>
+        <button class="tab-btn oneri-btn" data-kisa="Öneri" type="button" title="Öneri / geri bildirim" onclick="geriBildirimYaz()"><svg class="tab-ikon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/><path d="M8.5 11h7"/><path d="M8.5 14h4"/></svg>Öneri<span class="oneri-nokta"></span></button>
       </nav>
     </div>
     <div class="ust-sag">
@@ -1032,12 +1067,12 @@ if(!document.documentElement.classList.contains('tel')){
     <div class="ust-sol">
       <img class="ust-logo" src="simge.svg?v=2" alt="" width="30" height="30">
       <span class="surum-rozet" id="surumRozet" title="Güncelleme kontrol et" onclick="guncellemeKontrol()"></span>
-      <button type="button" class="oneri-btn" title="Öneri / geri bildirim gönder" onclick="geriBildirimYaz()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/><path d="M8.5 11h7"/><path d="M8.5 14h4"/></svg><span>Öneri</span></button>
       <nav class="tab-bar">
         <button class="tab-btn active" id="tabRaporBtn" data-kisa="Ana Sayfa" type="button" onclick="showTab('rapor')"><svg class="tab-ikon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5.5h4V20"/></svg>Ana Sayfa</button>
         <button class="tab-btn" id="tabAraclarBtn" data-kisa="Araçlar" type="button" onclick="showTab('araclar')"><svg class="tab-ikon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7.5" width="18" height="12.5" rx="2.5"/><path d="M9 7.5V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1.5"/><path d="M3 13h18"/><path d="M10.5 13v2h3v-2"/></svg>Araçlar</button>
         <button class="tab-btn" id="tabHafizaBtn" data-kisa="Hafıza" type="button" onclick="showTab('hafiza')"><svg class="tab-ikon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"/><path d="M9 7.5h6"/></svg>Kurumsal hafıza</button>
         <button class="tab-btn" id="tabTransferBtn" data-kisa="Transfer" type="button" onclick="showTab('transfer')"><svg class="tab-ikon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4"/><path d="M7.5 8.5 12 4l4.5 4.5"/><path d="M4 14.5V18a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3.5"/></svg>Transfer</button>
+        <button class="tab-btn oneri-btn" data-kisa="Öneri" type="button" title="Öneri / geri bildirim" onclick="geriBildirimYaz()"><svg class="tab-ikon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/><path d="M8.5 11h7"/><path d="M8.5 14h4"/></svg>Öneri<span class="oneri-nokta"></span></button>
       </nav>
     </div>
     <div class="ust-sag">
@@ -1102,9 +1137,20 @@ if(!document.documentElement.classList.contains('tel')){
     <div class="sayfa-baslik"><h2>Kurumsal hafıza</h2><span id="hafizaAlt"></span></div>
     <div class="hk-grid" id="hafizaGrid"></div>
     <div class="not-defteri" id="notDefteri">
-      <div class="nd-baslik">📝 Mağaza not defteri</div>
-      <div class="nd-alt">Bu mağazaya ait serbest notlar. Yazdıkça kaydedilir; bölge müdürü de görür.<span id="notDurum"></span></div>
-      <textarea id="notMetin" placeholder="Not yazın..."></textarea>
+      <div class="nd-baslik">📝 Mağaza notları <span class="nd-alt-yazi">Bu mağazaya ait; bölge müdürü de görür.</span></div>
+      <div class="kp-yeni" id="kpYeni">
+        <input type="text" id="kpYeniBaslik" class="kp-yeni-baslik" placeholder="Başlık" style="display:none;">
+        <textarea id="kpYeniMetin" class="kp-yeni-metin" rows="1" placeholder="Not al..."></textarea>
+        <div class="kp-yeni-alt" id="kpYeniAlt" style="display:none;">
+          <div class="kp-renkler" id="kpYeniRenkler"></div>
+          <button type="button" class="kp-kapat" id="kpYeniKapat">Kapat</button>
+        </div>
+      </div>
+      <div class="kp-durum" id="notDurum"></div>
+      <div class="kp-grup-baslik" id="kpSabitBaslik" style="display:none;">SABİTLENENLER</div>
+      <div class="kp-izgara" id="kpSabit"></div>
+      <div class="kp-grup-baslik" id="kpDigerBaslik" style="display:none;">DİĞERLERİ</div>
+      <div class="kp-izgara" id="kpDiger"></div>
     </div>
   </div>
   <div id="hafizaDetay" style="display:none;">
@@ -1181,7 +1227,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 28;
+const APP_SURUM = 30;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -2332,8 +2378,10 @@ document.getElementById('bpChip').addEventListener('click', e=>{
 });
 document.getElementById('bpCikis').addEventListener('click', cikisYap);
 // Telefonda sol üstteki simgeye dokununca sayfanın en üstüne çıkılır.
+// Sol üstteki simge: sürümü gösterir, yenisi varsa sayfayı günceller (telefonda ayrıca en üste çıkar).
 document.querySelectorAll('.ust-logo').forEach(img=> img.addEventListener('click', ()=>{
   if(TELEFON) window.scrollTo({top:0, behavior:'smooth'});
+  guncellemeKontrol();
 }));
 
 // ==================== GERİ BİLDİRİM / ÖNERİ ====================
@@ -4409,49 +4457,168 @@ function hafizaListeyeDon(){
   document.getElementById('hafizaDetay').style.display = 'none';
 }
 
+// Keep tarzı mağaza notları: stores/{m}/notlar/{id} = {baslik, metin, renk, sabit, olusturma, guncelleme, yazan}
+// Eski tek parça not defteri (settings/notlar) varsa ilk açılışta bir nota dönüştürülür.
+const KP_RENKLER = ['#ffffff','#faafa8','#f39f76','#fff8b8','#e2f6d3','#b4ddd3','#d4e4ed','#aeccdc','#d3bfdb','#f6e2dd','#e9e3d4','#efeff1'];
 let notYuklenenMagaza = null;
-let notZamanlayici = null;
+let notUnsub = null;
+let notlar = [];
+let kpYeniRenk = KP_RENKLER[0];
 function notDurum(msg){ document.getElementById('notDurum').textContent = msg || ''; }
+
 async function notDefteriYukle(){
   const key = aktifProfil && aktifProfil.key;
   if(!key || notYuklenenMagaza === key) return;
-  const alan = document.getElementById('notMetin');
-  alan.value = '';
-  alan.disabled = true;
-  notDurum('');
+  notDefteriSifirla();
+  notYuklenenMagaza = key;
+  const koleksiyon = magazaRef(key).collection('notlar');
   try{
-    const doc = await magazaRef(key).collection('settings').doc('notlar').get();
-    if(!aktifProfil || aktifProfil.key !== key) return;   // bu arada mağaza değişti
-    alan.value = doc.exists ? (doc.data().metin || '') : '';
-    notYuklenenMagaza = key;
-  }catch(e){
-    notDurum('Notlar okunamadı: ' + e.message);
-  }finally{
-    alan.disabled = false;
-  }
+    const eski = await magazaRef(key).collection('settings').doc('notlar').get();
+    const ilk = await koleksiyon.limit(1).get();
+    if(eski.exists && (eski.data().metin || '').trim() && ilk.empty && !eski.data().notlaraTasindi){
+      const zaman = eski.data().updatedAt || new Date().toISOString();
+      await koleksiyon.add({baslik:'Not defteri', metin: eski.data().metin, renk: KP_RENKLER[0], sabit:false,
+                            olusturma: zaman, guncelleme: zaman, yazan: eski.data().updatedBy || ''});
+      await magazaRef(key).collection('settings').doc('notlar').set({notlaraTasindi:true}, {merge:true});
+    }
+  }catch(e){ /* eski not taşınamadıysa sorun değil */ }
+  if(notYuklenenMagaza !== key) return;
+  notUnsub = koleksiyon.onSnapshot(snap=>{
+    notlar = [];
+    snap.forEach(d=> notlar.push(Object.assign({id:d.id}, d.data())));
+    notlar.sort((a,b)=> String(b.guncelleme || '').localeCompare(String(a.guncelleme || '')));
+    notlariCiz();
+  }, e=> notDurum('Notlar okunamadı: ' + e.message));
 }
 function notDefteriSifirla(){
-  clearTimeout(notZamanlayici);
+  if(notUnsub){ try{ notUnsub(); }catch(e){} notUnsub = null; }
   notYuklenenMagaza = null;
-  const alan = document.getElementById('notMetin');
-  if(alan) alan.value = '';
-  notDurum('');
+  notlar = [];
+  if(document.getElementById('kpDiger')){ notlariCiz(); notDurum(''); }
 }
-// Yazmayı bırakınca kaydedilir. Mağaza anahtarı yazarken alınır; kayıt
-// gecikse bile not doğru mağazaya yazılır.
-document.getElementById('notMetin').addEventListener('input', function(){
+
+function notKartHtml(n){
+  const t = n.guncelleme ? new Date(n.guncelleme) : null;
+  const zaman = t && !isNaN(t) ? kisaTarih(t) : '';
+  return '<div class="kp-not" data-id="' + n.id + '" style="background:' + (n.renk || '#fff') + '">'
+    + (n.sabit ? '<span class="kp-pin" title="Sabitlendi">📌</span>' : '')
+    + (n.baslik ? '<div class="kp-not-baslik">' + escapeHtml(n.baslik) + '</div>' : '')
+    + (n.metin ? '<div class="kp-not-metin">' + escapeHtml(n.metin) + '</div>' : '')
+    + '<div class="kp-not-alt">' + escapeHtml(zaman) + (n.yazan ? ' · ' + escapeHtml(n.yazan) : '') + '</div></div>';
+}
+function notlariCiz(){
+  const sabit = notlar.filter(n=> n.sabit), diger = notlar.filter(n=> !n.sabit);
+  document.getElementById('kpSabit').innerHTML = sabit.map(notKartHtml).join('');
+  document.getElementById('kpDiger').innerHTML = diger.length ? diger.map(notKartHtml).join('')
+    : (sabit.length ? '' : '<div class="kp-bos">Henüz not yok. Yukarıdan ilk notu ekle.</div>');
+  document.getElementById('kpSabitBaslik').style.display = sabit.length ? '' : 'none';
+  document.getElementById('kpDigerBaslik').style.display = sabit.length && diger.length ? '' : 'none';
+  document.querySelectorAll('#kpSabit .kp-not, #kpDiger .kp-not').forEach(k=> k.addEventListener('click', ()=> notAc(k.dataset.id)));
+}
+
+function renkSeciciHtml(secili){
+  return KP_RENKLER.map(r=> '<button type="button" class="kp-renk' + (r === secili ? ' secili' : '') + '" data-renk="' + r + '" style="background:' + r + '" title="Renk"></button>').join('');
+}
+
+// Yeni not: tıklayınca başlık ve renkler açılır, "Kapat" ya da dışarı tıklayınca kaydedilir.
+function kpYeniAc(){
+  document.getElementById('kpYeniBaslik').style.display = '';
+  document.getElementById('kpYeniAlt').style.display = '';
+  document.getElementById('kpYeniMetin').rows = 3;
+  kpRenkleriCiz();
+}
+function kpRenkleriCiz(){
+  const el = document.getElementById('kpYeniRenkler');
+  el.innerHTML = renkSeciciHtml(kpYeniRenk);
+  el.querySelectorAll('.kp-renk').forEach(b=> b.addEventListener('click', e=>{
+    e.stopPropagation();
+    kpYeniRenk = b.dataset.renk;
+    document.getElementById('kpYeni').style.background = kpYeniRenk;
+    kpRenkleriCiz();
+  }));
+}
+async function kpYeniKaydetVeKapat(){
+  const baslikEl = document.getElementById('kpYeniBaslik'), metinEl = document.getElementById('kpYeniMetin');
+  const baslik = baslikEl.value.trim(), metin = metinEl.value.trim();
   const key = notYuklenenMagaza;
-  if(!key) return;
-  const metin = this.value;
-  notDurum('Kaydediliyor...');
-  clearTimeout(notZamanlayici);
-  notZamanlayici = setTimeout(()=>{
-    magazaRef(key).collection('settings').doc('notlar').set({
-      metin, updatedBy: guncelleyenAdi(), updatedAt: new Date().toISOString()
-    }).then(()=>{ if(notYuklenenMagaza === key) notDurum('Kaydedildi ✓'); })
-      .catch(e=> notDurum('Kaydedilemedi: ' + e.message));
-  }, 700);
+  baslikEl.value = ''; metinEl.value = '';
+  baslikEl.style.display = 'none';
+  document.getElementById('kpYeniAlt').style.display = 'none';
+  metinEl.rows = 1;
+  const renk = kpYeniRenk;
+  kpYeniRenk = KP_RENKLER[0];
+  document.getElementById('kpYeni').style.background = '';
+  if(!key || (!baslik && !metin)) return;
+  const zaman = new Date().toISOString();
+  try{
+    await magazaRef(key).collection('notlar').add({baslik, metin, renk, sabit:false, olusturma:zaman, guncelleme:zaman, yazan: guncelleyenAdi()});
+  }catch(e){ uiBildirim('Not kaydedilemedi: ' + e.message, 'hata'); }
+}
+document.getElementById('kpYeniMetin').addEventListener('focus', kpYeniAc);
+document.getElementById('kpYeniKapat').addEventListener('click', e=>{ e.stopPropagation(); kpYeniKaydetVeKapat(); });
+document.addEventListener('click', e=>{
+  const kutu = document.getElementById('kpYeni');
+  if(kutu && document.getElementById('kpYeniAlt').style.display !== 'none' && !kutu.contains(e.target)) kpYeniKaydetVeKapat();
 });
+
+// Var olan not: pencerede düzenlenir; kapatınca değişiklik kaydedilir.
+function notAc(id){
+  const n = notlar.find(x=> x.id === id);
+  const key = notYuklenenMagaza;
+  if(!n || !key) return;
+  let renk = n.renk || KP_RENKLER[0], sabit = !!n.sabit;
+  const ov = document.createElement('div');
+  ov.className = 'ui-ov';
+  ov.innerHTML = '<div class="ui-dlg kp-duzen" style="background:' + renk + '">'
+    + '<input type="text" placeholder="Başlık">'
+    + '<textarea placeholder="Not"></textarea>'
+    + '<div class="kp-duzen-tarih"></div>'
+    + '<div class="kp-duzen-alt"><div class="kp-renkler"></div>'
+    + '<div class="kp-duzen-dugmeler"><button type="button" class="kp-ikon-btn" data-k="sabit"></button>'
+    + '<button type="button" class="kp-ikon-btn sil" data-k="sil">🗑 Sil</button>'
+    + '<button type="button" class="kp-kapat" data-k="kapat">Kapat</button></div></div></div>';
+  const dlg = ov.querySelector('.kp-duzen');
+  const bas = dlg.querySelector('input'), met = dlg.querySelector('textarea');
+  bas.value = n.baslik || ''; met.value = n.metin || '';
+  const t = n.guncelleme ? new Date(n.guncelleme) : null;
+  dlg.querySelector('.kp-duzen-tarih').textContent = t && !isNaN(t)
+    ? 'Düzenlendi: ' + kisaTarih(t) + ' ' + pad(t.getHours()) + ':' + pad(t.getMinutes()) + (n.yazan ? ' · ' + n.yazan : '') : '';
+  const sabitBtn = dlg.querySelector('[data-k="sabit"]');
+  const sabitYaz = ()=>{ sabitBtn.textContent = sabit ? '📌 Sabitlemeyi kaldır' : '📌 Sabitle'; };
+  sabitYaz();
+  const renkCiz = ()=>{
+    const el = dlg.querySelector('.kp-renkler');
+    el.innerHTML = renkSeciciHtml(renk);
+    el.querySelectorAll('.kp-renk').forEach(b=> b.addEventListener('click', ()=>{ renk = b.dataset.renk; dlg.style.background = renk; renkCiz(); }));
+  };
+  renkCiz();
+  let kapandi = false;
+  const kapat = async (sil)=>{
+    if(kapandi) return;
+    kapandi = true;
+    ov.remove();
+    document.removeEventListener('keydown', tus, true);
+    const ref = magazaRef(key).collection('notlar').doc(id);
+    try{
+      if(sil){ await ref.delete(); return; }
+      const yeni = {baslik: bas.value.trim(), metin: met.value.trim(), renk, sabit};
+      if(!yeni.baslik && !yeni.metin){ await ref.delete(); return; }
+      if(yeni.baslik !== (n.baslik || '') || yeni.metin !== (n.metin || '') || renk !== (n.renk || KP_RENKLER[0]) || sabit !== !!n.sabit){
+        await ref.update(Object.assign(yeni, {guncelleme: new Date().toISOString(), yazan: guncelleyenAdi()}));
+      }
+    }catch(e){ uiBildirim('Not kaydedilemedi: ' + e.message, 'hata'); }
+  };
+  const tus = e=>{ if(e.key === 'Escape'){ e.preventDefault(); kapat(false); } };
+  sabitBtn.addEventListener('click', ()=>{ sabit = !sabit; sabitYaz(); });
+  dlg.querySelector('[data-k="kapat"]').addEventListener('click', ()=> kapat(false));
+  dlg.querySelector('[data-k="sil"]').addEventListener('click', async ()=>{
+    if(await uiOnay('Bu not silinecek.', {baslik:'Not silinsin mi?', tehlike:true, evet:'Sil'})) kapat(true);
+  });
+  ov.addEventListener('click', e=>{ if(e.target === ov) kapat(false); });
+  document.addEventListener('keydown', tus, true);
+  document.body.appendChild(ov);
+  met.focus();
+}
 
 // ==================== TRANSFER (Telefon → Bilgisayar) ====================
 // Telefonda çekilen fotoğraflar ve yazılan notlar küçültülüp buluta yazılır,
@@ -5239,6 +5406,7 @@ async function guncellemeKontrol(){
   }
   guncellemeKontrolde = true;
   renderSurumRozet('⟳ kontrol');
+  uiBildirim('Sürüm v' + APP_SURUM + ' · güncelleme kontrol ediliyor...', '', 0);
   try{
     // cache:'reload' sunucudan taze kopyayı alır ve tarayıcı önbelleğini de günceller,
     // böylece ardından yapılan yenileme yeni sürümü açar.
@@ -5249,6 +5417,7 @@ async function guncellemeKontrol(){
     const sunucuSurum = m ? Number(m[1]) : 0;
     if(sunucuSurum > APP_SURUM){
       renderSurumRozet('v' + sunucuSurum + ' yükleniyor');
+      uiBildirim('Yeni sürüm v' + sunucuSurum + ' yükleniyor...', '', 0);
       location.reload();
       return;
     }
