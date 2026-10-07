@@ -3,6 +3,34 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=1300, user-scalable=yes">
+<script>
+// Yalnızca telefonda: sayfa 1300px genişliğinde ekrana sığdırılır ve yakınlaştırma
+// tamamen kapatılır (iki parmak, çift dokunma, kutuya dokununca otomatik büyüme).
+// Masaüstünde hiçbir şey yapmaz.
+(function(){
+  var tel = window.matchMedia && matchMedia('(pointer:coarse)').matches
+            && Math.min(screen.width, screen.height) < 900;
+  if(!tel) return;
+  document.documentElement.classList.add('tel');
+  var meta = document.querySelector('meta[name=viewport]');
+  function ayarla(){
+    var yatay = matchMedia('(orientation: landscape)').matches;
+    var gen = yatay ? Math.max(screen.width, screen.height) : Math.min(screen.width, screen.height);
+    var o = Math.min(1, gen / 1300).toFixed(4);
+    meta.setAttribute('content', 'width=1300, initial-scale=' + o + ', minimum-scale=' + o
+      + ', maximum-scale=' + o + ', user-scalable=no');
+  }
+  ayarla();
+  window.addEventListener('orientationchange', function(){ setTimeout(ayarla, 250); });
+  // iOS Safari user-scalable=no'yu yok sayar; parmak hareketleri ayrıca engellenir.
+  ['gesturestart','gesturechange','gestureend'].forEach(function(ad){
+    document.addEventListener(ad, function(e){ e.preventDefault(); }, {passive:false});
+  });
+  document.addEventListener('touchmove', function(e){
+    if(e.touches.length > 1 || (e.scale !== undefined && e.scale !== 1)) e.preventDefault();
+  }, {passive:false});
+})();
+</script>
 <title>Mağaza Performans Raporu</title>
 <link rel="icon" type="image/svg+xml" href="simge.svg">
 <link rel="icon" type="image/png" sizes="192x192" href="simge-192.png">
@@ -22,6 +50,8 @@
   :root{ --accent:#C8A066; --dark:#2d2d2d; --bg:#f6f4f1; --line:#e2ddd4; --pasif:#aaa;
          --grey:#d9d9d9; --yellow:#fff2a8; --green:#2e7d32; --red:#a34141; }
   *{box-sizing:border-box;}
+  /* Telefonda yakınlaştırma yok: yalnızca kaydırma serbest. */
+  html.tel, html.tel body{ touch-action:pan-x pan-y; }
   body{ margin:0; font-family:'Segoe UI', system-ui, sans-serif; background:var(--bg); color:#222; font-size:12.5px; }
   header{
     background:#fff; border-bottom:1px solid var(--line);
@@ -853,7 +883,7 @@
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 6;
+const APP_SURUM = 7;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -869,6 +899,21 @@ function arayuzOlcek(){
 }
 arayuzOlcek();
 window.addEventListener('resize', arayuzOlcek);
+
+// Telefonda giriş kutusu ekranın genişliğine (yatayda yüksekliğine) göre büyütülür.
+function girisOlcekle(){
+  const kart = document.getElementById('girisForm');
+  if(!kart) return;
+  kart.style.zoom = '';
+  if(!telefonMu() || kart.offsetParent === null) return;
+  const gen = document.documentElement.clientWidth;
+  const yuk = window.innerHeight;
+  const z = Math.min(gen * 0.9 / kart.offsetWidth, yuk * 0.88 / kart.offsetHeight);
+  if(z > 1) kart.style.zoom = z.toFixed(3);
+}
+window.addEventListener('resize', girisOlcekle);
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(girisOlcekle);
+window.addEventListener('orientationchange', ()=> setTimeout(girisOlcekle, 300));
 
 function uiDialog(o){
   return new Promise(res=>{
@@ -1409,6 +1454,7 @@ function girisHatasiMetni(e){
 
 function ekranGoster(ad){
   document.getElementById('girisEkrani').style.display = ad === 'giris' ? '' : 'none';
+  if(ad === 'giris') girisOlcekle();
   document.getElementById('bolgePaneli').style.display = ad === 'panel' ? '' : 'none';
   document.getElementById('appRoot').style.display = ad === 'uygulama' ? '' : 'none';
 }
