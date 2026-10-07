@@ -34,3 +34,10 @@ Giriş ekranının arka plan fotoğrafı `giris-arka.jpg`.
 |---|---|
 | `rapor.html` | Uygulamanın tamamı (HTML, CSS, JS tek dosyada) |
 | `firestore.rules` | Güvenlik kuralları |
+
+## Transfer · Kırık
+
+- Telefonda: irsaliye 1-4 yazılır, 1-6 / depo / tarih otomatik bulunur. Fotoğraflar: Kutu 1–4, Kırık, Tutanak (imzalı).
+- Bilgisayarda "Bekleyen deposu Excel'i yükle": eşleşmeler `stores/{m}/irsaliyeler/{1-6}` altına kaydedilir ve Outlook'ta taslak olarak açılan `bekleyen deposu hk.eml` iner. İmza `stores/{m}/settings/mail.imza` (Mail imzası butonu).
+- "Kırık tutanağı": EBA formu kopyalanıp yapıştırılır, tutanak yazdırılır.
+- İnen klasörler: `37 · 06.10.2026 · 1-S-6-…` içinde `kutu-1..4.jpg`, `kirik.jpg`, `tutanak.jpg`. Kartlarda "EBA'ya işlendi" işareti.
