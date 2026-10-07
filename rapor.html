@@ -765,6 +765,7 @@ if(!document.documentElement.classList.contains('tel')){
   }
   html.tel .tel-buyuk-btn:disabled{ opacity:.6; }
   html.tel .wp-btn{ background:#1f8a4c; }
+  html.tel #wpMsgBtn{ background:#fff; color:#1f8a4c; border:1.5px solid #1f8a4c; }
 
   /* Veri girişi penceresi */
   html.tel .tvf-arka{
@@ -1077,7 +1078,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 20;
+const APP_SURUM = 21;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -2410,7 +2411,51 @@ if(TELEFON){
 // sonra "Görseli paylaş"a dokununca paylaşım menüsü açılır (tarayıcılar paylaşımı
 // yalnızca doğrudan dokunuşla açtırır).
 let telHazirGorsel = null;
+let telHazirIkisi = null;   // {dosya, metin}
+async function telRaporGorseli(){
+  const canvas = await generateReportCanvas();
+  const blob = await new Promise(res=> canvas.toBlob(res, 'image/png'));
+  return new File([blob], 'rapor-' + todayStr(0) + '.png', {type:'image/png'});
+}
 if(TELEFON){
+  // Görsel + mesaj tek seferde: ilk dokunuşta mesaj panoya kopyalanır ve görsel hazırlanır,
+  // ikinci dokunuşta paylaşım menüsü görsel ve mesajla birlikte açılır (WhatsApp'ı seç).
+  // WhatsApp mesajı görselin altına yazmazsa panodaki mesaj açıklama kutusuna yapıştırılabilir.
+  document.addEventListener('click', async e=>{
+    const btn = e.target.closest && e.target.closest('#ikisiBtn');
+    if(!btn) return;
+    e.preventDefault();
+    if(telHazirIkisi){
+      const {dosya, metin} = telHazirIkisi;
+      telHazirIkisi = null;
+      btn.textContent = '📤 Görsel + mesajı gönder';
+      try{
+        if(navigator.canShare && navigator.canShare({files:[dosya]})){
+          await navigator.share({files:[dosya], text:metin});
+        } else {
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(dosya); a.download = dosya.name; a.click();
+          setTimeout(()=> URL.revokeObjectURL(a.href), 4000);
+          window.location.href = 'https://wa.me/?text=' + encodeURIComponent(metin);
+        }
+      }catch(err){ if(err && err.name !== 'AbortError') uiBildirim('Paylaşılamadı: ' + err.message, 'hata'); }
+      return;
+    }
+    const metin = buildDailyMessage();
+    copyTextToClipboard(metin);   // dokunuş anında; paylaşımda metin düşerse yapıştırmak için
+    btn.disabled = true;
+    btn.textContent = 'Hazırlanıyor...';
+    try{
+      telHazirIkisi = {dosya: await telRaporGorseli(), metin};
+      btn.textContent = '✅ Hazır — göndermek için dokun';
+    }catch(err){
+      uiBildirim('Görsel hazırlanamadı: ' + err.message, 'hata');
+      btn.textContent = '📤 Görsel + mesajı gönder';
+    }finally{
+      btn.disabled = false;
+    }
+  }, true);
+
   document.addEventListener('click', async e=>{
     const wp = e.target.closest && e.target.closest('#wpMsgBtn');
     if(wp){
@@ -2442,9 +2487,7 @@ if(TELEFON){
     btn.disabled = true;
     btn.textContent = 'Hazırlanıyor...';
     try{
-      const canvas = await generateReportCanvas();
-      const blob = await new Promise(res=> canvas.toBlob(res, 'image/png'));
-      telHazirGorsel = new File([blob], 'rapor-' + todayStr(0) + '.png', {type:'image/png'});
+      telHazirGorsel = await telRaporGorseli();
       btn.textContent = '📤 Görseli paylaş';
     }catch(err){
       uiBildirim('Görsel hazırlanamadı: ' + err.message, 'hata');
@@ -3534,7 +3577,8 @@ function renderReportPanel(){
     <span class="msg-label">Yorum (mesaja eklenecek):</span>
     <textarea id="yorumBox" placeholder="Yorumunuzu buraya yazın..."></textarea>
     <button class="send-btn" id="copyMsgBtn">📋 Mesajı Kopyala</button>
-    <button class="send-btn wp-btn sadece-tel" id="wpMsgBtn">💬 WhatsApp'a gönder</button>
+    <button class="send-btn wp-btn sadece-tel" id="ikisiBtn">📤 Görsel + mesajı gönder</button>
+    <button class="send-btn wp-btn sadece-tel" id="wpMsgBtn">💬 Sadece mesajı WhatsApp'a gönder</button>
   </div>
   ${(function(){
     const now = getNow();
