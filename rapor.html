@@ -607,6 +607,39 @@ if(!document.documentElement.classList.contains('tel')){
   .page-layout{ display:flex; gap:14px; align-items:flex-start; padding:14px; margin:0; }
   .left-col{ flex:1 1 auto; min-width:0; }
   .right-col{ flex:0 0 300px; }
+  .grafik-kart{ background:#fff; border:1px solid var(--line); border-radius:12px; padding:14px 16px 10px; margin-top:14px; }
+  .gr-ust{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .gr-baslik{ font-size:.95rem; font-weight:700; color:var(--dark); }
+  .gr-secim{ display:flex; gap:8px; flex-wrap:wrap; }
+  .gr-seg{ display:inline-flex; background:#f1efe9; border-radius:9px; padding:3px; gap:2px; flex-wrap:wrap; }
+  .gr-seg button{ background:none; border:none; padding:5px 10px; border-radius:7px; cursor:pointer; font-family:inherit; font-size:.76rem; color:#666; }
+  .gr-seg button.on{ background:#fff; color:var(--dark); font-weight:700; box-shadow:0 1px 3px rgba(0,0,0,.08); }
+  .gr-alt-baslik{ display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin:12px 0 4px; font-size:.82rem; color:var(--dark); }
+  .gr-alt-baslik span{ color:#77726a; font-size:.76rem; }
+  .gr-lejant{ display:flex; gap:14px; flex-wrap:wrap; font-size:.74rem; color:#55514a; margin:2px 0 4px; }
+  .gr-lejant span{ display:inline-flex; align-items:center; gap:5px; }
+  .gr-k-sutun{ display:inline-block; width:10px; height:10px; border-radius:2px; background:#2a78d6; }
+  .gr-k-sutun.soluk{ opacity:.4; }
+  .gr-k-cizgi{ display:inline-block; width:14px; height:2px; border-radius:1px; background:#eb6834; }
+  .gr-alan{ position:relative; }
+  .gr-svg{ display:block; width:100%; height:auto; overflow:visible; font-family:inherit; }
+  .gr-hedef-alan{ cursor:crosshair; outline:none; }
+  .gr-sutun{ transition:opacity .1s; }
+  .gr-sutun.vurgu{ filter:brightness(1.15); }
+  .gr-ipucu{ position:absolute; pointer-events:none; background:#fff; border:1px solid var(--line); border-radius:8px; padding:7px 10px;
+    box-shadow:0 4px 14px rgba(0,0,0,.1); font-size:.76rem; color:#55514a; min-width:120px; z-index:2; }
+  .gr-ipucu .gr-ip-bas{ font-size:.7rem; color:#8a857c; margin-bottom:3px; }
+  .gr-ipucu div{ display:flex; align-items:center; gap:6px; white-space:nowrap; }
+  .gr-ipucu b{ color:#2b2b2b; font-size:.84rem; }
+  .gr-ipucu .gr-k-cizgi, .gr-ipucu .gr-k-sutun{ flex:none; }
+  .gr-ipucu .gr-k-sutun{ width:14px; height:2px; }
+  .gr-tablo{ margin-top:4px; font-size:.76rem; color:#77726a; }
+  .gr-tablo summary{ cursor:pointer; padding:4px 0; }
+  .gr-tablo table{ width:100%; border-collapse:collapse; margin-top:6px; }
+  .gr-tablo th, .gr-tablo td{ text-align:right; padding:4px 6px; border-bottom:1px solid #f1eee8; color:#333; font-variant-numeric:tabular-nums; }
+  .gr-tablo th:first-child, .gr-tablo td:first-child{ text-align:left; }
+  html.tel .grafik-kart{ margin-top:10px; padding:12px 12px 8px; }
+  html.tel .gr-seg button{ padding:6px 8px; font-size:.74rem; }
 
   .month-grid{ display:grid; grid-template-columns:1fr 1fr; grid-template-rows:repeat(3, auto); grid-auto-flow:column; gap:10px; }
   @media (max-width: 900px){ .page-layout{ flex-direction:column; } .month-grid{ grid-template-columns:1fr; grid-auto-flow:row; } .right-col{ flex:1 1 auto; width:100%; } }
@@ -1305,6 +1338,7 @@ if(!document.documentElement.classList.contains('tel')){
 <div class="page-layout" id="raporPage">
   <div class="left-col">
     <div class="month-grid" id="monthContainer"></div>
+    <div class="grafik-kart" id="grafikKart"></div>
     <div class="status-msg" id="statusMsg">Buraya yapıştırın, otomatik işlenir.</div>
     <div class="last-edit-info" id="lastEditInfo"></div>
   </div>
@@ -1441,7 +1475,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 42;
+const APP_SURUM = 43;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -3533,9 +3567,313 @@ function telKisalt(kok){
     window[ad] = function(){ const r = asil.apply(this, arguments); haftaIsaretle(); return r; };
   }
   sar('renderReportPanel', ()=> document.getElementById('reportPanel'));
+  // Veri her yeniden çizildiğinde grafik de güncellenir.
+  for(const ad of ['renderReportPanel', 'refreshWeekBlockByKey']){
+    const asil = window[ad];
+    window[ad] = function(){ const r = asil.apply(this, arguments); grafikPlanla(); return r; };
+  }
   sar('bpCiz', ()=> document.getElementById('bpTablo'));
   const asilBpCiz = window.bpCiz;
   window.bpCiz = function(){ const r = asilBpCiz.apply(this, arguments); bpKartlariCiz(); return r; };
+}
+
+// ==================== GRAFİKLER ====================
+// Ana sayfanın altında: son 30 gün ya da son 12 hafta; ciro (hedefle birlikte), MDO, FBS, FBÜ, MGS, toplu satış.
+// Tek eksen; ciro ve toplu satış sütun, diğerleri çizgi. Üzerine gelince değerler görünür, tablo görünümü de var.
+const GRAFIK = {donem:'gun', olcu:'ciro'};
+const GRAFIK_OLCULER = [
+  {k:'ciro',  ad:'Ciro',        tur:'sutun'},
+  {k:'mdo',   ad:'MDO',         tur:'cizgi'},
+  {k:'fbs',   ad:'FBS',         tur:'cizgi'},
+  {k:'fbu',   ad:'FBÜ',         tur:'cizgi'},
+  {k:'mgs',   ad:'MGS',         tur:'cizgi'},
+  {k:'toplu', ad:'Toplu satış', tur:'sutun'}
+];
+const GR_RENK = {veri:'#2a78d6', hedef:'#eb6834', izgara:'#ebe7df', eksen:'#8a857c', metin:'#2b2b2b', soluk:'#77726a', zemin:'#ffffff'};
+const GR_GUNLER = ['Pzt','Sal','Çar','Per','Cum','Cmt','Paz'];
+
+function grDeger(r, olcu){
+  if(!r) return null;
+  const sayi = v=> (v === null || v === undefined || v === '' || isNaN(Number(v))) ? null : Number(v);
+  if(olcu === 'mdo'){ const v = mdoToNumber(r.mdo); return v === null || isNaN(v) ? null : v; }
+  if(olcu === 'toplu') return sayi(r.toplu_satis);
+  return sayi(r[olcu]);
+}
+function grafikVerisi(){
+  const bugun = getNow(); bugun.setHours(0, 0, 0, 0);
+  const olcu = GRAFIK.olcu;
+  const noktalar = [];
+  if(GRAFIK.donem === 'gun'){
+    for(let i = 29; i >= 0; i--){
+      const d = new Date(bugun); d.setDate(d.getDate() - i);
+      const r = getRecord(dateStr(d));
+      const deger = grDeger(r, olcu);
+      noktalar.push({
+        etiket: pad(d.getDate()) + '.' + pad(d.getMonth() + 1),
+        uzun: kisaTarih(d) + ' ' + GR_GUNLER[(d.getDay() + 6) % 7],
+        deger,
+        hedef: olcu === 'ciro' && deger !== null ? effectiveHedef(r) : null,
+        devam: i === 0
+      });
+    }
+  } else {
+    const buPzt = mondayOf(bugun);
+    for(let i = 11; i >= 0; i--){
+      const pzt = new Date(buPzt); pzt.setDate(pzt.getDate() - i * 7);
+      const h = computeWeekDerived(pzt);
+      const dolu = h.records.some(r=> grDeger(r, olcu) !== null);
+      const deger = !dolu ? null
+        : olcu === 'ciro' ? h.ciroToplam
+        : olcu === 'mdo' ? h.mdoAvg
+        : olcu === 'fbs' ? h.fbsAvg
+        : olcu === 'fbu' ? h.fbuAvg
+        : olcu === 'mgs' ? h.mgsTotal
+        : h.topluToplam;
+      const paz = new Date(pzt); paz.setDate(paz.getDate() + 6);
+      noktalar.push({
+        etiket: 'H' + h.week,
+        uzun: shortDate(pzt) + ' – ' + shortDate(paz) + ' (Hafta ' + h.week + ')',
+        deger,
+        hedef: olcu === 'ciro' && dolu ? (h.weekGoal || h.hedefToplam) : null,
+        devam: i === 0
+      });
+    }
+  }
+  return noktalar;
+}
+function grBicim(v, olcu, kisa){
+  if(v === null || v === undefined || isNaN(v)) return '–';
+  if(olcu === 'mdo') return '%' + (kisa ? Math.round(v) : v.toFixed(1).replace('.', ','));
+  if(olcu === 'fbu') return v.toFixed(kisa ? 1 : 2).replace('.', ',');
+  if(olcu === 'toplu') return Math.round(v).toLocaleString('tr-TR') + ' K';
+  if(olcu === 'mgs') return Math.round(v).toLocaleString('tr-TR');
+  // TL
+  if(kisa){
+    if(v === 0) return '0';
+    if(Math.abs(v) >= 1e6) return (v / 1e6).toFixed(1).replace('.', ',').replace(',0', '') + ' mn';
+    if(Math.abs(v) >= 1e3) return Math.round(v / 1e3).toLocaleString('tr-TR') + ' bin';
+  }
+  return Math.round(v).toLocaleString('tr-TR') + ' TL';
+}
+function grTemizAdim(aralik, adet){
+  const kaba = aralik / Math.max(1, adet);
+  const us = Math.pow(10, Math.floor(Math.log10(kaba || 1)));
+  const n = kaba / us;
+  return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10) * us;
+}
+
+let grafikZaman = null;
+function grafikPlanla(){
+  cancelAnimationFrame(grafikZaman);
+  grafikZaman = requestAnimationFrame(grafikCiz);
+}
+function grafikCiz(){
+  const kart = document.getElementById('grafikKart');
+  if(!kart || !aktifProfil) return;
+  // Telefonda grafik sağ sütunun en altına (ay özetinin altına) alınır.
+  if(TELEFON){
+    const sag = document.querySelector('#raporPage .right-col');
+    if(sag && kart.parentNode !== sag) sag.appendChild(kart);
+  }
+  if(document.getElementById('raporPage').style.display === 'none') return;
+  const olcuTanim = GRAFIK_OLCULER.find(o=> o.k === GRAFIK.olcu);
+  const noktalar = grafikVerisi();
+  const degerler = noktalar.map(n=> n.deger).filter(v=> v !== null);
+  const toplanir = ['ciro', 'mgs', 'toplu'].includes(GRAFIK.olcu);
+  const ozet = !degerler.length ? 'Bu dönemde veri yok.'
+    : (toplanir ? 'Toplam ' + grBicim(degerler.reduce((a, b)=> a + b, 0), GRAFIK.olcu) + ' · ' : '')
+      + 'Ortalama ' + grBicim(degerler.reduce((a, b)=> a + b, 0) / degerler.length, GRAFIK.olcu)
+      + ' · En yüksek ' + grBicim(Math.max(...degerler), GRAFIK.olcu);
+
+  kart.innerHTML =
+    '<div class="gr-ust"><div class="gr-baslik">📈 Grafikler</div>' +
+      '<div class="gr-secim"><span class="gr-seg" data-k="donem">' +
+        '<button type="button" data-v="gun"' + (GRAFIK.donem === 'gun' ? ' class="on"' : '') + '>Son 30 gün</button>' +
+        '<button type="button" data-v="hafta"' + (GRAFIK.donem === 'hafta' ? ' class="on"' : '') + '>Son 12 hafta</button></span>' +
+        '<span class="gr-seg gr-olcu" data-k="olcu">' + GRAFIK_OLCULER.map(o=>
+          '<button type="button" data-v="' + o.k + '"' + (GRAFIK.olcu === o.k ? ' class="on"' : '') + '>' + o.ad + '</button>').join('') + '</span>' +
+      '</div></div>' +
+    '<div class="gr-alt-baslik"><b>' + olcuTanim.ad + (GRAFIK.donem === 'hafta' ? (toplanir ? ' · haftalık toplam' : ' · haftalık ortalama') : ' · günlük') + '</b>' +
+      '<span>' + escapeHtml(ozet) + '</span></div>' +
+    (GRAFIK.olcu === 'ciro' ? '<div class="gr-lejant"><span><i class="gr-k-sutun"></i>Ciro</span><span><i class="gr-k-cizgi"></i>Hedef</span>' +
+      '<span class="gr-soluk"><i class="gr-k-sutun soluk"></i>' + (GRAFIK.donem === 'gun' ? 'Bugün (gün sürüyor)' : 'Bu hafta (sürüyor)') + '</span></div>' : '') +
+    '<div class="gr-alan"><svg class="gr-svg" role="img" aria-label="' + olcuTanim.ad + ' grafiği"></svg><div class="gr-ipucu" hidden></div></div>' +
+    '<details class="gr-tablo"><summary>Tablo olarak göster</summary><div></div></details>';
+
+  kart.querySelectorAll('.gr-seg button').forEach(b=> b.addEventListener('click', ()=>{
+    GRAFIK[b.parentNode.dataset.k] = b.dataset.v;
+    grafikCiz();
+  }));
+
+  // Tablo görünümü (değerler grafiğe bakmadan da okunur)
+  const tablo = document.createElement('table');
+  const bas = tablo.insertRow();
+  [GRAFIK.donem === 'gun' ? 'Gün' : 'Hafta', olcuTanim.ad].concat(GRAFIK.olcu === 'ciro' ? ['Hedef', 'Oran'] : []).forEach(t=>{
+    const th = document.createElement('th'); th.textContent = t; bas.appendChild(th);
+  });
+  noktalar.slice().reverse().forEach(n=>{
+    const tr = tablo.insertRow();
+    const hucreler = [n.uzun, grBicim(n.deger, GRAFIK.olcu)];
+    if(GRAFIK.olcu === 'ciro') hucreler.push(grBicim(n.hedef, 'ciro'), n.deger !== null && n.hedef ? '%' + Math.round(n.deger / n.hedef * 100) : '–');
+    hucreler.forEach(t=>{ const td = tr.insertCell(); td.textContent = t; });
+  });
+  kart.querySelector('.gr-tablo div').appendChild(tablo);
+
+  const alan = kart.querySelector('.gr-alan');
+  const svg = kart.querySelector('.gr-svg');
+  const W = Math.max(260, alan.clientWidth || 600);
+  const H = TELEFON ? 210 : 250;
+  const m = {sol: TELEFON ? 44 : 56, sag: 14, ust: 18, alt: 26};
+  const pw = W - m.sol - m.sag, ph = H - m.ust - m.alt;
+  svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+  svg.setAttribute('width', W); svg.setAttribute('height', H);
+  if(!degerler.length){
+    svg.innerHTML = '<text x="' + (W / 2) + '" y="' + (H / 2) + '" text-anchor="middle" fill="' + GR_RENK.soluk + '" font-size="13">Bu dönemde veri yok</text>';
+    return;
+  }
+
+  const sutun = olcuTanim.tur === 'sutun';
+  const tum = degerler.concat(noktalar.map(n=> n.hedef).filter(v=> v !== null));
+  let ymin = sutun ? 0 : Math.min(...tum), ymax = Math.max(...tum);
+  if(!sutun){ const pay = (ymax - ymin) * 0.15 || Math.abs(ymax) * 0.1 || 1; ymin = Math.max(0, ymin - pay); ymax += pay; }
+  const adim = grTemizAdim(ymax - ymin, 4);
+  ymin = Math.floor(ymin / adim) * adim;
+  ymax = Math.ceil(ymax / adim) * adim;
+  if(ymax === ymin) ymax = ymin + adim;
+  const y = v=> m.ust + ph - (v - ymin) / (ymax - ymin) * ph;
+  const bant = pw / noktalar.length;
+  const x = i=> m.sol + bant * i + bant / 2;
+
+  let s = '';
+  // Izgara ve y ekseni
+  for(let v = ymin; v <= ymax + adim / 2; v += adim){
+    const yy = Math.round(y(v)) + 0.5;
+    s += '<line x1="' + m.sol + '" x2="' + (W - m.sag) + '" y1="' + yy + '" y2="' + yy + '" stroke="' + GR_RENK.izgara + '" stroke-width="1"/>';
+    s += '<text x="' + (m.sol - 6) + '" y="' + (yy + 4) + '" text-anchor="end" font-size="10.5" fill="' + GR_RENK.soluk + '">' + escapeHtml(grBicim(v, GRAFIK.olcu, true)) + '</text>';
+  }
+  // X etiketleri (sığdığı kadar)
+  const her = Math.max(1, Math.ceil(noktalar.length / Math.floor(pw / 46)));
+  noktalar.forEach((n, i)=>{
+    if((noktalar.length - 1 - i) % her) return;
+    s += '<text x="' + x(i) + '" y="' + (H - 8) + '" text-anchor="middle" font-size="10.5" fill="' + GR_RENK.soluk + '">' + escapeHtml(n.etiket) + '</text>';
+  });
+  // Veri
+  if(sutun){
+    const g = Math.min(24, bant * 0.68);
+    noktalar.forEach((n, i)=>{
+      if(n.deger === null) return;
+      const y0 = y(ymin), y1 = y(Math.max(ymin, n.deger));
+      const h = Math.max(0, y0 - y1), r = Math.min(4, h, g / 2), x0 = x(i) - g / 2;
+      s += '<path class="gr-sutun" data-i="' + i + '" d="M' + x0 + ' ' + y0 + 'V' + (y1 + r) + 'Q' + x0 + ' ' + y1 + ' ' + (x0 + r) + ' ' + y1 +
+        'H' + (x0 + g - r) + 'Q' + (x0 + g) + ' ' + y1 + ' ' + (x0 + g) + ' ' + (y1 + r) + 'V' + y0 + 'Z" fill="' + GR_RENK.veri + '"' + (n.devam ? ' fill-opacity="0.4"' : '') + '/>';
+    });
+  } else {
+    let yol = '', acik = false;
+    noktalar.forEach((n, i)=>{
+      if(n.deger === null){ acik = false; return; }
+      yol += (acik ? 'L' : 'M') + x(i) + ' ' + y(n.deger);
+      acik = true;
+    });
+    s += '<path d="' + yol + '" fill="none" stroke="' + GR_RENK.veri + '" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
+    // Tek başına kalan noktalar görünsün diye küçük işaret
+    noktalar.forEach((n, i)=>{
+      if(n.deger === null) return;
+      const yalniz = (i === 0 || noktalar[i - 1].deger === null) && (i === noktalar.length - 1 || noktalar[i + 1].deger === null);
+      if(yalniz) s += '<circle cx="' + x(i) + '" cy="' + y(n.deger) + '" r="3" fill="' + GR_RENK.veri + '"/>';
+    });
+  }
+  // Hedef (ciro): her sütunun üstünde kısa bir çizgi; günden güne değişen hedef de doğru görünür.
+  if(GRAFIK.olcu === 'ciro'){
+    const g = Math.min(24, bant * 0.68) + 6;
+    noktalar.forEach((n, i)=>{
+      if(n.hedef === null) return;
+      const yy = y(Math.min(ymax, n.hedef));
+      s += '<line x1="' + (x(i) - g / 2) + '" x2="' + (x(i) + g / 2) + '" y1="' + yy + '" y2="' + yy + '" stroke="' + GR_RENK.zemin + '" stroke-width="4" stroke-linecap="round"/>' +
+           '<line x1="' + (x(i) - g / 2) + '" x2="' + (x(i) + g / 2) + '" y1="' + yy + '" y2="' + yy + '" stroke="' + GR_RENK.hedef + '" stroke-width="2" stroke-linecap="round"/>';
+    });
+  }
+  // Son değerin etiketi (seçici etiket: yalnızca en son nokta)
+  const sonI = noktalar.map(n=> n.deger !== null).lastIndexOf(true);
+  if(sonI >= 0){
+    const n = noktalar[sonI];
+    if(!sutun) s += '<circle cx="' + x(sonI) + '" cy="' + y(n.deger) + '" r="4.5" fill="' + GR_RENK.veri + '" stroke="' + GR_RENK.zemin + '" stroke-width="2"/>';
+    const metin = escapeHtml(grBicim(n.deger, GRAFIK.olcu, true));
+    if(sutun){
+      // Sütunun üstünde; hedef çizgisi de oradaysa onun üstüne çıkar.
+      const ust = Math.min(y(n.deger), n.hedef !== null && GRAFIK.olcu === 'ciro' ? y(Math.min(ymax, n.hedef)) : Infinity);
+      s += '<text x="' + x(sonI) + '" y="' + Math.max(m.ust - 4, ust - 7) + '" text-anchor="middle" font-size="11" font-weight="700" fill="' + GR_RENK.metin + '">' + metin + '</text>';
+    } else {
+      // Çizginin sonunda, noktanın sağında (yer yoksa üstünde).
+      const yer = W - m.sag - x(sonI) > 40;
+      s += '<text x="' + (yer ? x(sonI) + 9 : x(sonI)) + '" y="' + (yer ? y(n.deger) + 4 : y(n.deger) - 10) + '" text-anchor="' + (yer ? 'start' : 'middle') + '" font-size="11" font-weight="700" fill="' + GR_RENK.metin + '">' + metin + '</text>';
+    }
+  }
+  // Üzerine gelme katmanı
+  s += '<line class="gr-capraz" x1="0" x2="0" y1="' + m.ust + '" y2="' + (m.ust + ph) + '" stroke="' + GR_RENK.eksen + '" stroke-width="1" visibility="hidden"/>';
+  s += '<circle class="gr-nokta" r="4.5" fill="' + GR_RENK.veri + '" stroke="' + GR_RENK.zemin + '" stroke-width="2" visibility="hidden"/>';
+  s += '<rect class="gr-hedef-alan" x="' + m.sol + '" y="' + m.ust + '" width="' + pw + '" height="' + ph + '" fill="transparent" tabindex="0"/>';
+  svg.innerHTML = s;
+
+  const ipucu = kart.querySelector('.gr-ipucu');
+  const capraz = svg.querySelector('.gr-capraz'), nokta = svg.querySelector('.gr-nokta');
+  let secili = -1;
+  const goster = i=>{
+    if(i < 0 || i >= noktalar.length){ gizle(); return; }
+    secili = i;
+    const n = noktalar[i];
+    svg.querySelectorAll('.gr-sutun').forEach(p=> p.classList.toggle('vurgu', Number(p.dataset.i) === i));
+    if(!sutun){
+      capraz.setAttribute('x1', x(i)); capraz.setAttribute('x2', x(i)); capraz.setAttribute('visibility', 'visible');
+      if(n.deger !== null){ nokta.setAttribute('cx', x(i)); nokta.setAttribute('cy', y(n.deger)); nokta.setAttribute('visibility', 'visible'); }
+      else nokta.setAttribute('visibility', 'hidden');
+    }
+    ipucu.textContent = '';
+    const ekle = (deger, ad, renk, tip)=>{
+      const satir = document.createElement('div');
+      if(renk){ const k = document.createElement('i'); k.className = tip === 'cizgi' ? 'gr-k-cizgi' : 'gr-k-sutun'; k.style.background = renk; satir.appendChild(k); }
+      const b = document.createElement('b'); b.textContent = deger; satir.appendChild(b);
+      if(ad){ const sp = document.createElement('span'); sp.textContent = ' ' + ad; satir.appendChild(sp); }
+      ipucu.appendChild(satir);
+    };
+    const bas = document.createElement('div'); bas.className = 'gr-ip-bas'; bas.textContent = n.uzun + (n.devam ? ' · sürüyor' : ''); ipucu.appendChild(bas);
+    ekle(grBicim(n.deger, GRAFIK.olcu), olcuTanim.ad, GR_RENK.veri, sutun ? 'sutun' : 'cizgi');
+    if(GRAFIK.olcu === 'ciro'){
+      ekle(grBicim(n.hedef, 'ciro'), 'Hedef', GR_RENK.hedef, 'cizgi');
+      if(n.deger !== null && n.hedef) ekle('%' + Math.round(n.deger / n.hedef * 100), 'hedefe oran');
+    }
+    ipucu.hidden = false;
+    const gen = ipucu.offsetWidth, sol = x(i) + 12;
+    ipucu.style.left = (sol + gen > W ? x(i) - gen - 12 : sol) + 'px';
+    ipucu.style.top = m.ust + 'px';
+  };
+  const gizle = ()=>{
+    secili = -1; ipucu.hidden = true;
+    capraz.setAttribute('visibility', 'hidden'); nokta.setAttribute('visibility', 'hidden');
+    svg.querySelectorAll('.gr-sutun.vurgu').forEach(p=> p.classList.remove('vurgu'));
+  };
+  const hedefAlan = svg.querySelector('.gr-hedef-alan');
+  const indeks = e=>{
+    const r = svg.getBoundingClientRect();
+    const px = (e.clientX - r.left) * (W / r.width);
+    return Math.min(noktalar.length - 1, Math.max(0, Math.floor((px - m.sol) / bant)));
+  };
+  hedefAlan.addEventListener('pointermove', e=> goster(indeks(e)));
+  hedefAlan.addEventListener('pointerdown', e=> goster(indeks(e)));
+  hedefAlan.addEventListener('pointerleave', e=>{ if(e.pointerType === 'mouse') gizle(); });
+  hedefAlan.addEventListener('focus', ()=> goster(sonI >= 0 ? sonI : noktalar.length - 1));
+  hedefAlan.addEventListener('blur', gizle);
+  hedefAlan.addEventListener('keydown', e=>{
+    if(e.key === 'ArrowLeft'){ e.preventDefault(); goster(Math.max(0, secili - 1)); }
+    if(e.key === 'ArrowRight'){ e.preventDefault(); goster(Math.min(noktalar.length - 1, secili + 1)); }
+  });
+}
+// Genişlik değişince (pencere, telefon döndürme) yeniden çizilir.
+if(window.ResizeObserver){
+  let sonGen = 0;
+  new ResizeObserver(girdiler=>{
+    const g = Math.round(girdiler[0].contentRect.width);
+    if(g && Math.abs(g - sonGen) > 4){ sonGen = g; grafikPlanla(); }
+  }).observe(document.getElementById('grafikKart'));
 }
 
 // ==================== TELEFON: ALT ÇUBUK DOKUNUŞU ====================
@@ -5449,7 +5787,7 @@ const MR_KILAVUZ = `
 <li><a href="#" data-git="mr-hafta">Haftalık tablolar</a></li>
 <li><a href="#" data-git="mr-ghbh">GH / BH / R kategori raporu</a></li>
 <li><a href="#" data-git="mr-rt">RT tablosu ve günlük mesaj</a></li>
-<li><a href="#" data-git="mr-ay">Ay özeti</a></li>
+<li><a href="#" data-git="mr-ay">Ay özeti ve grafikler</a></li>
 <li><a href="#" data-git="mr-geri">Geri al ve dışa aktar</a></li>
 <li><a href="#" data-git="mr-araclar">Araçlar</a></li>
 <li><a href="#" data-git="mr-hafiza">Kurumsal hafıza ve notlar</a></li>
@@ -5582,11 +5920,19 @@ const MR_KILAVUZ = `
 </ul>
 <a class="hk-yukari" href="#" data-git="mr-bas">↑ İçindekiler</a>
 
-<h3 id="mr-ay">8. Ay özeti</h3>
+<h3 id="mr-ay">8. Ay özeti ve grafikler</h3>
 <ul>
 <li>Sağ altta <b>📅 Ay Özeti</b>: bu ayın bugüne kadarki değerleri, geçen ayın aynı günlerine göre karşılaştırılır.</li>
 <li>Gösterilenler: toplam ciro, ortalama MDO, FBÜ, FBS, MGS ve toplu satış (toplam/ortalama).</li>
 <li>Yeşil ▲ artış, kırmızı ▼ düşüş demektir.</li>
+<li><b>📈 Grafikler</b> (bilgisayarda haftalık tabloların altında, telefonda sayfanın en altında):
+  <ul>
+  <li>Dönem: <b>Son 30 gün</b> (günlük) ya da <b>Son 12 hafta</b> (haftalık).</li>
+  <li>Ölçü: Ciro, MDO, FBS, FBÜ, MGS, Toplu satış.</li>
+  <li>Cirodaki turuncu çizgiler o günün / haftanın hedefidir. Açık renkli son sütun bugün ya da bu hafta, henüz bitmedi demektir.</li>
+  <li>Haftalıkta ciro, MGS ve toplu satış haftanın toplamı; MDO, FBS ve FBÜ haftanın ortalamasıdır.</li>
+  <li>Grafiğin üzerine gelince (telefonda dokununca) o günün değerleri görünür. "Tablo olarak göster" ile bütün değerler liste halinde açılır.</li>
+  </ul></li>
 </ul>
 <a class="hk-yukari" href="#" data-git="mr-bas">↑ İçindekiler</a>
 
