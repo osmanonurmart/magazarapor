@@ -678,6 +678,18 @@ if(!document.documentElement.classList.contains('tel')){
     border:2px solid #d2cdc6; border-radius:8px; font-size:1rem; font-family:inherit; color:#222; background:#fff;
   }
   .giris-kart input:focus{ outline:none; border-color:#8a8a8a; }
+  .sifre-kutu{ position:relative; margin:0 0 28px; }
+  .sifre-kutu input{ margin:0; padding-right:52px; }
+  .sifre-kutu input::-ms-reveal{ display:none; }
+  .sifre-goz{
+    position:absolute; right:4px; top:50%; transform:translateY(-50%); width:44px; height:44px;
+    border:none; background:none; cursor:pointer; padding:0; display:flex; align-items:center; justify-content:center; color:#777;
+  }
+  .sifre-goz:hover{ color:#333; }
+  .sifre-goz svg{ width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+  .sifre-goz .goz-kapali{ display:none; }
+  .sifre-goz.acik .goz-acik{ display:none; }
+  .sifre-goz.acik .goz-kapali{ display:inline; }
   .giris-btn{
     display:block; width:100%; height:52px; margin-top:4px; border:none; border-radius:8px;
     background:#333; color:#fff; font-size:.95rem; font-weight:700; letter-spacing:.06em;
@@ -998,7 +1010,10 @@ if(!document.documentElement.classList.contains('tel')){
     <input type="text" id="girisKadi" name="username" autocomplete="username"
            autocapitalize="none" autocorrect="off" spellcheck="false">
     <label for="girisSifre">ŞİFRE</label>
-    <input type="password" id="girisSifre" name="password" autocomplete="current-password">
+    <div class="sifre-kutu">
+      <input type="password" id="girisSifre" name="password" autocomplete="current-password">
+      <button type="button" class="sifre-goz" id="sifreGoz" title="Şifreyi göster" aria-label="Şifreyi göster"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="goz-acik" d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle class="goz-acik" cx="12" cy="12" r="3"/><path class="goz-kapali" d="M3 3l18 18"/><path class="goz-kapali" d="M10.6 5.1A10 10 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4.1M6.6 6.6C3.8 8.4 2 12 2 12s3.6 7 10 7a9.8 9.8 0 0 0 5.4-1.6"/><path class="goz-kapali" d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg></button>
+    </div>
     <button type="submit" class="giris-btn" id="girisBtn" disabled>YÜKLENİYOR...</button>
     <div class="giris-hata" id="girisHata"></div>
   </form>
@@ -1285,7 +1300,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 32;
+const APP_SURUM = 33;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -1889,6 +1904,9 @@ function girisEkraniGoster(hata){
   girisZamanAsiminiKaldir();
   document.getElementById('girisYukleme').style.display = 'none';
   document.getElementById('girisForm').style.display = '';
+  // Çıkış yapınca şifre açık kalmasın
+  document.getElementById('girisSifre').type = 'password';
+  document.getElementById('sifreGoz').classList.remove('acik');
   girisOlcekle();
   const h = document.getElementById('girisHata');
   h.textContent = hata || '';
@@ -1937,6 +1955,20 @@ async function cikisYap(){
   bp.veri = {};
   await auth.signOut();
 }
+
+// Şifreyi göster / gizle (göz simgesi)
+document.getElementById('sifreGoz').addEventListener('click', ()=>{
+  const inp = document.getElementById('girisSifre');
+  const btn = document.getElementById('sifreGoz');
+  const goster = inp.type === 'password';
+  inp.type = goster ? 'text' : 'password';
+  btn.classList.toggle('acik', goster);
+  btn.title = goster ? 'Şifreyi gizle' : 'Şifreyi göster';
+  btn.setAttribute('aria-label', btn.title);
+  inp.focus();
+  const n = inp.value.length;
+  try{ inp.setSelectionRange(n, n); }catch(e){}
+});
 
 async function oturumuKur(user){
   const kadi = kullaniciAdiOf(user);
