@@ -907,6 +907,10 @@ if(!document.documentElement.classList.contains('tel')){
   }
   .chip-menu button:hover{ background:#f1efe9; color:var(--dark); }
   .chip-menu .sep{ height:1px; background:var(--line); margin:4px 2px; }
+  .sifre-dlg label{ display:block; text-align:left; font-size:calc(var(--k)*.78rem); color:#666; margin:0 0 calc(var(--k)*10px); }
+  .sifre-dlg label .ui-input{ margin-top:4px; }
+  .sifre-dlg .sifre-goster{ display:flex; align-items:center; gap:6px; }
+  .sifre-hata{ color:#a34141; font-size:calc(var(--k)*.8rem); min-height:1.2em; margin-bottom:6px; }
 
 
   /* ==================== TELEFON DÜZENİ ====================
@@ -1152,6 +1156,8 @@ if(!document.documentElement.classList.contains('tel')){
           <span class="pc-av" style="background:#3f6b8a"><span class="masa-metin">📊</span><svg class="tel-ikon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V11"/><path d="M10 20V5"/><path d="M16 20v-6"/><path d="M21 20H3"/></svg></span><span id="bpChipAd"></span>
         </button>
         <div class="chip-menu" id="bpChipMenu" style="display:none;">
+          <button type="button" class="sifre-degistir-btn">🔑 Şifre değiştir</button>
+          <div class="sep"></div>
           <button type="button" id="bpCikis">🚪 Çıkış yap</button>
         </div>
       </span>
@@ -1254,6 +1260,8 @@ if(!document.documentElement.classList.contains('tel')){
         <div class="chip-menu" id="chipMenu" style="display:none;">
           <button type="button" id="chipMagazaBtn">◀ Bölge paneline dön</button>
           <div class="sep" id="chipMagazaSep"></div>
+          <button type="button" class="sifre-degistir-btn">🔑 Şifre değiştir</button>
+          <div class="sep"></div>
           <button type="button" id="chipCikisBtn">🚪 Çıkış yap</button>
         </div>
       </span>
@@ -1408,7 +1416,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 39;
+const APP_SURUM = 40;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -2208,6 +2216,71 @@ document.getElementById('profileChip').addEventListener('click', e=>{ e.stopProp
 document.getElementById('chipMagazaBtn').addEventListener('click', ()=> bolgePaneliniAc(true));
 document.getElementById('bolgePanelBtn').addEventListener('click', ()=> bolgePaneliniAc(true));
 document.getElementById('chipCikisBtn').addEventListener('click', cikisYap);
+document.querySelectorAll('.sifre-degistir-btn').forEach(b=> b.addEventListener('click', ()=>{ kapatChipMenu(); sifreDegistir(); }));
+
+// Kullanıcı kendi şifresini değiştirir: güvenlik için önce mevcut şifre doğrulanır.
+function sifreDegistir(){
+  const user = auth.currentUser;
+  if(!user) return;
+  const ov = document.createElement('div');
+  ov.className = 'ui-ov';
+  ov.innerHTML = '<div class="ui-dlg sifre-dlg">'
+    + '<div class="ui-ikon">🔑</div><div class="ui-baslik">Şifre değiştir</div>'
+    + '<label>Mevcut şifre<input class="ui-input" type="password" data-k="eski" autocomplete="current-password"></label>'
+    + '<label>Yeni şifre<input class="ui-input" type="password" data-k="yeni" autocomplete="new-password" placeholder="En az 6 karakter"></label>'
+    + '<label>Yeni şifre (tekrar)<input class="ui-input" type="password" data-k="tekrar" autocomplete="new-password"></label>'
+    + '<label class="sifre-goster"><input type="checkbox" data-k="goster"> Şifreleri göster</label>'
+    + '<div class="sifre-hata"></div>'
+    + '<div class="ui-btns"><button type="button" class="ui-btn" data-k="vazgec">Vazgeç</button>'
+    + '<button type="button" class="ui-btn birincil" data-k="kaydet">Değiştir</button></div></div>';
+  const al = k=> ov.querySelector('[data-k="' + k + '"]');
+  const hata = ov.querySelector('.sifre-hata');
+  const kapat = ()=>{ ov.remove(); document.removeEventListener('keydown', tus, true); };
+  const tus = e=>{
+    if(e.key === 'Escape'){ e.preventDefault(); kapat(); }
+    else if(e.key === 'Enter'){ e.preventDefault(); kaydet(); }
+  };
+  al('goster').addEventListener('change', e=>{
+    ['eski', 'yeni', 'tekrar'].forEach(k=> al(k).type = e.target.checked ? 'text' : 'password');
+  });
+  al('vazgec').addEventListener('click', kapat);
+  ov.addEventListener('click', e=>{ if(e.target === ov) kapat(); });
+  let calisiyor = false;
+  async function kaydet(){
+    if(calisiyor) return;
+    const eski = al('eski').value, yeni = al('yeni').value, tekrar = al('tekrar').value;
+    hata.textContent = '';
+    if(!eski){ hata.textContent = 'Mevcut şifrenizi yazın.'; al('eski').focus(); return; }
+    if(yeni.length < 6){ hata.textContent = 'Yeni şifre en az 6 karakter olmalı.'; al('yeni').focus(); return; }
+    if(yeni !== tekrar){ hata.textContent = 'Yeni şifreler aynı değil.'; al('tekrar').focus(); return; }
+    if(yeni === eski){ hata.textContent = 'Yeni şifre eskisiyle aynı.'; al('yeni').focus(); return; }
+    calisiyor = true;
+    const btn = al('kaydet');
+    btn.disabled = true; btn.textContent = 'Değiştiriliyor...';
+    try{
+      const kimlik = firebase.auth.EmailAuthProvider.credential(user.email, eski);
+      await user.reauthenticateWithCredential(kimlik);
+      await user.updatePassword(yeni);
+      kapat();
+      uiBildirim('Şifreniz değiştirildi. Bir sonraki girişte yeni şifreyi kullanın.', 'basari', 5000);
+    }catch(e){
+      const kod = e && e.code || '';
+      hata.textContent =
+        /wrong-password|invalid-credential|invalid-login/.test(kod) ? 'Mevcut şifre yanlış.' :
+        /weak-password/.test(kod) ? 'Yeni şifre çok zayıf, daha uzun bir şifre seçin.' :
+        /too-many-requests/.test(kod) ? 'Çok fazla deneme yapıldı. Birkaç dakika sonra tekrar deneyin.' :
+        /network/.test(kod) ? 'İnternet bağlantısı yok gibi görünüyor.' :
+        'Şifre değiştirilemedi: ' + (e && e.message || e);
+    }finally{
+      calisiyor = false;
+      btn.disabled = false; btn.textContent = 'Değiştir';
+    }
+  }
+  al('kaydet').addEventListener('click', kaydet);
+  document.addEventListener('keydown', tus, true);
+  document.body.appendChild(ov);
+  al('eski').focus();
+}
 document.addEventListener('click', ()=> kapatChipMenu());
 document.getElementById('girisForm').addEventListener('submit', girisYap);
 
@@ -5211,6 +5284,7 @@ const MR_KILAVUZ = `
   </ul></li>
 <li>Yeni kullanıcı açmak ya da şifre değiştirmek için Sohbet'ten M583'e yazılır.</li>
 <li>Çıkış: sağ üstteki mağaza adına (profil) tıklayıp <b>Çıkış</b>.</li>
+<li><b>Şifre değiştirme:</b> profil menüsü → <b>🔑 Şifre değiştir</b>. Mevcut şifre ve iki kez yeni şifre (en az 6 karakter) yazılır.</li>
 <li><b>Sürüm ve güncelleme:</b> sol üstteki logoya tıklayınca sürüm numarası görünür; yeni sürüm varsa kendisi yüklenir.</li>
 </ul>
 <a class="hk-yukari" href="#" data-git="mr-bas">↑ İçindekiler</a>
@@ -5499,6 +5573,8 @@ Adres: <b style="word-break:break-all;">osmanonurmart.github.io/magazarapor/rapo
 <dd>Yer imleri çubuğu kapalı olabilir: Ctrl+Shift+B (Mac: Cmd+Shift+B). Olmazsa kartın altındaki "yer imi adresini kopyala" ile elle ekleyin.</dd>
 <dt>PDF'te yazıyı değiştiremiyorum.</dt>
 <dd>PDF taranmış (fotoğraf gibi) olabilir; bu PDF'lerde yazı seçilemez. Beyaz kutu ve Yazı ekle ile üstüne yazabilirsiniz.</dd>
+<dt>Şifremi değiştirmek istiyorum.</dt>
+<dd>Sağ üstteki profil menüsünden <b>🔑 Şifre değiştir</b>'i seçin.</dd>
 <dt>Şifremi unuttum / yeni kullanıcı lazım.</dt>
 <dd>Sohbet'ten M583'e yazın. Giriş yapamıyorsanız bölge müdürünüze söyleyin.</dd>
 <dt>Verilerimi başka mağaza görebilir mi?</dt>
