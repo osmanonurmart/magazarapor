@@ -48,3 +48,10 @@ Giriş ekranının arka plan fotoğrafı `giris-arka.jpg`.
 - Araçlar: Birleştir, Ayır, Düzenle (metin değiştirme, yazı/resim/imza/beyaz kutu), İmzala, Sayfaları düzenle, Döndür, Resimden PDF, PDF'ten resme, Sayfa numarası, Filigran.
 - Metin düzenlemede eski yazı içerik akışından silinir (`metinSil`); silinemezse üstü zemin rengiyle kapatılır ve kullanıcıya söylenir. Yeni yazı Liberation Sans/Serif ile yazılır.
 - Kütüphaneler `duzenleyici/lib`, fontlar `duzenleyici/fontlar` altında (lisanslar: `lib/OKUBENI.txt`, `fontlar/OFL.txt`).
+
+## Sohbet
+
+- Menüdeki "Sohbet" (eski Öneri) uygulama içi mesajlaşmadır. Konuşmalar iki kişiliktir: mağaza ↔ kurucu (m583), mağaza ↔ bölge müdürü, bölge müdürü ↔ kurucu.
+- `sohbetler/{a__b}` (üyeler sıralı) ve altında `mesajlar`. Okundu bilgisi `okunma.{kadi}` alanında.
+- Eski `geribildirim` kayıtları kurucu Sohbet'i ilk açtığında konuşmalara taşınır (`tasindi: true`).
+- Kurallar `firestore.rules` içinde; değiştikten sonra Firebase Console → Firestore → Rules'a yapıştırılıp yayınlanmalı.

@@ -131,6 +131,62 @@ if(!document.documentElement.classList.contains('tel')){
   .gb-benim-baslik{ font-size:.8rem; font-weight:700; color:#555; margin-top:18px; }
   .gb-yeni{ color:var(--red); }
   .oneri-btn{ position:relative; }
+  /* Sohbet */
+  .sohbet-page{ padding:12px 16px 0; }
+  .sh{ display:flex; max-width:1180px; margin:0 auto; background:#fff; border:1px solid var(--line); border-radius:14px; overflow:hidden; min-height:320px; }
+  .sh-liste{ width:320px; flex:none; border-right:1px solid var(--line); display:flex; flex-direction:column; min-height:0; }
+  .sh-ust{ padding:14px 16px 8px; font-size:1.05rem; color:var(--dark); }
+  .sh-ara{ margin:0 12px 8px; padding:8px 12px; border:1px solid #e2ddd3; border-radius:9px; font-family:inherit; font-size:.85rem; background:#faf9f6; }
+  .sh-kisiler{ flex:1; overflow-y:auto; min-height:0; }
+  .sh-kisi{ display:flex; align-items:center; gap:10px; width:100%; padding:10px 14px; background:none; border:none; border-bottom:1px solid #f3f0ea;
+    cursor:pointer; text-align:left; font-family:inherit; color:inherit; }
+  .sh-kisi:hover{ background:#faf7f1; }
+  .sh-kisi.aktif{ background:#f6efe2; }
+  .sh-av{ width:40px; height:40px; border-radius:50%; flex:none; display:flex; align-items:center; justify-content:center; font-size:.78rem; font-weight:700; color:#fff; background:#9a8f80; }
+  .sh-av.r-kurucu{ background:#2d2d2d; } .sh-av.r-bolge{ background:#C8A066; } .sh-av.r-magaza{ background:#7a8f6b; }
+  .sh-orta{ flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+  .sh-ad{ font-size:.88rem; font-weight:600; color:var(--dark); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sh-ad i{ font-style:normal; font-weight:400; font-size:.7rem; color:#999; margin-left:4px; }
+  .sh-onizleme{ font-size:.78rem; color:#888; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sh-kisi.yeni .sh-onizleme{ color:var(--dark); font-weight:600; }
+  .sh-sag{ display:flex; flex-direction:column; align-items:flex-end; gap:5px; flex:none; }
+  .sh-zaman{ font-size:.68rem; color:#aaa; }
+  .sh-kisi.yeni .sh-zaman{ color:#2e7d32; font-weight:700; }
+  .sh-rozet{ width:10px; height:10px; border-radius:50%; background:#2e7d32; }
+  .sh-pencere{ flex:1; min-width:0; display:flex; flex-direction:column; background:#f4efe6; }
+  .sh-bos{ margin:auto; color:#999; font-size:.85rem; padding:30px 16px; text-align:center; }
+  .sh-baslik{ display:flex; align-items:center; gap:10px; padding:10px 14px; background:#fff; border-bottom:1px solid var(--line); }
+  .sh-baslik b{ display:block; font-size:.92rem; color:var(--dark); }
+  .sh-baslik small{ display:block; font-size:.72rem; color:#999; }
+  .sh-geri{ display:none; background:none; border:none; font-size:1.8rem; line-height:1; padding:0 6px 4px 0; cursor:pointer; color:var(--dark); }
+  .sh-mesajlar{ flex:1; overflow-y:auto; padding:12px 14px; min-height:0; display:flex; flex-direction:column; gap:3px; }
+  .sh-mesajlar .sh-bos{ margin:auto; }
+  .sh-gun{ text-align:center; margin:10px 0 6px; }
+  .sh-gun span{ background:#fff; color:#888; font-size:.7rem; padding:3px 10px; border-radius:8px; box-shadow:0 1px 1px rgba(0,0,0,.05); }
+  .sh-msj{ display:flex; }
+  .sh-msj.benim{ justify-content:flex-end; }
+  .sh-balon{ max-width:72%; background:#fff; border-radius:12px 12px 12px 4px; padding:7px 10px 5px; font-size:.88rem; line-height:1.4;
+    color:#222; box-shadow:0 1px 1px rgba(0,0,0,.06); word-break:break-word; }
+  .sh-msj.benim .sh-balon{ background:#f3e3c4; border-radius:12px 12px 4px 12px; }
+  .sh-msj.bekliyor .sh-balon{ opacity:.6; }
+  .sh-balon a{ color:#1d5fa8; }
+  .sh-msj-alt{ float:right; margin:6px 0 -2px 10px; font-size:.65rem; color:#999; display:inline-flex; gap:3px; }
+  .sh-tik{ color:#aaa; } .sh-tik.okundu{ color:#2b8ad6; }
+  .sh-yaz{ display:flex; align-items:flex-end; gap:8px; padding:10px 12px; background:#fff; border-top:1px solid var(--line); }
+  .sh-yaz textarea{ flex:1; resize:none; border:1px solid #e2ddd3; border-radius:18px; padding:9px 14px; font-family:inherit; font-size:.9rem;
+    line-height:1.35; max-height:140px; outline:none; -webkit-text-size-adjust:100%; text-size-adjust:100%; }
+  .sh-yaz textarea:focus{ border-color:#c8a066; }
+  .sh-gonder{ width:40px; height:40px; border-radius:50%; border:none; background:var(--accent); cursor:pointer; flex:none; display:flex; align-items:center; justify-content:center; }
+  .sh-gonder svg{ width:20px; height:20px; fill:#fff; }
+  html.tel .sohbet-page{ padding:0; }
+  html.tel .sh{ border:none; border-radius:0; }
+  html.tel .sh-liste{ width:100%; border-right:none; }
+  html.tel .sh-pencere{ display:none; }
+  html.tel .sh.acik .sh-liste{ display:none; }
+  html.tel .sh.acik .sh-pencere{ display:flex; }
+  html.tel .sh-geri{ display:block; }
+  html.tel .sh-balon{ max-width:82%; font-size:.95rem; }
+  html.tel .sh-yaz textarea{ font-size:16px; }
   .oneri-nokta{ display:none; }
   html.tel .oneri-btn.yeni .oneri-nokta{ right:calc(50% - 20px); top:4px; }
   .oneri-btn.yeni .oneri-nokta{
@@ -1062,7 +1118,7 @@ if(!document.documentElement.classList.contains('tel')){
         <button class="tab-btn" id="bpTabAraclar" data-kisa="Araçlar" type="button"><svg class="tab-ikon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7.5" width="18" height="12.5" rx="2.5"/><path d="M9 7.5V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1.5"/><path d="M3 13h18"/><path d="M10.5 13v2h3v-2"/></svg>Araçlar</button>
         <button class="tab-btn" id="bpTabHafiza" data-kisa="Hafıza" type="button"><svg class="tab-ikon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"/><path d="M9 7.5h6"/></svg>Kurumsal hafıza</button>
         <button class="tab-btn" id="bpTabDuz" data-kisa="Düzenleyici" type="button"><svg class="tab-ikon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/><path d="M10 17l5.5-5.5 1.5 1.5L11.5 18.5H10z"/></svg>Düzenleyici</button>
-        <button class="tab-btn oneri-btn" data-kisa="Öneri" type="button" title="Öneri / geri bildirim" onclick="geriBildirimYaz()"><svg class="tab-ikon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/><path d="M8.5 11h7"/><path d="M8.5 14h4"/></svg>Öneri<span class="oneri-nokta"></span></button>
+        <button class="tab-btn oneri-btn" id="bpTabSohbet" data-kisa="Sohbet" type="button" title="Sohbet" onclick="bpSekme('sohbet')"><svg class="tab-ikon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/><path d="M8.5 11h7"/><path d="M8.5 14h4"/></svg>Sohbet<span class="oneri-nokta"></span></button>
       </nav>
     </div>
     <div class="ust-sag">
@@ -1157,7 +1213,7 @@ if(!document.documentElement.classList.contains('tel')){
         <button class="tab-btn" id="tabHafizaBtn" data-kisa="Hafıza" type="button" onclick="showTab('hafiza')"><svg class="tab-ikon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"/><path d="M9 7.5h6"/></svg>Kurumsal hafıza</button>
         <button class="tab-btn" id="tabTransferBtn" data-kisa="Transfer" type="button" onclick="showTab('transfer')"><svg class="tab-ikon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4"/><path d="M7.5 8.5 12 4l4.5 4.5"/><path d="M4 14.5V18a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3.5"/></svg>Transfer</button>
         <button class="tab-btn" id="tabDuzBtn" data-kisa="Düzenleyici" type="button" onclick="showTab('duz')"><svg class="tab-ikon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/><path d="M10 17l5.5-5.5 1.5 1.5L11.5 18.5H10z"/></svg>Düzenleyici</button>
-        <button class="tab-btn oneri-btn" data-kisa="Öneri" type="button" title="Öneri / geri bildirim" onclick="geriBildirimYaz()"><svg class="tab-ikon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/><path d="M8.5 11h7"/><path d="M8.5 14h4"/></svg>Öneri<span class="oneri-nokta"></span></button>
+        <button class="tab-btn oneri-btn" id="tabSohbetBtn" data-kisa="Sohbet" type="button" title="Sohbet" onclick="showTab('sohbet')"><svg class="tab-ikon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/><path d="M8.5 11h7"/><path d="M8.5 14h4"/></svg>Sohbet<span class="oneri-nokta"></span></button>
       </nav>
     </div>
     <div class="ust-sag">
@@ -1174,8 +1230,6 @@ if(!document.documentElement.classList.contains('tel')){
         <div class="chip-menu" id="chipMenu" style="display:none;">
           <button type="button" id="chipMagazaBtn">◀ Bölge paneline dön</button>
           <div class="sep" id="chipMagazaSep"></div>
-          <button type="button" id="chipGbBtn" style="display:none;">💬 Geri bildirimler <b class="gb-sayi" id="gbSayi"></b></button>
-          <div class="sep" id="chipGbSep" style="display:none;"></div>
           <button type="button" id="chipCikisBtn">🚪 Çıkış yap</button>
         </div>
       </span>
@@ -1204,6 +1258,7 @@ if(!document.documentElement.classList.contains('tel')){
 </div>
 
 <div class="duz-page" id="duzPage" style="display:none;"></div>
+<div class="sohbet-page" id="sohbetPage" style="display:none;"></div>
 <div class="araclar-page" id="araclarPage" style="display:none;">
   <div id="toolsGridView">
     <div class="sayfa-baslik"><h2>Araçlar</h2><span id="araclarAlt"></span></div>
@@ -1329,7 +1384,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 35;
+const APP_SURUM = 36;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -1977,9 +2032,8 @@ async function cikisYap(){
   resetStoreCaches();
   aktifProfil = null;
   oturum = null;
-  geriBildirimBirak();
+  sohbetBirak();
   duyurulariBirak();
-  cevapBirak();
   bp.yuklendi = false;
   bp.veri = {};
   await auth.signOut();
@@ -2409,12 +2463,15 @@ function bpSekme(ad){
   document.getElementById('hafizaPage').style.display = ad === 'hafiza' ? '' : 'none';
   document.getElementById('duzPage').style.display = ad === 'duz' ? '' : 'none';
   document.getElementById('bpTabDuz').classList.toggle('active', ad === 'duz');
+  document.getElementById('sohbetPage').style.display = ad === 'sohbet' ? '' : 'none';
+  document.getElementById('bpTabSohbet').classList.toggle('active', ad === 'sohbet');
   document.getElementById('bpDonemBar').style.display = ad === 'ozet' ? '' : 'none';
   document.getElementById('bpYenile').style.display = (ad === 'ozet' || ad === 'ayar') ? '' : 'none';
   if(ad === 'ayar') bpAyarCiz();
   else if(ad === 'araclar') closeToolViewer();
   else if(ad === 'hafiza') hafizaGoster();
   else if(ad === 'duz') duzenleyiciAc();
+  else if(ad === 'sohbet') sohbetAc();
 }
 
 function bpAyarCiz(){
@@ -2507,172 +2564,329 @@ document.querySelectorAll('.ust-logo').forEach(img=> img.addEventListener('click
   guncellemeKontrol();
 }));
 
-// ==================== GERİ BİLDİRİM / ÖNERİ ====================
-// Herkes "Öneri" butonundan yazar; kayıtlar geribildirim koleksiyonuna düşer ve
-// yalnızca alıcı (m583) hesap menüsünde görür, okundu olarak işaretler.
-const GERI_BILDIRIM_ALICI = 'm583';
-let gbUnsub = null;
-let gbListe = [];
+// ==================== SOHBET ====================
+// Uygulama içi mesajlaşma. Konuşmalar iki kişiliktir:
+//   mağaza ↔ kurucu (m583), mağaza ↔ bölge müdürü, bölge müdürü ↔ kurucu.
+// sohbetler/{a__b}: {uyeler:[a,b] (sıralı), roller:{a:'magaza'|'bolge'|'kurucu'},
+//                    son:{metin, kimden, zaman}, guncelleme, okunma:{kadi: ms}}
+// sohbetler/{a__b}/mesajlar/{id}: {kimden, metin, zaman}
+// Eski "Öneri" geri bildirimleri kurucu ilk kez Sohbet'i açtığında konuşmalara taşınır.
+const KURUCU = 'm583';
+const sh = {unsub:null, liste:[], kisiler:null, aktif:null, mesajUnsub:null, mesajlar:[], ilkYukleme:true, ara:'', tasindi:false};
 
-// "Öneri" butonu: yeni geri bildirim yazma + daha önce yazılanlar ve gelen cevaplar.
-// Cevaplar burada görülür; okunmamış cevap varsa butonda kırmızı nokta çıkar.
-async function geriBildirimYaz(){
-  if(!oturum) return;
-  const ov = document.createElement('div');
-  ov.className = 'ui-ov';
-  ov.innerHTML = '<div class="ui-dlg gb-pencere">'
-    + '<div class="ui-baslik">💬 Öneri / geri bildirim</div>'
-    + '<div class="ui-mesaj">Uygulamayla ilgili öneri, istek ya da sorun yazabilirsin.</div>'
-    + '<textarea class="ui-input ui-metin" id="gbYeniMetin" rows="4" placeholder="Yazmak istediğin..."></textarea>'
-    + '<div class="ui-btns"><button type="button" class="ui-btn" data-k="kapat">Kapat</button>'
-    + '<button type="button" class="ui-btn birincil" data-k="gonder">Gönder</button></div>'
-    + '<div class="gb-benim-baslik">Önceki geri bildirimlerim</div>'
-    + '<div class="gb-liste" id="gbBenimListe"></div></div>';
-  const kapat = ()=>{ ov.remove(); document.removeEventListener('keydown', tus, true); };
-  const tus = e=>{ if(e.key === 'Escape'){ e.preventDefault(); kapat(); } };
-  ov.addEventListener('click', e=>{ if(e.target === ov) kapat(); });
-  ov.querySelector('[data-k="kapat"]').addEventListener('click', kapat);
-  ov.querySelector('[data-k="gonder"]').addEventListener('click', async ()=>{
-    const alan = document.getElementById('gbYeniMetin');
-    const metin = alan.value.trim();
-    if(!metin){ uiBildirim('Boş geri bildirim gönderilmedi.', 'hata'); return; }
-    try{
-      await db.collection('geribildirim').add({
-        metin: metin.slice(0, 4000),
-        kimden: oturum.kadi,
-        magaza: aktifProfil ? aktifProfil.key : null,
-        cihaz: TELEFON ? 'telefon' : 'masaüstü',
-        surum: APP_SURUM,
-        tarih: new Date().toISOString(),
-        okundu: false
+function sohbetId(a, b){ return [a, b].sort().join('__'); }
+function shKarsi(s){ return s.uyeler[0] === oturum.kadi ? s.uyeler[1] : s.uyeler[0]; }
+function shRolum(){ return oturum.kadi === KURUCU ? 'kurucu' : oturum.rol; }
+function shKisiBilgi(k){
+  const kisi = (sh.kisiler || []).find(x=> x.k === k);
+  const konusma = sh.liste.find(s=> s.uyeler.includes(k));
+  const rol = k === KURUCU ? 'kurucu' : (kisi ? kisi.rol : (konusma && konusma.roller ? konusma.roller[k] : '')) || '';
+  const ad = kisi && kisi.ad ? kisi.ad : magazaAdi(k);
+  const etiket = rol === 'kurucu' ? 'Kurucu' : rol === 'bolge' ? 'Bölge müdürü' : 'Mağaza';
+  return {k, ad, rol, etiket};
+}
+function shOkunmamis(s){
+  return !!(s.son && s.son.kimden !== oturum.kadi && (s.son.zaman || 0) > ((s.okunma || {})[oturum.kadi] || 0));
+}
+function shAvatar(ad){
+  const m = String(ad).match(/^[a-z]+(\d{2,4})$/i);
+  return m ? m[1].slice(-3) : String(ad).slice(0, 2).toUpperCase();
+}
+function shSaat(ms){ const d = new Date(ms); return pad(d.getHours()) + ':' + pad(d.getMinutes()); }
+function shGunEtiketi(ms){
+  const d = new Date(ms), b = new Date();
+  const g = x=> new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+  const fark = Math.round((g(b) - g(d)) / 86400000);
+  if(fark === 0) return 'Bugün';
+  if(fark === 1) return 'Dün';
+  return pad(d.getDate()) + '.' + pad(d.getMonth() + 1) + '.' + d.getFullYear();
+}
+function shListeZaman(ms){
+  if(!ms) return '';
+  const e = shGunEtiketi(ms);
+  return e === 'Bugün' ? shSaat(ms) : e === 'Dün' ? 'Dün' : e.slice(0, 5);
+}
+function shMetinHtml(t){
+  return escapeHtml(t).replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>').replace(/\n/g, '<br>');
+}
+
+function sohbetDinle(){
+  if(sh.unsub || !oturum) return;
+  sh.ilkYukleme = true;
+  sh.unsub = db.collection('sohbetler').where('uyeler', 'array-contains', oturum.kadi).onSnapshot(snap=>{
+    const onceki = new Map(sh.liste.map(s=> [s.id, s.son ? s.son.zaman : 0]));
+    sh.liste = [];
+    snap.forEach(d=> sh.liste.push(Object.assign({id:d.id}, d.data())));
+    // Sayfa açık değilken gelen yeni mesaj kısa bildirimle haber verilir.
+    if(!sh.ilkYukleme){
+      sh.liste.forEach(s=>{
+        if(!shOkunmamis(s) || (onceki.get(s.id) || 0) >= s.son.zaman) return;
+        if(shSayfaAcik() && sh.aktif && sh.aktif.sid === s.id) return;
+        uiBildirim('💬 ' + shKisiBilgi(s.son.kimden).ad + ': ' + String(s.son.metin).slice(0, 80), '', 5000);
       });
-      alan.value = '';
-      uiBildirim('Teşekkürler, geri bildirimin iletildi.', 'basari');
-    }catch(e){
-      uiBildirim('Gönderilemedi: ' + e.message, 'hata');
     }
-  });
-  document.addEventListener('keydown', tus, true);
-  document.body.appendChild(ov);
-  benimGbCiz();
-  // Açılınca görülmemiş cevaplar "görüldü" olur.
-  benimGbListe.filter(g=> g.cevap && g.cevapGoruldu === false).forEach(g=>{
-    db.collection('geribildirim').doc(g.id).update({cevapGoruldu:true}).catch(()=>{});
-  });
-}
-
-function geriBildirimDinle(){
-  if(gbUnsub || !oturum || oturum.kadi !== GERI_BILDIRIM_ALICI) return;
-  document.getElementById('chipGbBtn').style.display = '';
-  document.getElementById('chipGbSep').style.display = '';
-  gbUnsub = db.collection('geribildirim').onSnapshot(snap=>{
-    gbListe = [];
-    snap.forEach(d=> gbListe.push(Object.assign({id:d.id}, d.data())));
-    gbListe.sort((a,b)=> String(b.tarih || '').localeCompare(String(a.tarih || '')));
-    const okunmamis = gbListe.filter(x=> !x.okundu).length;
-    document.getElementById('gbSayi').textContent = okunmamis ? String(okunmamis) : '';
-    document.getElementById('gbNokta').style.display = okunmamis ? '' : 'none';
-    const acik = document.getElementById('gbListe');
-    if(acik) gbListeCiz(acik);
-  }, ()=>{ /* yetki yoksa sessiz */ });
-}
-// Gönderen: yazdığı geri bildirime cevap gelmişse bir sonraki açılışta (ya da açıkken) görür.
-let cevapUnsub = null;
-let benimGbListe = [];
-function cevapDinle(){
-  if(cevapUnsub || !oturum) return;
-  cevapUnsub = db.collection('geribildirim').where('kimden', '==', oturum.kadi).onSnapshot(snap=>{
-    benimGbListe = [];
-    snap.forEach(d=> benimGbListe.push(Object.assign({id:d.id}, d.data())));
-    benimGbListe.sort((a,b)=> String(b.tarih || '').localeCompare(String(a.tarih || '')));
-    const yeniCevap = benimGbListe.some(g=> g.cevap && g.cevapGoruldu === false);
-    document.querySelectorAll('.oneri-btn').forEach(b=> b.classList.toggle('yeni', yeniCevap));
-    if(document.getElementById('gbBenimListe')) benimGbCiz();
+    sh.ilkYukleme = false;
+    shNoktaGuncelle();
+    if(shSayfaAcik()){ shListeCiz(); shPencereGuncelle(); }
   }, ()=>{ /* kurallar yayınlanmadıysa sessiz */ });
 }
-function cevapBirak(){
-  if(cevapUnsub){ try{ cevapUnsub(); }catch(e){} cevapUnsub = null; }
-  benimGbListe = [];
-  document.querySelectorAll('.oneri-btn').forEach(b=> b.classList.remove('yeni'));
+function sohbetBirak(){
+  if(sh.unsub){ try{ sh.unsub(); }catch(e){} }
+  if(sh.mesajUnsub){ try{ sh.mesajUnsub(); }catch(e){} }
+  Object.assign(sh, {unsub:null, liste:[], kisiler:null, aktif:null, mesajUnsub:null, mesajlar:[], ilkYukleme:true, ara:'', tasindi:false});
+  shNoktaGuncelle();
 }
-function benimGbCiz(){
-  const el = document.getElementById('gbBenimListe');
-  if(!el) return;
-  if(!benimGbListe.length){ el.innerHTML = '<div class="gb-bos">Henüz geri bildirim göndermedin.</div>'; return; }
-  el.innerHTML = benimGbListe.map(g=>{
-    const t = g.tarih ? new Date(g.tarih) : null;
-    const zaman = t && !isNaN(t) ? kisaTarih(t) + ' ' + pad(t.getHours()) + ':' + pad(t.getMinutes()) : '';
-    const yeni = g.cevap && g.cevapGoruldu === false;
-    return '<div class="gb-oge">'
-      + '<div class="gb-ust"><span>' + escapeHtml(zaman) + '</span><span>' + (g.cevap ? (yeni ? '<b class="gb-yeni">Yeni cevap</b>' : 'Cevaplandı') : (g.okundu ? 'Okundu' : 'Gönderildi')) + '</span></div>'
-      + '<div class="gb-metin">' + escapeHtml(g.metin || '') + '</div>'
-      + (g.cevap ? '<div class="gb-cevap">↳ ' + escapeHtml(g.cevap) + '</div>' : '')
-      + '</div>';
-  }).join('');
+function shNoktaGuncelle(){
+  const var_ = oturum ? sh.liste.some(shOkunmamis) : false;
+  document.querySelectorAll('.oneri-btn').forEach(b=> b.classList.toggle('yeni', var_));
+}
+function shSayfaAcik(){
+  const p = document.getElementById('sohbetPage');
+  return p && p.style.display !== 'none' && p.offsetParent !== null;
 }
 
-function geriBildirimBirak(){
-  if(gbUnsub){ try{ gbUnsub(); }catch(e){} gbUnsub = null; }
-  gbListe = [];
-  document.getElementById('chipGbBtn').style.display = 'none';
-  document.getElementById('chipGbSep').style.display = 'none';
-  document.getElementById('gbNokta').style.display = 'none';
+// Kimlerle konuşulabilir
+async function shKisileriYukle(){
+  const ben = oturum.kadi;
+  const kisiler = [];
+  const ekle = (k, rol, ad)=>{ k = String(k).toLowerCase(); if(k && k !== ben && !kisiler.some(x=> x.k === k)) kisiler.push({k, rol, ad}); };
+  try{
+    if(ben === KURUCU){
+      const snap = await db.collection('yetkiler').get();
+      snap.forEach(d=>{ const v = d.data() || {}; ekle(d.id, v.rol === 'bolge' ? 'bolge' : 'magaza', v.ad); });
+    } else {
+      ekle(KURUCU, 'kurucu');
+      if(oturum.rol === 'bolge'){
+        oturum.magazalar.forEach(m=> ekle(m, 'magaza'));
+      } else {
+        const snap = await db.collection('yetkiler').where('magazalar', 'array-contains', ben).get();
+        snap.forEach(d=>{ const v = d.data() || {}; if(v.rol === 'bolge') ekle(d.id, 'bolge', v.ad); });
+      }
+    }
+  }catch(e){
+    if(!kisiler.length && ben !== KURUCU) ekle(KURUCU, 'kurucu');
+  }
+  sh.kisiler = kisiler;
 }
 
-function gbListeCiz(el){
-  if(!gbListe.length){ el.innerHTML = '<div class="gb-bos">Henüz geri bildirim yok.</div>'; return; }
-  el.innerHTML = gbListe.map(g=>{
-    const t = g.tarih ? new Date(g.tarih) : null;
-    const zaman = t && !isNaN(t) ? kisaTarih(t) + ' ' + pad(t.getHours()) + ':' + pad(t.getMinutes()) : '';
-    const kim = magazaAdi(g.kimden) + (g.magaza && g.magaza !== g.kimden ? ' · ' + magazaAdi(g.magaza) : '');
-    return '<div class="gb-oge' + (g.okundu ? ' okundu' : '') + '">'
-      + '<div class="gb-ust"><b>' + escapeHtml(kim) + '</b><span>' + escapeHtml(zaman) + (g.cihaz ? ' · ' + escapeHtml(g.cihaz) : '') + '</span></div>'
-      + '<div class="gb-metin">' + escapeHtml(g.metin || '') + '</div>'
-      + (g.cevap ? '<div class="gb-cevap">↳ ' + escapeHtml(g.cevap) + (g.cevapGoruldu ? ' · görüldü' : '') + '</div>' : '')
-      + '<div class="gb-butonlar">'
-      + (g.okundu ? '<div class="gb-ust" style="margin:8px 0 0;">✓ okundu</div>'
-                  : '<button type="button" class="gb-okundu-btn" data-id="' + g.id + '">✓ Okundu</button>')
-      + '<button type="button" class="gb-okundu-btn gb-cevap-btn" data-id="' + g.id + '">' + (g.cevap ? '✎ Cevabı değiştir' : '↩ Cevap yaz') + '</button>'
-      + '</div></div>';
+async function sohbetAc(){
+  const kap = document.getElementById('sohbetPage');
+  if(!kap.dataset.kuruldu){
+    kap.dataset.kuruldu = '1';
+    kap.innerHTML =
+      '<div class="sh" id="shKok">' +
+        '<aside class="sh-liste">' +
+          '<div class="sh-ust"><b>Sohbet</b></div>' +
+          '<input class="sh-ara" id="shAra" type="search" placeholder="Ara...">' +
+          '<div class="sh-kisiler" id="shKisiler"></div>' +
+        '</aside>' +
+        '<section class="sh-pencere" id="shPencere"><div class="sh-bos">Bir sohbet seçin.</div></section>' +
+      '</div>';
+    document.getElementById('shAra').addEventListener('input', e=>{ sh.ara = e.target.value.trim().toLocaleLowerCase('tr'); shListeCiz(); });
+    window.addEventListener('resize', shBoyutla);
+  }
+  shBoyutla();
+  shListeCiz();
+  if(!sh.kisiler){ await shKisileriYukle(); shListeCiz(); }
+  if(oturum.kadi === KURUCU && !sh.tasindi){ sh.tasindi = true; eskiGeriBildirimleriTasi(); }
+  shPencereGuncelle();
+}
+function shBoyutla(){
+  const kok = document.getElementById('shKok');
+  if(!kok || !shSayfaAcik()) return;
+  const ust = kok.getBoundingClientRect().top + window.scrollY;
+  // Telefonda alttaki menü sabit durur; görünen menünün yüksekliği düşülür.
+  const alt = TELEFON ? (Array.from(document.querySelectorAll('.tab-bar')).map(e=> e.getBoundingClientRect().height).find(h=> h > 0) || 0) : 0;
+  kok.style.height = Math.max(320, window.innerHeight - ust - alt) + 'px';
+}
+
+function shListeCiz(){
+  const el = document.getElementById('shKisiler');
+  if(!el || !oturum) return;
+  const ben = oturum.kadi;
+  const ogeler = new Map();
+  (sh.kisiler || []).forEach(k=> ogeler.set(k.k, {k:k.k, s:null}));
+  sh.liste.forEach(s=>{ const k = shKarsi(s); ogeler.set(k, {k, s}); });
+  let liste = Array.from(ogeler.values()).map(o=> Object.assign(o, shKisiBilgi(o.k)));
+  if(sh.ara) liste = liste.filter(o=> (o.ad + ' ' + o.k + ' ' + o.etiket).toLocaleLowerCase('tr').includes(sh.ara));
+  const sira = {kurucu:0, bolge:1, magaza:2};
+  liste.sort((a, b)=>{
+    const za = a.s && a.s.son ? a.s.son.zaman : 0, zb = b.s && b.s.son ? b.s.son.zaman : 0;
+    if(za !== zb) return zb - za;
+    return (sira[a.rol] ?? 3) - (sira[b.rol] ?? 3) || a.ad.localeCompare(b.ad, 'tr', {numeric:true});
+  });
+  document.getElementById('shAra').style.display = (sh.kisiler || []).length > 6 ? '' : 'none';
+  if(!liste.length){ el.innerHTML = '<div class="sh-bos">' + (sh.kisiler ? 'Kimse bulunamadı.' : 'Yükleniyor...') + '</div>'; return; }
+  el.innerHTML = liste.map(o=>{
+    const son = o.s && o.s.son;
+    const yeni = o.s && shOkunmamis(o.s);
+    const onizleme = son ? (son.kimden === ben ? 'Sen: ' : '') + son.metin : 'Henüz mesaj yok';
+    const aktif = sh.aktif && sh.aktif.k === o.k;
+    return '<button type="button" class="sh-kisi' + (aktif ? ' aktif' : '') + (yeni ? ' yeni' : '') + '" data-k="' + escapeHtml(o.k) + '">' +
+      '<span class="sh-av r-' + o.rol + '">' + escapeHtml(shAvatar(o.ad)) + '</span>' +
+      '<span class="sh-orta"><span class="sh-ad">' + escapeHtml(o.ad) + ' <i>' + o.etiket + '</i></span>' +
+      '<span class="sh-onizleme">' + escapeHtml(onizleme) + '</span></span>' +
+      '<span class="sh-sag"><span class="sh-zaman">' + (son ? shListeZaman(son.zaman) : '') + '</span>' + (yeni ? '<span class="sh-rozet"></span>' : '') + '</span>' +
+    '</button>';
   }).join('');
-  el.querySelectorAll('.gb-cevap-btn').forEach(b=> b.addEventListener('click', async ()=>{
-    const g = gbListe.find(x=> x.id === b.dataset.id);
-    const cevap = await uiDialog({
-      ikon:'↩', baslik:'Cevap · ' + magazaAdi(g.kimden), mesaj: g.metin,
-      input:{tip:'textarea', deger: g.cevap || '', placeholder:'Cevabın...'},
-      butonlar:[{metin:'Vazgeç', deger:null}, {metin:'Gönder', deger:'__input', tip:'birincil'}], iptalDeger:null
+  el.querySelectorAll('.sh-kisi').forEach(b=> b.addEventListener('click', ()=> shKonusmaAc(b.dataset.k)));
+}
+
+function shKonusmaAc(k){
+  const sid = sohbetId(oturum.kadi, k);
+  if(sh.aktif && sh.aktif.sid === sid){ document.getElementById('shKok').classList.add('acik'); return; }
+  if(sh.mesajUnsub){ try{ sh.mesajUnsub(); }catch(e){} sh.mesajUnsub = null; }
+  sh.aktif = {k, sid};
+  sh.mesajlar = [];
+  const bilgi = shKisiBilgi(k);
+  const p = document.getElementById('shPencere');
+  p.innerHTML =
+    '<div class="sh-baslik"><button type="button" class="sh-geri" title="Geri">‹</button>' +
+      '<span class="sh-av r-' + bilgi.rol + '">' + escapeHtml(shAvatar(bilgi.ad)) + '</span>' +
+      '<span><b>' + escapeHtml(bilgi.ad) + '</b><small>' + bilgi.etiket + '</small></span></div>' +
+    '<div class="sh-mesajlar" id="shMesajlar"><div class="sh-bos">Yükleniyor...</div></div>' +
+    '<div class="sh-yaz"><textarea id="shMetin" rows="1" placeholder="Mesaj yazın..."></textarea>' +
+      '<button type="button" class="sh-gonder" id="shGonder" title="Gönder"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12l16-8-6 16-2.5-6.5z"/></svg></button></div>';
+  document.getElementById('shKok').classList.add('acik');
+  p.querySelector('.sh-geri').addEventListener('click', ()=>{
+    document.getElementById('shKok').classList.remove('acik');
+    if(sh.mesajUnsub){ try{ sh.mesajUnsub(); }catch(e){} sh.mesajUnsub = null; }
+    sh.aktif = null;
+    shListeCiz();
+  });
+  const alan = document.getElementById('shMetin');
+  alan.addEventListener('input', ()=>{ alan.style.height = 'auto'; alan.style.height = Math.min(140, alan.scrollHeight) + 'px'; });
+  alan.addEventListener('keydown', e=>{
+    if(e.key === 'Enter' && !e.shiftKey && !TELEFON){ e.preventDefault(); shGonder(); }
+  });
+  document.getElementById('shGonder').addEventListener('click', shGonder);
+  if(!TELEFON) alan.focus();
+  shListeCiz();
+  shPencereGuncelle();
+}
+
+// Konuşma belgesi oluşunca mesajlar dinlenir (belge yokken okuma izni yoktur).
+function shPencereGuncelle(){
+  if(!sh.aktif) return;
+  const s = sh.liste.find(x=> x.id === sh.aktif.sid);
+  if(!s){
+    const el = document.getElementById('shMesajlar');
+    if(el && !sh.mesajlar.length) el.innerHTML = '<div class="sh-bos">Henüz mesaj yok. İlk mesajı yazın.</div>';
+    return;
+  }
+  if(!sh.mesajUnsub){
+    const sid = sh.aktif.sid;
+    sh.mesajUnsub = db.collection('sohbetler').doc(sid).collection('mesajlar').orderBy('zaman', 'desc').limit(300)
+      .onSnapshot(snap=>{
+        if(!sh.aktif || sh.aktif.sid !== sid) return;
+        sh.mesajlar = [];
+        snap.forEach(d=> sh.mesajlar.unshift(Object.assign({id:d.id}, d.data())));
+        shMesajlariCiz();
+        shOkunduYap();
+      }, e=>{
+        const el = document.getElementById('shMesajlar');
+        if(el) el.innerHTML = '<div class="sh-bos">Mesajlar okunamadı: ' + escapeHtml(e.message) + '</div>';
+      });
+  } else {
+    shMesajlariCiz();
+    shOkunduYap();
+  }
+}
+function shOkunduYap(){
+  if(!sh.aktif || !shSayfaAcik() || document.hidden) return;
+  const s = sh.liste.find(x=> x.id === sh.aktif.sid);
+  if(!s || !shOkunmamis(s)) return;
+  db.collection('sohbetler').doc(s.id).update({['okunma.' + oturum.kadi]: Date.now()}).catch(()=>{});
+}
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) shOkunduYap(); });
+
+function shMesajlariCiz(){
+  const el = document.getElementById('shMesajlar');
+  if(!el || !sh.aktif) return;
+  const s = sh.liste.find(x=> x.id === sh.aktif.sid);
+  const karsiOkunma = s && s.okunma ? (s.okunma[sh.aktif.k] || 0) : 0;
+  if(!sh.mesajlar.length){ el.innerHTML = '<div class="sh-bos">Henüz mesaj yok. İlk mesajı yazın.</div>'; return; }
+  const altta = el.scrollHeight - el.scrollTop - el.clientHeight < 80 || !el.dataset.ciz;
+  let html = '', sonGun = '';
+  sh.mesajlar.forEach(m=>{
+    const gun = shGunEtiketi(m.zaman);
+    if(gun !== sonGun){ html += '<div class="sh-gun"><span>' + gun + '</span></div>'; sonGun = gun; }
+    const benim = m.kimden === oturum.kadi;
+    const tik = benim ? '<span class="sh-tik' + (karsiOkunma >= m.zaman ? ' okundu' : '') + '" title="' + (karsiOkunma >= m.zaman ? 'Okundu' : 'Gönderildi') + '">' + (karsiOkunma >= m.zaman ? '✓✓' : '✓') + '</span>' : '';
+    html += '<div class="sh-msj' + (benim ? ' benim' : '') + (m.bekliyor ? ' bekliyor' : '') + '"><div class="sh-balon">' + shMetinHtml(m.metin) +
+      '<span class="sh-msj-alt">' + shSaat(m.zaman) + tik + '</span></div></div>';
+  });
+  el.innerHTML = html;
+  el.dataset.ciz = '1';
+  if(altta) el.scrollTop = el.scrollHeight;
+}
+
+async function shGonder(){
+  if(!sh.aktif) return;
+  const alan = document.getElementById('shMetin');
+  const metin = alan.value.trim().slice(0, 4000);
+  if(!metin) return;
+  const ben = oturum.kadi, k = sh.aktif.k, sid = sh.aktif.sid;
+  const simdi = Date.now();
+  const ref = db.collection('sohbetler').doc(sid);
+  const mref = ref.collection('mesajlar').doc();
+  const mevcut = sh.liste.find(x=> x.id === sid);
+  const ust = {uyeler:[ben, k].sort(), son:{metin:metin.slice(0, 200), kimden:ben, zaman:simdi}, guncelleme:simdi, okunma:{[ben]:simdi}};
+  if(!mevcut) ust.roller = {[ben]:shRolum(), [k]:shKisiBilgi(k).rol || 'magaza'};
+  alan.value = ''; alan.style.height = 'auto';
+  // Gönderilen mesaj sunucu cevabını beklemeden görünür.
+  sh.mesajlar.push({id:mref.id, kimden:ben, metin, zaman:simdi, bekliyor:true});
+  shMesajlariCiz();
+  const el = document.getElementById('shMesajlar'); if(el) el.scrollTop = el.scrollHeight;
+  try{
+    const batch = db.batch();
+    batch.set(ref, ust, {merge:true});
+    batch.set(mref, {kimden:ben, metin, zaman:simdi});
+    await batch.commit();
+  }catch(e){
+    sh.mesajlar = sh.mesajlar.filter(m=> m.id !== mref.id);
+    shMesajlariCiz();
+    alan.value = metin;
+    uiBildirim('Mesaj gönderilemedi: ' + e.message, 'hata');
+  }
+}
+
+// Eski geri bildirimler (Öneri) kurucunun konuşmalarına bir kez taşınır.
+async function eskiGeriBildirimleriTasi(){
+  try{
+    const snap = await db.collection('geribildirim').get();
+    const gruplar = {};
+    snap.forEach(d=>{
+      const g = Object.assign({id:d.id}, d.data());
+      if(g.tasindi || !g.kimden || g.kimden === KURUCU || !g.metin) return;
+      (gruplar[g.kimden] = gruplar[g.kimden] || []).push(g);
     });
-    if(cevap === null || !cevap.trim()) return;
-    db.collection('geribildirim').doc(g.id).update({
-      cevap: cevap.trim().slice(0, 4000), cevapTarih: new Date().toISOString(), cevapGoruldu: false,
-      okundu: true, okunduTarih: g.okunduTarih || new Date().toISOString()
-    }).then(()=> uiBildirim('Cevap gönderildi.', 'basari'))
-      .catch(e=> uiBildirim('Gönderilemedi: ' + e.message, 'hata'));
-  }));
-  el.querySelectorAll('.gb-okundu-btn:not(.gb-cevap-btn)').forEach(b=> b.addEventListener('click', ()=>{
-    b.disabled = true;
-    db.collection('geribildirim').doc(b.dataset.id).update({okundu:true, okunduTarih:new Date().toISOString()})
-      .catch(e=>{ b.disabled = false; uiBildirim('İşaretlenemedi: ' + e.message, 'hata'); });
-  }));
+    for(const kimden of Object.keys(gruplar)){
+      const sid = sohbetId(kimden, KURUCU);
+      const ref = db.collection('sohbetler').doc(sid);
+      const batch = db.batch();
+      let son = null, karsiOkunma = Date.now();
+      gruplar[kimden].forEach(g=>{
+        const z = Date.parse(g.tarih) || Date.now();
+        batch.set(ref.collection('mesajlar').doc('gb_' + g.id), {kimden, metin:String(g.metin).slice(0, 4000), zaman:z, tasima:true});
+        if(!son || z > son.zaman) son = {metin:String(g.metin).slice(0, 200), kimden, zaman:z};
+        if(g.cevap){
+          const cz = Date.parse(g.cevapTarih) || z + 1;
+          batch.set(ref.collection('mesajlar').doc('gbc_' + g.id), {kimden:KURUCU, metin:String(g.cevap).slice(0, 4000), zaman:cz, tasima:true});
+          if(cz > son.zaman) son = {metin:String(g.cevap).slice(0, 200), kimden:KURUCU, zaman:cz};
+          if(g.cevapGoruldu === false) karsiOkunma = Math.min(karsiOkunma, cz - 1);
+        }
+        batch.update(db.collection('geribildirim').doc(g.id), {tasindi:true});
+      });
+      const mevcut = sh.liste.find(x=> x.id === sid);
+      const ust = {uyeler:[kimden, KURUCU].sort(), guncelleme:Date.now(), okunma:{[KURUCU]:Date.now()}};
+      if(!mevcut){ ust.roller = {[kimden]:shKisiBilgi(kimden).rol || 'magaza', [KURUCU]:'kurucu'}; ust.okunma[kimden] = karsiOkunma; }
+      if(!mevcut || !mevcut.son || mevcut.son.zaman < son.zaman) ust.son = son;
+      batch.set(ref, ust, {merge:true});
+      await batch.commit();
+    }
+  }catch(e){ console.warn('Geri bildirimler taşınamadı', e); }
 }
-
-function geriBildirimleriAc(){
-  kapatChipMenu();
-  const ov = document.createElement('div');
-  ov.className = 'ui-ov';
-  ov.innerHTML = '<div class="ui-dlg" style="width:calc(var(--k)*460px);">'
-    + '<div class="ui-baslik">💬 Geri bildirimler</div>'
-    + '<div class="gb-liste" id="gbListe"></div>'
-    + '<div class="ui-btns"><button type="button" class="ui-btn">Kapat</button></div></div>';
-  const kapat = ()=>{ ov.remove(); document.removeEventListener('keydown', tus, true); };
-  const tus = e=>{ if(e.key === 'Escape'){ e.preventDefault(); kapat(); } };
-  ov.querySelector('.ui-btn').addEventListener('click', kapat);
-  ov.addEventListener('click', e=>{ if(e.target === ov) kapat(); });
-  document.addEventListener('keydown', tus, true);
-  document.body.appendChild(ov);
-  gbListeCiz(document.getElementById('gbListe'));
-}
-document.getElementById('chipGbBtn').addEventListener('click', geriBildirimleriAc);
 
 // ==================== DUYURULAR ====================
 // Bölge müdürü duyuru yazar (listesindeki mağazalara gider); mağaza uygulamayı
@@ -3174,8 +3388,7 @@ auth.onAuthStateChanged(async function(user){
     await girisHatasi(e.yetkiYok ? e.message : ('Yetki okunamadı: ' + e.message));
     return;
   }
-  geriBildirimDinle();
-  cevapDinle();
+  sohbetDinle();
   if(oturum.rol === 'magaza') await magazayiAc(oturum.kadi, true);
   else await bolgePaneliniAc(true, true);
   duyurulariDinle();
@@ -4454,6 +4667,8 @@ function showTab(tab){
   document.getElementById('transferPage').style.display = tab === 'transfer' ? '' : 'none';
   document.getElementById('duzPage').style.display = tab === 'duz' ? '' : 'none';
   document.getElementById('tabDuzBtn').classList.toggle('active', tab === 'duz');
+  document.getElementById('sohbetPage').style.display = tab === 'sohbet' ? '' : 'none';
+  document.getElementById('tabSohbetBtn').classList.toggle('active', tab === 'sohbet');
   document.getElementById('tabRaporBtn').classList.toggle('active', raporMu);
   document.getElementById('tabAraclarBtn').classList.toggle('active', tab === 'araclar');
   document.getElementById('tabHafizaBtn').classList.toggle('active', tab === 'hafiza');
@@ -4468,6 +4683,8 @@ function showTab(tab){
     renderTransfer();
   } else if(tab === 'duz'){
     duzenleyiciAc();
+  } else if(tab === 'sohbet'){
+    sohbetAc();
   }
 }
 
@@ -4498,12 +4715,13 @@ function ortakSayfalariYerlestir(yer){
   const ar = document.getElementById('araclarPage');
   const hf = document.getElementById('hafizaPage');
   const dz = document.getElementById('duzPage');
+  const sp = document.getElementById('sohbetPage');
   if(yer === 'panel'){
     const hedef = document.getElementById('bpIcerik');
-    if(ar.parentNode !== hedef){ hedef.appendChild(ar); hedef.appendChild(hf); hedef.appendChild(dz); }
+    if(ar.parentNode !== hedef){ hedef.appendChild(ar); hedef.appendChild(hf); hedef.appendChild(dz); hedef.appendChild(sp); }
   } else {
     const tr = document.getElementById('transferPage');
-    if(ar.parentNode !== tr.parentNode){ tr.parentNode.insertBefore(ar, tr); tr.parentNode.insertBefore(hf, tr); tr.parentNode.insertBefore(dz, tr); }
+    if(ar.parentNode !== tr.parentNode){ tr.parentNode.insertBefore(ar, tr); tr.parentNode.insertBefore(hf, tr); tr.parentNode.insertBefore(dz, tr); tr.parentNode.insertBefore(sp, tr); }
   }
 }
 
@@ -4789,7 +5007,7 @@ const MR_KILAVUZ = `
 <li><a href="#" data-git="mr-hafiza">Kurumsal hafıza ve notlar</a></li>
 <li><a href="#" data-git="mr-transfer">Transfer (kırık ve genel)</a></li>
 <li><a href="#" data-git="mr-duz">Düzenleyici (PDF araçları)</a></li>
-<li><a href="#" data-git="mr-oneri">Öneri ve duyurular</a></li>
+<li><a href="#" data-git="mr-oneri">Sohbet ve duyurular</a></li>
 <li><a href="#" data-git="mr-bolge">Bölge paneli</a></li>
 <li><a href="#" data-git="mr-tel">Telefonda kullanım</a></li>
 <li><a href="#" data-git="mr-sss">Sık sorulan sorular</a></li>
@@ -4814,7 +5032,7 @@ const MR_KILAVUZ = `
   <li><b>Mağaza:</b> kendi mağazasının ekranını açar.</li>
   <li><b>Bölge müdürü:</b> önce Bölge panelini açar, oradan mağazalara geçer.</li>
   </ul></li>
-<li>Yeni kullanıcı açmak ya da şifre değiştirmek için M583'e haber verilir.</li>
+<li>Yeni kullanıcı açmak ya da şifre değiştirmek için Sohbet'ten M583'e yazılır.</li>
 <li>Çıkış: sağ üstteki mağaza adına (profil) tıklayıp <b>Çıkış</b>.</li>
 <li><b>Sürüm ve güncelleme:</b> sol üstteki logoya tıklayınca sürüm numarası görünür; yeni sürüm varsa kendisi yüklenir.</li>
 </ul>
@@ -4822,7 +5040,7 @@ const MR_KILAVUZ = `
 
 <h3 id="mr-ekran">3. Ekran düzeni</h3>
 <ul>
-<li><b>Üst menü</b> (telefonda alttaki simgeler): Ana Sayfa, Araçlar, Kurumsal hafıza, Transfer, Düzenleyici, Öneri.</li>
+<li><b>Üst menü</b> (telefonda alttaki simgeler): Ana Sayfa, Araçlar, Kurumsal hafıza, Transfer, Düzenleyici, Sohbet.</li>
 <li><b>Ana Sayfa:</b> solda haftalık tablolar, sağda RT tablosu, mesaj alanı ve ay özeti.</li>
 <li><b>Sağ üst:</b> Yapıştır / Veri Ekle, Dışa aktar, Geri al (↶) ve profil menüsü.</li>
 <li>Telefonda logoya dokunmak sayfanın en üstüne çıkarır.</li>
@@ -5003,13 +5221,18 @@ const MR_KILAVUZ = `
 </ul>
 <a class="hk-yukari" href="#" data-git="mr-bas">↑ İçindekiler</a>
 
-<h3 id="mr-oneri">14. Öneri ve duyurular</h3>
+<h3 id="mr-oneri">14. Sohbet ve duyurular</h3>
 <ul>
-<li><b>Öneri:</b>
+<li><b>Sohbet</b> uygulama içi mesajlaşmadır. Her konuşma iki kişiliktir:
   <ul>
-  <li>Menüdeki Öneri'den uygulamayla ilgili istek ya da sorun yazılır; M583'e gider.</li>
-  <li>Cevap gelince Öneri'de kırmızı nokta çıkar. Cevaplar aynı pencerede "Önceki geri bildirimlerim" altında görünür.</li>
+  <li>Her mağaza <b>kurucu (M583)</b> ve kendi <b>bölge müdürü</b> ile ayrı ayrı yazışır.</li>
+  <li>Bölge müdürü kendi mağazalarıyla ve kurucuyla yazışır; kurucu herkesle yazışabilir.</li>
   </ul></li>
+<li>Soldaki listeden kişiyi seçip yazın. Bilgisayarda <b>Enter</b> gönderir, <b>Shift + Enter</b> alt satıra geçer.</li>
+<li>Okunmamış mesaj olunca menüdeki Sohbet'te kırmızı nokta çıkar. Uygulamanın başka bir sayfasındayken yeni mesaj gelirse kısa bir bildirim görünür.</li>
+<li>Mesajın yanındaki <b>✓</b> gönderildi, mavi <b>✓✓</b> karşı taraf okudu demektir.</li>
+<li>Mesajları yalnızca konuşmanın iki tarafı görür.</li>
+<li>Eski "Öneri" yazışmaları cevaplarıyla birlikte kurucu sohbetine taşınmıştır.</li>
 <li><b>Duyurular:</b>
   <ul>
   <li>Bölge müdürünün yazdığı duyuru, uygulama açılınca pencere olarak çıkar.</li>
@@ -5028,7 +5251,7 @@ const MR_KILAVUZ = `
   </ul></li>
 <li><b>Mağazalarım:</b> panelde görünecek mağazalar seçilir.</li>
 <li>Bir mağazaya tıklayınca o mağazanın ekranı açılır; veriler görülür ve düzeltilebilir. Panele <b>◀ Bölge paneli</b> ile dönülür.</li>
-<li>Araçlar, Kurumsal hafıza, Düzenleyici ve Öneri panelde de vardır.</li>
+<li>Araçlar, Kurumsal hafıza, Düzenleyici ve Sohbet panelde de vardır.</li>
 </ul>
 <a class="hk-yukari" href="#" data-git="mr-bas">↑ İçindekiler</a>
 
@@ -5076,11 +5299,13 @@ const MR_KILAVUZ = `
 <dt>PDF'te yazıyı değiştiremiyorum.</dt>
 <dd>PDF taranmış (fotoğraf gibi) olabilir; bu PDF'lerde yazı seçilemez. Beyaz kutu ve Yazı ekle ile üstüne yazabilirsiniz.</dd>
 <dt>Şifremi unuttum / yeni kullanıcı lazım.</dt>
-<dd>M583'e haber verin.</dd>
+<dd>Sohbet'ten M583'e yazın. Giriş yapamıyorsanız bölge müdürünüze söyleyin.</dd>
 <dt>Verilerimi başka mağaza görebilir mi?</dt>
 <dd>Hayır. Her mağaza yalnızca kendi verisini görür. Bölge müdürü yalnızca kendisine bağlı mağazaları görür.</dd>
 <dt>Uygulamayla ilgili bir isteğim / sorunum var.</dt>
-<dd>Menüdeki Öneri'den yazın; cevap aynı yerde görünür.</dd>
+<dd>Sohbet'ten M583'e yazın.</dd>
+<dt>Özel bir durum oldu, bölge müdürüne nasıl yazarım?</dt>
+<dd>Sohbet'i açıp listeden bölge müdürünüzü seçin.</dd>
 </dl>
 <a class="hk-yukari" href="#" data-git="mr-bas">↑ İçindekiler</a>
 `;
@@ -5094,9 +5319,9 @@ const KURUMSAL_HAFIZA = [
   {id:'egitim', ikon:'🎓', baslik:'Eğitim notları',
    aciklama:'Yeni personel için ürün, sistem ve müşteri iletişimi notları.', icerik:"<p class=\"hk-taslak\">Taslak — mağaza işleyişine göre düzenlenmeli. Köşeli parantezli [ ] yerler doldurulacak.<\/p>\n<h3>İlk gün<\/h3>\n<ul>\n<li>Mağaza turu: reyonlar, depo, kasa, acil çıkışlar.<\/li>\n<li>Kasa ve satış sistemi kullanıcı açılışı; temel satış ve iade işlemleri.<\/li>\n<li>Kıyafet, saat ve mola düzeni: [ ].<\/li>\n<\/ul>\n<h3>Müşteri karşılama<\/h3>\n<ul>\n<li>Müşteriyi göz teması ve selamla karşıla; ihtiyacını sor, ürünü göster.<\/li>\n<li>Tamamlayıcı ürün öner (ör. nevresim alana yastık kılıfı) — sepet büyüklüğü (Fbü) buradan artar.<\/li>\n<li>Kasada kampanya ve sadakat programını hatırlat.<\/li>\n<\/ul>\n<h3>Uygulamadaki ölçüler<\/h3>\n<ul>\n<li><b>Ciro:<\/b> günün toplam satışı (TL).<\/li>\n<li><b>Mdo:<\/b> mağazaya girenlerin yüzde kaçının alışveriş yaptığı.<\/li>\n<li><b>Fbü:<\/b> fiş başına ürün adedi.<\/li>\n<li><b>Fbs:<\/b> fiş başına satış tutarı (TL).<\/li>\n<li><b>Mgs:<\/b> günün fiş (müşteri) sayısı.<\/li>\n<li><b>Toplu satış:<\/b> büyük tutarlı faturaların toplamı (K = bin TL).<\/li>\n<\/ul>"},
   {id:'sss', ikon:'❓', baslik:'Sık sorulanlar',
-   aciklama:'Mağazalardan en çok gelen sorular ve cevapları.', icerik:"<p class=\"hk-taslak\">Taslak — mağaza işleyişine göre düzenlenmeli. Köşeli parantezli [ ] yerler doldurulacak.<\/p>\n<h3>Fişsiz iade yapılır mı?<\/h3>\n<p>[Mağaza politikasına göre doldurulacak.]<\/p>\n<h3>Kampanyalar birleşir mi?<\/h3>\n<p>[ ]<\/p>\n<h3>Sistem çökerse ne yapılır?<\/h3>\n<p>Satışları kâğıda not al, [teknik destek] ile iletişime geç; sistem gelince işlemleri gir.<\/p>\n<h3>Uygulamada yanlış veri girdim, ne yapmalıyım?<\/h3>\n<p>Üstteki geri al (↩) ile son işlemi geri alabilir ya da hücreye dokunup doğru değeri yazabilirsin.<\/p>\n<h3>Uygulamaya öneri nasıl iletilir?<\/h3>\n<p>Sol üstteki \"Öneri\" butonundan yaz; cevap geldiğinde uygulamayı açınca görürsün.<\/p>"},
+   aciklama:'Mağazalardan en çok gelen sorular ve cevapları.', icerik:"<p class=\"hk-taslak\">Taslak — mağaza işleyişine göre düzenlenmeli. Köşeli parantezli [ ] yerler doldurulacak.<\/p>\n<h3>Fişsiz iade yapılır mı?<\/h3>\n<p>[Mağaza politikasına göre doldurulacak.]<\/p>\n<h3>Kampanyalar birleşir mi?<\/h3>\n<p>[ ]<\/p>\n<h3>Sistem çökerse ne yapılır?<\/h3>\n<p>Satışları kâğıda not al, [teknik destek] ile iletişime geç; sistem gelince işlemleri gir.<\/p>\n<h3>Uygulamada yanlış veri girdim, ne yapmalıyım?<\/h3>\n<p>Üstteki geri al (↩) ile son işlemi geri alabilir ya da hücreye dokunup doğru değeri yazabilirsin.<\/p>\n<h3>Uygulamaya öneri nasıl iletilir?<\/h3>\n<p>Menüdeki Sohbet'ten M583'e yaz; cevap aynı konuşmada görünür.<\/p>"},
   {id:'kime', ikon:'📞', baslik:'Kime sorulur',
-   aciklama:'Hangi konu hangi departmana gider, kim ne zaman aranır.', icerik:"<p class=\"hk-taslak\">Taslak — mağaza işleyişine göre düzenlenmeli. Köşeli parantezli [ ] yerler doldurulacak.<\/p>\n<table class=\"hk-tablo\">\n<tr><th>Konu<\/th><th>Kime<\/th><th>Nasıl / ne zaman<\/th><\/tr>\n<tr><td>Satış, hedef, personel<\/td><td>Bölge müdürü [ad]<\/td><td>[telefon] · mesai saatlerinde<\/td><\/tr>\n<tr><td>Sevkiyat, eksik/hasarlı koli<\/td><td>[Lojistik / depo]<\/td><td>[telefon / e-posta]<\/td><\/tr>\n<tr><td>Kasa, sistem, internet arızası<\/td><td>[Teknik destek]<\/td><td>[telefon] · 7/24 mü?<\/td><\/tr>\n<tr><td>Bina, elektrik, klima<\/td><td>[AVM yönetimi / teknik servis]<\/td><td>[telefon]<\/td><\/tr>\n<tr><td>İnsan kaynakları, bordro, izin<\/td><td>[İK]<\/td><td>[e-posta]<\/td><\/tr>\n<tr><td>Bu uygulama<\/td><td>M583<\/td><td>Uygulamadaki \"Öneri\" butonu<\/td><\/tr>\n<\/table>"}
+   aciklama:'Hangi konu hangi departmana gider, kim ne zaman aranır.', icerik:"<p class=\"hk-taslak\">Taslak — mağaza işleyişine göre düzenlenmeli. Köşeli parantezli [ ] yerler doldurulacak.<\/p>\n<table class=\"hk-tablo\">\n<tr><th>Konu<\/th><th>Kime<\/th><th>Nasıl / ne zaman<\/th><\/tr>\n<tr><td>Satış, hedef, personel<\/td><td>Bölge müdürü [ad]<\/td><td>[telefon] · mesai saatlerinde<\/td><\/tr>\n<tr><td>Sevkiyat, eksik/hasarlı koli<\/td><td>[Lojistik / depo]<\/td><td>[telefon / e-posta]<\/td><\/tr>\n<tr><td>Kasa, sistem, internet arızası<\/td><td>[Teknik destek]<\/td><td>[telefon] · 7/24 mü?<\/td><\/tr>\n<tr><td>Bina, elektrik, klima<\/td><td>[AVM yönetimi / teknik servis]<\/td><td>[telefon]<\/td><\/tr>\n<tr><td>İnsan kaynakları, bordro, izin<\/td><td>[İK]<\/td><td>[e-posta]<\/td><\/tr>\n<tr><td>Bu uygulama<\/td><td>M583<\/td><td>Uygulamadaki Sohbet (M583)<\/td><\/tr>\n<tr><td>Özel durum, acil konu<\/td><td>Bölge müdürü<\/td><td>Uygulamadaki Sohbet<\/td><\/tr>\n<\/table>"}
 ];
 
 function hafizaGoster(){
