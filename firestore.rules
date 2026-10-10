@@ -112,13 +112,27 @@ service cloud.firestore {
                     && kadi() in get(/databases/$(database)/documents/sohbetler/$(sid)).data.uyeler;
         allow create: if girisli()
                     && kadi() in getAfter(/databases/$(database)/documents/sohbetler/$(sid)).data.uyeler
-                    && request.resource.data.metin is string
-                    && request.resource.data.metin.size() > 0 && request.resource.data.metin.size() <= 4000
+                    && request.resource.data.metin is string && request.resource.data.metin.size() <= 4000
+                    // Boş metin yalnızca fotoğraflı mesajda olur; önizleme küçük tutulur.
+                    && (request.resource.data.metin.size() > 0 || 'foto' in request.resource.data)
+                    && (!('foto' in request.resource.data)
+                        || (request.resource.data.foto.thumb is string && request.resource.data.foto.thumb.size() < 80000
+                            && request.resource.data.foto.id is string))
                     && request.resource.data.zaman is number
                     && (request.resource.data.kimden == kadi()
                         // Kurucu eski geri bildirimleri gönderenin adıyla taşıyabilir.
                         || (kurucu() && request.resource.data.get('tasima', false) == true
                             && request.resource.data.kimden in getAfter(/databases/$(database)/documents/sohbetler/$(sid)).data.uyeler));
+      }
+
+      // Sohbet fotoğraflarının büyük hali (Firestore belge sınırı 1 MB).
+      match /fotolar/{fid} {
+        allow read: if girisli()
+                    && kadi() in get(/databases/$(database)/documents/sohbetler/$(sid)).data.uyeler;
+        allow create: if girisli()
+                    && kadi() in getAfter(/databases/$(database)/documents/sohbetler/$(sid)).data.uyeler
+                    && request.resource.data.kimden == kadi()
+                    && request.resource.data.data is string && request.resource.data.data.size() < 1000000;
       }
     }
 

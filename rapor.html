@@ -178,6 +178,30 @@ if(!document.documentElement.classList.contains('tel')){
   .sh-yaz textarea:focus{ border-color:#c8a066; }
   .sh-gonder{ width:40px; height:40px; border-radius:50%; border:none; background:var(--accent); cursor:pointer; flex:none; display:flex; align-items:center; justify-content:center; }
   .sh-gonder svg{ width:20px; height:20px; fill:#fff; }
+  .sh-av.r-duyuru{ background:#fdf0dc; font-size:1.1rem; }
+  .sh-duyuru{ background:#fffaf0; }
+  .sh-yeni-duyuru{ margin-left:auto; background:var(--accent); color:#fff; border:none; border-radius:8px; padding:7px 12px; font-family:inherit; font-size:.8rem; font-weight:600; cursor:pointer; }
+  .sh-duyurular{ gap:10px; }
+  .sh-duyuru-kart{ background:#fff; border-radius:12px; padding:12px 14px; box-shadow:0 1px 2px rgba(0,0,0,.06); }
+  .sh-duyuru-ust{ font-size:.7rem; color:#999; margin-bottom:4px; }
+  .sh-duyuru-metin{ font-size:.9rem; line-height:1.5; color:#222; word-break:break-word; }
+  .sh-duyuru-alt{ font-size:.72rem; color:#888; margin-top:8px; }
+  .sh-duyuru-alt .okudu{ color:#2e7d32; }
+  .sh-duyuru-alt .bpd-sil{ margin-left:6px; }
+  .sh-ekle{ width:40px; height:40px; border-radius:50%; border:none; background:#f1efe9; cursor:pointer; flex:none; display:flex; align-items:center; justify-content:center; }
+  .sh-ekle svg{ width:21px; height:21px; fill:none; stroke:#8a6a3f; stroke-width:1.8; stroke-linejoin:round; }
+  .sh-ek{ display:flex; align-items:center; gap:10px; padding:8px 14px; background:#fff; border-top:1px solid var(--line); font-size:.8rem; color:#666; }
+  .sh-ek img{ width:52px; height:52px; object-fit:cover; border-radius:8px; }
+  .sh-ek span{ flex:1; }
+  .sh-ek button{ background:#f1efe9; border:none; border-radius:50%; width:28px; height:28px; cursor:pointer; }
+  .sh-foto{ display:block; width:260px; max-width:100%; height:auto; border-radius:8px; margin:-2px -4px 5px; cursor:zoom-in; background:#eee; object-fit:cover; }
+  .sh-msj.fotolu .sh-balon{ padding:5px 5px 4px; }
+  .sh-msj.fotolu .sh-balon > .sh-msj-alt{ margin-right:5px; }
+  .sh-isik{ position:fixed; inset:0; z-index:2200; background:rgba(0,0,0,.88); display:flex; align-items:center; justify-content:center; padding:50px 12px 12px; }
+  .sh-isik img{ max-width:100%; max-height:100%; border-radius:6px; }
+  .sh-isik-ust{ position:absolute; top:10px; right:12px; display:flex; gap:8px; }
+  .sh-isik-ust button{ background:rgba(255,255,255,.15); color:#fff; border:none; border-radius:8px; padding:8px 12px; font-size:.85rem; cursor:pointer; font-family:inherit; }
+  html.tel .sh-foto{ width:230px; }
   html.tel .sohbet-page{ padding:0; }
   html.tel .sh{ border:none; border-radius:0; }
   html.tel .sh-liste{ width:100%; border-right:none; }
@@ -1384,7 +1408,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 38;
+const APP_SURUM = 39;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -2716,8 +2740,20 @@ function shListeCiz(){
     return (sira[a.rol] ?? 3) - (sira[b.rol] ?? 3) || a.ad.localeCompare(b.ad, 'tr', {numeric:true});
   });
   document.getElementById('shAra').style.display = (sh.kisiler || []).length > 6 ? '' : 'none';
-  if(!liste.length){ el.innerHTML = '<div class="sh-bos">' + (sh.kisiler ? 'Kimse bulunamadı.' : 'Yükleniyor...') + '</div>'; return; }
-  el.innerHTML = liste.map(o=>{
+  // En üstte sabit "Duyurular": bir kez pencere olarak çıkan duyurular sonradan buradan okunur.
+  const duyuruVar = oturum.rol === 'magaza' || oturum.rol === 'bolge';
+  const okunmamisD = oturum.rol === 'magaza' ? duyuruListe.filter(d=> !(d.okuyanlar && d.okuyanlar[ben])).length : 0;
+  const sonD = duyuruListe[0];
+  const duyuruHtml = duyuruVar && !sh.ara
+    ? '<button type="button" class="sh-kisi sh-duyuru' + (sh.aktif && sh.aktif.duyuru ? ' aktif' : '') + (okunmamisD ? ' yeni' : '') + '" data-duyuru="1">' +
+        '<span class="sh-av r-duyuru">📢</span>' +
+        '<span class="sh-orta"><span class="sh-ad">Duyurular <i>' + (oturum.rol === 'bolge' ? 'gönderdiklerin' : 'bölge müdürü') + '</i></span>' +
+        '<span class="sh-onizleme">' + escapeHtml(sonD ? sonD.metin : 'Henüz duyuru yok') + '</span></span>' +
+        '<span class="sh-sag"><span class="sh-zaman">' + (sonD ? shListeZaman(Date.parse(sonD.tarih)) : '') + '</span>' + (okunmamisD ? '<span class="sh-rozet"></span>' : '') + '</span>' +
+      '</button>'
+    : '';
+  if(!liste.length && !duyuruHtml){ el.innerHTML = '<div class="sh-bos">' + (sh.kisiler ? 'Kimse bulunamadı.' : 'Yükleniyor...') + '</div>'; return; }
+  el.innerHTML = duyuruHtml + liste.map(o=>{
     const son = o.s && o.s.son;
     const yeni = o.s && shOkunmamis(o.s);
     const onizleme = son ? (son.kimden === ben ? 'Sen: ' : '') + son.metin : 'Henüz mesaj yok';
@@ -2729,7 +2765,46 @@ function shListeCiz(){
       '<span class="sh-sag"><span class="sh-zaman">' + (son ? shListeZaman(son.zaman) : '') + '</span>' + (yeni ? '<span class="sh-rozet"></span>' : '') + '</span>' +
     '</button>';
   }).join('');
-  el.querySelectorAll('.sh-kisi').forEach(b=> b.addEventListener('click', ()=> shKonusmaAc(b.dataset.k)));
+  el.querySelectorAll('.sh-kisi').forEach(b=> b.addEventListener('click', ()=> b.dataset.duyuru ? shDuyurularAc() : shKonusmaAc(b.dataset.k)));
+}
+
+function shDuyurularAc(){
+  if(sh.mesajUnsub){ try{ sh.mesajUnsub(); }catch(e){} sh.mesajUnsub = null; }
+  sh.aktif = {duyuru:true};
+  sh.mesajlar = [];
+  sh.ekFoto = null;
+  const p = document.getElementById('shPencere');
+  p.innerHTML =
+    '<div class="sh-baslik"><button type="button" class="sh-geri" title="Geri">‹</button>' +
+      '<span class="sh-av r-duyuru">📢</span><span><b>Duyurular</b><small>' +
+      (oturum.rol === 'bolge' ? 'Mağazalarına gönderdiğin duyurular' : 'Bölge müdürünün duyuruları') + '</small></span>' +
+      (oturum.rol === 'bolge' ? '<button type="button" class="sh-yeni-duyuru" id="shYeniDuyuru">+ Yeni duyuru</button>' : '') +
+    '</div><div class="sh-mesajlar sh-duyurular" id="shDuyuruListe"></div>';
+  document.getElementById('shKok').classList.add('acik');
+  p.querySelector('.sh-geri').addEventListener('click', ()=>{ document.getElementById('shKok').classList.remove('acik'); sh.aktif = null; shListeCiz(); });
+  const yeni = document.getElementById('shYeniDuyuru');
+  if(yeni) yeni.addEventListener('click', duyuruYaz);
+  shDuyurulariCiz();
+  shListeCiz();
+}
+function shDuyurulariCiz(){
+  const el = document.getElementById('shDuyuruListe');
+  if(!el || !sh.aktif || !sh.aktif.duyuru) return;
+  if(!duyuruListe.length){ el.innerHTML = '<div class="sh-bos">Henüz duyuru yok.</div>'; return; }
+  const bolge = oturum.rol === 'bolge';
+  el.innerHTML = duyuruListe.map(d=>{
+    const okuyan = d.okuyanlar || {};
+    const alt = bolge
+      ? (d.magazalar || []).map(m=> okuyan[m] ? '<span class="okudu">' + escapeHtml(magazaAdi(m)) + ' ✓</span>' : escapeHtml(magazaAdi(m)) + ' –').join(' · ') +
+        ' <button type="button" class="bpd-sil" data-id="' + d.id + '">Sil</button>'
+      : escapeHtml(shKisiBilgi(d.kimden).ad);
+    return '<div class="sh-duyuru-kart"><div class="sh-duyuru-ust">' + escapeHtml(duyuruZamani(d.tarih)) + '</div>' +
+      '<div class="sh-duyuru-metin">' + shMetinHtml(d.metin || '') + '</div><div class="sh-duyuru-alt">' + alt + '</div></div>';
+  }).join('');
+  el.querySelectorAll('.bpd-sil').forEach(b=> b.addEventListener('click', async ()=>{
+    if(!await uiOnay('Bu duyuru silinecek.', {baslik:'Duyuru silinsin mi?', tehlike:true, evet:'Sil'})) return;
+    db.collection('duyurular').doc(b.dataset.id).delete().catch(e=> uiBildirim('Silinemedi: ' + e.message, 'hata'));
+  }));
 }
 
 function shKonusmaAc(k){
@@ -2745,7 +2820,10 @@ function shKonusmaAc(k){
       '<span class="sh-av r-' + bilgi.rol + '">' + escapeHtml(shAvatar(bilgi.ad)) + '</span>' +
       '<span><b>' + escapeHtml(bilgi.ad) + '</b><small>' + bilgi.etiket + '</small></span></div>' +
     '<div class="sh-mesajlar" id="shMesajlar"><div class="sh-bos">Yükleniyor...</div></div>' +
-    '<div class="sh-yaz"><textarea id="shMetin" rows="1" placeholder="Mesaj yazın..."></textarea>' +
+    '<div class="sh-ek" id="shEk" style="display:none;"></div>' +
+    '<div class="sh-yaz"><button type="button" class="sh-ekle" id="shEkle" title="Fotoğraf gönder"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></button>' +
+      '<input type="file" id="shDosya" accept="image/*" style="display:none;">' +
+      '<textarea id="shMetin" rows="1" placeholder="Mesaj yazın..."></textarea>' +
       '<button type="button" class="sh-gonder" id="shGonder" title="Gönder"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12l16-8-6 16-2.5-6.5z"/></svg></button></div>';
   document.getElementById('shKok').classList.add('acik');
   p.querySelector('.sh-geri').addEventListener('click', ()=>{
@@ -2760,6 +2838,20 @@ function shKonusmaAc(k){
     if(e.key === 'Enter' && !e.shiftKey && !TELEFON){ e.preventDefault(); shGonder(); }
   });
   document.getElementById('shGonder').addEventListener('click', shGonder);
+  sh.ekFoto = null;
+  const dosya = document.getElementById('shDosya');
+  document.getElementById('shEkle').addEventListener('click', ()=> dosya.click());
+  dosya.addEventListener('change', ()=>{ const f = dosya.files && dosya.files[0]; dosya.value = ''; if(f) shFotoSec(f); });
+  // Bilgisayarda panodan yapıştırılan ya da pencereye bırakılan resim de gönderilebilir.
+  alan.addEventListener('paste', e=>{
+    const f = Array.from((e.clipboardData || {}).files || []).find(x=> /^image\//.test(x.type));
+    if(f){ e.preventDefault(); shFotoSec(f); }
+  });
+  p.addEventListener('dragover', e=>{ if(Array.from(e.dataTransfer.types).includes('Files')) e.preventDefault(); });
+  p.addEventListener('drop', e=>{
+    const f = Array.from(e.dataTransfer.files || []).find(x=> /^image\//.test(x.type));
+    if(f){ e.preventDefault(); shFotoSec(f); }
+  });
   if(!TELEFON) alan.focus();
   shListeCiz();
   shPencereGuncelle();
@@ -2813,11 +2905,18 @@ function shMesajlariCiz(){
     if(gun !== sonGun){ html += '<div class="sh-gun"><span>' + gun + '</span></div>'; sonGun = gun; }
     const benim = m.kimden === oturum.kadi;
     const tik = benim ? '<span class="sh-tik' + (karsiOkunma >= m.zaman ? ' okundu' : '') + '" title="' + (karsiOkunma >= m.zaman ? 'Okundu' : 'Gönderildi') + '">' + (karsiOkunma >= m.zaman ? '✓✓' : '✓') + '</span>' : '';
-    html += '<div class="sh-msj' + (benim ? ' benim' : '') + (m.bekliyor ? ' bekliyor' : '') + '"><div class="sh-balon">' + shMetinHtml(m.metin) +
+    const foto = m.foto && m.foto.thumb
+      ? '<img class="sh-foto" alt="Fotoğraf" src="' + m.foto.thumb + '" data-fid="' + escapeHtml(m.foto.id || '') + '"' +
+        (m.foto.w && m.foto.h ? ' style="aspect-ratio:' + m.foto.w + '/' + m.foto.h + '"' : '') + '>' : '';
+    html += '<div class="sh-msj' + (benim ? ' benim' : '') + (m.bekliyor ? ' bekliyor' : '') + (foto ? ' fotolu' : '') + '"><div class="sh-balon">' + foto + shMetinHtml(m.metin || '') +
       '<span class="sh-msj-alt">' + shSaat(m.zaman) + tik + '</span></div></div>';
   });
   el.innerHTML = html;
   el.dataset.ciz = '1';
+  el.querySelectorAll('.sh-foto').forEach(im=>{
+    im.addEventListener('click', ()=> shFotoAc(im.dataset.fid, im.src));
+    im.addEventListener('load', ()=>{ if(altta) el.scrollTop = el.scrollHeight; }, {once:true});
+  });
   if(altta) el.scrollTop = el.scrollHeight;
 }
 
@@ -2825,30 +2924,107 @@ async function shGonder(){
   if(!sh.aktif) return;
   const alan = document.getElementById('shMetin');
   const metin = alan.value.trim().slice(0, 4000);
-  if(!metin) return;
+  const ek = sh.ekFoto;
+  if(!metin && !ek) return;
   const ben = oturum.kadi, k = sh.aktif.k, sid = sh.aktif.sid;
   const simdi = Date.now();
   const ref = db.collection('sohbetler').doc(sid);
   const mref = ref.collection('mesajlar').doc();
+  const fref = ek ? ref.collection('fotolar').doc() : null;
   const mevcut = sh.liste.find(x=> x.id === sid);
-  const ust = {uyeler:[ben, k].sort(), son:{metin:metin.slice(0, 200), kimden:ben, zaman:simdi}, guncelleme:simdi, okunma:{[ben]:simdi}};
+  const onizleme = ek ? '📷 ' + (metin || 'Fotoğraf') : metin;
+  const ust = {uyeler:[ben, k].sort(), son:{metin:onizleme.slice(0, 200), kimden:ben, zaman:simdi}, guncelleme:simdi, okunma:{[ben]:simdi}};
   if(!mevcut) ust.roller = {[ben]:shRolum(), [k]:shKisiBilgi(k).rol || 'magaza'};
+  const mesaj = {kimden:ben, metin, zaman:simdi};
+  if(ek){ mesaj.foto = {id:fref.id, thumb:ek.thumb, w:ek.w, h:ek.h}; shFotoOnb[fref.id] = ek.full; }
   alan.value = ''; alan.style.height = 'auto';
+  shEkTemizle();
   // Gönderilen mesaj sunucu cevabını beklemeden görünür.
-  sh.mesajlar.push({id:mref.id, kimden:ben, metin, zaman:simdi, bekliyor:true});
+  sh.mesajlar.push(Object.assign({id:mref.id, bekliyor:true}, mesaj));
   shMesajlariCiz();
   const el = document.getElementById('shMesajlar'); if(el) el.scrollTop = el.scrollHeight;
   try{
     const batch = db.batch();
     batch.set(ref, ust, {merge:true});
-    batch.set(mref, {kimden:ben, metin, zaman:simdi});
+    if(ek) batch.set(fref, {kimden:ben, data:ek.full, zaman:simdi});
+    batch.set(mref, mesaj);
     await batch.commit();
   }catch(e){
     sh.mesajlar = sh.mesajlar.filter(m=> m.id !== mref.id);
     shMesajlariCiz();
     alan.value = metin;
+    if(ek){ sh.ekFoto = ek; shEkCiz(); }
     uiBildirim('Mesaj gönderilemedi: ' + e.message, 'hata');
   }
+}
+
+// ---------- Sohbette fotoğraf ----------
+// Firebase Storage kullanılmadığı için fotoğraf küçültülüp Firestore'a yazılır:
+// büyük hali sohbetler/{sid}/fotolar/{id} belgesinde, küçük önizleme mesajın içinde.
+const shFotoOnb = {};
+function shResimCiz(img, maxKenar, kalite){
+  const o = Math.min(1, maxKenar / Math.max(img.naturalWidth, img.naturalHeight));
+  const c = document.createElement('canvas');
+  c.width = Math.max(1, Math.round(img.naturalWidth * o));
+  c.height = Math.max(1, Math.round(img.naturalHeight * o));
+  const x = c.getContext('2d');
+  x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height);
+  x.drawImage(img, 0, 0, c.width, c.height);
+  return c.toDataURL('image/jpeg', kalite);
+}
+async function shFotoSec(file){
+  try{
+    const url = URL.createObjectURL(file);
+    const img = await new Promise((res, rej)=>{ const i = new Image(); i.onload = ()=> res(i); i.onerror = ()=> rej(new Error('Fotoğraf açılamadı.')); i.src = url; });
+    URL.revokeObjectURL(url);
+    let kenar = 1600, kalite = 0.82, full = shResimCiz(img, kenar, kalite);
+    while(full.length > 850000 && kenar > 600){ kenar = Math.round(kenar * 0.8); kalite = Math.max(0.6, kalite - 0.05); full = shResimCiz(img, kenar, kalite); }
+    let tk = 420, thumb = shResimCiz(img, tk, 0.7);
+    while(thumb.length > 70000 && tk > 160){ tk = Math.round(tk * 0.8); thumb = shResimCiz(img, tk, 0.65); }
+    sh.ekFoto = {full, thumb, w:img.naturalWidth, h:img.naturalHeight};
+    shEkCiz();
+    const alan = document.getElementById('shMetin');
+    if(alan){ alan.placeholder = 'Açıklama ekleyin (isteğe bağlı)...'; if(!TELEFON) alan.focus(); }
+  }catch(e){ uiBildirim(e.message, 'hata'); }
+}
+function shEkCiz(){
+  const el = document.getElementById('shEk');
+  if(!el) return;
+  if(!sh.ekFoto){ el.style.display = 'none'; el.innerHTML = ''; return; }
+  el.style.display = '';
+  el.innerHTML = '<img alt="" src="' + sh.ekFoto.thumb + '"><span>Fotoğraf gönderilmeye hazır</span><button type="button" title="Kaldır">✕</button>';
+  el.querySelector('button').addEventListener('click', shEkTemizle);
+}
+function shEkTemizle(){
+  sh.ekFoto = null;
+  shEkCiz();
+  const alan = document.getElementById('shMetin');
+  if(alan) alan.placeholder = 'Mesaj yazın...';
+}
+async function shFotoAc(fid, onizleme){
+  const ov = document.createElement('div');
+  ov.className = 'sh-isik';
+  ov.innerHTML = '<img alt="" src="' + onizleme + '"><div class="sh-isik-ust"><button type="button" data-k="indir">⬇ İndir</button><button type="button" data-k="kapat">✕</button></div>';
+  const kapat = ()=>{ ov.remove(); document.removeEventListener('keydown', tus, true); };
+  const tus = e=>{ if(e.key === 'Escape'){ e.preventDefault(); kapat(); } };
+  ov.addEventListener('click', e=>{ if(e.target === ov) kapat(); });
+  ov.querySelector('[data-k="kapat"]').addEventListener('click', kapat);
+  document.addEventListener('keydown', tus, true);
+  document.body.appendChild(ov);
+  const im = ov.querySelector('img');
+  let buyuk = shFotoOnb[fid];
+  if(!buyuk && fid && sh.aktif){
+    try{
+      const d = await db.collection('sohbetler').doc(sh.aktif.sid).collection('fotolar').doc(fid).get();
+      if(d.exists) buyuk = shFotoOnb[fid] = d.data().data;
+    }catch(e){ /* önizleme kalır */ }
+  }
+  if(buyuk) im.src = buyuk;
+  ov.querySelector('[data-k="indir"]').addEventListener('click', ()=>{
+    const a = document.createElement('a');
+    a.href = im.src; a.download = 'sohbet-' + new Date().toISOString().slice(0, 10) + '.jpg';
+    document.body.appendChild(a); a.click(); a.remove();
+  });
 }
 
 // Eski geri bildirimler (Öneri) kurucunun konuşmalarına bir kez taşınır.
@@ -2907,6 +3083,7 @@ function duyurulariDinle(){
     duyuruListe.sort((a,b)=> String(b.tarih || '').localeCompare(String(a.tarih || '')));
     if(oturum && oturum.rol === 'bolge') bpDuyuruCiz();
     else okunmamisDuyuruGoster();
+    if(shSayfaAcik()){ shListeCiz(); shDuyurulariCiz(); }
   }, ()=>{ /* kurallar yayınlanmadıysa sessiz */ });
 }
 function duyurulariBirak(){
@@ -5232,12 +5409,14 @@ const MR_KILAVUZ = `
 <li>Soldaki listeden kişiyi seçip yazın. Bilgisayarda <b>Enter</b> gönderir, <b>Shift + Enter</b> alt satıra geçer.</li>
 <li>Okunmamış mesaj olunca menüdeki Sohbet'te kırmızı nokta çıkar. Uygulamanın başka bir sayfasındayken yeni mesaj gelirse kısa bir bildirim görünür.</li>
 <li>Mesajın yanındaki <b>✓</b> gönderildi, mavi <b>✓✓</b> karşı taraf okudu demektir.</li>
+<li><b>Fotoğraf göndermek:</b> yazı kutusunun solundaki 📷 simgesine dokunun (telefonda kamera ya da galeri açılır). Bilgisayarda resmi yapıştırabilir (Ctrl+V) ya da pencereye sürükleyebilirsiniz. İsterseniz açıklama yazıp gönderin. Fotoğrafa dokununca büyür, oradan indirilebilir.</li>
 <li>Mesajları yalnızca konuşmanın iki tarafı görür.</li>
 <li>Eski "Öneri" yazışmaları cevaplarıyla birlikte kurucu sohbetine taşınmıştır.</li>
 <li><b>Duyurular:</b>
   <ul>
-  <li>Bölge müdürünün yazdığı duyuru, uygulama açılınca pencere olarak çıkar.</li>
-  <li><b>Okudum</b>'a basınca bölge müdürü okunduğunu görür.</li>
+  <li>Bölge müdürünün yazdığı duyuru, uygulama açılınca bir kez pencere olarak çıkar. <b>Okudum</b>'a basınca bölge müdürü okunduğunu görür.</li>
+  <li>Bütün duyurular Sohbet listesinin en üstündeki <b>📢 Duyurular</b>'da kalır; sonradan oradan okunur.</li>
+  <li>Bölge müdürü aynı yerden yeni duyuru yazar, kimin okuduğunu görür ve duyuruyu siler.</li>
   </ul></li>
 </ul>
 <a class="hk-yukari" href="#" data-git="mr-bas">↑ İçindekiler</a>
