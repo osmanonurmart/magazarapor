@@ -1441,7 +1441,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 41;
+const APP_SURUM = 42;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -5479,6 +5479,7 @@ const MR_KILAVUZ = `
   <ul>
   <li><b>Mağaza:</b> kendi mağazasının ekranını açar.</li>
   <li><b>Bölge müdürü:</b> önce Bölge panelini açar, oradan mağazalara geçer.</li>
+  <li><b>Kurucu (M583):</b> mağaza hesabıdır; ayrıca kullanıcıları yönetir ve herkesle sohbet edebilir.</li>
   </ul></li>
 <li>Yeni kullanıcıyı M583 açar; ihtiyaç olursa Sohbet'ten M583'e yazılır.</li>
 <li>Çıkış: sağ üstteki mağaza adına (profil) tıklayıp <b>Çıkış</b>.</li>
@@ -5493,6 +5494,7 @@ const MR_KILAVUZ = `
 <li><b>Üst menü</b> (telefonda alttaki simgeler): Ana Sayfa, Araçlar, Kurumsal hafıza, Transfer, Düzenleyici, Sohbet.</li>
 <li><b>Ana Sayfa:</b> solda haftalık tablolar, sağda RT tablosu, mesaj alanı ve ay özeti.</li>
 <li><b>Sağ üst:</b> Yapıştır / Veri Ekle, Dışa aktar, Geri al (↶) ve profil menüsü.</li>
+<li><b>Profil menüsü</b> (mağaza adına tıklayınca): 🔑 Şifre değiştir, 🚪 Çıkış. Bölge müdüründe ayrıca "Bölge paneline dön", kurucuda (M583) ayrıca 👥 Kullanıcılar.</li>
 <li>Telefonda logoya dokunmak sayfanın en üstüne çıkarır.</li>
 </ul>
 <a class="hk-yukari" href="#" data-git="mr-bas">↑ İçindekiler</a>
@@ -5774,8 +5776,18 @@ Adres: <b style="word-break:break-all;">osmanonurmart.github.io/magazarapor/rapo
 <dd>PDF taranmış (fotoğraf gibi) olabilir; bu PDF'lerde yazı seçilemez. Beyaz kutu ve Yazı ekle ile üstüne yazabilirsiniz.</dd>
 <dt>Şifremi değiştirmek istiyorum.</dt>
 <dd>Sağ üstteki profil menüsünden <b>🔑 Şifre değiştir</b>'i seçin.</dd>
-<dt>Şifremi unuttum / yeni kullanıcı lazım.</dt>
-<dd>Sohbet'ten M583'e yazın. Giriş yapamıyorsanız bölge müdürünüze söyleyin.</dd>
+<dt>Şifremi unuttum.</dt>
+<dd>Bölge müdürünüze ya da M583'e haber verin. M583 hesabı yeni şifreyle yeniden açar; verileriniz ve sohbetleriniz olduğu gibi kalır.</dd>
+<dt>Yeni mağaza ya da bölge müdürü nasıl eklenir? (M583)</dt>
+<dd>Profil menüsü → 👥 Kullanıcılar → Yeni kullanıcı: kullanıcı adı (küçük harf, ör. m700), şifre, rol ve isteğe bağlı görünen ad. Bölge müdürü için bakacağı mağazaları işaretleyin. Oluşturunca kullanıcı adı ve şifre ekranda görünür; kullanıcıya iletin.</dd>
+<dt>Bir kullanıcının girişini nasıl kapatırım? (M583)</dt>
+<dd>👥 Kullanıcılar listesinde <b>Erişimi kapat</b>. Kullanıcı artık giremez, bölge müdürlerinin listesinden de çıkar. Verileri silinmez; aynı adla yeniden yetki verilirse geri gelir.</dd>
+<dt>Şifresini unutan kullanıcıya yeni şifre nasıl verilir? (M583)</dt>
+<dd>Firebase Console → Authentication → Users'ta hesabı silin (⋮ → Delete account), sonra 👥 Kullanıcılar'dan aynı kullanıcı adıyla yeni şifre ile yeniden açın. Uygulama "hesap zaten var" derse yalnızca yetkisini verin.</dd>
+<dt>Eski bir duyuruyu nerede bulurum?</dt>
+<dd>Sohbet listesinin en üstündeki 📢 Duyurular'da bütün duyurular durur.</dd>
+<dt>Sohbette fotoğraf nasıl gönderilir?</dt>
+<dd>Yazı kutusunun solundaki 📷'a dokunun. Bilgisayarda resmi yapıştırabilir ya da pencereye sürükleyebilirsiniz.</dd>
 <dt>Verilerimi başka mağaza görebilir mi?</dt>
 <dd>Hayır. Her mağaza yalnızca kendi verisini görür. Bölge müdürü yalnızca kendisine bağlı mağazaları görür.</dd>
 <dt>Uygulamayla ilgili bir isteğim / sorunum var.</dt>
