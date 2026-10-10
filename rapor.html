@@ -910,6 +910,30 @@ if(!document.documentElement.classList.contains('tel')){
   .sifre-dlg label{ display:block; text-align:left; font-size:calc(var(--k)*.78rem); color:#666; margin:0 0 calc(var(--k)*10px); }
   .sifre-dlg label .ui-input{ margin-top:4px; }
   .sifre-dlg .sifre-goster{ display:flex; align-items:center; gap:6px; }
+  .kul-dlg{ background:#fff; border-radius:18px; width:620px; max-width:100%; max-height:92vh; display:flex; flex-direction:column; box-shadow:0 20px 50px rgba(0,0,0,.25); overflow:hidden; }
+  .kul-dlg.kul-kucuk{ width:460px; }
+  .kul-ust{ display:flex; align-items:center; justify-content:space-between; padding:14px 18px; border-bottom:1px solid var(--line); font-size:1rem; }
+  .kul-kapat{ background:#f1efe9; border:none; border-radius:50%; width:30px; height:30px; cursor:pointer; }
+  .kul-govde{ padding:14px 18px 18px; overflow-y:auto; }
+  .kul-yeni-baslik{ font-size:.75rem; font-weight:700; letter-spacing:.04em; color:#999; text-transform:uppercase; margin-bottom:8px; }
+  .kul-form{ display:grid; grid-template-columns:1fr 1fr; gap:10px 12px; }
+  .kul-form label{ display:flex; flex-direction:column; gap:4px; font-size:.78rem; color:#666; }
+  .kul-form .ui-input{ margin:0; text-align:left; }
+  .kul-magazalar{ grid-column:1 / -1; font-size:.78rem; color:#666; }
+  .kul-magazalar > div{ display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:6px; }
+  .kul-cb{ flex-direction:row !important; align-items:center; gap:5px !important; color:#333 !important; font-size:.85rem !important; }
+  .kul-hata{ grid-column:1 / -1; color:#a34141; font-size:.8rem; min-height:1em; }
+  .kul-btns{ grid-column:1 / -1; display:flex; justify-content:flex-end; gap:8px; }
+  .kul-btns .ui-btn{ flex:none; padding-left:18px; padding-right:18px; }
+  .kul-liste{ display:flex; flex-direction:column; }
+  .kul-oge{ display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid #f3f0ea; }
+  .kul-bilgi{ flex:1; min-width:0; display:flex; flex-direction:column; }
+  .kul-bilgi b{ font-size:.88rem; color:var(--dark); }
+  .kul-bilgi small{ font-size:.72rem; color:#999; }
+  .kul-mini{ background:#f1efe9; border:none; border-radius:7px; padding:6px 10px; font-size:.75rem; cursor:pointer; font-family:inherit; }
+  .kul-mini.tehlike{ color:#a34141; }
+  html.tel .kul-form{ grid-template-columns:1fr; }
+  html.tel .kul-oge{ flex-wrap:wrap; }
   .sifre-hata{ color:#a34141; font-size:calc(var(--k)*.8rem); min-height:1.2em; margin-bottom:6px; }
 
 
@@ -1260,6 +1284,7 @@ if(!document.documentElement.classList.contains('tel')){
         <div class="chip-menu" id="chipMenu" style="display:none;">
           <button type="button" id="chipMagazaBtn">◀ Bölge paneline dön</button>
           <div class="sep" id="chipMagazaSep"></div>
+          <button type="button" id="chipKullanicilarBtn" style="display:none;">👥 Kullanıcılar</button>
           <button type="button" class="sifre-degistir-btn">🔑 Şifre değiştir</button>
           <div class="sep"></div>
           <button type="button" id="chipCikisBtn">🚪 Çıkış yap</button>
@@ -1416,7 +1441,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 40;
+const APP_SURUM = 41;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -2196,6 +2221,7 @@ function renderProfileChip(){
   document.getElementById('chipMagazaBtn').style.display = bolge ? '' : 'none';
   document.getElementById('chipMagazaSep').style.display = bolge ? '' : 'none';
   document.getElementById('bolgePanelBtn').style.display = bolge ? '' : 'none';
+  document.getElementById('chipKullanicilarBtn').style.display = (oturum && oturum.kadi === KURUCU) ? '' : 'none';
 }
 
 function renderLastEditInfo(){
@@ -2216,7 +2242,177 @@ document.getElementById('profileChip').addEventListener('click', e=>{ e.stopProp
 document.getElementById('chipMagazaBtn').addEventListener('click', ()=> bolgePaneliniAc(true));
 document.getElementById('bolgePanelBtn').addEventListener('click', ()=> bolgePaneliniAc(true));
 document.getElementById('chipCikisBtn').addEventListener('click', cikisYap);
+document.getElementById('chipKullanicilarBtn').addEventListener('click', ()=>{ kapatChipMenu(); kullanicilariAc(); });
 document.querySelectorAll('.sifre-degistir-btn').forEach(b=> b.addEventListener('click', ()=>{ kapatChipMenu(); sifreDegistir(); }));
+
+// ==================== KULLANICILAR (yalnızca kurucu) ====================
+// Yeni hesap ikinci bir Firebase uygulamasıyla açılır; böylece kurucunun oturumu kapanmaz.
+// Ardından yetkiler/{kadi} yazılır. Hesap silme ve başkasının şifresini sıfırlama tarayıcıdan
+// yapılamaz; "Erişimi kapat" yetki belgesini siler, kullanıcı artık uygulamaya giremez.
+let kulPencere = null;
+function kullanicilariAc(){
+  if(!oturum || oturum.kadi !== KURUCU) return;
+  const ov = document.createElement('div');
+  ov.className = 'ui-ov';
+  ov.innerHTML = '<div class="kul-dlg">'
+    + '<div class="kul-ust"><b>👥 Kullanıcılar</b><button type="button" class="kul-kapat" title="Kapat">✕</button></div>'
+    + '<div class="kul-govde"><div class="kul-yeni-baslik">Yeni kullanıcı</div><div id="kulForm"></div>'
+    + '<div class="kul-yeni-baslik" style="margin-top:18px;">Mevcut kullanıcılar</div><div class="kul-liste" id="kulListe">Yükleniyor...</div></div></div>';
+  const kapat = ()=>{ ov.remove(); kulPencere = null; document.removeEventListener('keydown', tus, true); };
+  const tus = e=>{ if(e.key === 'Escape' && !document.querySelector('.ui-dlg')){ e.preventDefault(); kapat(); } };
+  ov.querySelector('.kul-kapat').addEventListener('click', kapat);
+  ov.addEventListener('click', e=>{ if(e.target === ov) kapat(); });
+  document.addEventListener('keydown', tus, true);
+  document.body.appendChild(ov);
+  kulPencere = {ov, kullanicilar:[]};
+  kulListeYukle();
+}
+async function kulListeYukle(){
+  if(!kulPencere) return;
+  try{
+    const snap = await db.collection('yetkiler').get();
+    kulPencere.kullanicilar = [];
+    snap.forEach(d=> kulPencere.kullanicilar.push(Object.assign({k:d.id}, d.data())));
+    kulPencere.kullanicilar.sort((a, b)=> (a.rol === b.rol ? 0 : a.rol === 'bolge' ? -1 : 1) || a.k.localeCompare(b.k, 'tr', {numeric:true}));
+  }catch(e){
+    document.getElementById('kulListe').textContent = 'Kullanıcılar okunamadı: ' + e.message;
+    return;
+  }
+  kulFormCiz(document.getElementById('kulForm'), null);
+  kulListeCiz();
+}
+function kulMagazalar(){
+  return kulPencere.kullanicilar.filter(u=> u.rol !== 'bolge').map(u=> u.k);
+}
+// Form: yeni kullanıcı (u = null) ya da düzenleme (u = mevcut kayıt)
+function kulFormCiz(kap, u){
+  const yeni = !u;
+  kap.innerHTML = '<div class="kul-form">'
+    + (yeni ? '<label>Kullanıcı adı<input class="ui-input" data-k="kadi" placeholder="ör. m612" autocapitalize="none" autocomplete="off" spellcheck="false"></label>'
+            + '<label>Şifre<input class="ui-input" data-k="sifre" type="text" placeholder="En az 6 karakter" autocomplete="off"></label>' : '')
+    + '<label>Rol<select class="ui-input" data-k="rol"><option value="magaza">Mağaza</option><option value="bolge">Bölge müdürü</option></select></label>'
+    + '<label>Görünen ad (isteğe bağlı)<input class="ui-input" data-k="ad" placeholder="ör. Adnan Çardak"></label>'
+    + '<div class="kul-magazalar" data-k="magazalarKutu"><span>Bakacağı mağazalar</span><div data-k="magazalar"></div></div>'
+    + '<div class="kul-hata"></div>'
+    + '<div class="kul-btns">' + (yeni ? '' : '<button type="button" class="ui-btn" data-k="vazgec">Vazgeç</button>')
+    + '<button type="button" class="ui-btn birincil" data-k="kaydet">' + (yeni ? 'Kullanıcıyı oluştur' : 'Kaydet') + '</button></div></div>';
+  const al = k=> kap.querySelector('[data-k="' + k + '"]');
+  const secili = new Set(u && Array.isArray(u.magazalar) ? u.magazalar : []);
+  al('magazalar').innerHTML = kulMagazalar().map(m=>
+    '<label class="kul-cb"><input type="checkbox" value="' + escapeHtml(m) + '"' + (secili.has(m) ? ' checked' : '') + '> ' + escapeHtml(magazaAdi(m)) + '</label>').join('')
+    || '<i>Henüz mağaza yok.</i>';
+  if(u){ al('rol').value = u.rol === 'bolge' ? 'bolge' : 'magaza'; al('ad').value = u.ad || ''; }
+  const rolGuncelle = ()=>{ al('magazalarKutu').style.display = al('rol').value === 'bolge' ? '' : 'none'; };
+  al('rol').addEventListener('change', rolGuncelle);
+  rolGuncelle();
+  if(al('vazgec')) al('vazgec').addEventListener('click', ()=>{ kap.closest('.ui-ov').remove(); });
+  const hata = kap.querySelector('.kul-hata');
+  al('kaydet').addEventListener('click', async ()=>{
+    hata.textContent = '';
+    const rol = al('rol').value;
+    const ad = al('ad').value.trim().slice(0, 60);
+    const magazalar = Array.from(al('magazalar').querySelectorAll('input:checked')).map(x=> x.value);
+    const veri = {rol};
+    if(ad) veri.ad = ad;
+    if(rol === 'bolge') veri.magazalar = magazalar;
+    const btn = al('kaydet');
+    if(yeni){
+      const kadi = al('kadi').value.trim().toLowerCase();
+      const sifre = al('sifre').value;
+      if(!/^[a-z0-9._-]{2,30}$/.test(kadi)){ hata.textContent = 'Kullanıcı adı yalnızca küçük harf, rakam, nokta, tire ve alt çizgi içerebilir (en az 2 karakter). Türkçe harf kullanmayın.'; return; }
+      if(kulPencere.kullanicilar.some(x=> x.k === kadi)){ hata.textContent = kadi + ' zaten var. Aşağıdaki listeden düzenleyebilirsiniz.'; return; }
+      if(sifre.length < 6){ hata.textContent = 'Şifre en az 6 karakter olmalı.'; return; }
+      btn.disabled = true; btn.textContent = 'Oluşturuluyor...';
+      try{
+        await kulHesapAc(kadi, sifre);
+        await db.collection('yetkiler').doc(kadi).set(veri);
+        uiBildirim(kadi + ' oluşturuldu. Kullanıcı adı: ' + kadi + ' · Şifre: ' + sifre, 'basari', 8000);
+        await kulListeYukle();
+      }catch(e){
+        hata.textContent = kulHataMetni(e, kadi);
+        if(e && e.code === 'auth/email-already-in-use'){
+          // Hesap Firebase'de var ama yetkisi yoksa yalnızca yetki yazılabilir.
+          if(await uiOnay(kadi + ' hesabı Firebase\'de zaten açık ama uygulamada yetkisi yok. Yalnızca yetkisi verilsin mi? (Şifresi değişmez.)', {baslik:'Hesap zaten var', ikon:'👥', evet:'Yetki ver'})){
+            try{ await db.collection('yetkiler').doc(kadi).set(veri); uiBildirim(kadi + ' için yetki verildi.', 'basari'); hata.textContent = ''; await kulListeYukle(); }
+            catch(e2){ hata.textContent = 'Yetki yazılamadı: ' + e2.message; }
+          }
+        }
+      }finally{
+        btn.disabled = false; btn.textContent = 'Kullanıcıyı oluştur';
+      }
+    } else {
+      btn.disabled = true; btn.textContent = 'Kaydediliyor...';
+      try{
+        await db.collection('yetkiler').doc(u.k).set(veri);
+        kap.closest('.ui-ov').remove();
+        uiBildirim(magazaAdi(u.k) + ' güncellendi.', 'basari');
+        await kulListeYukle();
+      }catch(e){
+        hata.textContent = 'Kaydedilemedi: ' + e.message;
+        btn.disabled = false; btn.textContent = 'Kaydet';
+      }
+    }
+  });
+}
+let kulIkincilApp = null;
+async function kulHesapAc(kadi, sifre){
+  if(!kulIkincilApp){
+    kulIkincilApp = firebase.initializeApp(firebaseConfig, 'kullaniciEkle');
+    try{ await kulIkincilApp.auth().setPersistence(firebase.auth.Auth.Persistence.NONE); }catch(e){ /* önemli değil */ }
+  }
+  const a = kulIkincilApp.auth();
+  await a.createUserWithEmailAndPassword(kadi + GIRIS_ALAN_ADI, sifre);
+  try{ await a.signOut(); }catch(e){ /* önemli değil */ }
+}
+function kulHataMetni(e, kadi){
+  const kod = e && e.code || '';
+  if(kod === 'auth/email-already-in-use') return kadi + ' hesabı Firebase\'de zaten var.';
+  if(kod === 'auth/weak-password') return 'Şifre çok zayıf, en az 6 karakter olmalı.';
+  if(kod === 'auth/invalid-email') return 'Kullanıcı adı geçersiz.';
+  if(kod === 'auth/operation-not-allowed') return 'Firebase\'de e-posta/şifre girişi kapalı görünüyor.';
+  if(/network/.test(kod)) return 'İnternet bağlantısı yok gibi görünüyor.';
+  if(kod === 'permission-denied') return 'Yetki yazılamadı: Firestore kurallarının güncel olduğundan emin olun.';
+  return 'Oluşturulamadı: ' + (e && e.message || e);
+}
+function kulListeCiz(){
+  const el = document.getElementById('kulListe');
+  if(!el) return;
+  el.innerHTML = kulPencere.kullanicilar.map(u=>{
+    const rol = u.k === KURUCU ? 'Kurucu' : u.rol === 'bolge' ? 'Bölge müdürü' : 'Mağaza';
+    const detay = u.rol === 'bolge' ? ((u.magazalar || []).map(magazaAdi).join(', ') || 'mağaza seçilmedi') : '';
+    return '<div class="kul-oge"><span class="sh-av r-' + (u.k === KURUCU ? 'kurucu' : u.rol === 'bolge' ? 'bolge' : 'magaza') + '">' + escapeHtml(shAvatar(u.rol === 'bolge' && u.ad ? u.ad : magazaAdi(u.k))) + '</span>'
+      + '<span class="kul-bilgi"><b>' + escapeHtml(magazaAdi(u.k)) + (u.ad ? ' · ' + escapeHtml(u.ad) : '') + '</b><small>' + rol + (detay ? ' · ' + escapeHtml(detay) : '') + '</small></span>'
+      + (u.k === KURUCU ? '' : '<button type="button" class="kul-mini" data-duz="' + escapeHtml(u.k) + '">Düzenle</button>'
+        + '<button type="button" class="kul-mini tehlike" data-kapat="' + escapeHtml(u.k) + '">Erişimi kapat</button>')
+      + '</div>';
+  }).join('') || '<i>Kullanıcı yok.</i>';
+  el.querySelectorAll('[data-duz]').forEach(b=> b.addEventListener('click', ()=>{
+    const u = kulPencere.kullanicilar.find(x=> x.k === b.dataset.duz);
+    const ov = document.createElement('div');
+    ov.className = 'ui-ov';
+    ov.style.zIndex = '2100';
+    ov.innerHTML = '<div class="kul-dlg kul-kucuk"><div class="kul-ust"><b>' + escapeHtml(magazaAdi(u.k)) + ' · düzenle</b></div><div class="kul-govde"></div></div>';
+    ov.addEventListener('click', e=>{ if(e.target === ov) ov.remove(); });
+    document.body.appendChild(ov);
+    kulFormCiz(ov.querySelector('.kul-govde'), u);
+  }));
+  el.querySelectorAll('[data-kapat]').forEach(b=> b.addEventListener('click', async ()=>{
+    const k = b.dataset.kapat;
+    if(!await uiOnay(magazaAdi(k) + ' artık uygulamaya giremeyecek. Mağaza verileri ve sohbetleri silinmez; aynı kullanıcı adıyla yeniden yetki verirseniz geri gelir.',
+                     {baslik:'Erişim kapatılsın mı?', tehlike:true, evet:'Erişimi kapat'})) return;
+    try{
+      await db.collection('yetkiler').doc(k).delete();
+      // Bölge müdürlerinin listesinden de çıkarılır.
+      for(const u of kulPencere.kullanicilar.filter(x=> x.rol === 'bolge' && (x.magazalar || []).includes(k))){
+        const {k:_, ...veri} = u;
+        veri.magazalar = u.magazalar.filter(m=> m !== k);
+        await db.collection('yetkiler').doc(u.k).set(veri).catch(()=>{});
+      }
+      uiBildirim(magazaAdi(k) + ' için erişim kapatıldı.', 'basari');
+      await kulListeYukle();
+    }catch(e){ uiBildirim('Kapatılamadı: ' + e.message, 'hata'); }
+  }));
+}
 
 // Kullanıcı kendi şifresini değiştirir: güvenlik için önce mevcut şifre doğrulanır.
 function sifreDegistir(){
@@ -2678,9 +2874,11 @@ function shKisiBilgi(k){
   const kisi = (sh.kisiler || []).find(x=> x.k === k);
   const konusma = sh.liste.find(s=> s.uyeler.includes(k));
   const rol = k === KURUCU ? 'kurucu' : (kisi ? kisi.rol : (konusma && konusma.roller ? konusma.roller[k] : '')) || '';
-  const ad = kisi && kisi.ad ? kisi.ad : magazaAdi(k);
+  // Mağazalar kodlarıyla (M612 · Merkez), bölge müdürleri adlarıyla görünür.
+  const ad = kisi && kisi.ad ? (rol === 'bolge' ? kisi.ad : magazaAdi(k) + ' · ' + kisi.ad) : magazaAdi(k);
   const etiket = rol === 'kurucu' ? 'Kurucu' : rol === 'bolge' ? 'Bölge müdürü' : 'Mağaza';
-  return {k, ad, rol, etiket};
+  const av = shAvatar(rol === 'bolge' && kisi && kisi.ad ? kisi.ad : magazaAdi(k));
+  return {k, ad, rol, etiket, av};
 }
 function shOkunmamis(s){
   return !!(s.son && s.son.kimden !== oturum.kadi && (s.son.zaman || 0) > ((s.okunma || {})[oturum.kadi] || 0));
@@ -2832,7 +3030,7 @@ function shListeCiz(){
     const onizleme = son ? (son.kimden === ben ? 'Sen: ' : '') + son.metin : 'Henüz mesaj yok';
     const aktif = sh.aktif && sh.aktif.k === o.k;
     return '<button type="button" class="sh-kisi' + (aktif ? ' aktif' : '') + (yeni ? ' yeni' : '') + '" data-k="' + escapeHtml(o.k) + '">' +
-      '<span class="sh-av r-' + o.rol + '">' + escapeHtml(shAvatar(o.ad)) + '</span>' +
+      '<span class="sh-av r-' + o.rol + '">' + escapeHtml(o.av) + '</span>' +
       '<span class="sh-orta"><span class="sh-ad">' + escapeHtml(o.ad) + ' <i>' + o.etiket + '</i></span>' +
       '<span class="sh-onizleme">' + escapeHtml(onizleme) + '</span></span>' +
       '<span class="sh-sag"><span class="sh-zaman">' + (son ? shListeZaman(son.zaman) : '') + '</span>' + (yeni ? '<span class="sh-rozet"></span>' : '') + '</span>' +
@@ -2890,7 +3088,7 @@ function shKonusmaAc(k){
   const p = document.getElementById('shPencere');
   p.innerHTML =
     '<div class="sh-baslik"><button type="button" class="sh-geri" title="Geri">‹</button>' +
-      '<span class="sh-av r-' + bilgi.rol + '">' + escapeHtml(shAvatar(bilgi.ad)) + '</span>' +
+      '<span class="sh-av r-' + bilgi.rol + '">' + escapeHtml(bilgi.av) + '</span>' +
       '<span><b>' + escapeHtml(bilgi.ad) + '</b><small>' + bilgi.etiket + '</small></span></div>' +
     '<div class="sh-mesajlar" id="shMesajlar"><div class="sh-bos">Yükleniyor...</div></div>' +
     '<div class="sh-ek" id="shEk" style="display:none;"></div>' +
@@ -5282,8 +5480,9 @@ const MR_KILAVUZ = `
   <li><b>Mağaza:</b> kendi mağazasının ekranını açar.</li>
   <li><b>Bölge müdürü:</b> önce Bölge panelini açar, oradan mağazalara geçer.</li>
   </ul></li>
-<li>Yeni kullanıcı açmak ya da şifre değiştirmek için Sohbet'ten M583'e yazılır.</li>
+<li>Yeni kullanıcıyı M583 açar; ihtiyaç olursa Sohbet'ten M583'e yazılır.</li>
 <li>Çıkış: sağ üstteki mağaza adına (profil) tıklayıp <b>Çıkış</b>.</li>
+<li><b>Kullanıcı ekleme (kurucu):</b> M583 profil menüsü → <b>👥 Kullanıcılar</b>. Kullanıcı adı, şifre, rol (mağaza / bölge müdürü), isteğe bağlı görünen ad ve bölge müdürü için bakacağı mağazalar seçilir. Aynı ekranda mevcut kullanıcılar düzenlenir ya da <b>Erişimi kapat</b> ile uygulamaya girişleri kapatılır.</li>
 <li><b>Şifre değiştirme:</b> profil menüsü → <b>🔑 Şifre değiştir</b>. Mevcut şifre ve iki kez yeni şifre (en az 6 karakter) yazılır.</li>
 <li><b>Sürüm ve güncelleme:</b> sol üstteki logoya tıklayınca sürüm numarası görünür; yeni sürüm varsa kendisi yüklenir.</li>
 </ul>
