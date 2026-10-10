@@ -1017,6 +1017,7 @@ if(!document.documentElement.classList.contains('tel')){
         <button class="tab-btn" id="bpTabAyar" data-kisa="Mağazalar" type="button"><svg class="tab-ikon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v10h16V10"/><path d="M3 10 4.8 4h14.4L21 10z"/><path d="M10 20v-5h4v5"/></svg>Mağazalarım</button>
         <button class="tab-btn" id="bpTabAraclar" data-kisa="Araçlar" type="button"><svg class="tab-ikon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7.5" width="18" height="12.5" rx="2.5"/><path d="M9 7.5V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1.5"/><path d="M3 13h18"/><path d="M10.5 13v2h3v-2"/></svg>Araçlar</button>
         <button class="tab-btn" id="bpTabHafiza" data-kisa="Hafıza" type="button"><svg class="tab-ikon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"/><path d="M9 7.5h6"/></svg>Kurumsal hafıza</button>
+        <button class="tab-btn" id="bpTabDuz" data-kisa="Düzenleyici" type="button"><svg class="tab-ikon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/><path d="M10 17l5.5-5.5 1.5 1.5L11.5 18.5H10z"/></svg>Düzenleyici</button>
         <button class="tab-btn oneri-btn" data-kisa="Öneri" type="button" title="Öneri / geri bildirim" onclick="geriBildirimYaz()"><svg class="tab-ikon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/><path d="M8.5 11h7"/><path d="M8.5 14h4"/></svg>Öneri<span class="oneri-nokta"></span></button>
       </nav>
     </div>
@@ -1111,6 +1112,7 @@ if(!document.documentElement.classList.contains('tel')){
         <button class="tab-btn" id="tabAraclarBtn" data-kisa="Araçlar" type="button" onclick="showTab('araclar')"><svg class="tab-ikon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7.5" width="18" height="12.5" rx="2.5"/><path d="M9 7.5V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1.5"/><path d="M3 13h18"/><path d="M10.5 13v2h3v-2"/></svg>Araçlar</button>
         <button class="tab-btn" id="tabHafizaBtn" data-kisa="Hafıza" type="button" onclick="showTab('hafiza')"><svg class="tab-ikon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"/><path d="M9 7.5h6"/></svg>Kurumsal hafıza</button>
         <button class="tab-btn" id="tabTransferBtn" data-kisa="Transfer" type="button" onclick="showTab('transfer')"><svg class="tab-ikon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4"/><path d="M7.5 8.5 12 4l4.5 4.5"/><path d="M4 14.5V18a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3.5"/></svg>Transfer</button>
+        <button class="tab-btn" id="tabDuzBtn" data-kisa="Düzenleyici" type="button" onclick="showTab('duz')"><svg class="tab-ikon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/><path d="M10 17l5.5-5.5 1.5 1.5L11.5 18.5H10z"/></svg>Düzenleyici</button>
         <button class="tab-btn oneri-btn" data-kisa="Öneri" type="button" title="Öneri / geri bildirim" onclick="geriBildirimYaz()"><svg class="tab-ikon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/><path d="M8.5 11h7"/><path d="M8.5 14h4"/></svg>Öneri<span class="oneri-nokta"></span></button>
       </nav>
     </div>
@@ -1157,6 +1159,7 @@ if(!document.documentElement.classList.contains('tel')){
   </div>
 </div>
 
+<div class="duz-page" id="duzPage" style="display:none;"></div>
 <div class="araclar-page" id="araclarPage" style="display:none;">
   <div id="toolsGridView">
     <div class="sayfa-baslik"><h2>Araçlar</h2><span id="araclarAlt"></span></div>
@@ -1282,7 +1285,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 31;
+const APP_SURUM = 32;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -2343,11 +2346,14 @@ function bpSekme(ad){
   document.getElementById('bpAyar').style.display = ad === 'ayar' ? '' : 'none';
   document.getElementById('araclarPage').style.display = ad === 'araclar' ? '' : 'none';
   document.getElementById('hafizaPage').style.display = ad === 'hafiza' ? '' : 'none';
+  document.getElementById('duzPage').style.display = ad === 'duz' ? '' : 'none';
+  document.getElementById('bpTabDuz').classList.toggle('active', ad === 'duz');
   document.getElementById('bpDonemBar').style.display = ad === 'ozet' ? '' : 'none';
   document.getElementById('bpYenile').style.display = (ad === 'ozet' || ad === 'ayar') ? '' : 'none';
   if(ad === 'ayar') bpAyarCiz();
   else if(ad === 'araclar') closeToolViewer();
   else if(ad === 'hafiza') hafizaGoster();
+  else if(ad === 'duz') duzenleyiciAc();
 }
 
 function bpAyarCiz(){
@@ -2425,6 +2431,7 @@ document.getElementById('bpTabOzet').addEventListener('click', ()=> bpSekme('oze
 document.getElementById('bpTabAyar').addEventListener('click', ()=> bpSekme('ayar'));
 document.getElementById('bpTabAraclar').addEventListener('click', ()=> bpSekme('araclar'));
 document.getElementById('bpTabHafiza').addEventListener('click', ()=> bpSekme('hafiza'));
+document.getElementById('bpTabDuz').addEventListener('click', ()=> bpSekme('duz'));
 document.getElementById('bpAyarKaydet').addEventListener('click', bpAyarKaydet);
 document.getElementById('bpChip').addEventListener('click', e=>{
   e.stopPropagation();
@@ -4384,6 +4391,8 @@ function showTab(tab){
   document.getElementById('araclarPage').style.display = tab === 'araclar' ? '' : 'none';
   document.getElementById('hafizaPage').style.display = tab === 'hafiza' ? '' : 'none';
   document.getElementById('transferPage').style.display = tab === 'transfer' ? '' : 'none';
+  document.getElementById('duzPage').style.display = tab === 'duz' ? '' : 'none';
+  document.getElementById('tabDuzBtn').classList.toggle('active', tab === 'duz');
   document.getElementById('tabRaporBtn').classList.toggle('active', raporMu);
   document.getElementById('tabAraclarBtn').classList.toggle('active', tab === 'araclar');
   document.getElementById('tabHafizaBtn').classList.toggle('active', tab === 'hafiza');
@@ -4396,7 +4405,28 @@ function showTab(tab){
   } else if(tab === 'transfer'){
     transferMobilOlcek();
     renderTransfer();
+  } else if(tab === 'duz'){
+    duzenleyiciAc();
   }
+}
+
+// Düzenleyici (PDF araçları) ayrı dosyadadır, sekme ilk açıldığında yüklenir.
+let duzYukleniyor = null;
+function duzenleyiciAc(){
+  const kap = document.getElementById('duzPage');
+  if(window.Duzenleyici){ window.Duzenleyici.ac(kap); return; }
+  if(!duzYukleniyor){
+    kap.innerHTML = '<div style="text-align:center;padding:60px 16px;color:#999;">Yükleniyor...</div>';
+    duzYukleniyor = new Promise((res, rej)=>{
+      const el = document.createElement('script');
+      el.src = 'duzenleyici/duzenleyici.js?v=' + APP_SURUM;
+      el.onload = res;
+      el.onerror = ()=>{ duzYukleniyor = null; rej(); };
+      document.head.appendChild(el);
+    });
+  }
+  duzYukleniyor.then(()=> window.Duzenleyici.ac(kap))
+    .catch(()=>{ kap.innerHTML = '<div style="text-align:center;padding:60px 16px;color:#c0392b;">Düzenleyici yüklenemedi. İnternet bağlantısını kontrol edip sekmeyi yeniden açın.</div>'; });
 }
 
 // ==================== ARAÇLAR (Widget Sistemi) ====================
@@ -4406,12 +4436,13 @@ function showTab(tab){
 function ortakSayfalariYerlestir(yer){
   const ar = document.getElementById('araclarPage');
   const hf = document.getElementById('hafizaPage');
+  const dz = document.getElementById('duzPage');
   if(yer === 'panel'){
     const hedef = document.getElementById('bpIcerik');
-    if(ar.parentNode !== hedef){ hedef.appendChild(ar); hedef.appendChild(hf); }
+    if(ar.parentNode !== hedef){ hedef.appendChild(ar); hedef.appendChild(hf); hedef.appendChild(dz); }
   } else {
     const tr = document.getElementById('transferPage');
-    if(ar.parentNode !== tr.parentNode){ tr.parentNode.insertBefore(ar, tr); tr.parentNode.insertBefore(hf, tr); }
+    if(ar.parentNode !== tr.parentNode){ tr.parentNode.insertBefore(ar, tr); tr.parentNode.insertBefore(hf, tr); tr.parentNode.insertBefore(dz, tr); }
   }
 }
 

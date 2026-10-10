@@ -41,3 +41,10 @@ Giriş ekranının arka plan fotoğrafı `giris-arka.jpg`.
 - Bilgisayarda "Bekleyen deposu Excel'i yükle": eşleşmeler `stores/{m}/irsaliyeler/{1-6}` altına kaydedilir ve Outlook'ta taslak olarak açılan `bekleyen deposu hk.eml` iner. İmza `stores/{m}/settings/mail.imza` (Mail imzası butonu).
 - "Kırık tutanağı": EBA formu kopyalanıp yapıştırılır, tutanak yazdırılır.
 - İnen klasörler: `37 · 06.10.2026 · 1-S-6-…` içinde `kutu-1..4.jpg`, `kirik.jpg`, `tutanak.jpg`. Kartlarda "EBA'ya işlendi" işareti.
+
+## Düzenleyici (PDF araçları)
+
+- Sekme açılınca `duzenleyici/duzenleyici.js` yüklenir; her şey tarayıcıda çalışır, dosya bir yere gönderilmez.
+- Araçlar: Birleştir, Ayır, Düzenle (metin değiştirme, yazı/resim/imza/beyaz kutu), İmzala, Sayfaları düzenle, Döndür, Resimden PDF, PDF'ten resme, Sayfa numarası, Filigran.
+- Metin düzenlemede eski yazı içerik akışından silinir (`metinSil`); silinemezse üstü zemin rengiyle kapatılır ve kullanıcıya söylenir. Yeni yazı Liberation Sans/Serif ile yazılır.
+- Kütüphaneler `duzenleyici/lib`, fontlar `duzenleyici/fontlar` altında (lisanslar: `lib/OKUBENI.txt`, `fontlar/OFL.txt`).
