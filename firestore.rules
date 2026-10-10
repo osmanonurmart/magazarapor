@@ -42,6 +42,14 @@ service cloud.firestore {
                     || ('magazalar' in resource.data && kadi() in resource.data.magazalar));
       allow update: if girisli() && k == kadi() && yetkiVar() && yetki().rol == 'bolge'
                     && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['magazalar']);
+      // Kurucu kullanıcı ekler, düzenler ve erişimini kapatır (kendi belgesi hariç).
+      allow create, update: if kurucu() && k != 'm583'
+                    && k.matches('[a-z0-9._-]{2,30}')
+                    && request.resource.data.keys().hasOnly(['rol','magazalar','ad','yonetici'])
+                    && request.resource.data.rol in ['magaza', 'bolge']
+                    && (!('magazalar' in request.resource.data) || request.resource.data.magazalar is list)
+                    && (!('ad' in request.resource.data) || (request.resource.data.ad is string && request.resource.data.ad.size() <= 60));
+      allow delete: if kurucu() && k != 'm583';
     }
 
     // Ortak araçlar ve ortak ayarlar: herkes okur, bölge müdürü ve yönetici yazar.

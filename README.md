@@ -55,3 +55,9 @@ Giriş ekranının arka plan fotoğrafı `giris-arka.jpg`.
 - `sohbetler/{a__b}` (üyeler sıralı) ve altında `mesajlar`. Okundu bilgisi `okunma.{kadi}` alanında.
 - Eski `geribildirim` kayıtları kurucu Sohbet'i ilk açtığında konuşmalara taşınır (`tasindi: true`).
 - Kurallar `firestore.rules` içinde; değiştikten sonra Firebase Console → Firestore → Rules'a yapıştırılıp yayınlanmalı.
+
+## Kullanıcılar (kurucu)
+
+- M583 profil menüsü → 👥 Kullanıcılar: yeni hesap ikinci bir Firebase uygulamasıyla açılır (kurucunun oturumu kapanmaz), ardından `yetkiler/{kadi}` yazılır.
+- Düzenle: rol, görünen ad, bölge müdürünün mağazaları. Erişimi kapat: yetki belgesi silinir (veriler kalır).
+- Hesap silme ve başkasının şifresini sıfırlama tarayıcıdan yapılamaz; Firebase Console'dan yapılır.
