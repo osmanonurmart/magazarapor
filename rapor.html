@@ -1384,7 +1384,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 37;
+const APP_SURUM = 38;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -5009,7 +5009,7 @@ const MR_KILAVUZ = `
 <li><a href="#" data-git="mr-duz">Düzenleyici (PDF araçları)</a></li>
 <li><a href="#" data-git="mr-oneri">Sohbet ve duyurular</a></li>
 <li><a href="#" data-git="mr-bolge">Bölge paneli</a></li>
-<li><a href="#" data-git="mr-tel">Telefonda kullanım</a></li>
+<li><a href="#" data-git="mr-tel">Telefona yükleme ve kullanım</a></li>
 <li><a href="#" data-git="mr-sss">Sık sorulan sorular</a></li>
 </ol>
 </div>
@@ -5256,14 +5256,33 @@ const MR_KILAVUZ = `
 </ul>
 <a class="hk-yukari" href="#" data-git="mr-bas">↑ İçindekiler</a>
 
-<h3 id="mr-tel">16. Telefonda kullanım</h3>
+<h3 id="mr-tel">16. Telefona yükleme ve kullanım</h3>
+<p>Uygulama mağazadan indirilmez; internet adresi telefonun ana ekranına eklenir ve uygulama gibi açılır.
+Adres: <b style="word-break:break-all;">osmanonurmart.github.io/magazarapor/rapor.html</b></p>
+<p><b>iPhone (iOS):</b></p>
+<ol>
+<li>Adresi <b>Safari</b> ile açın. Ana ekrana ekleme en sorunsuz Safari'de çalışır.</li>
+<li>Alttaki <b>Paylaş</b> simgesine dokunun (yukarı ok çıkan kare). iPad'de bu simge sağ üsttedir.</li>
+<li>Açılan listeyi aşağı kaydırıp <b>Ana Ekrana Ekle</b>'ye dokunun. Listede yoksa en alttaki "Eylemleri Düzenle"den ekleyin.</li>
+<li>Ad <b>Mağaza Rapor</b> olarak gelir; sağ üstteki <b>Ekle</b>'ye dokunun.</li>
+<li>Ana ekranda Mağaza Rapor simgesi çıkar; uygulamayı bundan sonra bu simgeden açın.</li>
+</ol>
+<p><b>Android:</b></p>
+<ol>
+<li>Adresi <b>Chrome</b> ile açın.</li>
+<li>Sağ üstteki <b>⋮</b> menüsüne dokunun.</li>
+<li><b>Uygulamayı yükle</b> ya da <b>Ana ekrana ekle</b>'yi seçin. Chrome bazen alt kısımda kendiliğinden "Yükle" önerir; ona da basabilirsiniz.</li>
+<li><b>Yükle</b> / <b>Ekle</b>'ye dokunun. Simge ana ekrana (bazı telefonlarda uygulama listesine) gelir.</li>
+<li>Samsung İnternet kullanıyorsanız: alttaki <b>≡</b> menüsü → <b>Sayfayı ekle</b> → <b>Ana ekran</b>.</li>
+</ol>
+<p><b>Yükledikten sonra:</b></p>
 <ul>
-<li><b>Ana ekrana ekleyin:</b>
-  <ul>
-  <li>iPhone'da Safari → Paylaş → <b>Ana Ekrana Ekle</b>.</li>
-  <li>Android'de Chrome → ⋮ → <b>Ana ekrana ekle</b>.</li>
-  <li>Uygulama gibi açılır.</li>
-  </ul></li>
+<li>Simgeden açınca adres çubuğu olmadan, tam ekran açılır. Bir kez giriş yapmanız yeter.</li>
+<li><b>Güncelleme:</b> sol üstteki logoya dokunun; yeni sürüm varsa yüklenir. Takılırsa uygulamayı kapatıp yeniden açın.</li>
+<li><b>Kaldırmak için:</b> simgeye basılı tutun → <b>Uygulamayı Sil</b> / <b>Kaldır</b>. Verileriniz bulutta olduğu için silinmez.</li>
+</ul>
+<p><b>Kullanım:</b></p>
+<ul>
 <li>Telefonda veri yapıştırma ve dışa aktarma yoktur; bunlar bilgisayardan yapılır. Hücreler telefonda da düzeltilebilir.</li>
 <li>Tablolar sığsın diye kısaltmalar kullanılır: <b>₺</b> ciro, <b>Hdf</b> hedef, <b>%</b> oran, <b>TS</b> toplu satış, <b>Top.</b> hafta toplamı.</li>
 <li>İnternet zayıfken son açılan hali gösterilir. Yapılan değişiklikler internet gelince gönderilir.</li>
@@ -5289,6 +5308,8 @@ const MR_KILAVUZ = `
 <dd>Günün 2.900 TL ve üstü faturalarının toplamı alınır, bin TL'ye (K) çevrilir. Örneğin toplam 7.450 TL ise 7 yazılır.</dd>
 <dt>Günün hedefini nasıl değiştiririm?</dt>
 <dd>Haftalık tablodaki Hedef satırında o günün hücresine yazın. Bugünün hedefi RT tablosundaki "Günlük hedef" alanından da değişir.</dd>
+<dt>Uygulamayı telefona nasıl yüklerim?</dt>
+<dd>16. başlıktaki adımları izleyin: iPhone'da Safari → Paylaş → Ana Ekrana Ekle; Android'de Chrome → ⋮ → Uygulamayı yükle / Ana ekrana ekle.</dd>
 <dt>Telefonda eski sürüm görünüyor.</dt>
 <dd>Sol üstteki logoya dokunun; yeni sürüm varsa yüklenir.</dd>
 <dt>Telefonda "Veriler yükleniyor"da takılı kaldı.</dt>
