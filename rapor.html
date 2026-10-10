@@ -196,6 +196,16 @@ if(!document.documentElement.classList.contains('tel')){
   .hk-tablo{ width:100%; border-collapse:collapse; font-size:.8rem; }
   .hk-tablo th, .hk-tablo td{ border:1px solid var(--line); padding:6px 8px; text-align:left; vertical-align:top; }
   .hk-tablo th{ background:#f7f4ee; }
+  .hk-icindekiler{ background:#faf7f1; border:1px solid var(--line); border-radius:10px; padding:12px 16px; margin-bottom:10px; }
+  .hk-icindekiler ol{ columns:2; column-gap:28px; margin:6px 0 0; }
+  .hk-icindekiler a, .hk-yukari{ color:var(--accent); text-decoration:none; }
+  .hk-icindekiler a:hover, .hk-yukari:hover{ text-decoration:underline; }
+  .hk-detay h3[id]{ scroll-margin-top:70px; padding-top:6px; border-top:1px solid var(--line); }
+  .hk-yukari{ display:inline-block; font-size:.72rem; margin:2px 0 4px; }
+  .hk-sss dt{ font-weight:700; margin-top:12px; }
+  .hk-sss dd{ margin:3px 0 0 0; padding-left:12px; border-left:3px solid var(--line); }
+  .hk-kart.sabit{ border-color:var(--accent); background:#fffaf0; }
+  html.tel .hk-icindekiler ol{ columns:1; }
   .not-defteri{
     max-width:1100px; margin:14px auto 0; background:#fff; border:1px solid #cfc9bf; border-radius:10px;
     padding:14px 14px 16px; box-sizing:border-box;
@@ -1319,7 +1329,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 34;
+const APP_SURUM = 35;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -4760,7 +4770,323 @@ function closeToolViewer(){
 // ==================== KURUMSAL HAFIZA ====================
 // Bölümler bütün mağazalarda ortaktır; içerikleri burada, kodun içinde tutulur
 // (icerik: HTML). Not defteri ise mağazaya özeldir: stores/{m}/settings/notlar.
+// "Mağaza Rapor" bölümü her zaman en başta durur: uygulamanın kullanım kılavuzu ve SSS.
+// Yeni özellik eklendikçe ilgili başlığın altına madde eklenir.
+const MR_KILAVUZ = `
+<div class="hk-icindekiler" id="mr-bas">
+<b>İçindekiler</b>
+<ol>
+<li><a href="#" data-git="mr-nedir">Uygulama nedir?</a></li>
+<li><a href="#" data-git="mr-giris">Giriş, hesaplar ve güncelleme</a></li>
+<li><a href="#" data-git="mr-ekran">Ekran düzeni</a></li>
+<li><a href="#" data-git="mr-veri">Günlük veri girişi (Veri Kopyala → Yapıştır)</a></li>
+<li><a href="#" data-git="mr-hafta">Haftalık tablolar</a></li>
+<li><a href="#" data-git="mr-ghbh">GH / BH / R kategori raporu</a></li>
+<li><a href="#" data-git="mr-rt">RT tablosu ve günlük mesaj</a></li>
+<li><a href="#" data-git="mr-ay">Ay özeti</a></li>
+<li><a href="#" data-git="mr-geri">Geri al ve dışa aktar</a></li>
+<li><a href="#" data-git="mr-araclar">Araçlar</a></li>
+<li><a href="#" data-git="mr-hafiza">Kurumsal hafıza ve notlar</a></li>
+<li><a href="#" data-git="mr-transfer">Transfer (kırık ve genel)</a></li>
+<li><a href="#" data-git="mr-duz">Düzenleyici (PDF araçları)</a></li>
+<li><a href="#" data-git="mr-oneri">Öneri ve duyurular</a></li>
+<li><a href="#" data-git="mr-bolge">Bölge paneli</a></li>
+<li><a href="#" data-git="mr-tel">Telefonda kullanım</a></li>
+<li><a href="#" data-git="mr-sss">Sık sorulan sorular</a></li>
+</ol>
+</div>
+
+<h3 id="mr-nedir">1. Uygulama nedir?</h3>
+<ul>
+<li>Mağazanın günlük satış verilerini (ciro, MDO, FBÜ, FBS, MGS, toplu satış) tek yerde tutar, haftalık ve aylık karşılaştırır.</li>
+<li>Bölge müdürüne gönderilen günlük mesajı ve RT tablosunun görselini hazırlar.</li>
+<li>Kırık ürün kayıtları, PDF işleri ve mağaza bilgileri gibi günlük işleri de aynı yerde toplar.</li>
+<li>Veriler bulutta saklanır; bilgisayardan da telefondan da aynı veriler görünür. Bir yerde yapılan değişiklik diğerine anında gelir.</li>
+<li>Her mağaza yalnızca kendi verisini görür. Bölge müdürü kendisine bağlı mağazaları görür.</li>
+</ul>
+<a class="hk-yukari" href="#" data-git="mr-bas">↑ İçindekiler</a>
+
+<h3 id="mr-giris">2. Giriş, hesaplar ve güncelleme</h3>
+<ul>
+<li>Giriş ekranında kullanıcı adı (ör. <b>m583</b>) ve şifre yazılır. Şifre kutusundaki göz simgesi şifreyi gösterir/gizler.</li>
+<li>İki tür hesap vardır:
+  <ul>
+  <li><b>Mağaza:</b> kendi mağazasının ekranını açar.</li>
+  <li><b>Bölge müdürü:</b> önce Bölge panelini açar, oradan mağazalara geçer.</li>
+  </ul></li>
+<li>Yeni kullanıcı açmak ya da şifre değiştirmek için M583'e haber verilir.</li>
+<li>Çıkış: sağ üstteki mağaza adına (profil) tıklayıp <b>Çıkış</b>.</li>
+<li><b>Sürüm ve güncelleme:</b> sol üstteki logoya tıklayınca sürüm numarası görünür; yeni sürüm varsa kendisi yüklenir.</li>
+</ul>
+<a class="hk-yukari" href="#" data-git="mr-bas">↑ İçindekiler</a>
+
+<h3 id="mr-ekran">3. Ekran düzeni</h3>
+<ul>
+<li><b>Üst menü</b> (telefonda alttaki simgeler): Ana Sayfa, Araçlar, Kurumsal hafıza, Transfer, Düzenleyici, Öneri.</li>
+<li><b>Ana Sayfa:</b> solda haftalık tablolar, sağda RT tablosu, mesaj alanı ve ay özeti.</li>
+<li><b>Sağ üst:</b> Yapıştır / Veri Ekle, Dışa aktar, Geri al (↶) ve profil menüsü.</li>
+<li>Telefonda logoya dokunmak sayfanın en üstüne çıkarır.</li>
+</ul>
+<a class="hk-yukari" href="#" data-git="mr-bas">↑ İçindekiler</a>
+
+<h3 id="mr-veri">4. Günlük veri girişi</h3>
+<p>Veriler ciro raporundan tek tıkla alınır. Bunun için önce <b>Araçlar → Veri Kopyala</b> yer imi bir kez kurulur.</p>
+<ol>
+<li>Ciro raporunu açın. Fatura tablosunda gruplama <b>Fatura No</b> olsun.</li>
+<li>Yer imleri çubuğundaki <b>Veri Kopyala</b>'ya tıklayın.
+  <ul>
+  <li><b>Yeşil</b> kutu: veriler kopyalandı.</li>
+  <li><b>Kırmızı</b> kutu: kutuda yazan sorunu düzeltip tekrar basın (ör. Fatura No seçili değil, rapor tam yüklenmemiş).</li>
+  </ul></li>
+<li>Uygulamaya dönüp <b>⬇ Yapıştır / Veri Ekle</b>'ye basın.</li>
+</ol>
+<p>Yapıştırınca şunlar olur:</p>
+<ul>
+<li><b>Bugün:</b> ciro, MDO, MGS (ziyaret), FBÜ, FBS ve haftalık ciro yazılır.</li>
+<li><b>Toplu satış:</b> 2.900 TL ve üstü faturaların toplamı bin TL (K) olarak yazılır.</li>
+<li><b>Dün:</b> ciro ve MDO kesin değerleriyle güncellenir.</li>
+<li>Gün içinde istediğiniz kadar tekrar yapıştırabilirsiniz; her seferinde son değerler yazılır.</li>
+<li>Herhangi bir hücreye tıklayıp değeri elle de yazabilir ya da düzeltebilirsiniz.</li>
+</ul>
+<a class="hk-yukari" href="#" data-git="mr-bas">↑ İçindekiler</a>
+
+<h3 id="mr-hafta">5. Haftalık tablolar</h3>
+<ul>
+<li>Her hafta Pazartesi–Pazar tablosudur. Bilgisayarda ayın haftaları, telefonda bu hafta ve geçen hafta görünür.</li>
+<li><b>Satırlar:</b>
+  <ul>
+  <li>Ciro, Mdo, Fbü, Mgs, Fbs.</li>
+  <li><b>Hedef:</b> günün hedefi; hücreye yazarak değiştirilir.</li>
+  <li><b>Oran:</b> ciro / hedef.</li>
+  <li><b>Toplu S.:</b> toplu satış (K).</li>
+  </ul></li>
+<li><b>Son sütun (Formüller / Top.):</b>
+  <ul>
+  <li>Haftanın ciro toplamı ve geçen haftaya göre değişim yüzdesi.</li>
+  <li>MDO, FBÜ ve FBS ortalamaları.</li>
+  <li>MGS'nin ortalaması (O) ve toplamı (T).</li>
+  </ul></li>
+<li><b>Haftalık hedef:</b> tablo başlığındaki "Hedef" kutusuna yazılır. Yanındaki <b>Oran</b> rozeti %85'i geçince yeşil olur.</li>
+<li><b>İzinli personel:</b> bilgisayarda gün başlığının altındaki seçiciden seçilir.</li>
+<li><b>İşaretler:</b>
+  <ul>
+  <li><b>★</b> ayın en yüksek cirolu günüdür.</li>
+  <li>Açık kırmızı hücre: MDO ya da FBS'si geçen haftanın ortalamasının %15'ten fazla altında kalan gün.</li>
+  </ul></li>
+<li>Bugünün sütunu renkli gösterilir.</li>
+</ul>
+<a class="hk-yukari" href="#" data-git="mr-bas">↑ İçindekiler</a>
+
+<h3 id="mr-ghbh">6. GH / BH / R kategori raporu</h3>
+<ul>
+<li>Haftalık tablonun başlığındaki küçük kutulardır:
+  <ul>
+  <li><b>GH:</b> geçen haftanın kategori Excel'i.</li>
+  <li><b>BH:</b> bu haftanın kategori Excel'i.</li>
+  </ul></li>
+<li>Kutuya tıklayıp Excel'i seçin; yüklenince kutu yeşil olur.</li>
+<li>BH yüklenince bir sonraki haftanın GH'si kendiliğinden dolar; her hafta yalnızca BH yüklemek yeter.</li>
+<li><b>R</b> kutusu, payı %5'in üstündeki kategorilerin "gh %… bh %…" kıyas metnini panoya kopyalar.</li>
+<li>Pazar günü bu kıyas, günlük mesajın içine kendiliğinden eklenir.</li>
+<li>Yanlış yüklenen dosya, kutunun köşesindeki ✕ ile silinir.</li>
+</ul>
+<a class="hk-yukari" href="#" data-git="mr-bas">↑ İçindekiler</a>
+
+<h3 id="mr-rt">7. RT tablosu ve günlük mesaj</h3>
+<ul>
+<li><b>Hedefe kalan kutuları:</b> bugünkü ve haftalık hedefe ne kadar kaldığını gösterir. Hedef aşılınca "Aşıldı" yazar.</li>
+<li><b>RT tablosu:</b>
+  <ul>
+  <li>Bugün, dün ve geçen hafta aynı günün ciro, MDO ve toplu satışını yan yana gösterir.</li>
+  <li>Kendiliğinden dolmayan alanlar elle yazılır: günlük hedef, günün yıldızı ürün, deterjan, leke çıkarıcı, sıvı sabun & duş jeli, temizlik mendili satış adetleri ve gelen koli sayısı.</li>
+  </ul></li>
+<li><b>📷 Fotoğrafını Al:</b> RT tablosunun görselini hazırlar.</li>
+<li><b>Yorum kutusu:</b> buraya yazılan, mesajın "Yorum" kısmına eklenir.</li>
+<li><b>📋 Mesajı Kopyala</b> (bilgisayar):
+  <ul>
+  <li>Bugünü dünle karşılaştıran hazır mesajı kopyalar: ciro, MDO, MGS, FBÜ, FBS artış/düşüş yüzdeleri ve toplu satış.</li>
+  <li>Pazartesi günü karşılaştırma geçen haftanın aynı günüyle yapılır.</li>
+  <li>WhatsApp'a yapıştırıp gönderin.</li>
+  </ul></li>
+<li><b>📤 Görsel + mesajı gönder</b> (telefon): önce mesajı kopyalar ve görseli hazırlar, ikinci dokunuşta paylaşma ekranını açar. WhatsApp'ı seçip gönderin.</li>
+</ul>
+<a class="hk-yukari" href="#" data-git="mr-bas">↑ İçindekiler</a>
+
+<h3 id="mr-ay">8. Ay özeti</h3>
+<ul>
+<li>Sağ altta <b>📅 Ay Özeti</b>: bu ayın bugüne kadarki değerleri, geçen ayın aynı günlerine göre karşılaştırılır.</li>
+<li>Gösterilenler: toplam ciro, ortalama MDO, FBÜ, FBS, MGS ve toplu satış (toplam/ortalama).</li>
+<li>Yeşil ▲ artış, kırmızı ▼ düşüş demektir.</li>
+</ul>
+<a class="hk-yukari" href="#" data-git="mr-bas">↑ İçindekiler</a>
+
+<h3 id="mr-geri">9. Geri al ve dışa aktar</h3>
+<ul>
+<li><b>↶ Geri al:</b> bu oturumdaki son değişikliği geri alır (hücre düzeltmesi, yapıştırma, hedef). Art arda basılabilir.</li>
+<li><b>⬇ Dışa aktar</b> (bilgisayar): bütün verileri Excel ve yedek dosyası olarak indirir.</li>
+</ul>
+<a class="hk-yukari" href="#" data-git="mr-bas">↑ İçindekiler</a>
+
+<h3 id="mr-araclar">10. Araçlar</h3>
+<ul>
+<li>Bütün mağazalarda ortak araçlardır. Yeni araç M583 tarafından eklenir.</li>
+<li><b>Veri Kopyala:</b> ciro raporundan veri kopyalayan yer imi.
+  <ul>
+  <li>Kartı açıp butonu yer imleri çubuğuna sürükleyerek kurulur.</li>
+  <li>Kullanımı için 4. başlığa bakın.</li>
+  </ul></li>
+</ul>
+<a class="hk-yukari" href="#" data-git="mr-bas">↑ İçindekiler</a>
+
+<h3 id="mr-hafiza">11. Kurumsal hafıza ve notlar</h3>
+<ul>
+<li>Bölümler (süreçler, formlar, eğitim, SSS, kime sorulur) bütün mağazalarda ortaktır.</li>
+<li><b>Notlar:</b> sayfanın altındaki not alanı yalnızca o mağazaya özeldir.
+  <ul>
+  <li>"Not al..." kutusuna yazınca not eklenir.</li>
+  <li>Bir nota tıklayınca düzenlenir; rengi değiştirilebilir, 📌 ile en üste sabitlenebilir, silinebilir.</li>
+  </ul></li>
+</ul>
+<a class="hk-yukari" href="#" data-git="mr-bas">↑ İçindekiler</a>
+
+<h3 id="mr-transfer">12. Transfer</h3>
+<p>Telefonda çekilen fotoğraf ve yazıları bilgisayara aktarmak içindir.</p>
+<p><b>Kırık (telefonda):</b></p>
+<ol>
+<li>İrsaliye 1-4 numarasını yazın (ör. 7738681). 1-6 numarası, depo ve tarih kendiliğinden bulunur.</li>
+<li>Fotoğrafları çekin: Kutu 1–4 ve Kırık. Kutu 1'e dokununca kamera açılır ve sırayla ilerler. Tutanak (imzalı) fotoğrafı sonradan da eklenebilir.</li>
+<li><b>📤 Gönder</b>'e basın.</li>
+</ol>
+<p><b>Kırık (bilgisayarda):</b></p>
+<ul>
+<li>Gelen kayıtta 1-6 numarası 📋 ile kopyalanır.</li>
+<li><b>🖨 Tutanak:</b>
+  <ul>
+  <li>EBA kırık formunu Ctrl+A ve Ctrl+C ile kopyalayıp pencereye yapıştırın.</li>
+  <li>Ürünler ve bilgiler kendiliğinden dolar; yazdırıp imzalayın.</li>
+  </ul></li>
+<li>EBA'ya girince <b>EBA'ya işlendi</b> işaretlenir.</li>
+<li><b>⬇ İndir:</b> fotoğraflar seçtiğiniz klasöre "37 · 06.10.2026 · 1-S-6-…" adlı klasörle iner (kutu-1…4, kirik, tutanak). İndirilen kayıt listeden silinir.</li>
+</ul>
+<p><b>Bekleyen deposu</b> (bilgisayarda, haftalık):</p>
+<ul>
+<li><b>Bekleyen deposu Excel'i yükle</b>'ye basın.
+  <ul>
+  <li>1-4 → 1-6 eşleşmeleri kaydedilir.</li>
+  <li>Outlook'ta açılan hazır bir mail iner (alıcı, bilgi, konu, metin ve ek hazır); Gönder'e basmanız yeter.</li>
+  </ul></li>
+<li>Mail imzası <b>✍️ Mail imzası</b> ile değiştirilir.</li>
+</ul>
+<p><b>Genel:</b></p>
+<ul>
+<li>Telefondan istediğiniz fotoğraf ve yazıyı gönderin.</li>
+<li>Bilgisayarda yazı 📋 ile kopyalanır, fotoğraflar indirilir.</li>
+</ul>
+<a class="hk-yukari" href="#" data-git="mr-bas">↑ İçindekiler</a>
+
+<h3 id="mr-duz">13. Düzenleyici (PDF araçları)</h3>
+<ul>
+<li>Dosyalar hiçbir yere gönderilmez, her şey cihazda yapılır.</li>
+<li><b>PDF Birleştir:</b> birden çok PDF'i istediğiniz sırayla tek dosya yapar.</li>
+<li><b>PDF Ayır:</b> aralığa göre (ör. 1-3, 5), seçili sayfalara göre ya da her sayfayı ayrı dosya yapar. Birden çok dosya çıkarsa zip iner.</li>
+<li><b>PDF Düzenle:</b>
+  <ul>
+  <li>Yazıya tıklayıp değiştirilir.</li>
+  <li>Yazı, resim, imza ve beyaz kutu eklenir.</li>
+  <li>Boyut, renk, kalın ve italik ayarlanır.</li>
+  </ul></li>
+<li><b>PDF İmzala:</b> imzayı çizip istediğiniz yere koyarsınız.</li>
+<li><b>Sayfaları Düzenle / PDF Döndür:</b> sayfaları sıralar, siler, döndürür, boş sayfa ya da başka PDF ekler.</li>
+<li><b>Resimden PDF / PDF'ten Resme:</b> JPG ve PNG'leri PDF yapar ya da sayfaları JPG olarak kaydeder.</li>
+<li><b>Sayfa Numarası, Filigran Ekle:</b> sayfalara numara ya da yazı damgası basar.</li>
+<li>Taranmış (yazısı seçilemeyen) PDF'lerde yazı değiştirme çalışmaz.</li>
+</ul>
+<a class="hk-yukari" href="#" data-git="mr-bas">↑ İçindekiler</a>
+
+<h3 id="mr-oneri">14. Öneri ve duyurular</h3>
+<ul>
+<li><b>Öneri:</b>
+  <ul>
+  <li>Menüdeki Öneri'den uygulamayla ilgili istek ya da sorun yazılır; M583'e gider.</li>
+  <li>Cevap gelince Öneri'de kırmızı nokta çıkar. Cevaplar aynı pencerede "Önceki geri bildirimlerim" altında görünür.</li>
+  </ul></li>
+<li><b>Duyurular:</b>
+  <ul>
+  <li>Bölge müdürünün yazdığı duyuru, uygulama açılınca pencere olarak çıkar.</li>
+  <li><b>Okudum</b>'a basınca bölge müdürü okunduğunu görür.</li>
+  </ul></li>
+</ul>
+<a class="hk-yukari" href="#" data-git="mr-bas">↑ İçindekiler</a>
+
+<h3 id="mr-bolge">15. Bölge paneli (bölge müdürü)</h3>
+<ul>
+<li><b>Özet:</b>
+  <ul>
+  <li>Mağazaların ciro, MDO, FBÜ, FBS, MGS ve hedef oranlarını gün, hafta ve ay olarak karşılaştırır.</li>
+  <li>Bugün veri girmeyen mağazaları gösterir.</li>
+  <li>Duyuru yazılır ve kimin okuduğu görülür.</li>
+  </ul></li>
+<li><b>Mağazalarım:</b> panelde görünecek mağazalar seçilir.</li>
+<li>Bir mağazaya tıklayınca o mağazanın ekranı açılır; veriler görülür ve düzeltilebilir. Panele <b>◀ Bölge paneli</b> ile dönülür.</li>
+<li>Araçlar, Kurumsal hafıza, Düzenleyici ve Öneri panelde de vardır.</li>
+</ul>
+<a class="hk-yukari" href="#" data-git="mr-bas">↑ İçindekiler</a>
+
+<h3 id="mr-tel">16. Telefonda kullanım</h3>
+<ul>
+<li><b>Ana ekrana ekleyin:</b>
+  <ul>
+  <li>iPhone'da Safari → Paylaş → <b>Ana Ekrana Ekle</b>.</li>
+  <li>Android'de Chrome → ⋮ → <b>Ana ekrana ekle</b>.</li>
+  <li>Uygulama gibi açılır.</li>
+  </ul></li>
+<li>Telefonda veri yapıştırma ve dışa aktarma yoktur; bunlar bilgisayardan yapılır. Hücreler telefonda da düzeltilebilir.</li>
+<li>Tablolar sığsın diye kısaltmalar kullanılır: <b>₺</b> ciro, <b>Hdf</b> hedef, <b>%</b> oran, <b>TS</b> toplu satış, <b>Top.</b> hafta toplamı.</li>
+<li>İnternet zayıfken son açılan hali gösterilir. Yapılan değişiklikler internet gelince gönderilir.</li>
+</ul>
+<a class="hk-yukari" href="#" data-git="mr-bas">↑ İçindekiler</a>
+
+<h3 id="mr-sss">17. Sık sorulan sorular</h3>
+<dl class="hk-sss">
+<dt>Veri Kopyala kırmızı uyarı verdi, ne yapmalıyım?</dt>
+<dd>Kutuda sorun yazar:
+  <ul>
+  <li>"Fatura No seçili değil": fatura tablosunda gruplamayı Fatura No yapıp tekrar basın.</li>
+  <li>"eksik var": rapor tam yüklenmemiştir; sayfa yüklenince tekrar basın.</li>
+  <li>"Ciro raporu bulunamadı": yer imine ciro raporu açıkken basın.</li>
+  </ul></dd>
+<dt>Yapıştır / Veri Ekle'ye bastım, "Pano okunamadı" dedi.</dt>
+<dd>Tarayıcı panoyu okumak için izin ister; çıkan izni onaylayıp tekrar basın. Önce Veri Kopyala'nın yeşil verdiğinden emin olun.</dd>
+<dt>Yanlış değer girdim / yanlış yapıştırdım.</dt>
+<dd>Hücreye tıklayıp doğrusunu yazın ya da sağ üstteki ↶ Geri al'a basın.</dd>
+<dt>Dünün cirosu neden değişti?</dt>
+<dd>Yapıştırınca dünün ciro ve MDO'su raporun kesinleşmiş değerleriyle güncellenir. Bu doğrudur.</dd>
+<dt>Toplu satış nasıl hesaplanıyor?</dt>
+<dd>Günün 2.900 TL ve üstü faturalarının toplamı alınır, bin TL'ye (K) çevrilir. Örneğin toplam 7.450 TL ise 7 yazılır.</dd>
+<dt>Günün hedefini nasıl değiştiririm?</dt>
+<dd>Haftalık tablodaki Hedef satırında o günün hücresine yazın. Bugünün hedefi RT tablosundaki "Günlük hedef" alanından da değişir.</dd>
+<dt>Telefonda eski sürüm görünüyor.</dt>
+<dd>Sol üstteki logoya dokunun; yeni sürüm varsa yüklenir.</dd>
+<dt>Telefonda "Veriler yükleniyor"da takılı kaldı.</dt>
+<dd>Birkaç saniye sonra çıkan <b>Sayfayı yenile</b>'ye basın. Düzelmezse internet bağlantısını kontrol edin.</dd>
+<dt>Kırık kaydında 1-6 bulunamadı.</dt>
+<dd>O haftanın bekleyen deposu Excel'i henüz yüklenmemiştir. Yine de gönderin; Excel bilgisayardan yüklenince 1-6 kendiliğinden tamamlanır.</dd>
+<dt>Veri Kopyala yer imini sürükleyemiyorum.</dt>
+<dd>Yer imleri çubuğu kapalı olabilir: Ctrl+Shift+B (Mac: Cmd+Shift+B). Olmazsa kartın altındaki "yer imi adresini kopyala" ile elle ekleyin.</dd>
+<dt>PDF'te yazıyı değiştiremiyorum.</dt>
+<dd>PDF taranmış (fotoğraf gibi) olabilir; bu PDF'lerde yazı seçilemez. Beyaz kutu ve Yazı ekle ile üstüne yazabilirsiniz.</dd>
+<dt>Şifremi unuttum / yeni kullanıcı lazım.</dt>
+<dd>M583'e haber verin.</dd>
+<dt>Verilerimi başka mağaza görebilir mi?</dt>
+<dd>Hayır. Her mağaza yalnızca kendi verisini görür. Bölge müdürü yalnızca kendisine bağlı mağazaları görür.</dd>
+<dt>Uygulamayla ilgili bir isteğim / sorunum var.</dt>
+<dd>Menüdeki Öneri'den yazın; cevap aynı yerde görünür.</dd>
+</dl>
+<a class="hk-yukari" href="#" data-git="mr-bas">↑ İçindekiler</a>
+`;
 const KURUMSAL_HAFIZA = [
+  {id:'magaza-rapor', ikon:'📊', baslik:'Mağaza Rapor', sabit:true,
+   aciklama:'Uygulamanın kullanım kılavuzu: her bölüm madde madde, içindekiler ve sık sorulan sorular.', icerik:MR_KILAVUZ},
   {id:'surecler', ikon:'📋', baslik:'Süreçler ve talimatlar',
    aciklama:'Kasa kapanışı, sevkiyat kabulü, iade akışı gibi adım adım anlatımlar.', icerik:"<p class=\"hk-taslak\">Taslak — mağaza işleyişine göre düzenlenmeli. Köşeli parantezli [ ] yerler doldurulacak.<\/p>\n<h3>Kasa kapanışı<\/h3>\n<ol>\n<li>Son müşteri çıktıktan sonra kasada bekleyen işlem kalmadığını kontrol et.<\/li>\n<li>Gün sonu raporunu (Z raporu) al.<\/li>\n<li>Nakit, kredi kartı ve diğer ödeme tiplerini ayrı ayrı say; sistemle karşılaştır.<\/li>\n<li>Fark varsa tutarı ve sebebini kasa defterine yaz, [mağaza müdürüne] bildir.<\/li>\n<li>Nakit, belirlenen zarfa/kasaya konur; teslim eden ve teslim alan imzalar.<\/li>\n<li>Günün cirosunu ve KPI'larını bu uygulamaya gir, raporu gönder.<\/li>\n<\/ol>\n<h3>Sevkiyat kabulü<\/h3>\n<ol>\n<li>Gelen koli sayısını irsaliyeyle karşılaştır; eksik/hasarlı koli varsa şoförle tutanak tut.<\/li>\n<li>Koli sayısını RT tablosundaki \"Gelen koli sayısı\" alanına yaz.<\/li>\n<li>Koliler açılınca ürünleri sistemden okut, irsaliye ile fark varsa [ilgili birime] bildir.<\/li>\n<li>Kırık/hasarlı ürünler için Transfer sekmesinden \"Kırık\" kaydı aç, fotoğrafları sırayla ekle.<\/li>\n<li>Ürünleri depoya/reyona yerleştir, boş kolileri ayır.<\/li>\n<\/ol>\n<h3>İade ve değişim<\/h3>\n<ol>\n<li>Fişi/faturayı ve ürünün durumunu kontrol et (etiket, ambalaj, kullanılmamış olması).<\/li>\n<li>İade süresi: [ ] gün. Süre dışı ya da şartlara uymayan ürünlerde [mağaza müdürüne] danış.<\/li>\n<li>İadeyi sistemde fişe bağlı olarak işle, ödeme ilk ödeme tipine yapılır.<\/li>\n<li>Kusurlu ürünler ayrı bölmeye konur, [ilgili birime] bildirilir.<\/li>\n<\/ol>"},
   {id:'formlar', ikon:'📄', baslik:'Form ve şablonlar',
@@ -4778,7 +5104,7 @@ function hafizaGoster(){
   document.getElementById('hafizaAlt').textContent = aktifProfil ? aktifProfil.name : 'Tüm mağazalarda ortak';
   const grid = document.getElementById('hafizaGrid');
   grid.innerHTML = KURUMSAL_HAFIZA.map(b => `
-    <div class="hk-kart" data-id="${b.id}">
+    <div class="hk-kart${b.sabit ? ' sabit' : ''}" data-id="${b.id}">
       <div class="hk-ust"><span class="hk-ikon">${b.ikon}</span></div>
       <div class="hk-baslik">${escapeHtml(b.baslik)}</div>
       <div class="hk-aciklama">${escapeHtml(b.aciklama)}</div>
@@ -4794,8 +5120,16 @@ function hafizaBolumAc(id){
   document.getElementById('hafizaListe').style.display = 'none';
   document.getElementById('hafizaDetay').style.display = '';
   document.getElementById('hafizaDetayBaslik').textContent = b.ikon + ' ' + b.baslik;
-  document.getElementById('hafizaDetayIcerik').innerHTML = b.icerik
+  const detay = document.getElementById('hafizaDetayIcerik');
+  detay.innerHTML = b.icerik
     || '<div class="hk-bos">Bu bölüme henüz içerik eklenmedi.</div>';
+  // İçindekiler bağlantıları: sayfa adresini değiştirmeden ilgili başlığa kaydırır.
+  detay.querySelectorAll('[data-git]').forEach(a=> a.addEventListener('click', e=>{
+    e.preventDefault();
+    const hedef = document.getElementById(a.dataset.git);
+    if(hedef) hedef.scrollIntoView({behavior:'smooth', block:'start'});
+  }));
+  window.scrollTo(0, 0);
 }
 function hafizaListeyeDon(){
   document.getElementById('hafizaListe').style.display = '';
