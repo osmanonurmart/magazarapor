@@ -638,6 +638,8 @@ if(!document.documentElement.classList.contains('tel')){
   .gr-tablo table{ width:100%; border-collapse:collapse; margin-top:6px; }
   .gr-tablo th, .gr-tablo td{ text-align:right; padding:4px 6px; border-bottom:1px solid #f1eee8; color:#333; font-variant-numeric:tabular-nums; }
   .gr-tablo th:first-child, .gr-tablo td:first-child{ text-align:left; }
+  .bp-grafik{ max-width:1180px; margin:14px auto 0; }
+  .gr-soluk{ color:#8a857c; }
   html.tel .grafik-kart{ margin-top:10px; padding:12px 12px 8px; }
   html.tel .gr-seg button{ padding:6px 8px; font-size:.74rem; }
 
@@ -1249,6 +1251,7 @@ if(!document.documentElement.classList.contains('tel')){
       <table class="bp-tablo" id="bpTablo"></table>
     </div>
     <div class="bp-not" id="bpNot"></div>
+    <div class="grafik-kart bp-grafik" id="bpGrafik" style="display:none;"></div>
   </section>
   <section id="bpAyar" style="display:none;">
     <div class="bp-kutu bp-ayar-kutu">
@@ -1475,7 +1478,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 43;
+const APP_SURUM = 44;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -3574,7 +3577,7 @@ function telKisalt(kok){
   }
   sar('bpCiz', ()=> document.getElementById('bpTablo'));
   const asilBpCiz = window.bpCiz;
-  window.bpCiz = function(){ const r = asilBpCiz.apply(this, arguments); bpKartlariCiz(); return r; };
+  window.bpCiz = function(){ const r = asilBpCiz.apply(this, arguments); bpKartlariCiz(); bpGrafikCiz(); return r; };
 }
 
 // ==================== GRAFİKLER ====================
@@ -3874,6 +3877,252 @@ if(window.ResizeObserver){
     const g = Math.round(girdiler[0].contentRect.width);
     if(g && Math.abs(g - sonGen) > 4){ sonGen = g; grafikPlanla(); }
   }).observe(document.getElementById('grafikKart'));
+}
+
+// ==================== BÖLGE PANELİ: KARŞILAŞTIRMA GRAFİĞİ ====================
+// İki görünüm: seçili dönemde mağazaların yan yana çubukları ve son 12 haftada mağaza başına çizgiler.
+// Renkler sabit sırayla mağazaya bağlıdır (sıralama değişse de mağazanın rengi değişmez).
+const BPG_RENKLER = ['#2a78d6', '#eb6834', '#1baf7a', '#eda100', '#e87ba4', '#008300', '#6250d6', '#e34948'];
+const BPG = {gorunum:'kiyas', olcu:'ciro'};
+const BPG_OLCULER = [
+  {k:'ciro',    ad:'Ciro',          b:'tl'},
+  {k:'oran',    ad:'Hedef gerç. %', b:'yuzde'},
+  {k:'degisim', ad:'Ciro değişimi', b:'degisim', sadeceKiyas:true},
+  {k:'mdo',     ad:'MDO',           b:'mdo'},
+  {k:'fbs',     ad:'FBS',           b:'tl'},
+  {k:'fbu',     ad:'FBÜ',           b:'fbu'},
+  {k:'mgs',     ad:'MGS',           b:'sayi'},
+  {k:'toplu',   ad:'Toplu satış',   b:'k'}
+];
+function bpgBicim(v, b, kisa){
+  if(v === null || v === undefined || isNaN(v)) return '–';
+  if(b === 'yuzde') return '%' + Math.round(v);
+  if(b === 'degisim'){ const r = Math.round(v); return (r > 0 ? '+' : r < 0 ? '-' : '') + '%' + Math.abs(r); }
+  if(b === 'mdo') return '%' + (kisa ? Math.round(v) : v.toFixed(1).replace('.', ','));
+  if(b === 'fbu') return v.toFixed(kisa ? 1 : 2).replace('.', ',');
+  if(b === 'k') return Math.round(v).toLocaleString('tr-TR') + ' K';
+  if(b === 'sayi') return Math.round(v).toLocaleString('tr-TR');
+  if(kisa){
+    if(v === 0) return '0';
+    if(Math.abs(v) >= 1e6) return (v / 1e6).toFixed(1).replace('.', ',').replace(',0', '') + ' mn';
+    if(Math.abs(v) >= 1e3) return Math.round(v / 1e3).toLocaleString('tr-TR') + ' bin';
+  }
+  return Math.round(v).toLocaleString('tr-TR') + ' TL';
+}
+function bpgRenk(m){
+  const i = oturum.magazalar.indexOf(m);
+  return BPG_RENKLER[i] || '#8a857c';
+}
+function bpGrafikCiz(){
+  const kart = document.getElementById('bpGrafik');
+  if(!kart) return;
+  if(!oturum || !oturum.magazalar.length || !bp.yuklendi){ kart.style.display = 'none'; return; }
+  kart.style.display = '';
+  if(BPG.gorunum === 'trend' && BPG.olcu === 'degisim') BPG.olcu = 'ciro';
+  const olcu = BPG_OLCULER.find(o=> o.k === BPG.olcu);
+  const ar = bpAraligi();
+  kart.innerHTML =
+    '<div class="gr-ust"><div class="gr-baslik">📊 Mağaza karşılaştırma</div><div class="gr-secim">' +
+      '<span class="gr-seg" data-k="gorunum"><button type="button" data-v="kiyas"' + (BPG.gorunum === 'kiyas' ? ' class="on"' : '') + '>Seçili dönem</button>' +
+      '<button type="button" data-v="trend"' + (BPG.gorunum === 'trend' ? ' class="on"' : '') + '>Son 12 hafta</button></span>' +
+      '<span class="gr-seg" data-k="olcu">' + BPG_OLCULER.filter(o=> !(o.sadeceKiyas && BPG.gorunum === 'trend')).map(o=>
+        '<button type="button" data-v="' + o.k + '"' + (BPG.olcu === o.k ? ' class="on"' : '') + '>' + o.ad + '</button>').join('') + '</span>' +
+    '</div></div>' +
+    '<div class="gr-alt-baslik"><b>' + olcu.ad + '</b><span>' +
+      escapeHtml(BPG.gorunum === 'kiyas' ? ar.etiket + (BPG.olcu === 'degisim' ? ' · ' + ar.kiyasEtiket : '')
+        : 'Haftalık ' + (['ciro', 'mgs', 'toplu'].includes(BPG.olcu) ? 'toplam' : BPG.olcu === 'oran' ? 'hedef gerçekleşme' : 'ortalama')) + '</span></div>' +
+    '<div class="gr-lejant" data-lejant></div>' +
+    '<div class="gr-alan"><svg class="gr-svg" role="img" aria-label="' + escapeHtml(olcu.ad) + ' karşılaştırma grafiği"></svg><div class="gr-ipucu" hidden></div></div>' +
+    '<details class="gr-tablo"><summary>Tablo olarak göster</summary><div></div></details>';
+  kart.querySelectorAll('.gr-seg button').forEach(b=> b.addEventListener('click', ()=>{ BPG[b.parentNode.dataset.k] = b.dataset.v; bpGrafikCiz(); }));
+  if(BPG.gorunum === 'kiyas') bpgKiyasCiz(kart, olcu, ar);
+  else bpgTrendCiz(kart, olcu);
+}
+
+// Seçili dönem: yatay çubuklar, büyükten küçüğe; bölge ortalaması ince çizgi.
+function bpgKiyasCiz(kart, olcu, ar){
+  const satirlar = bpSatirlar(ar).filter(s=> !s.hata);
+  const veri = satirlar.map(s=> ({m:s.m, ad:s.ad, v:s[olcu.k]})).sort((a, b)=> (b.v ?? -Infinity) - (a.v ?? -Infinity));
+  const degerler = veri.map(d=> d.v).filter(v=> v !== null && v !== undefined);
+  // Tablo
+  const tablo = document.createElement('table');
+  const bas = tablo.insertRow(); ['Mağaza', olcu.ad].forEach(t=>{ const th = document.createElement('th'); th.textContent = t; bas.appendChild(th); });
+  veri.forEach(d=>{ const tr = tablo.insertRow(); [d.ad, bpgBicim(d.v, olcu.b)].forEach(t=>{ const td = tr.insertCell(); td.textContent = t; }); });
+  kart.querySelector('.gr-tablo div').appendChild(tablo);
+  const ortalama = degerler.length ? degerler.reduce((a, b)=> a + b, 0) / degerler.length : null;
+  kart.querySelector('[data-lejant]').innerHTML = ortalama !== null && veri.length > 1
+    ? '<span><i class="gr-k-cizgi" style="background:#55514a;width:2px;height:12px;"></i>Mağaza ortalaması: ' + escapeHtml(bpgBicim(ortalama, olcu.b)) + '</span>' : '';
+
+  const alan = kart.querySelector('.gr-alan'), svg = kart.querySelector('.gr-svg');
+  const W = Math.max(280, alan.clientWidth || 600);
+  const satirH = 30, m = {sol: Math.min(150, Math.max(70, W * 0.24)), sag: 70, ust: 6, alt: 22};
+  const H = m.ust + m.alt + satirH * Math.max(1, veri.length);
+  svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H); svg.setAttribute('width', W); svg.setAttribute('height', H);
+  if(!degerler.length){ svg.innerHTML = '<text x="' + W / 2 + '" y="' + H / 2 + '" text-anchor="middle" font-size="13" fill="#77726a">Bu dönemde veri yok</text>'; return; }
+  const pw = W - m.sol - m.sag;
+  let vmin = Math.min(0, ...degerler), vmax = Math.max(0, ...degerler);
+  const adim = grTemizAdim(vmax - vmin, W < 500 ? 3 : 5);
+  vmin = Math.floor(vmin / adim) * adim; vmax = Math.ceil(vmax / adim) * adim || adim;
+  const x = v=> m.sol + (v - vmin) / (vmax - vmin) * pw;
+  let s = '';
+  for(let v = vmin; v <= vmax + adim / 2; v += adim){
+    const xx = Math.round(x(v)) + 0.5;
+    s += '<line x1="' + xx + '" x2="' + xx + '" y1="' + m.ust + '" y2="' + (H - m.alt) + '" stroke="' + (v === 0 ? '#c9c4ba' : GR_RENK.izgara) + '" stroke-width="1"/>' +
+      '<text x="' + xx + '" y="' + (H - 6) + '" text-anchor="middle" font-size="10.5" fill="' + GR_RENK.soluk + '">' + escapeHtml(bpgBicim(v, olcu.b, true)) + '</text>';
+  }
+  const kalin = Math.min(20, satirH - 10);
+  veri.forEach((d, i)=>{
+    const yo = m.ust + i * satirH + satirH / 2;
+    const ad = d.ad.length > 18 ? d.ad.slice(0, 17) + '…' : d.ad;
+    s += '<text x="' + (m.sol - 8) + '" y="' + (yo + 4) + '" text-anchor="end" font-size="11.5" fill="' + GR_RENK.metin + '">' + escapeHtml(ad) + '</text>';
+    if(d.v === null || d.v === undefined){
+      s += '<text x="' + (x(0) + 6) + '" y="' + (yo + 4) + '" font-size="11" fill="' + GR_RENK.soluk + '">veri yok</text>';
+      return;
+    }
+    const x0 = x(Math.min(0, d.v)), x1 = x(Math.max(0, d.v)), w = Math.max(1, x1 - x0), r = Math.min(4, w / 2);
+    const renk = olcu.b === 'degisim' ? (d.v >= 0 ? '#2a78d6' : '#eb6834') : bpgRenk(d.m);
+    const y0 = yo - kalin / 2;
+    // Uç yuvarlak, sıfır tarafı düz
+    const yol = d.v >= 0
+      ? 'M' + x0 + ' ' + y0 + 'H' + (x0 + w - r) + 'Q' + (x0 + w) + ' ' + y0 + ' ' + (x0 + w) + ' ' + (y0 + r) + 'V' + (y0 + kalin - r) + 'Q' + (x0 + w) + ' ' + (y0 + kalin) + ' ' + (x0 + w - r) + ' ' + (y0 + kalin) + 'H' + x0 + 'Z'
+      : 'M' + x1 + ' ' + y0 + 'H' + (x0 + r) + 'Q' + x0 + ' ' + y0 + ' ' + x0 + ' ' + (y0 + r) + 'V' + (y0 + kalin - r) + 'Q' + x0 + ' ' + (y0 + kalin) + ' ' + (x0 + r) + ' ' + (y0 + kalin) + 'H' + x1 + 'Z';
+    s += '<path class="gr-sutun" data-i="' + i + '" d="' + yol + '" fill="' + renk + '"/>';
+    // Değer etiketi çubuğun bittiği yere değil, sıfırın sağına yazılır; eksi çubuklarda mağaza adına binmez.
+    s += '<text x="' + (x1 + 6) + '" y="' + (yo + 4) + '" text-anchor="start" font-size="11" font-weight="700" fill="' + GR_RENK.metin + '">' + escapeHtml(bpgBicim(d.v, olcu.b)) + '</text>';
+    s += '<rect class="bpg-hedef" data-m="' + escapeHtml(d.m) + '" x="0" y="' + (yo - satirH / 2) + '" width="' + W + '" height="' + satirH + '" fill="transparent" style="cursor:pointer"><title>' + escapeHtml(d.ad + ': ' + bpgBicim(d.v, olcu.b) + ' — raporunu açmak için tıkla') + '</title></rect>';
+  });
+  if(ortalama !== null && veri.length > 1){
+    const xo = Math.round(x(ortalama)) + 0.5;
+    s += '<line x1="' + xo + '" x2="' + xo + '" y1="' + m.ust + '" y2="' + (H - m.alt) + '" stroke="#55514a" stroke-width="1.5" stroke-opacity=".7"/>';
+  }
+  svg.innerHTML = s;
+  svg.querySelectorAll('.bpg-hedef').forEach(r=>{
+    r.addEventListener('click', ()=> magazayiAc(r.dataset.m));
+    r.addEventListener('pointerenter', ()=>{ const p = svg.querySelector('.gr-sutun[data-i="' + veri.findIndex(d=> d.m === r.dataset.m) + '"]'); if(p) p.classList.add('vurgu'); });
+    r.addEventListener('pointerleave', ()=> svg.querySelectorAll('.gr-sutun.vurgu').forEach(p=> p.classList.remove('vurgu')));
+  });
+}
+
+// Son 12 hafta: mağaza başına bir çizgi. 8'den fazla mağaza varsa en yüksek cirolu 8'i çizilir.
+function bpgTrendCiz(kart, olcu){
+  const bugun = getNow(); bugun.setHours(0, 0, 0, 0);
+  const buPzt = mondayOf(bugun);
+  const haftalar = [];
+  for(let i = 11; i >= 0; i--){
+    const pzt = gunEkle(buPzt, -7 * i), paz = gunEkle(pzt, 6);
+    haftalar.push({pzt, son: paz > bugun ? bugun : paz, etiket:'H' + isoWeekInfo(pzt).week,
+      uzun: shortDate(pzt) + ' – ' + shortDate(paz) + ' (Hafta ' + isoWeekInfo(pzt).week + ')', devam: i === 0});
+  }
+  let seriler = oturum.magazalar.filter(m=> !bp.hatalar[m]).map(m=>{
+    const kayitlar = bp.veri[m] || {};
+    const degerler = haftalar.map(h=>{ const v = bpHesapla(kayitlar, h.pzt, h.son)[olcu.k]; return v === undefined ? null : v; });
+    const toplamCiro = haftalar.reduce((a, h)=> a + (bpHesapla(kayitlar, h.pzt, h.son).ciro || 0), 0);
+    return {m, ad: bpMagazaAdi(m), renk: bpgRenk(m), degerler, toplamCiro};
+  });
+  const fazla = seriler.length > 8;
+  if(fazla) seriler = seriler.sort((a, b)=> b.toplamCiro - a.toplamCiro).slice(0, 8);
+  seriler.sort((a, b)=> oturum.magazalar.indexOf(a.m) - oturum.magazalar.indexOf(b.m));
+
+  kart.querySelector('[data-lejant]').innerHTML = seriler.map(sr=>
+    '<span><i class="gr-k-cizgi" style="background:' + sr.renk + '"></i>' + escapeHtml(sr.ad) + '</span>').join('') +
+    (fazla ? '<span class="gr-soluk">En yüksek cirolu 8 mağaza gösteriliyor</span>' : '');
+  const tablo = document.createElement('table');
+  const bas = tablo.insertRow(); ['Hafta'].concat(seriler.map(sr=> sr.ad)).forEach(t=>{ const th = document.createElement('th'); th.textContent = t; bas.appendChild(th); });
+  haftalar.slice().reverse().forEach((h, ri)=>{
+    const i = haftalar.length - 1 - ri;
+    const tr = tablo.insertRow();
+    [h.uzun].concat(seriler.map(sr=> bpgBicim(sr.degerler[i], olcu.b))).forEach(t=>{ const td = tr.insertCell(); td.textContent = t; });
+  });
+  kart.querySelector('.gr-tablo div').appendChild(tablo);
+
+  const alan = kart.querySelector('.gr-alan'), svg = kart.querySelector('.gr-svg');
+  const W = Math.max(280, alan.clientWidth || 600), H = TELEFON ? 220 : 270;
+  const sonEtiket = !TELEFON && seriler.length <= 4;
+  const m = {sol: TELEFON ? 44 : 56, sag: sonEtiket ? 90 : 14, ust: 14, alt: 26};
+  const pw = W - m.sol - m.sag, ph = H - m.ust - m.alt;
+  svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H); svg.setAttribute('width', W); svg.setAttribute('height', H);
+  const tum = seriler.flatMap(sr=> sr.degerler).filter(v=> v !== null);
+  if(!tum.length){ svg.innerHTML = '<text x="' + W / 2 + '" y="' + H / 2 + '" text-anchor="middle" font-size="13" fill="#77726a">Bu dönemde veri yok</text>'; return; }
+  const sifirdan = ['ciro', 'mgs', 'toplu'].includes(olcu.k);
+  let ymin = sifirdan ? 0 : Math.min(...tum), ymax = Math.max(...tum);
+  if(!sifirdan){ const pay = (ymax - ymin) * 0.12 || Math.abs(ymax) * 0.1 || 1; ymin = Math.max(0, ymin - pay); ymax += pay; }
+  const adim = grTemizAdim(ymax - ymin, 4);
+  ymin = Math.floor(ymin / adim) * adim; ymax = Math.ceil(ymax / adim) * adim; if(ymax === ymin) ymax += adim;
+  const y = v=> m.ust + ph - (v - ymin) / (ymax - ymin) * ph;
+  const bant = pw / haftalar.length, x = i=> m.sol + bant * i + bant / 2;
+  let s = '';
+  for(let v = ymin; v <= ymax + adim / 2; v += adim){
+    const yy = Math.round(y(v)) + 0.5;
+    s += '<line x1="' + m.sol + '" x2="' + (W - m.sag) + '" y1="' + yy + '" y2="' + yy + '" stroke="' + GR_RENK.izgara + '" stroke-width="1"/>' +
+      '<text x="' + (m.sol - 6) + '" y="' + (yy + 4) + '" text-anchor="end" font-size="10.5" fill="' + GR_RENK.soluk + '">' + escapeHtml(bpgBicim(v, olcu.b, true)) + '</text>';
+  }
+  if(olcu.k === 'oran' && ymin <= 100 && ymax >= 100){
+    const yy = Math.round(y(100)) + 0.5;
+    s += '<line x1="' + m.sol + '" x2="' + (W - m.sag) + '" y1="' + yy + '" y2="' + yy + '" stroke="#c9c4ba" stroke-width="1"/><text x="' + (m.sol + 4) + '" y="' + (yy - 4) + '" font-size="10" fill="' + GR_RENK.soluk + '">hedef</text>';
+  }
+  const her = Math.max(1, Math.ceil(haftalar.length / Math.floor(pw / 40)));
+  haftalar.forEach((h, i)=>{ if((haftalar.length - 1 - i) % her) return;
+    s += '<text x="' + x(i) + '" y="' + (H - 8) + '" text-anchor="middle" font-size="10.5" fill="' + GR_RENK.soluk + '">' + h.etiket + '</text>'; });
+  // Sürmekte olan hafta açık zeminle belirtilir.
+  s = '<rect x="' + (x(haftalar.length - 1) - bant / 2) + '" y="' + m.ust + '" width="' + bant + '" height="' + ph + '" fill="#f6f3ee"/>' + s;
+  const sonlar = [];
+  seriler.forEach(sr=>{
+    let yol = '', acik = false;
+    sr.degerler.forEach((v, i)=>{ if(v === null){ acik = false; return; } yol += (acik ? 'L' : 'M') + x(i) + ' ' + y(v); acik = true; });
+    s += '<path d="' + yol + '" fill="none" stroke="' + sr.renk + '" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
+    const sonI = sr.degerler.map(v=> v !== null).lastIndexOf(true);
+    if(sonI >= 0){
+      s += '<circle cx="' + x(sonI) + '" cy="' + y(sr.degerler[sonI]) + '" r="4" fill="' + sr.renk + '" stroke="#fff" stroke-width="2"/>';
+      sonlar.push({sr, sonI, yy: y(sr.degerler[sonI])});
+    }
+  });
+  // 4 ve daha az mağazada çizgi sonlarına ad yazılır (çakışanlar legend ve ipucuna kalır)
+  if(sonEtiket){
+    sonlar.forEach(o=>{
+      // Başka bir çizginin sonuna çok yakınsa ad yazılmaz (yanlış çizgiye ait gibi görünmesin).
+      if(sonlar.some(b=> b !== o && Math.abs(b.yy - o.yy) < 13 && b.sonI === o.sonI)) return;
+      s += '<text x="' + (x(o.sonI) + 8) + '" y="' + (o.yy + 4) + '" font-size="11" fill="' + GR_RENK.metin + '">' + escapeHtml(o.sr.ad.length > 12 ? o.sr.ad.slice(0, 11) + '…' : o.sr.ad) + '</text>';
+    });
+  }
+  s += '<line class="gr-capraz" y1="' + m.ust + '" y2="' + (m.ust + ph) + '" stroke="' + GR_RENK.eksen + '" stroke-width="1" visibility="hidden"/>';
+  s += '<rect class="gr-hedef-alan" x="' + m.sol + '" y="' + m.ust + '" width="' + pw + '" height="' + ph + '" fill="transparent" tabindex="0"/>';
+  svg.innerHTML = s;
+  const ipucu = kart.querySelector('.gr-ipucu'), capraz = svg.querySelector('.gr-capraz');
+  let secili = -1;
+  const goster = i=>{
+    secili = i;
+    capraz.setAttribute('x1', x(i)); capraz.setAttribute('x2', x(i)); capraz.setAttribute('visibility', 'visible');
+    ipucu.textContent = '';
+    const b = document.createElement('div'); b.className = 'gr-ip-bas'; b.textContent = haftalar[i].uzun + (haftalar[i].devam ? ' · sürüyor' : ''); ipucu.appendChild(b);
+    seriler.slice().sort((a, c)=> (c.degerler[i] ?? -Infinity) - (a.degerler[i] ?? -Infinity)).forEach(sr=>{
+      const satir = document.createElement('div');
+      const k = document.createElement('i'); k.className = 'gr-k-cizgi'; k.style.background = sr.renk; satir.appendChild(k);
+      const v = document.createElement('b'); v.textContent = bpgBicim(sr.degerler[i], olcu.b); satir.appendChild(v);
+      const a = document.createElement('span'); a.textContent = ' ' + sr.ad; satir.appendChild(a);
+      ipucu.appendChild(satir);
+    });
+    ipucu.hidden = false;
+    const gen = ipucu.offsetWidth, sol = x(i) + 12;
+    ipucu.style.left = (sol + gen > W ? Math.max(0, x(i) - gen - 12) : sol) + 'px';
+    ipucu.style.top = m.ust + 'px';
+  };
+  const gizle = ()=>{ secili = -1; ipucu.hidden = true; capraz.setAttribute('visibility', 'hidden'); };
+  const hedef = svg.querySelector('.gr-hedef-alan');
+  const indeks = e=>{ const r = svg.getBoundingClientRect(); return Math.min(haftalar.length - 1, Math.max(0, Math.floor(((e.clientX - r.left) * (W / r.width) - m.sol) / bant))); };
+  hedef.addEventListener('pointermove', e=> goster(indeks(e)));
+  hedef.addEventListener('pointerdown', e=> goster(indeks(e)));
+  hedef.addEventListener('pointerleave', e=>{ if(e.pointerType === 'mouse') gizle(); });
+  hedef.addEventListener('focus', ()=> goster(haftalar.length - 1));
+  hedef.addEventListener('blur', gizle);
+  hedef.addEventListener('keydown', e=>{
+    if(e.key === 'ArrowLeft'){ e.preventDefault(); goster(Math.max(0, secili - 1)); }
+    if(e.key === 'ArrowRight'){ e.preventDefault(); goster(Math.min(haftalar.length - 1, secili + 1)); }
+  });
+}
+if(window.ResizeObserver){
+  let sonGen = 0;
+  new ResizeObserver(g=>{ const w = Math.round(g[0].contentRect.width); if(w && Math.abs(w - sonGen) > 4){ sonGen = w; requestAnimationFrame(bpGrafikCiz); } })
+    .observe(document.getElementById('bpGrafik'));
 }
 
 // ==================== TELEFON: ALT ÇUBUK DOKUNUŞU ====================
@@ -6052,6 +6301,12 @@ const MR_KILAVUZ = `
   </ul></li>
 <li><b>Mağazalarım:</b> panelde görünecek mağazalar seçilir.</li>
 <li>Bir mağazaya tıklayınca o mağazanın ekranı açılır; veriler görülür ve düzeltilebilir. Panele <b>◀ Bölge paneli</b> ile dönülür.</li>
+<li><b>📊 Mağaza karşılaştırma</b> grafiği (Özet'in altında):
+  <ul>
+  <li><b>Seçili dönem:</b> üstteki Gün / Hafta / Ay seçimine göre mağazalar yan yana, büyükten küçüğe. Ciro, hedef gerçekleşme, ciro değişimi, MDO, FBS, FBÜ, MGS, toplu satış seçilebilir. Dikey ince çizgi mağaza ortalamasıdır. Bir mağazaya tıklayınca raporu açılır.</li>
+  <li><b>Son 12 hafta:</b> her mağaza bir çizgi; mağazaların haftalık gidişatı karşılaştırılır. Üzerine gelince o haftanın değerleri büyükten küçüğe görünür.</li>
+  <li>Her mağazanın rengi sabittir. "Tablo olarak göster" ile değerler liste halinde açılır.</li>
+  </ul></li>
 <li>Araçlar, Kurumsal hafıza, Düzenleyici ve Sohbet panelde de vardır.</li>
 </ul>
 <a class="hk-yukari" href="#" data-git="mr-bas">↑ İçindekiler</a>
