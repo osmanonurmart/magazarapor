@@ -32,8 +32,14 @@ service cloud.firestore {
     // Eski "onur" profilinin verisini m583'e taşımak için yalnızca okuma izni.
     function eskiVeriSahibi(){ return girisli() && kadi() == 'm583'; }
 
+    // Kurucu: uygulamanın sahibi; bütün kullanıcılarla sohbet edebilir.
+    function kurucu(){ return girisli() && kadi() == 'm583'; }
+
+    // Yetki belgeleri: kişi kendini, bölge müdürü ve kurucu herkesi okur;
+    // mağaza, kendisinin bağlı olduğu bölge müdürünün belgesini okur (sohbet listesi için).
     match /yetkiler/{k} {
-      allow read: if girisli() && (k == kadi() || (yetkiVar() && yetki().rol == 'bolge'));
+      allow read: if girisli() && (k == kadi() || kurucu() || (yetkiVar() && yetki().rol == 'bolge')
+                    || ('magazalar' in resource.data && kadi() in resource.data.magazalar));
       allow update: if girisli() && k == kadi() && yetkiVar() && yetki().rol == 'bolge'
                     && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['magazalar']);
     }
@@ -62,7 +68,7 @@ service cloud.firestore {
       allow update: if girisli() && (
         (kadi() == 'm583'
           && request.resource.data.diff(resource.data).affectedKeys()
-               .hasOnly(['okundu','okunduTarih','cevap','cevapTarih','cevapGoruldu']))
+               .hasOnly(['okundu','okunduTarih','cevap','cevapTarih','cevapGoruldu','tasindi']))
         || (resource.data.kimden == kadi()
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['cevapGoruldu'])));
     }
@@ -77,6 +83,43 @@ service cloud.firestore {
       allow update: if girisli() && kadi() in resource.data.magazalar
                     && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['okuyanlar'])
                     && request.resource.data.okuyanlar.diff(resource.data.okuyanlar).affectedKeys().hasOnly([kadi()]);
+    }
+
+    // Sohbet: iki kişilik konuşmalar. Belge adı üyelerin sıralı birleşimidir (ör. "adnanc__m583").
+    // İzinli çiftler: herkes ↔ kurucu, bölge müdürü ↔ listesindeki mağaza.
+    function sohbetIzinli(u){
+      let o = u[0] == kadi() ? u[1] : u[0];
+      return kadi() in u && yetkiVar() && (
+        kurucu() || o == 'm583'
+        || (yetki().rol == 'bolge' && yetki().magazalar is list && o in yetki().magazalar)
+        || (yetki().rol == 'magaza'
+            && get(/databases/$(database)/documents/yetkiler/$(o)).data.get('magazalar', []) is list
+            && kadi() in get(/databases/$(database)/documents/yetkiler/$(o)).data.get('magazalar', [])));
+    }
+    match /sohbetler/{sid} {
+      allow read: if girisli() && kadi() in resource.data.uyeler;
+      allow create: if girisli()
+                    && request.resource.data.uyeler is list && request.resource.data.uyeler.size() == 2
+                    && request.resource.data.uyeler[0] < request.resource.data.uyeler[1]
+                    && sid == request.resource.data.uyeler[0] + '__' + request.resource.data.uyeler[1]
+                    && sohbetIzinli(request.resource.data.uyeler)
+                    && request.resource.data.keys().hasOnly(['uyeler','roller','son','guncelleme','okunma']);
+      allow update: if girisli() && kadi() in resource.data.uyeler
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['son','guncelleme','okunma']);
+
+      match /mesajlar/{mid} {
+        allow read: if girisli()
+                    && kadi() in get(/databases/$(database)/documents/sohbetler/$(sid)).data.uyeler;
+        allow create: if girisli()
+                    && kadi() in getAfter(/databases/$(database)/documents/sohbetler/$(sid)).data.uyeler
+                    && request.resource.data.metin is string
+                    && request.resource.data.metin.size() > 0 && request.resource.data.metin.size() <= 4000
+                    && request.resource.data.zaman is number
+                    && (request.resource.data.kimden == kadi()
+                        // Kurucu eski geri bildirimleri gönderenin adıyla taşıyabilir.
+                        || (kurucu() && request.resource.data.get('tasima', false) == true
+                            && request.resource.data.kimden in getAfter(/databases/$(database)/documents/sohbetler/$(sid)).data.uyeler));
+      }
     }
 
     match /stores/{magaza} {
