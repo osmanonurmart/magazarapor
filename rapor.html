@@ -468,6 +468,25 @@ if(!document.documentElement.classList.contains('tel')){
   }
   #toolFrameHolder{ background:#fff; border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,.08); overflow:hidden; width:100%; height:calc(100vh - 150px); }
   #toolFrameHolder iframe{ border:none; display:block; }
+  #toolFrameHolder.yerel{ height:auto; overflow:visible; }
+  .vk{ max-width:760px; margin:0 auto; padding:22px 22px 26px; color:#333; }
+  .vk-giris{ margin:0 0 16px; font-size:.9rem; line-height:1.55; }
+  .vk-kurulum{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:14px; }
+  .vk-btn{
+    display:inline-block; background:var(--accent); color:#fff; text-decoration:none; font-weight:700; font-size:1rem;
+    padding:12px 22px; border-radius:10px; cursor:grab; box-shadow:0 3px 10px rgba(200,160,102,.35); user-select:none;
+  }
+  .vk-btn:active{ cursor:grabbing; }
+  .vk-ipucu{ font-size:.85rem; color:#8a6a3f; font-weight:600; }
+  .vk-gorsel{ width:100%; max-width:560px; display:block; margin:6px 0 14px; }
+  .vk-adim{ padding-left:20px; margin:0 0 14px; font-size:.86rem; line-height:1.7; }
+  .vk-renk{ font-weight:700; padding:0 6px; border-radius:4px; color:#fff; }
+  .vk-renk.yesil{ background:#2e7d32; } .vk-renk.kirmizi{ background:#c62828; }
+  .vk-not{ font-size:.8rem; color:#777; line-height:1.6; }
+  .vk-link{ background:none; border:none; padding:0; color:var(--accent); text-decoration:underline; cursor:pointer; font-size:inherit; font-family:inherit; }
+  .vk-tel{ display:none; margin-top:8px; color:#a34141; }
+  html.tel .vk-tel{ display:block; }
+  html.tel .vk{ padding:16px 14px 20px; }
 
   .modal-overlay{
     position:fixed; inset:0; background:rgba(0,0,0,.4); display:flex; align-items:center; justify-content:center; z-index:100;
@@ -1300,7 +1319,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 33;
+const APP_SURUM = 34;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -4482,7 +4501,213 @@ function ortakSayfalariYerlestir(yer){
 // eklenmez/değiştirilmez. Her araç kendi başına çalışan bir HTML sayfasıdır
 // (html alanı) ve sayfanın içinde bir çerçevede açılır.
 //   {id:'ornek', ikon:'🧮', baslik:'Araç adı', aciklama:'Kartta görünen kısa açıklama', html:`<!doctype html>...`}
-const ARACLAR = [];
+// Araçlar kodun içinde tanımlıdır; "ciz" verilen araçlar iframe yerine doğrudan sayfaya çizilir.
+const ARACLAR = [
+  {id:'veri-kopyala', ikon:'📋', baslik:'Veri Kopyala',
+   aciklama:'Ciro raporundaki verileri tek tıkla kopyalayan yer imi. Kurmak için butonu yer imleri çubuğuna sürükle.',
+   ciz: veriKopyalaCiz}
+];
+
+// ---------- Veri Kopyala (yer imi) ----------
+// Bu fonksiyon uygulamada çalışmaz; metni yer iminin içine konur ve ciro raporu sayfasında çalışır.
+// Yer imi adresinde satır sonları kodlandığı için // yorum ve noktalı virgülsüz satır kullanılmaz.
+function veriKopyalaKodu(){
+  var ESIK = 2900;
+  var KUTU_ID = 'mr-veri-kopyala';
+  function num(s){ if(!s) return null; s = s.replace(/\./g, '').replace(',', '.').replace(/[^\d.\-]/g, ''); var n = parseFloat(s); return isNaN(n) ? null : n; }
+  function txt(s){ return s ? s.trim() : null; }
+  function bicim(n){ return n === null || n === undefined ? '-' : Math.round(n).toLocaleString('tr-TR'); }
+  function goster(ok, baslik, satirlar, yineDe){
+    var eski = document.getElementById(KUTU_ID);
+    if(eski) eski.remove();
+    var d = document.createElement('div');
+    d.id = KUTU_ID;
+    d.style.cssText = 'position:fixed;top:16px;right:16px;z-index:2147483647;width:340px;max-width:calc(100vw - 32px);padding:14px 40px 14px 16px;border-radius:10px;font:14px/1.45 -apple-system,Segoe UI,Arial,sans-serif;color:#fff;box-shadow:0 6px 24px rgba(0,0,0,.3);background:' + (ok ? '#2e7d32' : '#c62828') + ';';
+    var b = document.createElement('div');
+    b.style.cssText = 'font-weight:700;font-size:15px;margin-bottom:' + (satirlar.length ? '6px' : '0') + ';';
+    b.textContent = (ok ? '✅ ' : '❌ ') + baslik;
+    d.appendChild(b);
+    satirlar.forEach(function(s){ var p = document.createElement('div'); p.textContent = s; d.appendChild(p); });
+    var x = document.createElement('button');
+    x.textContent = '✕';
+    x.style.cssText = 'position:absolute;top:8px;right:8px;background:none;border:none;color:#fff;font-size:16px;cursor:pointer;';
+    x.onclick = function(){ d.remove(); };
+    d.appendChild(x);
+    if(yineDe){
+      var y = document.createElement('button');
+      y.textContent = 'Yine de kopyala';
+      y.style.cssText = 'margin-top:10px;background:#fff;color:#c62828;border:none;border-radius:6px;padding:6px 12px;font-weight:700;cursor:pointer;';
+      y.onclick = function(){ d.remove(); yineDe(); };
+      d.appendChild(y);
+    }
+    document.body.appendChild(d);
+    if(ok) setTimeout(function(){ d.style.transition = 'opacity .4s'; d.style.opacity = '0'; setTimeout(function(){ d.remove(); }, 400); }, 3000);
+  }
+  function kopyala(metin, bitti){
+    function yedek(){
+      var ta = document.createElement('textarea');
+      ta.value = metin; ta.style.position = 'fixed'; ta.style.left = '-9999px';
+      document.body.appendChild(ta); ta.focus(); ta.select();
+      var ok = false;
+      try{ ok = document.execCommand('copy'); }catch(e){ ok = false; }
+      document.body.removeChild(ta);
+      bitti(ok);
+    }
+    if(navigator.clipboard && navigator.clipboard.writeText && window.isSecureContext){
+      navigator.clipboard.writeText(metin).then(function(){ bitti(true); }, yedek);
+    } else yedek();
+  }
+
+  var satirlar = document.querySelectorAll('.mc-summary-table tbody tr');
+  if(!satirlar.length){
+    goster(false, 'Ciro raporu bulunamadı', ['Bu yer imine ciro raporu sayfası açıkken basın.']);
+    return;
+  }
+  var data = {};
+  satirlar.forEach(function(tr){
+    var tds = tr.querySelectorAll('td');
+    if(!tds.length) return;
+    var label = txt(tds[0].innerText);
+    if(label === 'Ciro'){ data.ciro_bugun = num(tds[1].innerText); data.ciro_dun = num(tds[2].innerText); data.ciro_gecenhafta_aynigun = num(tds[3].innerText); }
+    if(label === 'MDO'){ data.mdo_bugun = txt(tds[1].innerText); data.mdo_dun = txt(tds[2].innerText); }
+    if(label === 'FBS'){ data.fbs_bugun = num(tds[1].innerText); }
+    if(label === 'FBU'){ data.fbu_bugun = num(tds[1].innerText); }
+  });
+  document.querySelectorAll('.mc-kpi-box').forEach(function(box){
+    var l = box.querySelector('.label'), v = box.querySelector('.value');
+    if(!l || !v) return;
+    var t = txt(l.innerText).toUpperCase();
+    if(t.indexOf('ZİYARET') !== -1 || t.indexOf('ZIYARET') !== -1) data.mgs_bugun = num(v.innerText);
+  });
+  document.querySelectorAll('.mc-trend-composite tbody tr').forEach(function(tr){
+    var tds = tr.querySelectorAll('td');
+    if(!tds.length) return;
+    var label = txt(tds[0].innerText);
+    if((label === 'Satis' || label === 'Satış') && tds.length > 9){ data.ciro_hafta_gecen = num(tds[8].innerText); data.ciro_hafta_bu = num(tds[9].innerText); }
+  });
+
+  var tablo = document.querySelector('.mc-expandable-table');
+  var gruplar = [];
+  var buyuk = [];
+  if(tablo){
+    tablo.querySelectorAll('tbody tr.mc-row-header').forEach(function(tr){
+      var tds = tr.querySelectorAll('td');
+      if(tds.length < 4) return;
+      var grup = txt(tds[0].textContent);
+      var tutar = num(tds[3].textContent);
+      gruplar.push(grup || '');
+      if(tutar !== null && tutar >= ESIK) buyuk.push({fatura:grup, tutar:tutar});
+    });
+  }
+  data.buyuk_faturalar = buyuk;
+  data.tarih = new Date().toISOString().slice(0, 10);
+
+  function faturaNoSecili(){
+    if(!tablo) return false;
+    var ilk = tablo.querySelector('thead th, thead td');
+    if(ilk && /fatura/i.test(ilk.textContent)) return true;
+    var secili = false;
+    document.querySelectorAll('select').forEach(function(s){ var o = s.options[s.selectedIndex]; if(o && /fatura\s*no/i.test(o.text)) secili = true; });
+    if(secili) return true;
+    document.querySelectorAll('input:checked, .active, .selected, [aria-pressed="true"], [aria-selected="true"], [aria-checked="true"]').forEach(function(e){
+      var t = e.tagName === 'INPUT' ? ((e.labels && e.labels[0] && e.labels[0].textContent) || e.value || '') : e.textContent;
+      if(t && t.length < 40 && /fatura\s*no/i.test(t)) secili = true;
+    });
+    if(secili) return true;
+    return gruplar.length > 0 && gruplar.every(function(g){ return /^[A-Za-z]{0,5}[\d\-\/]{6,}$/.test(g.replace(/\s/g, '')); });
+  }
+
+  var eksik = [];
+  if(data.ciro_bugun === null || data.ciro_bugun === undefined) eksik.push('Ciro');
+  if(!data.mdo_bugun) eksik.push('MDO');
+  if(data.fbs_bugun === null || data.fbs_bugun === undefined) eksik.push('FBS');
+  if(data.fbu_bugun === null || data.fbu_bugun === undefined) eksik.push('FBU');
+  if(data.mgs_bugun === null || data.mgs_bugun === undefined) eksik.push('Ziyaret (MGS)');
+  if(data.ciro_hafta_bu === null || data.ciro_hafta_bu === undefined) eksik.push('Haftalık ciro');
+
+  var json = JSON.stringify(data);
+  function kopyalaVeBildir(){
+    kopyala(json, function(ok){
+      if(!ok){ goster(false, 'Kopyalanamadı', ['Tarayıcı panoya yazmaya izin vermedi. Sayfaya bir kez tıklayıp tekrar deneyin.']); return; }
+      if(eksik.length){ goster(false, 'Kopyalandı ama eksik var', ['Bulunamayan: ' + eksik.join(', '), 'Rapor tam yüklenmemiş olabilir; sayfa yüklenince tekrar deneyin.']); return; }
+      goster(true, 'Kopyalandı', ['Ciro: ' + bicim(data.ciro_bugun) + ' TL', buyuk.length + ' büyük fatura (' + ESIK.toLocaleString('tr-TR') + ' TL ve üstü)', 'Raporda "Yapıştır / Veri Ekle"ye basın.']);
+    });
+  }
+  if(!tablo){
+    goster(false, 'Fatura tablosu bulunamadı', ['Toplu satış hesaplanamaz. Raporda fatura tablosu açık olmalı.'].concat(eksik.length ? ['Bulunamayan: ' + eksik.join(', ')] : []), kopyalaVeBildir);
+    return;
+  }
+  if(!faturaNoSecili()){
+    goster(false, 'Fatura No seçili değil', ['Fatura tablosunda gruplama "Fatura No" olmalı; yoksa toplu satış yanlış hesaplanır. Seçip tekrar basın.'].concat(eksik.length ? ['Bulunamayan: ' + eksik.join(', ')] : []), kopyalaVeBildir);
+    return;
+  }
+  kopyalaVeBildir();
+}
+function veriKopyalaAdresi(){
+  return 'javascript:' + encodeURIComponent('(' + veriKopyalaKodu.toString() + ')();void 0;');
+}
+
+// Yer imleri çubuğuna sürüklemeyi anlatan çizim
+const VK_GORSEL = `<svg viewBox="0 0 560 250" class="vk-gorsel" role="img" aria-label="Butonu yer imleri çubuğuna sürükleme">
+  <defs><marker id="vkOk" markerWidth="10" markerHeight="10" refX="6" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#c8a066"/></marker></defs>
+  <rect x="10" y="10" width="540" height="230" rx="12" fill="#fff" stroke="#d9d4cb" stroke-width="2"/>
+  <rect x="10" y="10" width="540" height="34" rx="12" fill="#f1efe9"/><rect x="10" y="32" width="540" height="12" fill="#f1efe9"/>
+  <circle cx="30" cy="27" r="5" fill="#e5655b"/><circle cx="46" cy="27" r="5" fill="#f2b705"/><circle cx="62" cy="27" r="5" fill="#4caf50"/>
+  <rect x="90" y="18" width="300" height="18" rx="9" fill="#fff" stroke="#e2ddd3"/>
+  <text x="104" y="31" font-size="10" fill="#999" font-family="Arial">rapor sayfası</text>
+  <rect x="10" y="44" width="540" height="30" fill="#faf9f6" stroke="#e8e4dc"/>
+  <text x="22" y="63" font-size="10.5" fill="#888" font-family="Arial">Yer imleri çubuğu</text>
+  <rect x="290" y="50" width="104" height="18" rx="9" fill="#fff" stroke="#c8a066" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <text x="342" y="63" font-size="10.5" fill="#8a6a3f" text-anchor="middle" font-family="Arial" font-weight="700">📋 Veri Kopyala</text>
+  <text x="404" y="63" font-size="10.5" fill="#2e7d32" font-family="Arial" font-weight="700">← 3. Bırak</text>
+  <rect x="60" y="160" width="150" height="40" rx="10" fill="#c8a066"/>
+  <text x="135" y="185" font-size="14" fill="#fff" text-anchor="middle" font-family="Arial" font-weight="700">📋 Veri Kopyala</text>
+  <text x="135" y="222" font-size="11" fill="#666" text-anchor="middle" font-family="Arial">1. Butonu fareyle tut</text>
+  <path d="M200 160 C 250 130, 300 110, 335 78" fill="none" stroke="#c8a066" stroke-width="3" stroke-dasharray="7 6" marker-end="url(#vkOk)"/>
+  <text x="300" y="150" font-size="11" fill="#666" font-family="Arial">2. Yukarı sürükle</text>
+  <path d="M188 176 l0 22 l5 -5 l4 9 l4 -2 l-4 -9 l7 0 z" fill="#222" stroke="#fff" stroke-width="1"/>
+</svg>`;
+
+function veriKopyalaCiz(kap){
+  kap.innerHTML = `
+    <div class="vk">
+      <p class="vk-giris">Ciro raporundaki verileri (ciro, MDO, FBS, FBU, ziyaret, haftalık ciro ve büyük faturalar) tek tıkla kopyalar.
+      Sonra raporda <b>Yapıştır / Veri Ekle</b>'ye basınca hepsi yerine yazılır.</p>
+      <div class="vk-kurulum">
+        <a class="vk-btn" id="vkBtn" href="#" draggable="true" title="Yer imleri çubuğuna sürükleyin">📋 Veri Kopyala</a>
+        <span class="vk-ipucu">← Bu butonu yer imleri çubuğuna sürükleyip bırakın</span>
+      </div>
+      ${VK_GORSEL}
+      <ol class="vk-adim">
+        <li>Yer imleri çubuğu görünmüyorsa açın: Windows'ta <b>Ctrl + Shift + B</b>, Mac'te <b>Cmd + Shift + B</b>.</li>
+        <li>Yukarıdaki <b>Veri Kopyala</b> butonunu fareyle tutup yer imleri çubuğuna sürükleyin ve bırakın.</li>
+        <li>Ciro raporunu açın; fatura tablosunda gruplama <b>Fatura No</b> olsun.</li>
+        <li>Yer imleri çubuğundaki <b>Veri Kopyala</b>'ya tıklayın.
+          <span class="vk-renk yesil">Yeşil</span> çıkarsa her şey tamam.
+          <span class="vk-renk kirmizi">Kırmızı</span> çıkarsa yazan sorunu düzeltip tekrar basın.</li>
+        <li>Bu uygulamaya dönüp <b>Yapıştır / Veri Ekle</b>'ye basın.</li>
+      </ol>
+      <div class="vk-not">Eski yer imini silebilirsiniz. Sürükleme olmazsa:
+        <button class="vk-link" type="button" id="vkKopyala">yer imi adresini kopyala</button>, sonra yeni bir yer imi ekleyip adres (URL) kısmına yapıştırın.</div>
+      <div class="vk-not vk-tel">Bu araç bilgisayardaki tarayıcı için hazırlandı.</div>
+    </div>`;
+  const btn = kap.querySelector('#vkBtn');
+  btn.href = veriKopyalaAdresi();
+  // Uygulamanın içinde tıklanırsa çalışmasın; yalnızca sürüklenip yer imi yapılır.
+  btn.addEventListener('click', e=>{
+    e.preventDefault();
+    uiBildirim('Tıklamayın; butonu yer imleri çubuğuna sürükleyin.', '', 3500);
+  });
+  kap.querySelector('#vkKopyala').addEventListener('click', async ()=>{
+    const adres = veriKopyalaAdresi();
+    try{ await navigator.clipboard.writeText(adres); }
+    catch(e){
+      const ta = document.createElement('textarea');
+      ta.value = adres; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+    }
+    uiBildirim('Yer imi adresi kopyalandı.', 'basari');
+  });
+}
 
 let currentToolId = null;
 
@@ -4514,6 +4739,8 @@ function openTool(id){
   document.getElementById('toolViewerName').textContent = (tool.ikon ? tool.ikon + ' ' : '') + tool.baslik;
   const holder = document.getElementById('toolFrameHolder');
   holder.innerHTML = '';
+  holder.classList.toggle('yerel', !!tool.ciz);
+  if(tool.ciz){ tool.ciz(holder); return; }
   const iframe = document.createElement('iframe');
   iframe.id = 'activeToolFrame';
   iframe.style.width = '100%';
