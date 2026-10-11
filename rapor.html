@@ -918,7 +918,35 @@ if(!document.documentElement.classList.contains('tel')){
   .bp-icerik{ padding:16px 14px 40px; }
   .bp-kutu{ background:#fff; border:1px solid var(--line); border-radius:12px; padding:6px; overflow-x:auto; }
   .bp-tablo-kutu{ width:fit-content; max-width:100%; }
-  .bp-gunluk{ width:fit-content; max-width:100%; margin-top:12px; padding:10px; }
+  .bpk-tablo{ border-collapse:collapse; font-size:.8rem; font-variant-numeric:tabular-nums; }
+  .bpk-tablo th, .bpk-tablo td{ border:1px solid var(--line); padding:6px 12px; text-align:right; white-space:nowrap; }
+  .bpk-tablo thead th{ background:var(--dark); color:#fff; font-weight:600; text-align:center; font-size:.76rem; }
+  .bpk-tablo thead th.bpk-mag{ cursor:pointer; text-decoration:underline dotted rgba(255,255,255,.5); text-underline-offset:3px; }
+  .bpk-tablo thead th.bpk-mag:hover{ background:#4a4a4a; }
+  .bpk-tablo thead th.bpk-kose{ background:#f4f1ea; color:#666; font-weight:600; font-size:.7rem; text-align:left; }
+  .bpk-tablo thead th.bpk-bolge{ background:var(--accent); }
+  .bpk-tablo tbody th{ text-align:left; background:#faf8f5; font-weight:600; color:#333; }
+  .bpk-tablo td.bpk-bolge{ background:#fbf3e6; font-weight:700; }
+  .bpk-tablo td.en-iyi{ background:#e3f3e7; color:#1f7a3a; font-weight:700; }
+  .bpk-tablo td.en-kotu{ background:#fbe9e9; color:#a34141; font-weight:700; }
+  .bpk-tablo td.bos{ color:#bbb; }
+  .bpk-tablo td.hata{ color:var(--red); text-align:center; }
+  .bpk-tablo td.artis{ color:#1f7a3a; font-weight:600; }
+  .bpk-tablo td.dusus{ color:#a34141; font-weight:600; }
+  .bpk-tablo .bpg-son{ border-right:2px solid #bdb6aa; }
+  .bpk-tablo th.bpk-grup small{ display:block; font-weight:400; font-size:.64rem; opacity:.75; margin-top:1px; }
+  .bpk-ov{ padding:16px; }
+  .bpk-dlg{ background:#fff; border-radius:16px; width:min(980px, 100%); max-height:92vh; display:flex; flex-direction:column; overflow:hidden; text-align:left; box-shadow:0 20px 50px rgba(0,0,0,.25); }
+  .bpk-ust{ display:flex; justify-content:space-between; align-items:center; gap:10px; padding:14px 16px; border-bottom:1px solid var(--line); }
+  .bpk-baslik{ font-size:1.1rem; font-weight:700; color:var(--dark); }
+  .bpk-altbaslik{ font-size:.74rem; color:#888; }
+  .bpk-dugmeler{ display:flex; gap:6px; }
+  .bpk-govde{ overflow:auto; padding:14px 16px; }
+  .bpk-ara{ font-size:.82rem; font-weight:700; color:var(--dark); margin:16px 0 6px; }
+  html.tel .bpk-ov{ padding:0; }
+  html.tel .bpk-kiyas, html.tel .bp-tablo-kutu .bpk-tablo{ width:100%; }
+  html.tel .bpk-dlg{ width:100%; height:100%; max-height:none; border-radius:0; }
+  html.tel .bpk-tablo th, html.tel .bpk-tablo td{ padding:6px 7px; font-size:.74rem; }
   .bpg-kap{ overflow-x:auto; }
   .bpg-tablo{ border-collapse:collapse; font-size:.76rem; font-variant-numeric:tabular-nums; }
   .bpg-tablo th, .bpg-tablo td{ border:1px solid #e6e2da; padding:3px 7px; text-align:right; white-space:nowrap; }
@@ -1199,7 +1227,7 @@ if(!document.documentElement.classList.contains('tel')){
   html.tel .tvf-hata{ color:var(--red); font-size:.8rem; min-height:18px; margin-bottom:6px; }
 
   /* Bölge paneli: mağaza kartları */
-  html.tel #bpOzet .bp-tablo-kutu{ display:none; }
+  html.tel #bpOzet .bp-tel-sirala, html.tel #bpOzet .bp-kartlar{ display:none !important; }
   html.tel .bp-tel-sirala{ display:flex !important; align-items:center; gap:8px; margin-bottom:10px; font-size:.8rem; color:#666; }
   html.tel .bp-tel-sirala select{ flex:1; padding:8px 10px; border-radius:9px; border:1px solid #d8d2c8; font-size:.85rem; background:#fff; font-family:inherit; }
   html.tel .bp-kart{
@@ -1303,9 +1331,8 @@ if(!document.documentElement.classList.contains('tel')){
     </div>
     <div class="bp-kartlar sadece-tel" id="bpKartlar"></div>
     <div class="bp-kutu bp-tablo-kutu">
-      <table class="bp-tablo" id="bpTablo"></table>
+      <table class="bpk-tablo" id="bpTablo"></table>
     </div>
-    <div class="bp-kutu bp-gunluk" id="bpGunluk"></div>
     <div class="bp-not" id="bpNot"></div>
     <div class="bp-eksik" id="bpEksik" style="display:none;"></div>
     <div class="bp-duyuru" id="bpDuyuru">
@@ -1493,7 +1520,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 60;
+const APP_SURUM = 63;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -2539,7 +2566,7 @@ document.getElementById('girisForm').addEventListener('submit', girisYap);
 // Veriler her mağazanın kendi entries koleksiyonundan okunur; bir satıra
 // tıklanınca o mağazanın normal rapor ekranı açılır.
 const bp = {
-  basSec: 'ayBasi', sonSec: 'bugun',   // ERP'deki gibi hazır seçenek ya da 'ozel'
+  basSec: 'bugun', sonSec: 'bugun',   // ERP'deki gibi hazır seçenek ya da 'ozel'
   basTarih: null, sonTarih: null,      // 'YYYY-MM-DD' (Tarih seç)
   sekme: 'ozet',
   yuklendi: false,
@@ -2588,10 +2615,15 @@ function bpAraligi(){
     oncekiBas = new Date(bas.getFullYear(), bas.getMonth()-1, 1);
     oncekiSon = new Date(bas.getFullYear(), bas.getMonth()-1, Math.min(kesim.getDate(), new Date(bas.getFullYear(), bas.getMonth(), 0).getDate()));
     kiyasEtiket = 'geçen ayın aynı günlerine göre';
+  } else if(uzun <= 7 && bas.getDay() === 1 || uzun === 1){
+    // Tek gün ya da hafta başından beri: geçen haftanın aynı günleri (GH).
+    oncekiBas = gunEkle(bas, -7);
+    oncekiSon = gunEkle(kesim, -7);
+    kiyasEtiket = uzun === 1 ? 'geçen hafta aynı güne (GH) göre' : 'geçen haftanın aynı günlerine (GH) göre';
   } else {
     oncekiBas = gunEkle(bas, -uzun);
     oncekiSon = gunEkle(bas, -1);
-    kiyasEtiket = uzun === 1 ? 'bir önceki güne göre' : 'önceki ' + uzun + ' güne göre';
+    kiyasEtiket = 'önceki ' + uzun + ' güne göre';
   }
   const etiket = (gunSayisi === 1 ? kisaTarih(bas) + ' ' + BP_GUN_ADLARI[bas.getDay()] : kisaTarih(bas) + ' – ' + kisaTarih(son))
     + (gunSayisi > 1 ? ' · ' + gunSayisi + ' gün' : '');
@@ -2722,74 +2754,47 @@ function bpCiz(){
   if(!bp.yuklendi){ tablo.innerHTML = ''; not.textContent = 'Veriler yükleniyor...'; return; }
 
   const satirlar = bpSatirlar(ar);
-  const {kol, yon} = bp.sirala;
-  satirlar.sort((a,b)=>{
-    if(a.hata || b.hata) return a.hata ? 1 : -1;
-    const x = a[kol], y = b[kol];
-    if(kol === 'ad') return String(x).localeCompare(String(y), 'tr') * yon;
-    if(x === null || x === undefined) return 1;
-    if(y === null || y === undefined) return -1;
-    return (x < y ? -1 : x > y ? 1 : 0) * yon;
-  });
-
-  // Excel'deki 3 renk skalası: her sütunda mağazalar arasında en düşük kırmızı, en yüksek yeşil.
-  const skala = {};
-  BP_KOLONLAR.filter(c=> c.iyi).forEach(c=>{ skala[c.k] = bpRenkSkala(satirlar.filter(s=> !s.hata).map(s=> s[c.k])); });
-
-  const hucre = (c, s, toplamMi)=>{
-    if(c.k === 'ad'){
-      return '<td class="bp-ad">' + escapeHtml(s.ad) + (!toplamMi && s.ad !== magazaAdi(s.m) ? '<small>' + escapeHtml(magazaAdi(s.m)) + '</small>' : '') + '</td>';
-    }
-    const v = s[c.k];
-    const metin = (v === null || v === undefined) ? null : c.fmt(v);
-    const sinif = [];
-    let stil = '', ipucu = '';
-    if(metin === null) sinif.push('bos');
-    else if(!toplamMi && c.iyi){
-      stil = skala[c.k](v);
-      if(c.k !== 'degisim' && s.once && s.once[c.k] !== null && s.once[c.k] !== undefined && s.once[c.k] !== 0){
-        const ov = s.once[c.k], fark = (v - ov) / Math.abs(ov) * 100;
-        ipucu = 'Önceki dönem: ' + c.fmt(ov) + ' (' + (fark >= 0 ? '+' : '') + fark.toFixed(1).replace('.', ',') + '%)';
-      }
-    }
-    if(c.k === 'fbu') sinif.push('fbu');
-    return '<td class="' + sinif.join(' ') + '"' + (stil ? ' style="' + stil + '"' : '') + (ipucu ? ' title="' + escapeHtml(ipucu) + '"' : '') + '>'
-      + (metin === null ? '–' : escapeHtml(metin)) + '</td>';
-  };
-
-  const thead = '<thead><tr>' + BP_KOLONLAR.map(c=>{
-    const ok = c.k === kol ? (yon < 0 ? ' ▼' : ' ▲') : '';
-    const ipucu = c.k === 'degisim' ? 'Ciro, ' + ar.kiyasEtiket : (c.ipucu || '');
-    return '<th data-kol="' + c.k + '" class="' + (c.k === kol ? 'sirali' : '') + '" title="' + escapeHtml(ipucu) + '">' + c.t + ok + '</th>';
-  }).join('') + '</tr></thead>';
-
-  const tbody = '<tbody>' + satirlar.map(s=>{
-    if(s.hata){
-      return '<tr data-m="' + escapeHtml(s.m) + '"><td class="bp-ad">' + escapeHtml(s.ad) + '</td>'
-        + '<td class="hata" colspan="' + (BP_KOLONLAR.length - 1) + '">Okunamadı: ' + escapeHtml(s.hata) + '</td></tr>';
-    }
-    return '<tr data-m="' + escapeHtml(s.m) + '" title="' + escapeHtml(s.ad) + ' raporunu aç">'
-      + BP_KOLONLAR.map(c=> hucre(c, s, false)).join('') + '</tr>';
-  }).join('') + '</tbody>';
-
+  const gecerli = satirlar.filter(s=> !s.hata);
   const toplam = bpToplam(satirlar);
-  const tfoot = satirlar.length > 1
-    ? '<tfoot><tr>' + BP_KOLONLAR.map(c=> hucre(c, toplam, true)).join('') + '</tr></tfoot>'
-    : '';
 
-  tablo.innerHTML = thead + tbody + tfoot;
-  tablo.querySelectorAll('th').forEach(th=> th.addEventListener('click', ()=>{
-    const k = th.dataset.kol;
-    bp.sirala = (bp.sirala.kol === k) ? {kol:k, yon:-bp.sirala.yon} : {kol:k, yon: k === 'ad' ? 1 : -1};
-    bpCiz();
-  }));
-  tablo.querySelectorAll('tbody tr').forEach(tr=> tr.addEventListener('click', ()=> magazayiAc(tr.dataset.m)));
+  // Satırlar KPI, sütunlar mağaza (mağazanın haftalık tablosu gibi); en sağda Bölge.
+  // Mağazalar birbiriyle renklendirilmez; kıyas, mağaza adına tıklanınca açılan pencerededir.
+  const KPI = [
+    {k:'ciro',  t:'Ciro',     fmt: bpfTL,   iyi:1},
+    {k:'hedef', t:'Hedef',    fmt: bpfTL,   iyi:0},
+    {k:'oran',  t:'Oran',     fmt: bpfPct,  iyi:1},
+    {k:'degisim', t:'Ciro değ.', fmt: fmtDegisim, iyi:1, ipucu:'Ciro, ' + ar.kiyasEtiket},
+    {k:'mdo',   t:'Mdo',      fmt: bpfMdo,  iyi:1, ipucu:'Günlük ortalama'},
+    {k:'fbu',   t:'Fbü',      fmt: bpfFbu,  iyi:1, ipucu:'Günlük ortalama'},
+    {k:'mgs',   t:'Mgs',      fmt: bpfTam,  iyi:1, ipucu:'Toplam'},
+    {k:'fbs',   t:'Fbs',      fmt: bpfTL,   iyi:1, ipucu:'Günlük ortalama'},
+    {k:'toplu', t:'Toplu S.', fmt: bpfK,    iyi:1, ipucu:'Toplam'},
+    {k:'sonGiris', t:'Son giriş', fmt: v => kisaTarih(tarihOku(v)).slice(0, 5), iyi:0, ipucu:'Ciro girilen son gün'}
+  ];
+  const hucre = (kpi, s)=>{
+    const v = s[kpi.k];
+    if(v === null || v === undefined) return '<td class="bos">–</td>';
+    return '<td>' + escapeHtml(kpi.fmt(v)) + '</td>';
+  };
+  tablo.innerHTML =
+    '<thead><tr><th class="bpk-kose">' + escapeHtml(ar.etiket) + '</th>' +
+      satirlar.map(s=> '<th class="bpk-mag" data-m="' + escapeHtml(s.m) + '" title="' + escapeHtml(s.ad) + ' kıyasını aç">' + escapeHtml(s.ad) + '</th>').join('') +
+      (satirlar.length > 1 ? '<th class="bpk-bolge">Bölge</th>' : '') + '</tr></thead><tbody>' +
+    KPI.map(kpi=> '<tr><th title="' + escapeHtml(kpi.ipucu || '') + '">' + kpi.t + '</th>' +
+      satirlar.map(s=> s.hata ? '<td class="hata">!</td>' : hucre(kpi, s)).join('') +
+      (satirlar.length > 1 ? (toplam[kpi.k] === null || toplam[kpi.k] === undefined ? '<td class="bpk-bolge bos">–</td>'
+        : '<td class="bpk-bolge">' + escapeHtml(kpi.fmt(toplam[kpi.k])) + '</td>') : '') + '</tr>').join('') +
+    '</tbody>';
+  tablo.querySelectorAll('.bpk-mag').forEach(th=> th.addEventListener('click', ()=> bpMagazaKiyas(th.dataset.m)));
 
+  const hatali = satirlar.filter(s=> s.hata);
   not.textContent = (ar.gunSayisi <= 0 ? 'Bu dönem henüz başlamadı. ' : '')
+    + (hatali.length ? 'Okunamayan: ' + hatali.map(s=> s.ad + ' (' + s.hata + ')').join(', ') + '. ' : '')
     + 'Ciro değişimi ' + ar.kiyasEtiket + '. Mdo, Fbü ve Fbs günlük ortalama; Mgs ve Toplu satış toplamdır. '
-    + 'Renkler her sütunda mağazalar arasında: en düşük kırmızı, en yüksek yeşil (hücrenin üzerine gelince önceki dönemin değeri görünür). Bölge satırında Mdo, Fbü ve Fbs mağaza ortalamasıdır. '
-    + 'Bir mağazanın raporunu açmak için satırına tıkla.';
+    + 'Bölge sütununda Mdo, Fbü ve Fbs mağaza ortalamasıdır. '
+    + 'Kıyas için mağaza adına tıkla.';
 }
+
 
 async function bpVeriYukle(){
   bp.yuklendi = false;
@@ -3610,7 +3615,7 @@ function telKisalt(kok){
   }
   sar('bpCiz', ()=> document.getElementById('bpTablo'));
   const asilBpCiz = window.bpCiz;
-  window.bpCiz = function(){ const r = asilBpCiz.apply(this, arguments); bpKartlariCiz(); bpGunlukCiz(); return r; };
+  window.bpCiz = function(){ const r = asilBpCiz.apply(this, arguments); return r; };
 }
 
 // ==================== GRAFİKLER ====================
@@ -3957,25 +3962,39 @@ function bpgMagazaVerisi(m, ar){
   return {gunler, topCiro, donemHedef, kumPct: topHedef ? topCiro / topHedef * 100 : null, renk};
 }
 
-function bpGunlukCiz(){
-  const kart = document.getElementById('bpGunluk');
-  if(!kart) return;
-  if(!oturum || !oturum.magazalar.length || !bp.yuklendi){ kart.innerHTML = ''; return; }
-  const ar = bpAraligi();
-  if(ar.gunSayisi <= 0){ kart.innerHTML = '<div class="bpg-bos">Bu dönem henüz başlamadı.</div>'; return; }
-  const magazalar = oturum.magazalar.filter(m=> !bp.hatalar[m]);
-  if(TELEFON && !magazalar.includes(bpgTelMagaza)) bpgTelMagaza = magazalar[0];
-  const liste = TELEFON ? magazalar.filter(m=> m === bpgTelMagaza) : magazalar;
+// ==================== BÖLGE PANELİ: MAĞAZA KIYASI ====================
+const bpfTam = v=> Math.round(v).toLocaleString('tr-TR');
+const bpfK = v=> Math.round(v).toLocaleString('tr-TR') + ' K';
+const bpfTL = v=> Math.round(v).toLocaleString('tr-TR') + ' TL';
+const bpfFbu = v=> Number(v).toFixed(2).replace('.', ',');
+const bpfPct = v=> '%' + Number(v).toFixed(1).replace('.', ',');
+const bpfMdo = v=> '% ' + Number(v).toFixed(1).replace('.', ',');
+// Önceki dönem yalnızca bu dönemde verisi olan günlerin karşılıklarından hesaplanır (yarım haftayı tam haftayla
+// kıyaslamamak için). Bu dönemde hiç veri yoksa önceki dönemin tamamı gösterilir.
+function bpKarsilikHesapla(kayitlar, bas, son, karsilik){
+  const secili = {};
+  let var_ = false;
+  for(let d = new Date(bas); d <= son; d = gunEkle(d, 1)){
+    const r = kayitlar[dateStr(d)];
+    if(r && bpDolu(r.ciro)){
+      var_ = true;
+      const k = dateStr(karsilik(d));
+      if(kayitlar[k]) secili[k] = kayitlar[k];
+    }
+  }
+  if(!var_) return bpHesapla(kayitlar, karsilik(bas), karsilik(son));
+  return bpHesapla(secili, karsilik(bas), karsilik(son));
+}
+// Mağaza adına tıklayınca: Bugün / GH bugün, Hafta başından beri / GH aynı günler, Bu ay 1–N / Geçen ay 1–N.
+// Altında o mağazanın bu ayki günlük ciro tablosu.
+function bpgTabloHtml(liste, ar){
   const v = {};
   liste.forEach(m=> v[m] = bpgMagazaVerisi(m, ar));
   const tarihler = [];
   for(let d = new Date(ar.bas); d <= ar.kesim; d = gunEkle(d, 1)) tarihler.push(new Date(d));
   const ayHedefi = ar.hedefSon > ar.kesim;
-  let html = (TELEFON ? '<div class="gr-seg bpg-sec">' + magazalar.map(m=> '<button type="button" data-m="' + escapeHtml(m) + '"' +
-      (m === bpgTelMagaza ? ' class="on"' : '') + '>' + escapeHtml(bpMagazaAdi(m)) + '</button>').join('') + '</div>' : '') +
-    '<div class="bpg-kap"><table class="bpg-tablo"><thead><tr><th rowspan="2" class="bpg-tarih">Gün</th>' +
-    liste.map(m=> '<th colspan="3" class="bpg-ad" data-m="' + escapeHtml(m) + '" title="Raporu aç">' + escapeHtml(bpMagazaAdi(m)) + '</th>').join('') +
-    '</tr><tr>' + liste.map(()=> '<th>Ciro</th><th>Gün %</th><th class="bpg-son">Küm. %</th>').join('') + '</tr></thead><tbody>';
+  let html = '<div class="bpg-kap"><table class="bpg-tablo"><thead><tr><th class="bpg-tarih">Gün</th>' +
+    liste.map(()=> '<th>Ciro</th><th>Gün %</th><th class="bpg-son">Küm. %</th>').join('') + '</tr></thead><tbody>';
   tarihler.forEach((d, i)=>{
     html += '<tr><td class="bpg-tarih">' + pad(d.getDate()) + '.' + pad(d.getMonth()+1) + ' <span>' + GR_GUNLER[(d.getDay() + 6) % 7] + '</span></td>' +
       liste.map(m=>{
@@ -3991,13 +4010,74 @@ function bpGunlukCiz(){
     '<tr class="bpg-alt"><td class="bpg-tarih">Kalan</td>' + liste.map(m=>{
       const k = v[m].donemHedef - v[m].topCiro;
       return '<td class="' + (k > 0 ? 'eksi' : 'arti') + '">' + (k > 0 ? bpgTL(k) : 'Aşıldı ' + bpgTL(-k)) + '</td><td></td><td class="bpg-son"></td>';
-    }).join('') + '</tr></tfoot></table></div>' +
-    '<div class="bpg-not">Gün %: o günün cirosu / o günün hedefi. Küm. %: o güne kadar toplam ciro / toplam hedef. ' +
-      'Renkler her mağazanın kendi günleri içinde: en düşük kırmızı, en yüksek yeşil. ' + (ayHedefi ? 'Ay hedefi ayın tamamının hedefidir. ' : '') +
-      'Mağaza adına tıklayınca raporu açılır.</div>';
-  kart.innerHTML = html;
-  kart.querySelectorAll('.bpg-sec button').forEach(b=> b.addEventListener('click', ()=>{ bpgTelMagaza = b.dataset.m; bpGunlukCiz(); }));
-  kart.querySelectorAll('.bpg-ad').forEach(th=> th.addEventListener('click', ()=> magazayiAc(th.dataset.m)));
+    }).join('') + '</tr></tfoot></table></div>';
+  return html;
+}
+
+function bpMagazaKiyas(m){
+  const kayitlar = bp.veri[m] || {};
+  const bugun = getNow(); bugun.setHours(0,0,0,0);
+  const pzt = mondayOf(bugun);
+  const ayBas = new Date(bugun.getFullYear(), bugun.getMonth(), 1);
+  const gecenAyBas = new Date(bugun.getFullYear(), bugun.getMonth()-1, 1);
+  const gecenAySon = new Date(bugun.getFullYear(), bugun.getMonth()-1,
+    Math.min(bugun.getDate(), new Date(bugun.getFullYear(), bugun.getMonth(), 0).getDate()));
+  const n = bugun.getDate();
+  const gh = d=> gunEkle(d, -7);
+  const gecenAy = d=> new Date(d.getFullYear(), d.getMonth()-1, Math.min(d.getDate(), new Date(d.getFullYear(), d.getMonth(), 0).getDate()));
+  const donemler = [
+    {ad:'Bugün', alt: kisaTarih(bugun).slice(0, 5) + ' / GH ' + kisaTarih(gh(bugun)).slice(0, 5),
+     simdi: bpHesapla(kayitlar, bugun, bugun), once: bpHesapla(kayitlar, gh(bugun), gh(bugun)), onceAd:'GH'},
+    {ad:'Hafta başından beri', alt: kisaTarih(pzt).slice(0, 5) + '–' + kisaTarih(bugun).slice(0, 5) + ' / GH aynı günler',
+     simdi: bpHesapla(kayitlar, pzt, bugun), once: bpKarsilikHesapla(kayitlar, pzt, bugun, gh), onceAd:'GH'},
+    {ad:'Ay (' + n + ' gün)', alt: AY_TAM_ADLARI[bugun.getMonth()] + ' 1–' + n + ' / ' + AY_TAM_ADLARI[gecenAyBas.getMonth()] + ' 1–' + gecenAySon.getDate(),
+     simdi: bpHesapla(kayitlar, ayBas, bugun), once: bpKarsilikHesapla(kayitlar, ayBas, bugun, gecenAy), onceAd:'Geçen ay'}
+  ];
+  const KPI = [
+    {k:'ciro', t:'Ciro', fmt: bpfTL}, {k:'hedef', t:'Hedef', fmt: bpfTL}, {k:'oran', t:'Oran', fmt: bpfPct, puan:true},
+    {k:'mdo', t:'Mdo', fmt: bpfMdo, puan:true}, {k:'fbu', t:'Fbü', fmt: bpfFbu}, {k:'mgs', t:'Mgs', fmt: bpfTam},
+    {k:'fbs', t:'Fbs', fmt: bpfTL}, {k:'toplu', t:'Toplu S.', fmt: bpfK}
+  ];
+  const degisim = (kpi, a, b)=>{
+    if(a === null || a === undefined || b === null || b === undefined) return '<td class="bos">–</td>';
+    let f, metin;
+    if(kpi.puan){ f = a - b; metin = (f >= 0 ? '+' : '') + f.toFixed(1).replace('.', ',') + ' puan'; }
+    else { if(!b) return '<td class="bos">–</td>'; f = (a - b) / Math.abs(b) * 100; metin = (f >= 0 ? '+' : '') + Math.round(f) + '%'; }
+    if(kpi.k === 'hedef') return '<td class="bpk-deg">' + metin + '</td>';
+    return '<td class="bpk-deg ' + (Math.abs(f) < 0.05 ? '' : f > 0 ? 'artis' : 'dusus') + '">' + metin + '</td>';
+  };
+  const deger = (kpi, s)=> (s[kpi.k] === null || s[kpi.k] === undefined) ? '<td class="bos">–</td>' : '<td>' + escapeHtml(kpi.fmt(s[kpi.k])) + '</td>';
+  // Telefonda üç dönem alt alta ayrı tablolar; bilgisayarda yan yana.
+  const tabloYap = ds=> '<div class="bpg-kap"><table class="bpk-tablo bpk-kiyas"><thead>' +
+    '<tr><th rowspan="2"></th>' + ds.map(d=> '<th colspan="3" class="bpk-grup" title="' + escapeHtml(d.alt) + '">' + d.ad + '<small>' + escapeHtml(d.alt) + '</small></th>').join('') + '</tr>' +
+    '<tr>' + ds.map(d=> '<th>Bu</th><th>' + d.onceAd + '</th><th class="bpg-son">Değ.</th>').join('') + '</tr></thead><tbody>' +
+    KPI.map(kpi=> '<tr><th>' + kpi.t + '</th>' + ds.map(d=> deger(kpi, d.simdi) + deger(kpi, d.once) +
+      degisim(kpi, d.simdi[kpi.k], d.once[kpi.k]).replace('<td class="', '<td class="bpg-son ')).join('') + '</tr>').join('') +
+    '</tbody></table></div>';
+  const tablo = TELEFON ? donemler.map(d=> tabloYap([d])).join('<div style="height:12px"></div>') : tabloYap(donemler);
+  const ar = {bas: ayBas, kesim: bugun, hedefSon: new Date(bugun.getFullYear(), bugun.getMonth()+1, 0)};
+
+  const ov = document.createElement('div');
+  ov.className = 'ui-ov bpk-ov';
+  ov.innerHTML =
+    '<div class="bpk-dlg">' +
+      '<div class="bpk-ust"><div><div class="bpk-baslik">' + escapeHtml(bpMagazaAdi(m)) + '</div>' +
+        '<div class="bpk-altbaslik">Kıyas · ' + escapeHtml(kisaTarih(bugun)) + '</div></div>' +
+        '<div class="bpk-dugmeler"><button class="ust-btn dolu" type="button" data-act="ac">Raporu aç</button>' +
+        '<button class="ust-btn" type="button" data-act="kapat">✕</button></div></div>' +
+      '<div class="bpk-govde">' + tablo +
+        '<div class="bpk-ara">Bu ay gün gün</div>' + bpgTabloHtml([m], ar) +
+        '<div class="bpg-not">GH: geçen hafta. Hafta ve ay kıyasında önceki dönem, bu dönemde verisi olan günlerin karşılığıdır. Değ.: Ciro, Fbü, Fbs, Mgs ve Toplu satışta yüzde değişim; Oran ve Mdo\'da puan farkı. ' +
+          'Günlük tabloda renkler mağazanın kendi günleri içinde: en düşük kırmızı, en yüksek yeşil.</div>' +
+      '</div>' +
+    '</div>';
+  const kapat = ()=>{ document.removeEventListener('keydown', tus, true); ov.remove(); };
+  function tus(e){ if(e.key === 'Escape'){ e.preventDefault(); kapat(); } }
+  document.addEventListener('keydown', tus, true);
+  ov.addEventListener('click', e=>{ if(e.target === ov) kapat(); });
+  ov.querySelector('[data-act="kapat"]').addEventListener('click', kapat);
+  ov.querySelector('[data-act="ac"]').addEventListener('click', ()=>{ kapat(); magazayiAc(m); });
+  document.body.appendChild(ov);
 }
 
 // ==================== TELEFON: ALT ÇUBUK DOKUNUŞU ====================
@@ -5783,7 +5863,7 @@ function ortakSayfalariYerlestir(yer){
 //   {id:'ornek', ikon:'🧮', baslik:'Araç adı', aciklama:'Kartta görünen kısa açıklama', html:`<!doctype html>...`}
 // Araçlar kodun içinde tanımlıdır; "ciz" verilen araçlar iframe yerine doğrudan sayfaya çizilir.
 const ARACLAR = [
-  {id:'veri-kopyala', ikon:'📋', baslik:'Veri Kopyala',
+  {id:'veri-kopyala', ikon:'📋', baslik:'Veri Kopyala', rol:'magaza',
    aciklama:'Ciro raporundaki verileri tek tıkla kopyalayan yer imi. Kurmak için butonu yer imleri çubuğuna sürükle.',
    ciz: veriKopyalaCiz},
   {id:'bekleyen-deposu', ikon:'📊', baslik:'Bekleyen deposu',
@@ -6029,7 +6109,9 @@ let currentToolId = null;
 function renderToolsGrid(){
   document.getElementById('araclarAlt').textContent = 'Tüm mağazalarda ortak';
   const grid = document.getElementById('toolsGrid');
-  grid.innerHTML = ARACLAR.length ? ARACLAR.map(t => `
+  // rol verilen araç yalnızca o role görünür (ör. Veri Kopyala bölge müdürüne görünmez).
+  const araclar = ARACLAR.filter(t=> !t.rol || !oturum || t.rol === oturum.rol);
+  grid.innerHTML = araclar.length ? araclar.map(t => `
     <div class="hk-kart" data-id="${t.id}">
       <div class="hk-ust"><span class="hk-ikon">${t.ikon || '🧩'}</span></div>
       <div class="hk-baslik">${escapeHtml(t.baslik)}</div>
@@ -6349,21 +6431,23 @@ const MR_KILAVUZ = `
 
 <h3 id="mr-bolge">15. Bölge paneli (bölge müdürü)</h3>
 <ul>
-<li><b>Özet:</b>
+<li><b>Özet tablosu</b> (mağazanın haftalık tablosu gibi): satırlar alt alta <b>Ciro, Hedef, Oran, Ciro değ., Mdo, Fbü, Mgs, Fbs, Toplu S., Son giriş</b>; sütunlar mağazalar, en sağda <b>Bölge</b>.</li>
+<li><b>Dönem</b> (üstte, ERP'deki gibi): Başlangıç ve Bitiş Tarihi. Varsayılan <b>Bugün</b>. Hazır seçenekler: Bugün, Dün, Bu haftanın başı, Bu ayın başı, Geçen ayın başı, Geçen ayın bugünü, Geçen ayın sonu, Bu yılın başı ya da takvimden tarih. Seçince tablo hemen yenilenir.</li>
+<li><b>Ciro değ.:</b> tek gün ya da hafta başından beri seçiliyse geçen haftanın aynı günlerine (GH), ayın 1'inden başlıyorsa geçen ayın aynı günlerine, diğerlerinde önceki eşit döneme göredir.</li>
+<li><b>Mağaza adına tıklayınca kıyas penceresi</b> açılır:
   <ul>
-  <li>Mağazaların ciro, MDO, FBÜ, FBS, MGS ve hedef oranlarını seçilen dönem için karşılaştırır.</li>
-  <li><b>Dönem</b> (üstte, ERP'deki gibi): <b>Başlangıç Tarihi</b> ve <b>Bitiş Tarihi</b>. Her birinde hazır seçenekler vardır (Bugün, Dün, Bu haftanın başı, Bu ayın başı, Geçen ayın başı, Geçen ayın bugünü, Geçen ayın sonu, Bu yılın başı) ya da takvimden tarih seçilir. Seçince tablo hemen yenilenir. Varsayılan: Bu ayın başı – Bugün.</li>
-  <li><b>Ciro değ.:</b> dönem ayın 1'inde başlıyorsa geçen ayın aynı günlerine, değilse hemen önceki eşit uzunluktaki döneme göredir.</li>
-  <li><b>Özet tablo:</b> mağazaların ciro, gerçekleşme, ciro değişimi, Mdo, Fbü, Mgs, Fbs ve toplu satışı. Her sütunda mağazalar arasında en düşük kırmızı, en yüksek yeşil (Excel'deki 3 renk skalası). Hücrenin üzerine gelince önceki dönemin değeri görünür. Telefonda kartlar halindedir.</li>
-  <li><b>Günlük tablo:</b> satırlar gün, her mağazanın sütunları <b>Ciro | Gün % | Küm. %</b>. Gün %: o günün cirosu / o günün hedefi; Küm. %: o güne kadar toplam ciro / toplam hedef. Renkler her mağazanın kendi günleri içindedir: en düşük gün kırmızı, en iyi gün yeşil. Altta Toplam, Hedef (dönem ayın 1'inden bugüne ise <b>Ay hedefi</b>) ve <b>Kalan</b> yazar. Telefonda üstten mağaza seçilir.</li>
-  <li>Duyurular ve "Bugün veri girmeyen" uyarısı tabloların altındadır.</li>
-  <li>Bugün veri girmeyen mağazaları gösterir.</li>
-  <li>Duyuru yazılır ve kimin okuduğu görülür.</li>
+  <li><b>Bugün</b> ve GH (geçen hafta aynı gün), <b>Hafta başından beri</b> ve GH'nin aynı günleri, <b>Ay</b> (ör. ayın 12'si ise bu ay 1–12 ve geçen ay 1–12).</li>
+  <li>Her biri için Ciro, Hedef, Oran, Mdo, Fbü, Mgs, Fbs ve Toplu satış; değişim yeşil (artış) ya da kırmızı (düşüş). Oran ve Mdo'da puan farkı gösterilir.</li>
+  <li>Hafta ve ay kıyasında önceki dönem, bu dönemde verisi olan günlerin karşılığıdır.</li>
+  <li>Altında o mağazanın bu ayki gün gün ciro tablosu (Ciro, Gün %, Küm. %; en düşük gün kırmızı, en iyi gün yeşil; altta Toplam, Ay hedefi, Kalan).</li>
+  <li><b>Raporu aç</b> mağazanın tam ekranına geçer.</li>
   </ul></li>
+<li>"Bugün veri girmeyen" uyarısı ve Duyurular tablonun altındadır.</li>
+<li><b>Araçlar:</b> Veri Kopyala bölge müdürüne görünmez.</li>
 <li><b>Mağazalarım:</b> panelde görünecek mağazalar seçilir.</li>
 <li><b>🎯 Hedef gir</b> (sağ üstte; telefonda profil menüsünde): mağaza ve ay seçilir, Excel'deki günlük hedef satırı yapıştırılır, Kaydet ile o mağazanın günlük hedefleri yazılır.
   <figure class="hk-gorsel"><img src="guncelleme/hedef-bolge-pencere.jpg" alt="Bölge panelinde hedef girme" loading="lazy"><figcaption>Önce mağazayı ve ayı seçin.</figcaption></figure></li>
-<li>Bir mağazaya tıklayınca o mağazanın ekranı açılır; veriler görülür ve düzeltilebilir. Panele <b>◀ Bölge paneli</b> ile dönülür.</li>
+<li>Kıyas penceresindeki <b>Raporu aç</b> ile mağazanın ekranı açılır; veriler görülür ve düzeltilebilir. Panele <b>◀ Bölge paneli</b> ile dönülür.</li>
 <li>Araçlar, Kurumsal hafıza, Düzenleyici ve Sohbet panelde de vardır.</li>
 </ul>
 <a class="hk-yukari" href="#" data-git="mr-bas">↑ İçindekiler</a>
