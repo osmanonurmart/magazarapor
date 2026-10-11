@@ -35,12 +35,16 @@ Giriş ekranının arka plan fotoğrafı `giris-arka.jpg`.
 | `rapor.html` | Uygulamanın tamamı (HTML, CSS, JS tek dosyada) |
 | `firestore.rules` | Güvenlik kuralları |
 
-## Transfer · Kırık
+## Transfer
 
-- Telefonda: irsaliye 1-4 yazılır, 1-6 / depo / tarih otomatik bulunur. Fotoğraflar: Kutu 1–4, Kırık, Tutanak (imzalı).
-- Bilgisayarda "Bekleyen deposu Excel'i yükle": eşleşmeler `stores/{m}/irsaliyeler/{1-6}` altına kaydedilir ve Outlook'ta taslak olarak açılan `bekleyen deposu hk.eml` iner. İmza `stores/{m}/settings/mail.imza` (Mail imzası butonu).
-- "Kırık tutanağı": EBA formu kopyalanıp yapıştırılır, tutanak yazdırılır.
-- İnen klasörler: `37 · 06.10.2026 · 1-S-6-…` içinde `kutu-1..4.jpg`, `kirik.jpg`, `tutanak.jpg`. Kartlarda "EBA'ya işlendi" işareti.
+- Telefondan en fazla 5 fotoğraf ve isteğe bağlı not gönderilir. Uygulama içi kamerada her çekimden sonra Tekrar çek / Devam et / Gönder.
+- Fotoğraflar en uzun kenar 3200 px, JPEG %88. 1 MB belge sınırı yüzünden parçalanır: `transferFotos/{id}_{sira}` ilk parça, `{id}_{sira}_{p}` sonrakiler; parça sayıları `transfers/{id}.parcalar`.
+- Bilgisayarda "Gelenler": İndir (tam çözünürlük, `foto-YYYY-MM-DD_HHMM-n.jpg`), Notu kopyala, Sil.
+
+## Araçlar · Bekleyen deposu ve Kırık tutanağı
+
+- "Bekleyen deposu": Excel yüklenince eşleşmeler `stores/{m}/irsaliyeler/{1-6}` altına kaydedilir ve Outlook'ta taslak olarak açılan `bekleyen deposu hk.eml` iner. İmza `stores/{m}/settings/mail.imza`.
+- "Kırık tutanağı": EBA formu kopyalanıp yapıştırılır, tutanak yazdırılır (depo / tarih irsaliyelerden doldurulur).
 
 ## Düzenleyici (PDF araçları)
 
