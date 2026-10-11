@@ -40,7 +40,8 @@
 // açılışta yüklenir; telefonda giriş ekranını geciktirmesin diye sonradan yüklenir.
 var KUTUPHANELER = {
   html2canvas: 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',
-  xlsx: 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'
+  xlsx: 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
+  jszip: 'duzenleyici/lib/jszip.min.js'
 };
 if(!document.documentElement.classList.contains('tel')){
   document.write('<script src="' + KUTUPHANELER.html2canvas + '"><\/script>'
@@ -397,6 +398,9 @@ if(!document.documentElement.classList.contains('tel')){
   }
   .tr-foto-row{ display:flex; gap:8px; }
   .kirik-slots.tr-slots{ grid-template-columns:repeat(5, 1fr); }
+  .tr-klasor{ font-size:.72rem; color:#666; text-align:right; line-height:1.6; }
+  .tr-klasor b{ color:var(--dark); }
+  .tr-link{ background:none; border:none; color:var(--accent); cursor:pointer; font-size:.72rem; padding:0; text-decoration:underline; }
   .tr-indi-etiket{ background:var(--green); color:#fff; border-radius:5px; padding:1px 6px; font-size:.68rem; font-weight:700; }
   .tr-foto-btn{
     flex:1; background:#fdf6ea; color:#8a6a3f; border:2px dashed var(--accent); border-radius:10px;
@@ -485,13 +489,15 @@ if(!document.documentElement.classList.contains('tel')){
   }
   .kam-goruntu{ position:relative; flex:1; min-height:0; overflow:hidden; }
   .kam-goruntu video{ width:100%; height:100%; object-fit:cover; display:block; background:#000; }
-  .kam-onizleme{ position:absolute; inset:0; width:100%; height:100%; object-fit:contain; background:#000; display:none; }
-  .kam-secim{ gap:calc(var(--k)*8px); }
-  .kam-sec{
-    flex:1; border:none; border-radius:calc(var(--k)*12px); cursor:pointer; font-family:inherit; font-weight:700;
-    font-size:calc(var(--k)*14px); padding:calc(var(--k)*14px) calc(var(--k)*6px); background:#2a2a2a; color:#fff;
+  .kam-gonder{
+    width:calc(var(--k)*96px); border:none; border-radius:calc(var(--k)*12px); cursor:pointer; font-family:inherit;
+    font-weight:700; font-size:calc(var(--k)*14px); padding:calc(var(--k)*12px) 0; background:var(--accent); color:#1a1a1a;
   }
-  .kam-sec.gonder{ background:var(--accent); color:#1a1a1a; }
+  .kam-gonder:disabled{ opacity:.35; }
+  .kam-mini .km-sil{
+    position:absolute; top:2px; right:2px; z-index:1; background:rgba(0,0,0,.65); color:#fff; border-radius:50%;
+    width:calc(var(--k)*18px); height:calc(var(--k)*18px); font-size:calc(var(--k)*11px); line-height:calc(var(--k)*18px); text-align:center;
+  }
   .kam-flas{ position:absolute; inset:0; background:#fff; opacity:0; pointer-events:none; }
   .kam-flas.on{ animation:kamFlas .3s ease-out; }
   @keyframes kamFlas{ 0%{ opacity:.85; } 100%{ opacity:0; } }
@@ -1398,14 +1404,16 @@ if(!document.documentElement.classList.contains('tel')){
         <button class="tr-foto-btn" id="trCekBtn" type="button" onclick="trKameraAc()">📷 Fotoğraf çek</button>
         <button class="tr-foto-btn" type="button" onclick="trGaleriAc()">🖼️ Galeriden ekle</button>
       </div>
-      <textarea class="tr-text" id="trNot" placeholder="Not (isteğe bağlı)"></textarea>
       <div class="tr-actions">
         <button class="btn tr-big" type="button" onclick="trTemizle()">Temizle</button>
         <button class="btn tr-big tr-go" id="trGonderBtn" type="button" onclick="trGonder()">📤 Gönder</button>
       </div>
     </div>
     <div class="tr-card">
-      <div class="tr-card-head"><div class="tr-card-title">Gelenler</div></div>
+      <div class="tr-card-head">
+        <div class="tr-card-title">Gelenler</div>
+        <div class="tr-klasor" id="trKlasorBilgi"></div>
+      </div>
       <div id="trListe"></div>
     </div>
   </div>
@@ -1421,7 +1429,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 51;
+const APP_SURUM = 52;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -1772,7 +1780,7 @@ if(TELEFON){
 // Telefonda sonradan yüklenen kütüphaneler; masaüstünde zaten yüklü olduğu için hemen döner.
 const kutuphaneSozleri = {};
 function kutuphaneYukle(ad){
-  if((ad === 'xlsx' && window.XLSX) || (ad === 'html2canvas' && window.html2canvas)) return Promise.resolve();
+  if((ad === 'xlsx' && window.XLSX) || (ad === 'html2canvas' && window.html2canvas) || (ad === 'jszip' && window.JSZip)) return Promise.resolve();
   if(!kutuphaneSozleri[ad]){
     kutuphaneSozleri[ad] = new Promise((res, rej)=>{
       const el = document.createElement('script');
@@ -6199,20 +6207,20 @@ const MR_KILAVUZ = `
 <p><b>Telefonda:</b></p>
 <ol>
 <li><b>📷 Fotoğraf çek</b>'e basın; kamera açılır.</li>
-<li>Çektikten sonra üç seçenek çıkar:
-  <ul>
-  <li><b>↺ Tekrar çek:</b> fotoğraf beğenilmediyse yeniden çekilir.</li>
-  <li><b>📷 Devam et:</b> bir fotoğraf daha çekilir (en fazla 5).</li>
-  <li><b>📤 Gönder:</b> çekilenler hemen gönderilir. Tek fotoğraf da gönderilebilir.</li>
-  </ul></li>
-<li>Galerideki fotoğraflar <b>🖼️ Galeriden ekle</b> ile eklenir. İsterseniz kısa bir not da yazabilirsiniz.</li>
+<li>Fotoğrafları art arda çekin (en fazla 5). Araya soru girmez.</li>
+<li>Beğenmediğiniz fotoğrafın alttaki küçük resmine dokunun; silinir, yerine yenisini çekin.</li>
+<li>Deklanşörün yanındaki <b>📤 Gönder</b>'e basın. Tek fotoğraf çektiyseniz hemen, beş tane çekecekseniz en sonda basarsınız.</li>
+<li>Galerideki fotoğraflar <b>🖼️ Galeriden ekle</b> ile eklenip <b>Gönder</b>'le gönderilir.</li>
 </ol>
 <p><b>Bilgisayarda:</b></p>
 <ul>
 <li>Gönderilenler <b>Gelenler</b> listesinde görünür.</li>
-<li><b>⬇ İndir</b> fotoğrafların hepsini indirir ("foto-2026-10-11_1430-1.jpg" gibi). Tek fotoğraf için küçük resme tıklayın.</li>
-<li>İndirilen kayıtta <b>✓ İndirildi</b> yazar; işiniz bitince 🗑 ile silin.</li>
-<li>Not varsa <b>📋 Notu kopyala</b> ile kopyalanır.</li>
+<li><b>⬇ İndir</b> fotoğrafları numaralı bir klasöre indirir: klasör <b>12</b> içinde <b>1.jpg, 2.jpg … 5.jpg</b>.</li>
+<li>Klasör numaraları 1, 2, 3… diye gider; son numara bulutta tutulur, aynı numara bir daha verilmez. Bilgisayar değişse de sıra devam eder.</li>
+<li>Chrome ve Edge'de ilk indirmede bir ana klasör seçilir (ör. Masaüstü'nde "Transfer"); numaralı klasörler doğrudan onun içine açılır ve seçim hatırlanır. Yeri <b>Kayıt yeri → değiştir</b> ile değiştirilir.</li>
+<li>Klasöre yazamayan tarayıcılarda aynı içerik <b>12.zip</b> olarak iner.</li>
+<li>Numara gerekirse <b>Sıradaki klasör → değiştir</b> ile ayarlanır.</li>
+<li>İndirilen kayıtta <b>✓ İndirildi · klasör 12</b> yazar; işiniz bitince 🗑 ile silin.</li>
 </ul>
 <a class="hk-yukari" href="#" data-git="mr-bas">↑ İçindekiler</a>
 
@@ -6586,13 +6594,15 @@ const THUMB_KENAR = 200;
 let transferCache = [];          // [{id, text, siralar, parcalar, thumbs, createdAtMs, by, indirildi}]
 let trFotolar = [];              // [{full, thumb}]
 let transferMesgul = false;
+let klasorSayac = null;          // en son açılan klasör numarası (bulutta: settings/transfer.klasorSayac)
+let trKlasor = null;             // FileSystemDirectoryHandle (bu bilgisayarda hatırlanır)
+const KLASOR_DESTEGI = typeof window.showDirectoryPicker === 'function';
 
 function transferSifirla(){
   transferCache = [];
   trFotolar = [];
+  klasorSayac = null;
   mailAyar = null;
-  const n = document.getElementById('trNot');
-  if(n) n.value = '';
 }
 
 function listenTransferChanges(){
@@ -6603,6 +6613,10 @@ function listenTransferChanges(){
     transferCache = liste;
     renderTransferListesi();
   }, err=> setTransferDurum('Transferler okunamadı: ' + err.message, true)));
+  cloudUnsubs.push(sdb('settings').doc('transfer').onSnapshot(doc=>{
+    klasorSayac = doc.exists ? (Number(doc.data().klasorSayac) || 0) : 0;
+    renderTrKlasorBilgi();
+  }, err=> setTransferDurum('Klasör sayacı okunamadı: ' + err.message, true)));
 }
 
 function setTransferDurum(msg, isError){
@@ -6635,6 +6649,7 @@ function renderTransfer(){
   document.getElementById('trCekBtn').style.display = telefonMu() ? '' : 'none';
   renderTrSlotlar();
   renderTransferListesi();
+  renderTrKlasorBilgi();
 }
 
 // ---------- Fotoğraf hazırlama ----------
@@ -6732,13 +6747,13 @@ document.getElementById('trKameraInput').addEventListener('change', async e=>{
 
 function trTemizle(){
   trFotolar = [];
-  document.getElementById('trNot').value = '';
   renderTrSlotlar();
   setTransferDurum('');
 }
 
 // ---------- Uygulama içi kamera ----------
-// Her çekimden sonra fotoğraf gösterilir: Tekrar çek, Devam et (5'e kadar) ya da Gönder.
+// Fotoğraflar art arda çekilir; deklanşörün yanındaki Gönder ile istenen anda gönderilir.
+// Alttaki küçük resme dokununca o fotoğraf silinir.
 let kamera = null;   // {ov, video, stream, mesgul}
 
 async function trKameraAc(){
@@ -6761,22 +6776,16 @@ async function trKameraAc(){
   ov.innerHTML =
     '<div class="kam-goruntu">' +
       '<video autoplay playsinline muted></video>' +
-      '<img class="kam-onizleme" alt="">' +
       '<div class="kam-flas"></div>' +
       '<div class="kam-ust"><div class="kam-baslik"></div>' +
         '<button class="kam-kapat" type="button" title="Kapat">✕</button></div>' +
     '</div>' +
     '<div class="kam-alt">' +
       '<div class="kam-serit"></div>' +
-      '<div class="kam-kontrol kam-canli">' +
+      '<div class="kam-kontrol">' +
         '<button class="kam-yan" type="button" data-act="kapat">Kapat</button>' +
         '<button class="kam-deklansor" type="button" title="Çek"></button>' +
-        '<span class="kam-yan"></span>' +
-      '</div>' +
-      '<div class="kam-kontrol kam-secim">' +
-        '<button class="kam-sec" type="button" data-act="tekrar">↺ Tekrar çek</button>' +
-        '<button class="kam-sec" type="button" data-act="devam">📷 Devam et</button>' +
-        '<button class="kam-sec gonder" type="button" data-act="gonder">📤 Gönder</button>' +
+        '<button class="kam-gonder" type="button" data-act="gonder">📤 Gönder</button>' +
       '</div>' +
     '</div>';
   document.body.appendChild(ov);
@@ -6787,17 +6796,12 @@ async function trKameraAc(){
   ov.querySelector('.kam-kapat').addEventListener('click', kameraKapat);
   ov.querySelector('[data-act="kapat"]').addEventListener('click', kameraKapat);
   ov.querySelector('.kam-deklansor').addEventListener('click', kameraCek);
-  ov.querySelector('[data-act="tekrar"]').addEventListener('click', ()=>{
-    trFotolar.pop();
-    renderTrSlotlar();
-    kameraCanli();
-  });
-  ov.querySelector('[data-act="devam"]').addEventListener('click', kameraCanli);
   ov.querySelector('[data-act="gonder"]').addEventListener('click', ()=>{
+    if(!trFotolar.length) return;
     kameraKapat();
     trGonder();
   });
-  kameraCanli();
+  renderKamera();
 }
 
 function kameraYok(hata){
@@ -6812,19 +6816,31 @@ function kameraYok(hata){
   }).then(evet=>{ if(evet) document.getElementById('trKameraInput').click(); });
 }
 
-function renderKameraSerit(){
+function renderKamera(){
   if(!kamera) return;
-  kamera.ov.querySelector('.kam-baslik').innerHTML =
-    'Fotoğraf ' + Math.min(trFotolar.length + (kamera.secim ? 0 : 1), TR_MAX_FOTO) +
-    '<small>' + trFotolar.length + ' / ' + TR_MAX_FOTO + ' hazır</small>';
+  const n = trFotolar.length, dolu = n >= TR_MAX_FOTO;
+  kamera.ov.querySelector('.kam-baslik').innerHTML = dolu
+    ? TR_MAX_FOTO + ' fotoğraf çekildi<small>Gönder\'e basın</small>'
+    : 'Fotoğraf ' + (n + 1) + '<small>' + n + ' / ' + TR_MAX_FOTO + ' çekildi</small>';
+  kamera.ov.querySelector('.kam-deklansor').disabled = dolu;
+  const g = kamera.ov.querySelector('[data-act="gonder"]');
+  g.disabled = !n;
+  g.textContent = '📤 Gönder' + (n ? ' (' + n + ')' : '');
   const serit = kamera.ov.querySelector('.kam-serit');
   serit.innerHTML = '';
   for(let i=0;i<TR_MAX_FOTO;i++){
-    const b = document.createElement('div');
-    b.className = 'kam-mini' + (i === trFotolar.length - (kamera.secim ? 1 : 0) ? ' aktif' : '');
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'kam-mini' + (i === n ? ' aktif' : '');
     if(trFotolar[i]){
-      b.innerHTML = '<img alt="">';
+      b.innerHTML = '<img alt=""><span class="km-sil">✕</span>';
       b.querySelector('img').src = trFotolar[i].thumb;
+      b.title = 'Sil';
+      b.addEventListener('click', ()=>{
+        trFotolar.splice(i, 1);
+        renderTrSlotlar();
+        renderKamera();
+      });
     } else {
       b.textContent = i + 1;
     }
@@ -6832,34 +6848,8 @@ function renderKameraSerit(){
   }
 }
 
-// Canlı görüntü: deklanşör görünür.
-function kameraCanli(){
-  if(!kamera) return;
-  if(trFotolar.length >= TR_MAX_FOTO){ kameraSecim(); return; }
-  kamera.secim = false;
-  kamera.mesgul = false;
-  kamera.ov.querySelector('.kam-onizleme').style.display = 'none';
-  kamera.ov.querySelector('.kam-canli').style.display = '';
-  kamera.ov.querySelector('.kam-secim').style.display = 'none';
-  renderKameraSerit();
-}
-
-// Çekimden sonra: çekilen fotoğraf ve Tekrar çek / Devam et / Gönder.
-function kameraSecim(){
-  if(!kamera) return;
-  kamera.secim = true;
-  const son = trFotolar[trFotolar.length - 1];
-  const on = kamera.ov.querySelector('.kam-onizleme');
-  if(son){ on.src = son.full; on.style.display = ''; }
-  kamera.ov.querySelector('.kam-canli').style.display = 'none';
-  kamera.ov.querySelector('.kam-secim').style.display = '';
-  kamera.ov.querySelector('[data-act="devam"]').style.display = trFotolar.length >= TR_MAX_FOTO ? 'none' : '';
-  kamera.ov.querySelector('[data-act="gonder"]').textContent = '📤 Gönder (' + trFotolar.length + ')';
-  renderKameraSerit();
-}
-
 function kameraCek(){
-  if(!kamera || kamera.mesgul) return;
+  if(!kamera || kamera.mesgul || trFotolar.length >= TR_MAX_FOTO) return;
   const v = kamera.video;
   if(!v.videoWidth){ uiBildirim('Kamera henüz hazır değil', 'hata'); return; }
   kamera.mesgul = true;
@@ -6871,7 +6861,8 @@ function kameraCek(){
   c.getContext('2d').drawImage(v, 0, 0);
   trFotolar.push(kaynaktanFoto(c, c.width, c.height));
   renderTrSlotlar();
-  kameraSecim();
+  renderKamera();
+  kamera.mesgul = false;
 }
 
 function kameraKapat(){
@@ -6891,7 +6882,7 @@ function fotoBelgeId(tid, sira, p){
   return tid + '_' + sira + (p ? '_' + p : '');
 }
 
-async function transferKaydet(fotolar, text){
+async function transferKaydet(fotolar){
   const ref = sdb('transfers').doc();
   const parcaSayilari = [];
   for(let i=0;i<fotolar.length;i++){
@@ -6907,7 +6898,7 @@ async function transferKaydet(fotolar, text){
   }
   // Ana kayıt en son yazılır; bilgisayar yarım kalmış bir kaydı görmez.
   await ref.set({
-    tip: 'genel', text: text || '',
+    tip: 'genel',
     siralar: fotolar.map((f,i)=> i+1),
     parcalar: parcaSayilari,
     thumbs: fotolar.map(f=> f.thumb),
@@ -6918,12 +6909,11 @@ async function transferKaydet(fotolar, text){
 
 async function trGonder(){
   if(transferMesgul) return;
-  const text = document.getElementById('trNot').value.trim();
-  if(!trFotolar.length && !text){ setTransferDurum('Önce fotoğraf ekleyin.', true); return; }
+  if(!trFotolar.length){ setTransferDurum('Önce fotoğraf ekleyin.', true); return; }
   transferMesgul = true;
   document.getElementById('trGonderBtn').disabled = true;
   try{
-    await transferKaydet(trFotolar, text);
+    await transferKaydet(trFotolar);
     trTemizle();
     setTransferDurum('✓ Gönderildi.');
   }catch(e){
@@ -7278,7 +7268,7 @@ function transferKartiOlustur(t, butonlar){
   const bilgi = [transferZaman(t.createdAtMs), t.by, (t.siralar||[]).length ? (t.siralar.length + ' fotoğraf') : '',
                  t.irs6 || t.irs4 || ''].filter(Boolean).join(' · ');
   item.innerHTML = '<div class="tr-item-head"><span>' + escapeHtml(bilgi) +
-    (t.indirildi ? ' <span class="tr-indi-etiket">✓ İndirildi</span>' : '') +
+    (t.indirildi ? ' <span class="tr-indi-etiket">✓ İndirildi' + (t.klasorNo ? ' · klasör ' + t.klasorNo : '') + '</span>' : '') +
     '</span><span class="tr-item-acts"></span></div>';
   const acts = item.querySelector('.tr-item-acts');
   butonlar.forEach(b=>{
@@ -7297,9 +7287,8 @@ function transferKartiOlustur(t, butonlar){
     t.thumbs.forEach((th, i)=>{
       const tn = document.createElement('div');
       tn.className = 'tn';
-      tn.innerHTML = '<img alt="" title="Bu fotoğrafı indir"><span>' + t.siralar[i] + '</span>';
+      tn.innerHTML = '<img alt=""><span>' + t.siralar[i] + '</span>';
       tn.querySelector('img').src = th;
-      tn.querySelector('img').addEventListener('click', ()=> transferIndir(t, [i]));
       row.appendChild(tn);
     });
     item.appendChild(row);
@@ -7327,6 +7316,104 @@ function renderTransferListesi(){
   });
 }
 
+function renderTrKlasorBilgi(){
+  const el = document.getElementById('trKlasorBilgi');
+  if(!el) return;
+  if(telefonMu()){ el.innerHTML = ''; return; }
+  const sonraki = (klasorSayac === null) ? '…' : (klasorSayac + 1);
+  let html = 'Sıradaki klasör: <b>' + sonraki + '</b> <button class="tr-link" type="button" onclick="klasorSayacDegistir()">değiştir</button><br>';
+  if(KLASOR_DESTEGI){
+    html += 'Kayıt yeri: <b>' + (trKlasor ? escapeHtml(trKlasor.name) : 'seçilmedi') + '</b> ' +
+            '<button class="tr-link" type="button" onclick="trKlasorSec()">' + (trKlasor ? 'değiştir' : 'seç') + '</button>';
+  } else {
+    html += '<span style="color:#999;">Bu tarayıcı klasöre yazamıyor, numaralı zip iner (ör. 12.zip)</span>';
+  }
+  el.innerHTML = html;
+}
+
+async function klasorSayacDegistir(){
+  const v = await uiSor('Son açılan klasör numarasını yazın. Bir sonraki indirme bunun bir fazlası olur.', String(klasorSayac || 0),
+                        {baslik:'Klasör numarası', ikon:'📁', tip:'number', evet:'Kaydet'});
+  if(v === null) return;
+  const n = parseInt(v, 10);
+  if(isNaN(n) || n < 0){ setTransferDurum('Geçerli bir sayı girin.', true); return; }
+  try{
+    await sdb('settings').doc('transfer').set({klasorSayac:n}, {merge:true});
+    klasorSayac = n;
+    renderTrKlasorBilgi();
+  }catch(e){ setTransferDurum('Sayaç kaydedilemedi: ' + e.message, true); }
+}
+
+// ---------- Klasör erişimi (Chrome / Edge) ----------
+function idbAc(){
+  return new Promise((res, rej)=>{
+    const r = indexedDB.open('magazaRaporTransfer', 1);
+    r.onupgradeneeded = ()=> r.result.createObjectStore('kv');
+    r.onsuccess = ()=> res(r.result);
+    r.onerror = ()=> rej(r.error);
+  });
+}
+async function idbOku(k){
+  const idb = await idbAc();
+  return new Promise((res, rej)=>{
+    const q = idb.transaction('kv').objectStore('kv').get(k);
+    q.onsuccess = ()=> res(q.result);
+    q.onerror = ()=> rej(q.error);
+  });
+}
+async function idbYaz(k, v){
+  const idb = await idbAc();
+  return new Promise((res, rej)=>{
+    const tx = idb.transaction('kv', 'readwrite');
+    tx.objectStore('kv').put(v, k);
+    tx.oncomplete = ()=> res();
+    tx.onerror = ()=> rej(tx.error);
+  });
+}
+async function kayitliKlasoruYukle(){
+  if(!KLASOR_DESTEGI || trKlasor) return;
+  try{ trKlasor = (await idbOku('trKlasor')) || null; }catch(e){ /* IndexedDB yoksa her seferinde sorulur */ }
+  renderTrKlasorBilgi();
+}
+kayitliKlasoruYukle();
+
+async function trKlasorSec(){
+  try{
+    trKlasor = await window.showDirectoryPicker({id:'transfer', mode:'readwrite', startIn:'desktop'});
+    try{ await idbYaz('trKlasor', trKlasor); }catch(e){ /* hatırlanamazsa bir dahakine yine sorulur */ }
+    renderTrKlasorBilgi();
+    return trKlasor;
+  }catch(e){
+    if(e.name === 'AbortError') return null;
+    throw e;
+  }
+}
+async function trKlasorAl(){
+  await kayitliKlasoruYukle();
+  if(!trKlasor) return trKlasorSec();
+  const izin = {mode:'readwrite'};
+  if(await trKlasor.queryPermission(izin) === 'granted') return trKlasor;
+  if(await trKlasor.requestPermission(izin) === 'granted') return trKlasor;
+  throw new Error('Klasöre yazma izni verilmedi.');
+}
+
+// Ana klasörde aynı numarayla başlayan bir klasör ya da dosya varsa sonraki boş numara alınır.
+async function bosKlasorNo(ana, no){
+  const kullanilan = new Set();
+  for await (const ad of ana.keys()){
+    const m = String(ad).match(/^(\d+)(?!\d)/);
+    if(m) kullanilan.add(Number(m[1]));
+  }
+  while(kullanilan.has(no)) no++;
+  return no;
+}
+async function dosyaYaz(klasor, ad, icerik){
+  const fh = await klasor.getFileHandle(ad, {create:true});
+  const w = await fh.createWritable();
+  await w.write(icerik);
+  await w.close();
+}
+
 // Fotoğrafın parçaları sırayla birleştirilir. Eski kayıtlarda parça bilgisi yoktur, tek parçadır.
 async function transferFotoGetir(t, i){
   const sira = t.siralar[i];
@@ -7334,11 +7421,6 @@ async function transferFotoGetir(t, i){
   const docs = await Promise.all(Array.from({length:adet}, (_, p)=> sdb('transferFotos').doc(fotoBelgeId(t.id, sira, p)).get()));
   if(!docs[0].exists) return null;
   return {sira, data: docs.map(d=> d.exists ? d.data().data : '').join('')};
-}
-
-function transferDosyaZamani(ms){
-  const d = new Date(ms || Date.now());
-  return dateStr(d) + '_' + pad(d.getHours()) + pad(d.getMinutes());
 }
 
 function dosyaIndir(href, ad){
@@ -7350,27 +7432,52 @@ function dosyaIndir(href, ad){
   a.remove();
 }
 
-const bekle = ms => new Promise(r=> setTimeout(r, ms));
-
-// Fotoğraflar tam çözünürlükte "foto-2026-10-11_1430-1.jpg" adıyla iner.
-// Art arda inişler tarayıcıda kaybolmasın diye aralıklı.
-async function transferIndir(t, hangileri){
-  const idx = hangileri || (t.siralar||[]).map((s, i)=> i);
-  const onEk = 'foto-' + transferDosyaZamani(t.createdAtMs) + '-';
+// Her indirme yeni numaralı bir klasöre gider: 12/1.jpg, 12/2.jpg ...
+// Son numara bulutta tutulur; aynı numara bir daha verilmez.
+async function transferIndir(t){
+  if(transferMesgul) return;
+  transferMesgul = true;
+  renderTransferListesi();
   try{
-    for(let k=0;k<idx.length;k++){
-      setTransferDurum('İndiriliyor ' + (k+1) + '/' + idx.length + '...');
-      const f = await transferFotoGetir(t, idx[k]);
-      if(!f){ setTransferDurum('Fotoğraf bulunamadı.', true); return; }
-      const blob = await (await fetch(f.data)).blob();
-      const url = URL.createObjectURL(blob);
-      dosyaIndir(url, onEk + f.sira + '.jpg');
-      setTimeout(()=> URL.revokeObjectURL(url), 10000);
-      if(k < idx.length - 1) await bekle(400);
+    let hedef = null;
+    if(KLASOR_DESTEGI){
+      hedef = await trKlasorAl();
+      if(!hedef){ setTransferDurum('Klasör seçilmedi.', true); return; }
+    } else {
+      await kutuphaneYukle('jszip');
     }
-    setTransferDurum('✓ ' + idx.length + ' fotoğraf indirildi.');
-    if(!hangileri && !t.indirildi) sdb('transfers').doc(t.id).update({indirildi:true}).catch(()=>{});
-  }catch(e){ setTransferDurum('İndirilemedi: ' + e.message, true); }
+    const fotolar = [];
+    for(let i=0;i<(t.siralar||[]).length;i++){
+      setTransferDurum('İndiriliyor ' + (i+1) + '/' + t.siralar.length + '...');
+      const f = await transferFotoGetir(t, i);
+      if(f) fotolar.push({ad: (i+1) + '.jpg', blob: await (await fetch(f.data)).blob()});
+    }
+    if(!fotolar.length){ setTransferDurum('Fotoğraf bulunamadı.', true); return; }
+    const sayacDoc = await sdb('settings').doc('transfer').get();
+    let no = (sayacDoc.exists ? (Number(sayacDoc.data().klasorSayac) || 0) : 0) + 1;
+    if(hedef){
+      no = await bosKlasorNo(hedef, no);
+      const klasor = await hedef.getDirectoryHandle(String(no), {create:true});
+      for(const f of fotolar) await dosyaYaz(klasor, f.ad, f.blob);
+    } else {
+      const zip = new JSZip();
+      const kl = zip.folder(String(no));
+      fotolar.forEach(f=> kl.file(f.ad, f.blob));
+      const url = URL.createObjectURL(await zip.generateAsync({type:'blob'}));
+      dosyaIndir(url, no + '.zip');
+      setTimeout(()=> URL.revokeObjectURL(url), 10000);
+    }
+    await sdb('settings').doc('transfer').set({klasorSayac:no}, {merge:true});
+    klasorSayac = no;
+    renderTrKlasorBilgi();
+    sdb('transfers').doc(t.id).update({indirildi:true, klasorNo:no}).catch(()=>{});
+    setTransferDurum('✓ ' + fotolar.length + ' fotoğraf indirildi → ' + (hedef ? hedef.name + '/' : '') + no);
+  }catch(e){
+    setTransferDurum('İndirilemedi: ' + e.message, true);
+  }finally{
+    transferMesgul = false;
+    renderTransferListesi();
+  }
 }
 
 async function transferSil(t){
