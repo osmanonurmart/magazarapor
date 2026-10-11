@@ -35,9 +35,13 @@ Giriş ekranının arka plan fotoğrafı `giris-arka.jpg`.
 | `rapor.html` | Uygulamanın tamamı (HTML, CSS, JS tek dosyada) |
 | `firestore.rules` | Güvenlik kuralları |
 
+## Yenilikler (güncelleme notları)
+
+- `SURUM_NOTLARI` (rapor.html) — her güncellemede en üste `{surum, tarih, maddeler}` eklenir. Yeni sürüm ilk açılınca görülmemiş notlar bir kez pencere olarak çıkar (`localStorage.mr_surumGoruldu`), hepsi Sohbet → Duyurular'ın altında listelenir.
+
 ## Hedef kırılımı
 
-- Üstteki "🎯 Hedef gir": Excel'den ayın günlük hedef satırı yapıştırılır, her gün `stores/{m}/entries/{YYYY-MM-DD}.hedef` olarak yazılır (son güncelleyen bilgisi değişmez). Geri al hepsini eski haline getirir.
+- Üstteki "🎯 Hedef gir" (telefonda profil menüsünde): Excel'den ayın günlük hedef satırı yapıştırılır, her gün `stores/{m}/entries/{YYYY-MM-DD}.hedef` olarak yazılır (son güncelleyen bilgisi değişmez). Geri al hepsini eski haline getirir.
 - Sağ paneldeki günlük hedef, günün `hedef` alanı varsa onu kullanır.
 
 ## Transfer
