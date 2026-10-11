@@ -183,6 +183,9 @@ if(!document.documentElement.classList.contains('tel')){
   .sh-duyuru{ background:#fffaf0; }
   .sh-yeni-duyuru{ margin-left:auto; background:var(--accent); color:#fff; border:none; border-radius:8px; padding:7px 12px; font-family:inherit; font-size:.8rem; font-weight:600; cursor:pointer; }
   .sh-duyurular{ gap:10px; }
+  .sh-guncelleme-baslik{ font-size:.78rem; font-weight:700; color:#888; margin:14px 2px 2px; }
+  .sh-guncelleme{ margin:4px 0 0; padding-left:18px; font-size:.84rem; line-height:1.5; color:#333; }
+  .sh-guncelleme li{ margin:3px 0; }
   .sh-duyuru-kart{ background:#fff; border-radius:12px; padding:12px 14px; box-shadow:0 1px 2px rgba(0,0,0,.06); }
   .sh-duyuru-ust{ font-size:.7rem; color:#999; margin-bottom:4px; }
   .sh-duyuru-metin{ font-size:.9rem; line-height:1.5; color:#222; word-break:break-word; }
@@ -459,6 +462,7 @@ if(!document.documentElement.classList.contains('tel')){
   .ui-dlg.tehlike .ui-ikon{ background:#fbe9e9; }
   .ui-baslik{ font-size:calc(var(--k)*17px); font-weight:700; color:var(--dark); margin-bottom:calc(var(--k)*6px); }
   .ui-mesaj{ font-size:calc(var(--k)*13.5px); color:#6b6b6b; line-height:1.5; white-space:pre-line; }
+  .ui-dlg.sola .ui-mesaj{ text-align:left; color:#444; }
   .ui-input{
     width:100%; margin-top:calc(var(--k)*14px); padding:calc(var(--k)*11px) calc(var(--k)*12px);
     border:1.5px solid var(--line); border-radius:calc(var(--k)*12px); font-size:calc(var(--k)*16px);
@@ -1023,6 +1027,10 @@ if(!document.documentElement.classList.contains('tel')){
 
   /* Mağaza üst işlemleri: telefonda gerekli olanlar */
   html.tel #exportBtn, html.tel #hedefBtn{ display:none; }
+  html:not(.tel) #chipHedefBtn{ display:none; }
+  html.tel .hk-gunler{ grid-template-columns:repeat(4, 1fr); }
+  html.tel .hk-gun.bos{ display:none; }
+  html.tel .hk-dlg{ padding:16px 14px; }
   html.tel .top-controls{ flex-wrap:nowrap; gap:6px; }
   html.tel .ust-btn{ padding:8px 10px; font-size:.78rem; }
   html.tel #addDataBtn{ display:none; }
@@ -1330,6 +1338,7 @@ if(!document.documentElement.classList.contains('tel')){
           <button type="button" id="chipMagazaBtn">◀ Bölge paneline dön</button>
           <div class="sep" id="chipMagazaSep"></div>
           <button type="button" id="chipKullanicilarBtn" style="display:none;">👥 Kullanıcılar</button>
+          <button type="button" id="chipHedefBtn">🎯 Hedef gir</button>
           <button type="button" class="sifre-degistir-btn">🔑 Şifre değiştir</button>
           <div class="sep"></div>
           <button type="button" id="chipCikisBtn">🚪 Çıkış yap</button>
@@ -1440,7 +1449,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 54;
+const APP_SURUM = 55;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -1477,7 +1486,7 @@ function uiDialog(o){
     const ov = document.createElement('div');
     ov.className = 'ui-ov';
     const dlg = document.createElement('div');
-    dlg.className = 'ui-dlg' + (o.tehlike ? ' tehlike' : '') + (o.dikey ? ' dikey' : '');
+    dlg.className = 'ui-dlg' + (o.tehlike ? ' tehlike' : '') + (o.dikey ? ' dikey' : '') + (o.sola ? ' sola' : '');
     if(o.ikon){
       const ik = document.createElement('div');
       ik.className = 'ui-ikon';
@@ -2242,6 +2251,7 @@ document.getElementById('chipMagazaBtn').addEventListener('click', ()=> bolgePan
 document.getElementById('bolgePanelBtn').addEventListener('click', ()=> bolgePaneliniAc(true));
 document.getElementById('chipCikisBtn').addEventListener('click', cikisYap);
 document.getElementById('chipKullanicilarBtn').addEventListener('click', ()=>{ kapatChipMenu(); kullanicilariAc(); });
+document.getElementById('chipHedefBtn').addEventListener('click', ()=>{ kapatChipMenu(); hedefKirilimAc(); });
 document.querySelectorAll('.sifre-degistir-btn').forEach(b=> b.addEventListener('click', ()=>{ kapatChipMenu(); sifreDegistir(); }));
 
 // ==================== KULLANICILAR (yalnızca kurucu) ====================
@@ -3060,7 +3070,7 @@ function shDuyurularAc(){
 function shDuyurulariCiz(){
   const el = document.getElementById('shDuyuruListe');
   if(!el || !sh.aktif || !sh.aktif.duyuru) return;
-  if(!duyuruListe.length){ el.innerHTML = '<div class="sh-bos">Henüz duyuru yok.</div>'; return; }
+  if(!duyuruListe.length){ el.innerHTML = '<div class="sh-bos">Henüz duyuru yok.</div>' + surumNotlariHtml(); return; }
   const bolge = oturum.rol === 'bolge';
   el.innerHTML = duyuruListe.map(d=>{
     const okuyan = d.okuyanlar || {};
@@ -3070,7 +3080,7 @@ function shDuyurulariCiz(){
       : escapeHtml(shKisiBilgi(d.kimden).ad);
     return '<div class="sh-duyuru-kart"><div class="sh-duyuru-ust">' + escapeHtml(duyuruZamani(d.tarih)) + '</div>' +
       '<div class="sh-duyuru-metin">' + shMetinHtml(d.metin || '') + '</div><div class="sh-duyuru-alt">' + alt + '</div></div>';
-  }).join('');
+  }).join('') + surumNotlariHtml();
   el.querySelectorAll('.bpd-sil').forEach(b=> b.addEventListener('click', async ()=>{
     if(!await uiOnay('Bu duyuru silinecek.', {baslik:'Duyuru silinsin mi?', tehlike:true, evet:'Sil'})) return;
     db.collection('duyurular').doc(b.dataset.id).delete().catch(e=> uiBildirim('Silinemedi: ' + e.message, 'hata'));
@@ -4388,6 +4398,7 @@ auth.onAuthStateChanged(async function(user){
   sohbetDinle();
   if(oturum.rol === 'magaza') await magazayiAc(oturum.kadi, true);
   else await bolgePaneliniAc(true, true);
+  await yenilikleriGoster();
   duyurulariDinle();
 });
 
@@ -4522,7 +4533,9 @@ function hedefKirilimAc(){
   ov.innerHTML =
     '<div class="tt-dlg hk-dlg">' +
       '<h3>🎯 Günlük hedef kırılımı</h3>' +
-      '<div class="tt-ipucu">Excel\'de ayın günlük hedef satırını (1\'inden ayın sonuna) seçip Ctrl+C ile kopyalayın ve aşağıya yapıştırın. Her gün sırayla yerine yazılır.</div>' +
+      '<div class="tt-ipucu">' + (TELEFON
+        ? 'Excel\'de ayın günlük hedef satırını (1\'inden ayın sonuna) seçip kopyalayın, aşağıdaki kutuya basılı tutup Yapıştır deyin. Her gün sırayla yerine yazılır.'
+        : 'Excel\'de ayın günlük hedef satırını (1\'inden ayın sonuna) seçip Ctrl+C ile kopyalayın ve aşağıya yapıştırın. Her gün sırayla yerine yazılır.') + '</div>' +
       '<div class="hk-ay">Ay: <select data-f="ay">' + aySecenek.join('') + '</select></div>' +
       '<textarea data-f="metin" placeholder="27.630,51   28.521,82   35.652,27 ..."></textarea>' +
       '<div class="hk-gunler"></div>' +
@@ -4550,6 +4563,7 @@ function hedefKirilimAc(){
       const goster = (yeni !== undefined && yeni !== null) ? yeni : mevcut;
       if(goster !== null && goster !== undefined) toplam += goster;
       html += '<div class="hk-gun' + (yeni !== undefined && yeni !== null ? ' yeni' : '') + '">' + d +
+        (TELEFON ? ' ' + GR_GUNLER[(new Date(y, m-1, d).getDay() + 6) % 7] : '') +
         '<b>' + (goster !== null && goster !== undefined ? fmtNum(goster) : '—') + '</b></div>';
     }
     kutu.innerHTML = html;
@@ -4594,7 +4608,7 @@ function hedefKirilimAc(){
   });
   document.body.appendChild(ov);
   ciz();
-  f('metin').focus();
+  if(!TELEFON) f('metin').focus();
 }
 
 function processClipboardText(text){
@@ -6229,10 +6243,10 @@ const MR_KILAVUZ = `
   <li>MDO, FBÜ ve FBS ortalamaları.</li>
   <li>MGS'nin ortalaması (O) ve toplamı (T).</li>
   </ul></li>
-<li><b>🎯 Hedef gir</b> (bilgisayarda, sağ üstte): ayın günlük hedef kırılımı tek seferde girilir.
+<li><b>🎯 Hedef gir</b> (bilgisayarda sağ üstte, telefonda profil menüsünde): ayın günlük hedef kırılımı tek seferde girilir.
   <ol>
   <li>Excel'de ayın günlük hedef satırını (1'inden ayın sonuna) seçip Ctrl+C ile kopyalayın.</li>
-  <li><b>🎯 Hedef gir</b>'e basın, ayı seçin ve kutuya yapıştırın.</li>
+  <li><b>🎯 Hedef gir</b>'e basın, ayı seçin ve kutuya yapıştırın (telefonda kutuya basılı tutup Yapıştır).</li>
   <li>Takvimde her günün hedefi ve aylık toplam görünür; yeni yazılacaklar yeşildir. Kontrol edip <b>Kaydet</b>'e basın.</li>
   </ol>
   Değer sayısı ayın gün sayısından fazlaysa kaydedilmez; azsa sadece ilk günlere yazılır. Her mağaza kendi hedefini girer. Yanlış girildiyse <b>↶ Geri al</b> ile hepsi geri alınır. Tek bir gün, tablodaki Hedef hücresine yazılarak da değiştirilebilir.</li>
@@ -6390,6 +6404,7 @@ const MR_KILAVUZ = `
   <li>Bütün duyurular Sohbet listesinin en üstündeki <b>📢 Duyurular</b>'da kalır; sonradan oradan okunur.</li>
   <li>Bölge müdürü aynı yerden yeni duyuru yazar, kimin okuduğunu görür ve duyuruyu siler.</li>
   </ul></li>
+<li><b>Uygulama güncellemeleri:</b> uygulama güncellenince yeni gelenler bir kez <b>🆕 Uygulama güncellendi</b> penceresiyle çıkar. Bütün güncelleme notları <b>📢 Duyurular</b>'ın altında durur.</li>
 </ul>
 <a class="hk-yukari" href="#" data-git="mr-bas">↑ İçindekiler</a>
 
@@ -7655,6 +7670,45 @@ async function metniKopyala(text){
     ta.remove();
   }
   setTransferDurum('✓ Metin kopyalandı.');
+}
+
+// ==================== YENİLİKLER ====================
+// Her güncellemede en üste yeni bir kayıt eklenir. Kullanıcı yeni sürümü ilk açtığında
+// görmediği kayıtlar bir kez duyuru gibi çıkar (bu cihazda hatırlanır); hepsi Sohbet → Duyurular'da durur.
+const SURUM_NOTLARI = [
+  {surum:55, tarih:'2026-10-11', maddeler:[
+    '🎯 Hedef gir: ayın günlük hedef kırılımı Excel\'den kopyalanıp tek seferde girilir. Bilgisayarda sağ üstte, telefonda profil menüsünde.',
+    'Sağdaki "Günlük hedef" artık o günün kendi hedefini gösterir.',
+    '📤 Transfer yenilendi: en fazla 5 fotoğraf art arda çekilir, deklanşörün yanındaki Gönder ile gönderilir. Fotoğraflar net (tam çözünürlük) iner.',
+    'Bilgisayarda indirilen fotoğraflar numaralı klasöre (1, 2, 3…) 1.jpg … 5.jpg olarak kaydedilir. İndirilen kayıtlar 7 gün sonra kendiliğinden silinir.',
+    '📊 Bekleyen deposu ve 🖨 Kırık tutanağı Araçlar\'a taşındı.'
+  ]}
+];
+const SURUM_GORULDU_ANAHTAR = 'mr_surumGoruldu';
+
+async function yenilikleriGoster(){
+  let gorulen = 0;
+  try{ gorulen = Number(localStorage.getItem(SURUM_GORULDU_ANAHTAR)) || 0; }catch(e){ return; }
+  const yeni = SURUM_NOTLARI.filter(n=> n.surum > gorulen && n.surum <= APP_SURUM);
+  if(!yeni.length) return;
+  duyuruGosteriliyor = true;
+  try{
+    await uiDialog({
+      ikon:'🆕', baslik:'Uygulama güncellendi', sola:true,
+      mesaj: yeni.slice(0, 3).map(n=> n.maddeler.map(x=> '• ' + x).join('\n')).join('\n\n') +
+        '\n\nBu notlar Sohbet → Duyurular\'da da durur.',
+      butonlar:[{metin:'Tamam', deger:true, tip:'birincil'}], iptalDeger:true
+    });
+  }finally{
+    duyuruGosteriliyor = false;
+  }
+  try{ localStorage.setItem(SURUM_GORULDU_ANAHTAR, String(APP_SURUM)); }catch(e){ /* bir dahakine yine çıkar */ }
+}
+
+function surumNotlariHtml(){
+  return '<div class="sh-guncelleme-baslik">🆕 Uygulama güncellemeleri</div>' + SURUM_NOTLARI.map(n=>
+    '<div class="sh-duyuru-kart"><div class="sh-duyuru-ust">' + escapeHtml(kisaTarih(new Date(n.tarih))) + ' · v' + n.surum + '</div>' +
+    '<ul class="sh-guncelleme">' + n.maddeler.map(x=> '<li>' + escapeHtml(x) + '</li>').join('') + '</ul></div>').join('');
 }
 
 // ==================== SÜRÜM / GÜNCELLEME ====================
