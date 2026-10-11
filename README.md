@@ -42,7 +42,8 @@ Giriş ekranının arka plan fotoğrafı `giris-arka.jpg`.
 ## Bölge paneli
 
 - Dönem ERP'deki gibi Başlangıç / Bitiş Tarihi: hazır seçenek ya da tarih (`bp.basSec`, `bp.sonSec`, `bp.basTarih`, `bp.sonTarih`, `bpTarihCoz`); `bpAraligi()` aralığı ve kıyas dönemini verir.
-- Mağaza tablosu sıkışık; hücreler her mağazanın kendi önceki dönemine göre kırmızı–yeşil renklenir (`s.once`).
+- Özet tablo sıkışık; her sütunda mağazalar arası 3 renk skalası (`bpRenkSkala`).
+- Günlük tablo (`bpGunlukCiz`): satırlar gün, mağaza başına Ciro | Gün % | Küm. %; renkler mağazanın kendi günleri içinde; altta Toplam, Hedef / Ay hedefi, Kalan.
 
 ## Hedef kırılımı
 
