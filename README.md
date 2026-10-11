@@ -37,9 +37,9 @@ Giriş ekranının arka plan fotoğrafı `giris-arka.jpg`.
 
 ## Transfer
 
-- Telefondan en fazla 5 fotoğraf ve isteğe bağlı not gönderilir. Uygulama içi kamerada her çekimden sonra Tekrar çek / Devam et / Gönder.
+- Telefondan en fazla 5 fotoğraf gönderilir. Uygulama içi kamerada art arda çekilir, deklanşörün yanındaki Gönder ile gönderilir; şeritteki küçük resme dokununca o fotoğraf silinir.
 - Fotoğraflar en uzun kenar 3200 px, JPEG %88. 1 MB belge sınırı yüzünden parçalanır: `transferFotos/{id}_{sira}` ilk parça, `{id}_{sira}_{p}` sonrakiler; parça sayıları `transfers/{id}.parcalar`.
-- Bilgisayarda "Gelenler": İndir (tam çözünürlük, `foto-YYYY-MM-DD_HHMM-n.jpg`), Notu kopyala, Sil.
+- Bilgisayarda İndir: seçilen ana klasörün içine numaralı klasör (`12/1.jpg … 5.jpg`), klasöre yazılamayan tarayıcıda `12.zip`. Son numara `stores/{m}/settings/transfer.klasorSayac`; kayda `indirildi`, `klasorNo` yazılır.
 
 ## Araçlar · Bekleyen deposu ve Kırık tutanağı
 
