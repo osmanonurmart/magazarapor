@@ -368,6 +368,15 @@ if(!document.documentElement.classList.contains('tel')){
     background:#fff; border-radius:16px; width:680px; max-width:100%; max-height:92vh; overflow:auto;
     padding:20px; box-shadow:0 20px 50px rgba(0,0,0,.25); text-align:left;
   }
+  .hk-dlg .hk-ay{ display:flex; align-items:center; gap:8px; margin:6px 0 10px; font-size:.82rem; color:#555; }
+  .hk-dlg .hk-ay select{ padding:6px 8px; border:1px solid #ddd; border-radius:7px; font-family:inherit; font-size:.85rem; }
+  .hk-gunler{ display:grid; grid-template-columns:repeat(7, 1fr); gap:4px; margin-top:10px; }
+  .hk-gun{ border:1px solid var(--line); border-radius:7px; padding:4px 5px; font-size:.68rem; color:#888; line-height:1.35; min-height:38px; }
+  .hk-gun b{ display:block; color:var(--dark); font-size:.74rem; white-space:nowrap; }
+  .hk-gun.yeni{ border-color:var(--green); background:rgba(76,153,96,.07); }
+  .hk-gun.bos{ border:none; }
+  .hk-ozet{ margin-top:10px; font-size:.8rem; color:#555; }
+  .hk-ozet .uyari{ color:var(--red); font-weight:600; }
   .tt-dlg h3{ margin:0 0 4px; font-size:1.05rem; color:var(--dark); }
   .tt-dlg .tt-ipucu{ font-size:.75rem; color:#888; margin-bottom:8px; }
   .tt-dlg textarea{ width:100%; min-height:90px; border:1px solid #ddd; border-radius:8px; padding:8px; font-family:inherit; font-size:.78rem; }
@@ -1013,7 +1022,7 @@ if(!document.documentElement.classList.contains('tel')){
   html.tel .bp-baslik{ font-size:.95rem; }
 
   /* Mağaza üst işlemleri: telefonda gerekli olanlar */
-  html.tel #exportBtn{ display:none; }
+  html.tel #exportBtn, html.tel #hedefBtn{ display:none; }
   html.tel .top-controls{ flex-wrap:nowrap; gap:6px; }
   html.tel .ust-btn{ padding:8px 10px; font-size:.78rem; }
   html.tel #addDataBtn{ display:none; }
@@ -1308,6 +1317,7 @@ if(!document.documentElement.classList.contains('tel')){
     <div class="ust-sag">
       <div class="top-controls" id="raporControls">
         <button class="ust-btn dolu" id="addDataBtn" type="button">⬇ Yapıştır / Veri Ekle</button>
+        <button class="ust-btn" id="hedefBtn" type="button" onclick="hedefKirilimAc()">🎯 Hedef gir</button>
         <button class="ust-btn" id="exportBtn" type="button">⬇ Dışa aktar</button>
         <button class="ust-btn" id="undoBtn" type="button" disabled onclick="undoLast()" title="Geri al"><svg class="tel-ikon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg><span class="masa-metin">↩ Geri al</span></button>
       </div>
@@ -1430,7 +1440,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 53;
+const APP_SURUM = 54;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -4475,12 +4485,116 @@ function undoLast(){
     setRecord(entry.yest, entry.oldYest);
   } else if(entry.type === 'hedef'){
     setGunlukHedef(entry.oldValue);
+  } else if(entry.type === 'hedefAy'){
+    entry.eski.forEach(e=> hedefYaz(e.date, e.oldValue).catch(err=> setStatus('Buluta kaydedilemedi: ' + err.message, true)));
   } else if(entry.type === 'gun'){
     setRecord(entry.date, entry.oldRec || {date: entry.date});
   }
   document.getElementById('undoBtn').disabled = undoStack.length===0;
   setStatus('Son işlem geri alındı.');
   renderAll();
+}
+
+// ---------- Günlük hedef kırılımı ----------
+// Excel'deki ayın günlük hedef satırı (1'inden ayın sonuna) yapıştırılır; her günün kaydına
+// "hedef" yazılır. Son güncelleyen bilgisi değişmesin diye setRecord kullanılmaz.
+function hedefYaz(dateKey, val){
+  const rec = Object.assign({}, getRecord(dateKey) || {date: dateKey});
+  if(val === null || val === undefined) delete rec.hedef; else rec.hedef = val;
+  cloudCache['entry:'+dateKey] = JSON.stringify(rec);
+  return sdb('entries').doc(dateKey).set(rec);
+}
+
+function hedefSatiriCoz(metin){
+  return String(metin || '').split(/[\s;]+/).map(x=> x.trim()).filter(x=> x !== '').map(x=> parseNumberInput(x));
+}
+
+function hedefKirilimAc(){
+  const ov = document.createElement('div');
+  ov.className = 'ui-ov';
+  const aySecenek = [];
+  const [py, pm] = getMonthVal().split('-').map(Number);
+  for(let k=-2;k<=3;k++){
+    const d = new Date(py, pm - 1 + k, 1);
+    const v = d.getFullYear() + '-' + pad(d.getMonth()+1);
+    aySecenek.push('<option value="' + v + '"' + (k === 0 ? ' selected' : '') + '>' + AY_TAM_ADLARI[d.getMonth()] + ' ' + d.getFullYear() + '</option>');
+  }
+  ov.innerHTML =
+    '<div class="tt-dlg hk-dlg">' +
+      '<h3>🎯 Günlük hedef kırılımı</h3>' +
+      '<div class="tt-ipucu">Excel\'de ayın günlük hedef satırını (1\'inden ayın sonuna) seçip Ctrl+C ile kopyalayın ve aşağıya yapıştırın. Her gün sırayla yerine yazılır.</div>' +
+      '<div class="hk-ay">Ay: <select data-f="ay">' + aySecenek.join('') + '</select></div>' +
+      '<textarea data-f="metin" placeholder="27.630,51   28.521,82   35.652,27 ..."></textarea>' +
+      '<div class="hk-gunler"></div>' +
+      '<div class="hk-ozet"></div>' +
+      '<div class="tt-btns"><button class="btn" type="button" data-act="kapat">Vazgeç</button>' +
+        '<button class="btn tr-go" type="button" data-act="kaydet">Kaydet</button></div>' +
+    '</div>';
+  const f = ad=> ov.querySelector('[data-f="' + ad + '"]');
+  const kaydetBtn = ov.querySelector('[data-act="kaydet"]');
+  let degerler = [];
+  const ciz = ()=>{
+    const [y, m] = f('ay').value.split('-').map(Number);
+    const gunSay = daysInMonth(y, m);
+    degerler = hedefSatiriCoz(f('metin').value);
+    const kutu = ov.querySelector('.hk-gunler');
+    const bas = (new Date(y, m-1, 1).getDay() + 6) % 7;
+    let html = GR_GUNLER.map(g=> '<div class="hk-gun bos" style="text-align:center;font-weight:700;">' + g + '</div>').join('');
+    for(let i=0;i<bas;i++) html += '<div class="hk-gun bos"></div>';
+    let toplam = 0;
+    for(let d=1; d<=gunSay; d++){
+      const dk = y + '-' + pad(m) + '-' + pad(d);
+      const r = getRecord(dk);
+      const mevcut = r && r.hedef !== undefined && r.hedef !== null ? Number(r.hedef) : null;
+      const yeni = degerler.length ? degerler[d-1] : undefined;
+      const goster = (yeni !== undefined && yeni !== null) ? yeni : mevcut;
+      if(goster !== null && goster !== undefined) toplam += goster;
+      html += '<div class="hk-gun' + (yeni !== undefined && yeni !== null ? ' yeni' : '') + '">' + d +
+        '<b>' + (goster !== null && goster !== undefined ? fmtNum(goster) : '—') + '</b></div>';
+    }
+    kutu.innerHTML = html;
+    const oz = ov.querySelector('.hk-ozet');
+    const hatali = degerler.filter(v=> v === null).length;
+    let uyari = '';
+    if(degerler.length && degerler.length !== gunSay)
+      uyari = degerler.length + ' değer yapıştırıldı, ay ' + gunSay + ' gün. ' +
+        (degerler.length > gunSay ? 'Fazla değer var, doğru satırı kopyaladığınızdan emin olun.' : 'Sadece ilk ' + degerler.length + ' güne yazılacak.');
+    if(hatali) uyari = hatali + ' değer sayı olarak okunamadı. ' + uyari;
+    oz.innerHTML = 'Aylık toplam: <b>' + fmtTL(toplam) + '</b>' + (uyari ? '<br><span class="uyari">' + escapeHtml(uyari) + '</span>' : '') +
+      (!degerler.length ? '<br>Şu an kayıtlı hedefler gösteriliyor.' : '');
+    kaydetBtn.disabled = !degerler.length || degerler.length > gunSay || hatali > 0;
+  };
+  const kapat = ()=>{ document.removeEventListener('keydown', tus, true); ov.remove(); };
+  function tus(e){ if(e.key === 'Escape'){ e.preventDefault(); kapat(); } }
+  document.addEventListener('keydown', tus, true);
+  ov.addEventListener('click', e=>{ if(e.target === ov) kapat(); });
+  ov.querySelector('[data-act="kapat"]').addEventListener('click', kapat);
+  f('metin').addEventListener('input', ciz);
+  f('ay').addEventListener('change', ciz);
+  kaydetBtn.addEventListener('click', async ()=>{
+    const [y, m] = f('ay').value.split('-').map(Number);
+    const eski = [];
+    kaydetBtn.disabled = true;
+    try{
+      await Promise.all(degerler.map((v, i)=>{
+        const dk = y + '-' + pad(m) + '-' + pad(i+1);
+        const r = getRecord(dk);
+        eski.push({date: dk, oldValue: r && r.hedef !== undefined ? r.hedef : null});
+        return hedefYaz(dk, v);
+      }));
+      pushUndo({type:'hedefAy', eski});
+      kapat();
+      renderAll();
+      setStatus(AY_TAM_ADLARI[m-1] + ' için ' + degerler.length + ' günün hedefi kaydedildi.');
+      uiBildirim(AY_TAM_ADLARI[m-1] + ' hedefleri kaydedildi', 'basari');
+    }catch(e){
+      kaydetBtn.disabled = false;
+      uiBildirim('Kaydedilemedi: ' + e.message, 'hata');
+    }
+  });
+  document.body.appendChild(ov);
+  ciz();
+  f('metin').focus();
 }
 
 function processClipboardText(text){
@@ -5221,7 +5335,8 @@ function renderReportPanel(){
     const r = getRecord(dateStr(d));
     return r ? r.ciro : null;
   })();
-  const gunlukHedef = getGunlukHedef();
+  // Günün kendi hedefi (kırılımdan) varsa o, yoksa genel günlük hedef.
+  const gunlukHedef = (t.hedef !== undefined && t.hedef !== null) ? Number(t.hedef) : getGunlukHedef();
   const oran = (t.ciro && gunlukHedef) ? (t.ciro/gunlukHedef*100) : null;
 
   const ghToplu = (function(){
@@ -5425,7 +5540,11 @@ function renderReportPanel(){
       const oldText = this.dataset.oldText;
       if(newText === oldText) return;
 
-      if(field === 'gunlukHedef'){
+      const bugunRec = getRecord(today);
+      if(field === 'gunlukHedef' && bugunRec && bugunRec.hedef !== undefined && bugunRec.hedef !== null){
+        const v = parseNumberInput(newText);
+        if(v!==null){ pushUndo({type:'cell', date: today, field:'hedef', oldValue: bugunRec.hedef}); hedefYaz(today, v).catch(e=> setStatus('Buluta kaydedilemedi: '+e.message, true)); }
+      } else if(field === 'gunlukHedef'){
         const oldValue = getGunlukHedef();
         const v = parseNumberInput(newText);
         if(v!==null){ setGunlukHedef(v); pushUndo({type:'hedef', oldValue}); }
@@ -6110,6 +6229,13 @@ const MR_KILAVUZ = `
   <li>MDO, FBÜ ve FBS ortalamaları.</li>
   <li>MGS'nin ortalaması (O) ve toplamı (T).</li>
   </ul></li>
+<li><b>🎯 Hedef gir</b> (bilgisayarda, sağ üstte): ayın günlük hedef kırılımı tek seferde girilir.
+  <ol>
+  <li>Excel'de ayın günlük hedef satırını (1'inden ayın sonuna) seçip Ctrl+C ile kopyalayın.</li>
+  <li><b>🎯 Hedef gir</b>'e basın, ayı seçin ve kutuya yapıştırın.</li>
+  <li>Takvimde her günün hedefi ve aylık toplam görünür; yeni yazılacaklar yeşildir. Kontrol edip <b>Kaydet</b>'e basın.</li>
+  </ol>
+  Değer sayısı ayın gün sayısından fazlaysa kaydedilmez; azsa sadece ilk günlere yazılır. Her mağaza kendi hedefini girer. Yanlış girildiyse <b>↶ Geri al</b> ile hepsi geri alınır. Tek bir gün, tablodaki Hedef hücresine yazılarak da değiştirilebilir.</li>
 <li><b>Haftalık hedef:</b> tablo başlığındaki "Hedef" kutusuna yazılır. Yanındaki <b>Oran</b> rozeti %85'i geçince yeşil olur.</li>
 <li><b>İzinli personel:</b> bilgisayarda gün başlığının altındaki seçiciden seçilir.</li>
 <li><b>İşaretler:</b>
@@ -6139,6 +6265,7 @@ const MR_KILAVUZ = `
 <h3 id="mr-rt">7. RT tablosu ve günlük mesaj</h3>
 <ul>
 <li><b>Hedefe kalan kutuları:</b> bugünkü ve haftalık hedefe ne kadar kaldığını gösterir. Hedef aşılınca "Aşıldı" yazar.</li>
+<li><b>Günlük hedef & oranı:</b> günün kırılımdaki hedefi gösterilir; kırılım girilmemişse genel günlük hedef kullanılır.</li>
 <li><b>RT tablosu:</b>
   <ul>
   <li>Bugün, dün ve geçen hafta aynı günün ciro, MDO ve toplu satışını yan yana gösterir.</li>
@@ -6174,7 +6301,7 @@ const MR_KILAVUZ = `
 
 <h3 id="mr-geri">9. Geri al ve dışa aktar</h3>
 <ul>
-<li><b>↶ Geri al:</b> bu oturumdaki son değişikliği geri alır (hücre düzeltmesi, yapıştırma, hedef). Art arda basılabilir.</li>
+<li><b>↶ Geri al:</b> bu oturumdaki son değişikliği geri alır (hücre düzeltmesi, yapıştırma, hedef, aylık hedef kırılımı). Art arda basılabilir.</li>
 <li><b>⬇ Dışa aktar</b> (bilgisayar): bütün verileri Excel ve yedek dosyası olarak indirir.</li>
 </ul>
 <a class="hk-yukari" href="#" data-git="mr-bas">↑ İçindekiler</a>
