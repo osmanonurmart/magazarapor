@@ -41,8 +41,8 @@ Giriş ekranının arka plan fotoğrafı `giris-arka.jpg`.
 
 ## Bölge paneli
 
-- Dönem: Bugün / Son 1 hafta / Bu ay (varsayılan) / Geçen ay aynı dönem / Özel (`bp.secim`, `bp.ozelBas`, `bp.ozelSon`); `bpAraligi()` aralığı ve kıyas dönemini verir.
-- Günlük ciro tablosu (`bpGrafikCiz`): mağaza başına gün gün ciro, Gün %, Küm. %, yeşil renk skalası; altta toplam, dönem hedefi ve hedefe kalan.
+- Dönem ERP'deki gibi Başlangıç / Bitiş Tarihi: hazır seçenek ya da tarih (`bp.basSec`, `bp.sonSec`, `bp.basTarih`, `bp.sonTarih`, `bpTarihCoz`); `bpAraligi()` aralığı ve kıyas dönemini verir.
+- Mağaza tablosu sıkışık; hücreler her mağazanın kendi önceki dönemine göre kırmızı–yeşil renklenir (`s.once`).
 
 ## Hedef kırılımı
 
