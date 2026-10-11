@@ -911,30 +911,14 @@ if(!document.documentElement.classList.contains('tel')){
   }
   .bp-seg button:last-child{ border-right:none; }
   .bp-seg button.active{ background:#2d2d2d; color:#fff; }
-  .bp-ozel{ display:inline-flex; align-items:center; gap:6px; font-size:.78rem; color:#777; }
-  .bpg-bloklar{ display:flex; gap:14px; overflow-x:auto; padding:4px 2px 8px; align-items:flex-start; }
-  .bpg-blok{ flex:0 0 auto; }
-  .bpg-tablo{ border-collapse:collapse; font-size:.76rem; font-variant-numeric:tabular-nums; }
-  .bpg-tablo th, .bpg-tablo td{ border:1px solid #e3e0d8; padding:3px 8px; text-align:right; white-space:nowrap; }
-  .bpg-tablo thead th{ background:#f4f1ea; color:#555; font-weight:600; }
-  .bpg-tablo th.bpg-ad{ background:#2b2b2b; color:#fff; text-align:center; font-size:.82rem; cursor:pointer; }
-  .bpg-tablo td.bpg-tarih{ text-align:left; color:#555; }
-  .bpg-tablo td.bpg-tarih span{ color:#aaa; font-size:.7rem; }
-  .bpg-tablo tfoot td{ font-weight:700; background:#faf8f3; }
-  .bpg-tablo tfoot td:first-child{ text-align:left; }
-  .bpg-tablo .bpg-kalan td{ font-weight:600; color:#555; }
-  .bpg-tablo td.eksi{ color:var(--red); }
-  .bpg-tablo td.arti{ color:var(--green); }
-  .bpg-sec{ margin:6px 0 10px; flex-wrap:wrap; }
-  .bpg-bos{ color:#999; padding:16px 0; }
-  .bpg-not{ font-size:.72rem; color:#888; margin-top:6px; line-height:1.5; }
-  html.tel .bpg-tablo{ width:100%; font-size:.74rem; }
-  html.tel .bpg-blok{ flex:1 1 auto; }
+  .bp-erp{ display:inline-flex; align-items:center; gap:6px; font-size:.76rem; font-weight:600; color:#555; }
+  .bp-erp select{ padding:4px 6px; border-radius:6px; border:1px solid #cfc9bf; font-size:.76rem; font-family:inherit; background:#fff; }
   .bp-tarih{ padding:4px 7px; border-radius:6px; border:1px solid #ddd; font-size:.74rem; font-family:inherit; }
   .bp-aralik{ font-size:.8rem; font-weight:600; color:#555; margin-left:4px; }
   .bp-icerik{ padding:16px 14px 40px; }
   .bp-kutu{ background:#fff; border:1px solid var(--line); border-radius:12px; padding:6px; overflow-x:auto; }
-  .bp-tablo{ width:100%; border-collapse:collapse; font-size:.82rem; font-variant-numeric:tabular-nums; }
+  .bp-tablo-kutu{ width:fit-content; max-width:100%; }
+  .bp-tablo{ width:auto; border-collapse:collapse; font-size:.82rem; font-variant-numeric:tabular-nums; }
   .bp-tablo th{
     text-align:right; padding:9px 10px; font-size:.72rem; color:#666; font-weight:600;
     border-bottom:2px solid var(--line); cursor:pointer; user-select:none; white-space:nowrap;
@@ -942,7 +926,7 @@ if(!document.documentElement.classList.contains('tel')){
   .bp-tablo th:first-child, .bp-tablo td:first-child{ text-align:left; }
   .bp-tablo th:hover{ color:#2d2d2d; }
   .bp-tablo th.sirali{ color:#9a7438; }
-  .bp-tablo td{ text-align:right; padding:9px 10px; border-bottom:1px solid #f0ece5; white-space:nowrap; }
+  .bp-tablo td{ text-align:right; padding:8px 12px; border-bottom:1px solid #f0ece5; white-space:nowrap; }
   .bp-tablo tbody tr{ cursor:pointer; }
   .bp-tablo tbody tr:hover td{ background:#faf7f1; }
   .bp-tablo td.bp-ad{ font-weight:700; color:#2d2d2d; }
@@ -1151,7 +1135,9 @@ if(!document.documentElement.classList.contains('tel')){
   html.tel .bp-tablo{ font-size:.8rem; }
   html.tel .bp-tablo th:first-child, html.tel .bp-tablo td:first-child{ position:sticky; left:0; z-index:1; background:#fff; }
   html.tel .bp-tablo tfoot td:first-child{ background:#fbfaf7; }
-  html.tel #bpSeg{ flex-wrap:wrap; }
+  html.tel .bp-erp{ display:flex; width:100%; gap:6px; font-size:.78rem; }
+  html.tel .bp-erp-ad{ flex:0 0 68px; line-height:1.15; }
+  html.tel .bp-erp select, html.tel .bp-erp .bp-tarih{ flex:1 1 0; min-width:0; font-size:.8rem; padding:6px; }
   html.tel .bp-ayar-kutu{ max-width:none; }
 
   /* Pencereler */
@@ -1280,16 +1266,12 @@ if(!document.documentElement.classList.contains('tel')){
     </div>
   </div>
   <div class="alt-bar" id="bpDonemBar">
-    <div class="bp-seg" id="bpSeg">
-      <button type="button" data-secim="bugun">Bugün</button>
-      <button type="button" data-secim="hafta">Son 1 hafta</button>
-      <button type="button" data-secim="ay">Bu ay</button>
-      <button type="button" data-secim="gecenAy">Geçen ay aynı dönem</button>
-      <button type="button" data-secim="ozel">Özel</button>
-    </div>
-    <span class="bp-ozel" id="bpOzel" style="display:none;">
-      <input type="date" id="bpOzelBas" class="bp-tarih"> – <input type="date" id="bpOzelSon" class="bp-tarih">
-    </span>
+    <label class="bp-erp"><span class="bp-erp-ad">Başlangıç Tarihi</span>
+      <select id="bpBasSec"><option value="bugun">Bugün</option><option value="dun">Dün</option><option value="haftaBasi">Bu haftanın başı</option><option value="ayBasi">Bu ayın başı</option><option value="gecenAyBasi">Geçen ayın başı</option><option value="gecenAyBugun">Geçen ayın bugünü</option><option value="yilBasi">Bu yılın başı</option><option value="ozel">Tarih seç</option></select><input type="date" id="bpBasTarih" class="bp-tarih">
+    </label>
+    <label class="bp-erp"><span class="bp-erp-ad">Bitiş Tarihi</span>
+      <select id="bpSonSec"><option value="bugun">Bugün</option><option value="dun">Dün</option><option value="gecenAyBugun">Geçen ayın bugünü</option><option value="gecenAySonu">Geçen ayın sonu</option><option value="ozel">Tarih seç</option></select><input type="date" id="bpSonTarih" class="bp-tarih">
+    </label>
     <span class="bp-aralik" id="bpAralik"></span>
   </div>
 </header>
@@ -1305,11 +1287,10 @@ if(!document.documentElement.classList.contains('tel')){
       <select id="bpTelSirala"></select>
     </div>
     <div class="bp-kartlar sadece-tel" id="bpKartlar"></div>
-    <div class="bp-kutu">
+    <div class="bp-kutu bp-tablo-kutu">
       <table class="bp-tablo" id="bpTablo"></table>
     </div>
     <div class="bp-not" id="bpNot"></div>
-    <div class="grafik-kart bp-grafik" id="bpGrafik" style="display:none;"></div>
   </section>
   <section id="bpAyar" style="display:none;">
     <div class="bp-kutu bp-ayar-kutu">
@@ -1491,7 +1472,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 58;
+const APP_SURUM = 59;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -2537,8 +2518,8 @@ document.getElementById('girisForm').addEventListener('submit', girisYap);
 // Veriler her mağazanın kendi entries koleksiyonundan okunur; bir satıra
 // tıklanınca o mağazanın normal rapor ekranı açılır.
 const bp = {
-  secim: 'ay',           // 'bugun' | 'hafta' | 'ay' | 'gecenAy' | 'ozel'
-  ozelBas: null, ozelSon: null,   // 'YYYY-MM-DD' (Özel)
+  basSec: 'ayBasi', sonSec: 'bugun',   // ERP'deki gibi hazır seçenek ya da 'ozel'
+  basTarih: null, sonTarih: null,      // 'YYYY-MM-DD' (Tarih seç)
   sekme: 'ozet',
   yuklendi: false,
   veri: {},              // magaza -> {tarih: kayit}
@@ -2554,53 +2535,46 @@ const AY_TAM_ADLARI = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz
 
 // Seçili dönemin günleri ve kıyas için önceki dönemin aynı uzunluktaki günleri.
 // Bugünden sonraki günler hesaba katılmaz (dönem henüz bitmediyse "bugüne kadar").
-// Dönem: Bugün, Son 1 hafta (son 7 gün), Bu ay (1'inden bugüne), Geçen ay aynı dönem (geçen ayın 1'inden
-// bugünün gününe kadar) ya da Özel. Ciro değişimi bir önceki eşit uzunluktaki döneme göre hesaplanır.
-// hedefSon: dönemin hedef toplamı için son gün (Bu ay'da ayın son günü).
+// Dönem ERP'deki gibi Başlangıç ve Bitiş Tarihi ile seçilir; her biri hazır seçenek (Bugün, Bu ayın başı…)
+// ya da takvimden tarih. Ciro değişimi: dönem ayın 1'inde başlıyorsa geçen ayın aynı günlerine,
+// değilse hemen önceki eşit uzunluktaki döneme göre.
 const BP_GUN_ADLARI = ['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'];
+function bpTarihCoz(sec, tarih){
+  const b = getNow(); b.setHours(0,0,0,0);
+  const y = b.getFullYear(), m = b.getMonth();
+  const ayUzun = (yy, mm)=> new Date(yy, mm+1, 0).getDate();
+  switch(sec){
+    case 'dun': return gunEkle(b, -1);
+    case 'haftaBasi': return mondayOf(b);
+    case 'ayBasi': return new Date(y, m, 1);
+    case 'gecenAyBasi': return new Date(y, m-1, 1);
+    case 'gecenAyBugun': return new Date(y, m-1, Math.min(b.getDate(), ayUzun(y, m-1)));
+    case 'gecenAySonu': return new Date(y, m, 0);
+    case 'yilBasi': return new Date(y, 0, 1);
+    case 'ozel': return tarih ? tarihOku(tarih) : b;
+    default: return b;
+  }
+}
 function bpAraligi(){
   const bugun = getNow(); bugun.setHours(0,0,0,0);
-  let bas, son, oncekiBas, oncekiSon = null, etiket, kiyasEtiket, hedefSon = null;
-  const ayUzun = (y, m)=> new Date(y, m+1, 0).getDate();
-  if(bp.secim === 'bugun'){
-    bas = son = bugun;
-    oncekiBas = gunEkle(bugun, -7);
-    etiket = 'Bugün · ' + kisaTarih(bugun) + ' ' + BP_GUN_ADLARI[bugun.getDay()];
-    kiyasEtiket = 'geçen hafta aynı güne göre';
-  } else if(bp.secim === 'hafta'){
-    son = bugun; bas = gunEkle(bugun, -6);
-    oncekiBas = gunEkle(bas, -7);
-    etiket = 'Son 1 hafta · ' + kisaTarih(bas) + ' – ' + kisaTarih(son);
-    kiyasEtiket = 'önceki 7 güne göre';
-  } else if(bp.secim === 'gecenAy'){
-    const y = bugun.getFullYear(), m = bugun.getMonth() - 1;
-    const gun = Math.min(bugun.getDate(), ayUzun(y, m));
-    bas = new Date(y, m, 1); son = new Date(y, m, gun);
-    oncekiBas = new Date(y, m-1, 1);
-    oncekiSon = new Date(y, m-1, Math.min(gun, ayUzun(y, m-1)));
-    etiket = AY_TAM_ADLARI[bas.getMonth()] + ' ' + bas.getFullYear() + ' · ilk ' + gun + ' gün';
-    kiyasEtiket = 'bir önceki ayın aynı günlerine göre';
-  } else if(bp.secim === 'ozel'){
-    bas = bp.ozelBas ? tarihOku(bp.ozelBas) : new Date(bugun.getFullYear(), bugun.getMonth(), 1);
-    son = bp.ozelSon ? tarihOku(bp.ozelSon) : bugun;
-    if(son < bas){ const x = bas; bas = son; son = x; }
-    const uzun = Math.round((son - bas) / 86400000) + 1;
-    oncekiBas = gunEkle(bas, -uzun);
-    etiket = 'Özel · ' + kisaTarih(bas) + ' – ' + kisaTarih(son);
-    kiyasEtiket = 'önceki ' + uzun + ' güne göre';
-  } else {
-    bas = new Date(bugun.getFullYear(), bugun.getMonth(), 1);
-    son = bugun;
-    hedefSon = new Date(bugun.getFullYear(), bugun.getMonth()+1, 0);
-    oncekiBas = new Date(bugun.getFullYear(), bugun.getMonth()-1, 1);
-    oncekiSon = new Date(oncekiBas.getFullYear(), oncekiBas.getMonth(), Math.min(bugun.getDate(), ayUzun(oncekiBas.getFullYear(), oncekiBas.getMonth())));
-    etiket = 'Bu ay · ' + AY_TAM_ADLARI[bugun.getMonth()] + ' ' + bugun.getFullYear() + ' · ' + bugun.getDate() + '. güne kadar';
-    kiyasEtiket = 'geçen ayın aynı günlerine göre';
-  }
+  let bas = bpTarihCoz(bp.basSec, bp.basTarih), son = bpTarihCoz(bp.sonSec, bp.sonTarih);
+  if(son < bas){ const x = bas; bas = son; son = x; }
   const kesim = son > bugun ? bugun : son;
   const gunSayisi = Math.round((kesim - bas) / 86400000) + 1;   // 0 veya eksi: dönem henüz başlamadı
-  if(!oncekiSon) oncekiSon = gunEkle(oncekiBas, Math.max(gunSayisi, 1) - 1);
-  return {bas, kesim, gunSayisi, oncekiBas, oncekiSon, etiket, kiyasEtiket, hedefSon: hedefSon || son};
+  const uzun = Math.max(gunSayisi, 1);
+  let oncekiBas, oncekiSon, kiyasEtiket;
+  if(bas.getDate() === 1 && kesim.getMonth() === bas.getMonth() && kesim.getFullYear() === bas.getFullYear()){
+    oncekiBas = new Date(bas.getFullYear(), bas.getMonth()-1, 1);
+    oncekiSon = new Date(bas.getFullYear(), bas.getMonth()-1, Math.min(kesim.getDate(), new Date(bas.getFullYear(), bas.getMonth(), 0).getDate()));
+    kiyasEtiket = 'geçen ayın aynı günlerine göre';
+  } else {
+    oncekiBas = gunEkle(bas, -uzun);
+    oncekiSon = gunEkle(bas, -1);
+    kiyasEtiket = uzun === 1 ? 'bir önceki güne göre' : 'önceki ' + uzun + ' güne göre';
+  }
+  const etiket = (gunSayisi === 1 ? kisaTarih(bas) + ' ' + BP_GUN_ADLARI[bas.getDay()] : kisaTarih(bas) + ' – ' + kisaTarih(son))
+    + (gunSayisi > 1 ? ' · ' + gunSayisi + ' gün' : '');
+  return {bas, kesim, gunSayisi, oncekiBas, oncekiSon, etiket, kiyasEtiket};
 }
 
 function bpDolu(v){ return v !== undefined && v !== null && v !== ''; }
@@ -2667,6 +2641,7 @@ function bpSatirlar(ar){
     const s = ar.gunSayisi > 0 ? bpHesapla(kayitlar, ar.bas, ar.kesim) : bpHesapla({}, ar.bas, ar.bas);
     const o = ar.gunSayisi > 0 ? bpHesapla(kayitlar, ar.oncekiBas, ar.oncekiSon) : {ciro:null};
     s.oncekiCiro = o.ciro;
+    s.once = o;
     s.degisim = (s.ciro !== null && o.ciro) ? (s.ciro - o.ciro) / o.ciro * 100 : null;
     s.sonGiris = bpSonGiris(kayitlar);
     s.m = m;
@@ -2707,13 +2682,11 @@ function bpEksikCiz(){
 }
 function bpCiz(){
   bpEksikCiz();
-  document.querySelectorAll('#bpSeg button').forEach(b=> b.classList.toggle('active', b.dataset.secim === bp.secim));
-  document.getElementById('bpOzel').style.display = bp.secim === 'ozel' ? '' : 'none';
+  document.getElementById('bpBasSec').value = bp.basSec;
+  document.getElementById('bpSonSec').value = bp.sonSec;
+  document.getElementById('bpBasTarih').value = dateStr(bpTarihCoz(bp.basSec, bp.basTarih));
+  document.getElementById('bpSonTarih').value = dateStr(bpTarihCoz(bp.sonSec, bp.sonTarih));
   const ar = bpAraligi();
-  if(bp.secim === 'ozel'){
-    document.getElementById('bpOzelBas').value = dateStr(ar.bas);
-    document.getElementById('bpOzelSon').value = dateStr(gunEkle(ar.bas, Math.round((ar.hedefSon - ar.bas) / 86400000)));
-  }
   document.getElementById('bpAralik').textContent = ar.etiket;
 
   const tablo = document.getElementById('bpTablo');
@@ -2736,12 +2709,13 @@ function bpCiz(){
     return (x < y ? -1 : x > y ? 1 : 0) * yon;
   });
 
-  // En iyi / en kötü: en az iki mağazada değer varsa işaretlenir.
-  const uclar = {};
-  BP_KOLONLAR.filter(c=> c.iyi).forEach(c=>{
-    const v = satirlar.filter(s=> !s.hata && s[c.k] !== null && s[c.k] !== undefined).map(s=> s[c.k]);
-    if(v.length >= 2 && Math.max(...v) !== Math.min(...v)) uclar[c.k] = {max: Math.max(...v), min: Math.min(...v)};
-  });
+  // Her mağaza kendi önceki dönemiyle kıyaslanır (Excel'deki kırmızı–beyaz–yeşil renk skalası gibi):
+  // kendi önceki dönemine göre iyiyse yeşil, kötüyse kırmızı; fark büyüdükçe renk koyulaşır (±%25'te en koyu).
+  const bpRenk = (oran)=>{
+    if(oran === null || oran === undefined || !isFinite(oran) || Math.abs(oran) < 0.5) return '';
+    const a = (0.12 + Math.min(Math.abs(oran) / 25, 1) * 0.5).toFixed(2);
+    return oran > 0 ? 'background:rgba(99,190,123,' + a + ')' : 'background:rgba(248,105,107,' + a + ')';
+  };
 
   const hucre = (c, s, toplamMi)=>{
     if(c.k === 'ad'){
@@ -2750,14 +2724,19 @@ function bpCiz(){
     const v = s[c.k];
     const metin = (v === null || v === undefined) ? null : c.fmt(v);
     const sinif = [];
+    let stil = '', ipucu = '';
     if(metin === null) sinif.push('bos');
-    else if(!toplamMi && uclar[c.k]){
-      if(v === uclar[c.k].max) sinif.push('en-iyi');
-      else if(v === uclar[c.k].min) sinif.push('en-kotu');
+    else if(!toplamMi && c.iyi){
+      if(c.k === 'degisim') stil = bpRenk(v);
+      else if(s.once && s.once[c.k] !== null && s.once[c.k] !== undefined && s.once[c.k] !== 0){
+        const ov = s.once[c.k], fark = (v - ov) / Math.abs(ov) * 100;
+        stil = bpRenk(fark);
+        ipucu = 'Önceki dönem: ' + c.fmt(ov) + ' (' + (fark >= 0 ? '+' : '') + fark.toFixed(1).replace('.', ',') + '%)';
+      }
     }
-    if(c.k === 'degisim' && metin !== null && !sinif.length) sinif.push(v >= 0 ? 'artis' : 'dusus');
     if(c.k === 'fbu') sinif.push('fbu');
-    return '<td class="' + sinif.join(' ') + '">' + (metin === null ? '–' : escapeHtml(metin)) + '</td>';
+    return '<td class="' + sinif.join(' ') + '"' + (stil ? ' style="' + stil + '"' : '') + (ipucu ? ' title="' + escapeHtml(ipucu) + '"' : '') + '>'
+      + (metin === null ? '–' : escapeHtml(metin)) + '</td>';
   };
 
   const thead = '<thead><tr>' + BP_KOLONLAR.map(c=>{
@@ -2790,7 +2769,7 @@ function bpCiz(){
 
   not.textContent = (ar.gunSayisi <= 0 ? 'Bu dönem henüz başlamadı. ' : '')
     + 'Ciro değişimi ' + ar.kiyasEtiket + '. Mdo, Fbü ve Fbs günlük ortalama; Mgs ve Toplu satış toplamdır. '
-    + 'Yeşil en iyi, kırmızı en düşük değer. Bölge satırında Mdo, Fbü ve Fbs mağaza ortalamasıdır. '
+    + 'Her mağaza kendi önceki dönemiyle kıyaslanır: yeşil iyileşme, kırmızı düşüş; renk koyulaştıkça fark büyür (hücrenin üzerine gelince önceki değer görünür). Bölge satırında Mdo, Fbü ve Fbs mağaza ortalamasıdır. '
     + 'Bir mağazanın raporunu açmak için satırına tıkla.';
 }
 
@@ -2896,12 +2875,19 @@ async function bolgePaneliniAc(yenidenYukle, giristen){
   else bpCiz();
 }
 
-document.querySelectorAll('#bpSeg button').forEach(b=> b.addEventListener('click', ()=>{ bp.secim = b.dataset.secim; bpCiz(); }));
-['bpOzelBas', 'bpOzelSon'].forEach(id=> document.getElementById(id).addEventListener('change', ()=>{
-  bp.ozelBas = document.getElementById('bpOzelBas').value || null;
-  bp.ozelSon = document.getElementById('bpOzelSon').value || null;
-  bpCiz();
-}));
+// Seçim değişince tablo hemen yenilenir. Takvimden tarih seçilince seçenek "Tarih seç" olur.
+[['bpBasSec', 'bpBasTarih', 'basSec', 'basTarih'], ['bpSonSec', 'bpSonTarih', 'sonSec', 'sonTarih']].forEach(([sec, tar, ks, kt])=>{
+  document.getElementById(sec).addEventListener('change', function(){
+    if(this.value === 'ozel') bp[kt] = document.getElementById(tar).value || null;
+    bp[ks] = this.value;
+    bpCiz();
+  });
+  document.getElementById(tar).addEventListener('change', function(){
+    if(!this.value) return;
+    bp[ks] = 'ozel'; bp[kt] = this.value;
+    bpCiz();
+  });
+});
 document.getElementById('bpYenile').addEventListener('click', bpVeriYukle);
 document.getElementById('bpTabOzet').addEventListener('click', ()=> bpSekme('ozet'));
 document.getElementById('bpTabAyar').addEventListener('click', ()=> bpSekme('ayar'));
@@ -3606,7 +3592,7 @@ function telKisalt(kok){
   }
   sar('bpCiz', ()=> document.getElementById('bpTablo'));
   const asilBpCiz = window.bpCiz;
-  window.bpCiz = function(){ const r = asilBpCiz.apply(this, arguments); bpKartlariCiz(); bpGrafikCiz(); return r; };
+  window.bpCiz = function(){ const r = asilBpCiz.apply(this, arguments); bpKartlariCiz(); return r; };
 }
 
 // ==================== GRAFİKLER ====================
@@ -3906,79 +3892,6 @@ if(window.ResizeObserver){
     const g = Math.round(girdiler[0].contentRect.width);
     if(g && Math.abs(g - sonGen) > 4){ sonGen = g; grafikPlanla(); }
   }).observe(document.getElementById('grafikKart'));
-}
-
-// ==================== BÖLGE PANELİ: GÜNLÜK CİRO TABLOSU ====================
-// Seçili dönemde her mağaza için gün gün: ciro, günlük hedef gerçekleşme ve kümülatif gerçekleşme.
-// Renkler Excel'deki yeşil renk skalası gibi: sütundaki en düşük değer en açık, en yüksek en koyu.
-// Altta toplam ciro, dönemin toplam hedefi ve hedefe kalan (Bu ay seçiliyse ayın tamamının hedefi).
-let bpgTelMagaza = null;
-
-function bpgTL(v){ return v === null || v === undefined ? '–' : '₺' + Number(v).toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
-function bpgYuzde(v){ return v === null || v === undefined ? '–' : Number(v).toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2}) + '%'; }
-function bpgYesil(v, min, max){
-  if(v === null || v === undefined || max === min) return '';
-  const t = Math.max(0, Math.min(1, (v - min) / (max - min)));
-  return 'background:rgba(99,190,123,' + (0.10 + t * 0.62).toFixed(2) + ')';
-}
-
-function bpgMagazaGunleri(m, ar){
-  const kayitlar = bp.veri[m] || {};
-  const gunler = [];
-  let topCiro = 0, topHedef = 0;
-  for(let d = new Date(ar.bas); d <= ar.kesim; d = gunEkle(d, 1)){
-    const r = kayitlar[dateStr(d)];
-    const dolu = r && bpDolu(r.ciro);
-    const ciro = dolu ? Number(r.ciro) : null;
-    const hedef = effectiveHedef(r);
-    if(dolu){ topCiro += ciro; topHedef += hedef; }
-    gunler.push({d, ciro, gunPct: dolu && hedef ? ciro / hedef * 100 : null, kumPct: dolu && topHedef ? topCiro / topHedef * 100 : null});
-  }
-  // Dönemin toplam hedefi: veri girilmemiş ve henüz gelmemiş günler dahil.
-  let donemHedef = 0;
-  for(let d = new Date(ar.bas); d <= ar.hedefSon; d = gunEkle(d, 1)) donemHedef += effectiveHedef(kayitlar[dateStr(d)]);
-  return {gunler, topCiro, donemHedef, kumPct: topHedef ? topCiro / topHedef * 100 : null};
-}
-
-function bpgBlok(m, ar){
-  const v = bpgMagazaGunleri(m, ar);
-  const sinir = alan=>{ const a = v.gunler.map(g=> g[alan]).filter(x=> x !== null); return a.length ? [Math.min(...a), Math.max(...a)] : [0, 0]; };
-  const [c0, c1] = sinir('ciro'), [g0, g1] = sinir('gunPct'), [k0, k1] = sinir('kumPct');
-  const kalan = v.donemHedef - v.topCiro;
-  return '<div class="bpg-blok">' +
-    '<table class="bpg-tablo"><thead><tr><th colspan="4" class="bpg-ad" data-m="' + escapeHtml(m) + '" title="Raporu aç">' + escapeHtml(bpMagazaAdi(m)) + '</th></tr>' +
-    '<tr><th>Gün</th><th>Ciro</th><th>Gün %</th><th>Küm. %</th></tr></thead><tbody>' +
-    v.gunler.map(g=> '<tr><td class="bpg-tarih">' + pad(g.d.getDate()) + '.' + pad(g.d.getMonth()+1) + ' <span>' + GR_GUNLER[(g.d.getDay() + 6) % 7] + '</span></td>' +
-      '<td style="' + bpgYesil(g.ciro, c0, c1) + '">' + bpgTL(g.ciro) + '</td>' +
-      '<td style="' + bpgYesil(g.gunPct, g0, g1) + '">' + bpgYuzde(g.gunPct) + '</td>' +
-      '<td style="' + bpgYesil(g.kumPct, k0, k1) + '">' + bpgYuzde(g.kumPct) + '</td></tr>').join('') +
-    '</tbody><tfoot>' +
-      '<tr><td>Toplam</td><td>' + bpgTL(v.topCiro) + '</td><td colspan="2">' + bpgYuzde(v.kumPct) + '</td></tr>' +
-      '<tr class="bpg-kalan"><td>Hedef</td><td>' + bpgTL(v.donemHedef) + '</td><td colspan="2" class="' + (kalan > 0 ? 'eksi' : 'arti') + '">' +
-        (kalan > 0 ? 'Kalan ' + bpgTL(kalan) : 'Aşıldı ' + bpgTL(-kalan)) + '</td></tr>' +
-    '</tfoot></table></div>';
-}
-
-function bpGrafikCiz(){
-  const kart = document.getElementById('bpGrafik');
-  if(!kart) return;
-  if(!oturum || !oturum.magazalar.length || !bp.yuklendi){ kart.style.display = 'none'; return; }
-  kart.style.display = '';
-  const ar = bpAraligi();
-  const magazalar = oturum.magazalar.filter(m=> !bp.hatalar[m]);
-  if(TELEFON && !magazalar.includes(bpgTelMagaza)) bpgTelMagaza = magazalar[0];
-  const gosterilen = TELEFON ? magazalar.filter(m=> m === bpgTelMagaza) : magazalar;
-  kart.innerHTML =
-    '<div class="gr-ust"><div class="gr-baslik">📅 Günlük ciro ve hedef gerçekleşme</div></div>' +
-    '<div class="gr-alt-baslik"><span>' + escapeHtml(ar.etiket) + '</span></div>' +
-    (TELEFON ? '<div class="gr-seg bpg-sec">' + magazalar.map(m=> '<button type="button" data-m="' + escapeHtml(m) + '"' +
-      (m === bpgTelMagaza ? ' class="on"' : '') + '>' + escapeHtml(bpMagazaAdi(m)) + '</button>').join('') + '</div>' : '') +
-    (ar.gunSayisi <= 0 ? '<div class="bpg-bos">Bu dönem henüz başlamadı.</div>'
-      : '<div class="bpg-bloklar">' + gosterilen.map(m=> bpgBlok(m, ar)).join('') + '</div>') +
-    '<div class="bpg-not">Gün %: o günün cirosu / o günün hedefi. Küm. %: döneme kadar toplam ciro / toplam hedef. ' +
-      'Hedef: seçili dönemin toplam hedefi' + (bp.secim === 'ay' ? ' (ayın tamamı)' : '') + '. Mağaza adına tıklayınca raporu açılır.</div>';
-  kart.querySelectorAll('.bpg-sec button').forEach(b=> b.addEventListener('click', ()=>{ bpgTelMagaza = b.dataset.m; bpGrafikCiz(); }));
-  kart.querySelectorAll('.bpg-ad').forEach(th=> th.addEventListener('click', ()=> magazayiAc(th.dataset.m)));
 }
 
 // ==================== TELEFON: ALT ÇUBUK DOKUNUŞU ====================
@@ -6333,7 +6246,9 @@ const MR_KILAVUZ = `
 <li><b>Özet:</b>
   <ul>
   <li>Mağazaların ciro, MDO, FBÜ, FBS, MGS ve hedef oranlarını seçilen dönem için karşılaştırır.</li>
-  <li><b>Dönem</b> (üstte): <b>Bugün</b>, <b>Son 1 hafta</b>, <b>Bu ay</b> (1'inden bugüne, varsayılan), <b>Geçen ay aynı dönem</b> (ör. bugün 11 Ekim ise 1–11 Eylül) ya da <b>Özel</b> (başlangıç ve bitiş tarihi seçilir). Ciro değişimi bir önceki eşit döneme göredir.</li>
+  <li><b>Dönem</b> (üstte, ERP'deki gibi): <b>Başlangıç Tarihi</b> ve <b>Bitiş Tarihi</b>. Her birinde hazır seçenekler vardır (Bugün, Dün, Bu haftanın başı, Bu ayın başı, Geçen ayın başı, Geçen ayın bugünü, Geçen ayın sonu, Bu yılın başı) ya da takvimden tarih seçilir. Seçince tablo hemen yenilenir. Varsayılan: Bu ayın başı – Bugün.</li>
+  <li><b>Ciro değ.:</b> dönem ayın 1'inde başlıyorsa geçen ayın aynı günlerine, değilse hemen önceki eşit uzunluktaki döneme göredir.</li>
+  <li><b>Renkler:</b> her mağaza kendi önceki dönemiyle kıyaslanır. Kendi önceki dönemine göre iyiyse yeşil, kötüyse kırmızı; fark büyüdükçe renk koyulaşır. Hücrenin üzerine gelince önceki dönemin değeri görünür.</li>
   <li>Bugün veri girmeyen mağazaları gösterir.</li>
   <li>Duyuru yazılır ve kimin okuduğu görülür.</li>
   </ul></li>
@@ -6341,14 +6256,6 @@ const MR_KILAVUZ = `
 <li><b>🎯 Hedef gir</b> (sağ üstte; telefonda profil menüsünde): mağaza ve ay seçilir, Excel'deki günlük hedef satırı yapıştırılır, Kaydet ile o mağazanın günlük hedefleri yazılır.
   <figure class="hk-gorsel"><img src="guncelleme/hedef-bolge-pencere.jpg" alt="Bölge panelinde hedef girme" loading="lazy"><figcaption>Önce mağazayı ve ayı seçin.</figcaption></figure></li>
 <li>Bir mağazaya tıklayınca o mağazanın ekranı açılır; veriler görülür ve düzeltilebilir. Panele <b>◀ Bölge paneli</b> ile dönülür.</li>
-<li><b>📅 Günlük ciro ve hedef gerçekleşme</b> (Özet'in altında): seçilen dönemde her mağaza için gün gün:
-  <ul>
-  <li><b>Ciro</b>, <b>Gün %</b> (o günün cirosu / o günün hedefi) ve <b>Küm. %</b> (o güne kadar toplam ciro / toplam hedef).</li>
-  <li>Yeşil tonlar Excel'deki gibidir: sütunda değer yükseldikçe koyulaşır.</li>
-  <li>Altta toplam ciro, dönemin hedefi ve hedefe <b>kalan</b> (ya da aşılan) tutar yazar. Bu ay seçiliyken hedef ayın tamamının hedefidir.</li>
-  <li>Bilgisayarda mağazalar yan yana durur; telefonda üstten mağaza seçilir. Mağaza adına tıklayınca raporu açılır.</li>
-  </ul>
-  <figure class="hk-gorsel"><img src="guncelleme/bolge-gunluk.jpg" alt="Bölge paneli günlük ciro tablosu" loading="lazy"><figcaption>Dönem seçimi ve mağazaların günlük ciro tablosu.</figcaption></figure></li>
 <li>Araçlar, Kurumsal hafıza, Düzenleyici ve Sohbet panelde de vardır.</li>
 </ul>
 <a class="hk-yukari" href="#" data-git="mr-bas">↑ İçindekiler</a>
@@ -7614,11 +7521,6 @@ async function metniKopyala(text){
 // görmediği kayıtlar bir kez pencere olarak çıkar (bu cihazda hatırlanır); hepsi Sohbet → Duyurular'da durur.
 // Kart: {ikon, baslik, metin, gorseller:[guncelleme/...jpg], rol?:'magaza'|'bolge'} — rol verilirse yalnız o role gösterilir.
 const SURUM_NOTLARI = [
-  {surum:58, tarih:'2026-10-11', kartlar:[
-    {ikon:'📅', baslik:'Bölge paneli: dönem ve günlük ciro tablosu', rol:'bolge',
-     metin:'Üstten dönemi seçin: Bugün, Son 1 hafta, Bu ay, Geçen ay aynı dönem ya da Özel (iki tarih arası). Altta her mağaza için gün gün ciro, günlük ve kümülatif hedef gerçekleşme yüzdesi Excel\'deki gibi yeşil tonlarla görünür; en altta toplam ciro ve hedefe kalan tutar yazar.',
-     gorseller:['guncelleme/bolge-gunluk.jpg']}
-  ]},
   {surum:56, tarih:'2026-10-11', kartlar:[
     {ikon:'🎯', baslik:'Bölge panelinden hedef girme', rol:'bolge',
      metin:'Sağ üstteki 🎯 Hedef gir ile mağazayı ve ayı seçip Excel\'deki günlük hedef satırını yapıştırın. Hedefler o mağazaya yazılır. Telefonda profil menüsündedir.',
