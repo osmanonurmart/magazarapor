@@ -1520,7 +1520,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 62;
+const APP_SURUM = 63;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -2758,7 +2758,7 @@ function bpCiz(){
   const toplam = bpToplam(satirlar);
 
   // Satırlar KPI, sütunlar mağaza (mağazanın haftalık tablosu gibi); en sağda Bölge.
-  // Her satırda mağazalar arasında en iyi değer yeşil, en düşük kırmızı.
+  // Mağazalar birbiriyle renklendirilmez; kıyas, mağaza adına tıklanınca açılan pencerededir.
   const KPI = [
     {k:'ciro',  t:'Ciro',     fmt: bpfTL,   iyi:1},
     {k:'hedef', t:'Hedef',    fmt: bpfTL,   iyi:0},
@@ -2774,14 +2774,7 @@ function bpCiz(){
   const hucre = (kpi, s)=>{
     const v = s[kpi.k];
     if(v === null || v === undefined) return '<td class="bos">–</td>';
-    let sinif = '';
-    if(kpi.iyi && gecerli.length >= 2){
-      const a = gecerli.map(x=> x[kpi.k]).filter(x=> x !== null && x !== undefined);
-      if(a.length >= 2 && Math.max(...a) !== Math.min(...a)){
-        if(v === Math.max(...a)) sinif = 'en-iyi'; else if(v === Math.min(...a)) sinif = 'en-kotu';
-      }
-    }
-    return '<td' + (sinif ? ' class="' + sinif + '"' : '') + '>' + escapeHtml(kpi.fmt(v)) + '</td>';
+    return '<td>' + escapeHtml(kpi.fmt(v)) + '</td>';
   };
   tablo.innerHTML =
     '<thead><tr><th class="bpk-kose">' + escapeHtml(ar.etiket) + '</th>' +
@@ -2798,7 +2791,7 @@ function bpCiz(){
   not.textContent = (ar.gunSayisi <= 0 ? 'Bu dönem henüz başlamadı. ' : '')
     + (hatali.length ? 'Okunamayan: ' + hatali.map(s=> s.ad + ' (' + s.hata + ')').join(', ') + '. ' : '')
     + 'Ciro değişimi ' + ar.kiyasEtiket + '. Mdo, Fbü ve Fbs günlük ortalama; Mgs ve Toplu satış toplamdır. '
-    + 'Her satırda en iyi mağaza yeşil, en düşük kırmızı. Bölge sütununda Mdo, Fbü ve Fbs mağaza ortalamasıdır. '
+    + 'Bölge sütununda Mdo, Fbü ve Fbs mağaza ortalamasıdır. '
     + 'Kıyas için mağaza adına tıkla.';
 }
 
@@ -6438,7 +6431,7 @@ const MR_KILAVUZ = `
 
 <h3 id="mr-bolge">15. Bölge paneli (bölge müdürü)</h3>
 <ul>
-<li><b>Özet tablosu</b> (mağazanın haftalık tablosu gibi): satırlar alt alta <b>Ciro, Hedef, Oran, Ciro değ., Mdo, Fbü, Mgs, Fbs, Toplu S., Son giriş</b>; sütunlar mağazalar, en sağda <b>Bölge</b>. Her satırda en iyi mağaza yeşil, en düşük kırmızı.</li>
+<li><b>Özet tablosu</b> (mağazanın haftalık tablosu gibi): satırlar alt alta <b>Ciro, Hedef, Oran, Ciro değ., Mdo, Fbü, Mgs, Fbs, Toplu S., Son giriş</b>; sütunlar mağazalar, en sağda <b>Bölge</b>.</li>
 <li><b>Dönem</b> (üstte, ERP'deki gibi): Başlangıç ve Bitiş Tarihi. Varsayılan <b>Bugün</b>. Hazır seçenekler: Bugün, Dün, Bu haftanın başı, Bu ayın başı, Geçen ayın başı, Geçen ayın bugünü, Geçen ayın sonu, Bu yılın başı ya da takvimden tarih. Seçince tablo hemen yenilenir.</li>
 <li><b>Ciro değ.:</b> tek gün ya da hafta başından beri seçiliyse geçen haftanın aynı günlerine (GH), ayın 1'inden başlıyorsa geçen ayın aynı günlerine, diğerlerinde önceki eşit döneme göredir.</li>
 <li><b>Mağaza adına tıklayınca kıyas penceresi</b> açılır:

@@ -42,7 +42,7 @@ Giriş ekranının arka plan fotoğrafı `giris-arka.jpg`.
 ## Bölge paneli
 
 - Dönem ERP'deki gibi Başlangıç / Bitiş Tarihi: hazır seçenek ya da tarih (`bp.basSec`, `bp.sonSec`, `bp.basTarih`, `bp.sonTarih`, `bpTarihCoz`); `bpAraligi()` aralığı ve kıyas dönemini verir.
-- Ana tablo (`bpCiz`): satırlar KPI, sütunlar mağaza + Bölge; her satırda en iyi yeşil, en düşük kırmızı. Varsayılan dönem Bugün.
+- Ana tablo (`bpCiz`): satırlar KPI, sütunlar mağaza + Bölge; mağazalar arası renklendirme yok. Varsayılan dönem Bugün.
 - Mağaza adına tıklayınca `bpMagazaKiyas`: Bugün / GH, Hafta başından beri / GH, Ay 1–N / geçen ay 1–N ve bu ayın gün gün ciro tablosu (`bpgTabloHtml`, 3 renk skalası).
 - Veri Kopyala aracı `rol:'magaza'` ile bölge müdürüne gizlenir.
 
