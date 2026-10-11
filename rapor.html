@@ -353,35 +353,13 @@ if(!document.documentElement.classList.contains('tel')){
 
   .transfer-page{ margin:0; padding:16px; }
   .tr-wrap{ max-width:620px; margin:0 auto; }
-  .tr-seg{ display:flex; gap:6px; margin-bottom:12px; }
-  .tr-seg-btn{
-    flex:1; background:#f1efe9; color:#666; border:none; padding:10px; border-radius:10px;
-    font-size:.85rem; font-weight:600; cursor:pointer; border-bottom:3px solid transparent;
-  }
-  .tr-seg-btn.active{ background:#fff; color:var(--dark); border-bottom-color:var(--accent); }
   .tr-card{ background:#fff; border:1px solid var(--line); border-radius:12px; padding:14px; margin-bottom:12px; }
   .tr-card-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
   .tr-card-title{ font-size:.9rem; font-weight:700; color:var(--dark); }
   .tr-hint{ font-size:.7rem; color:#999; font-weight:400; }
   .kirik-slots{ display:grid; grid-template-columns:repeat(6, 1fr); gap:8px; margin:10px 0; }
   .kirik-slot .ks-ad{ font-size:.68rem; font-weight:600; color:#999; margin-top:2px; }
-  .tr-irs{ display:flex; flex-direction:column; gap:6px; margin-top:10px; }
-  .tr-irs-input{
-    width:100%; padding:10px 12px; border-radius:8px; border:1px solid #ddd; font-family:inherit; font-size:.9rem;
-    -webkit-text-size-adjust:100%; text-size-adjust:100%;
-  }
-  .tr-irs-sonuc{ font-size:.8rem; color:#666; min-height:1em; }
-  .tr-irs-sonuc b{ color:var(--dark); }
-  .tr-irs-sonuc .ok{ color:var(--green); font-weight:700; }
-  .tr-irs-sonuc .yok{ color:var(--red); }
-  .tr-irs-sec{ background:#fdf6ea; border:1px solid var(--accent); border-radius:6px; padding:3px 8px; margin:2px 4px 0 0; cursor:pointer; font-size:.78rem; }
-  .tr-irs-satir{ margin-top:6px; font-size:.78rem; color:#555; display:flex; flex-wrap:wrap; align-items:center; gap:6px; }
-  .tr-irs-satir b{ color:var(--dark); }
   .tr-kopya{ background:#f1efe9; border:none; border-radius:5px; padding:2px 7px; cursor:pointer; font-size:.72rem; }
-  .tr-item.eba-ok{ background:linear-gradient(90deg, rgba(76,153,96,.08), transparent 60%); }
-  .tr-eba{ background:#fff; color:#777; border:1px solid #ccc; }
-  .btn.tr-eba.on{ background:var(--green); color:#fff; border-color:var(--green); }
-  .tr-eba-etiket{ background:var(--green); color:#fff; border-radius:5px; padding:1px 6px; font-size:.68rem; font-weight:700; }
   .bk-bilgi{ font-size:.75rem; color:#777; margin-top:6px; line-height:1.6; }
   .bk-bilgi b{ color:var(--dark); }
   .tr-araclar{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
@@ -418,6 +396,8 @@ if(!document.documentElement.classList.contains('tel')){
     border-radius:6px; width:22px; height:22px; font-size:.8rem; cursor:pointer; z-index:1;
   }
   .tr-foto-row{ display:flex; gap:8px; }
+  .kirik-slots.tr-slots{ grid-template-columns:repeat(5, 1fr); }
+  .tr-indi-etiket{ background:var(--green); color:#fff; border-radius:5px; padding:1px 6px; font-size:.68rem; font-weight:700; }
   .tr-foto-btn{
     flex:1; background:#fdf6ea; color:#8a6a3f; border:2px dashed var(--accent); border-radius:10px;
     padding:12px 8px; font-size:.85rem; font-weight:600; cursor:pointer;
@@ -429,9 +409,6 @@ if(!document.documentElement.classList.contains('tel')){
   .tr-actions{ display:flex; justify-content:flex-end; gap:8px; margin-top:10px; }
   .btn.tr-big{ padding:9px 18px; font-size:.82rem; }
   .btn.tr-go{ background:var(--accent); }
-  .genel-thumbs{ display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
-  .genel-thumbs .gt{ position:relative; width:64px; height:64px; border-radius:8px; overflow:hidden; }
-  .genel-thumbs .gt img{ width:100%; height:100%; object-fit:cover; }
   .tr-item{ border-top:1px solid var(--line); padding:10px 0; }
   .tr-item:first-child{ border-top:none; padding-top:0; }
   .tr-item-head{ display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:.75rem; color:#777; }
@@ -448,9 +425,6 @@ if(!document.documentElement.classList.contains('tel')){
   }
   .tr-item-acts{ display:flex; gap:6px; }
   .tr-empty{ font-size:.78rem; color:#aaa; text-align:center; padding:10px 0; }
-  .tr-klasor{ font-size:.72rem; color:#666; text-align:right; line-height:1.6; }
-  .tr-klasor b{ color:var(--dark); }
-  .tr-link{ background:none; border:none; color:var(--accent); cursor:pointer; font-size:.72rem; padding:0; text-decoration:underline; }
 
   /* Uygulama içi pencereler ve bildirimler. --k telefonda ekranı büyütme oranıdır. */
   :root{ --k:1; }
@@ -511,6 +485,13 @@ if(!document.documentElement.classList.contains('tel')){
   }
   .kam-goruntu{ position:relative; flex:1; min-height:0; overflow:hidden; }
   .kam-goruntu video{ width:100%; height:100%; object-fit:cover; display:block; background:#000; }
+  .kam-onizleme{ position:absolute; inset:0; width:100%; height:100%; object-fit:contain; background:#000; display:none; }
+  .kam-secim{ gap:calc(var(--k)*8px); }
+  .kam-sec{
+    flex:1; border:none; border-radius:calc(var(--k)*12px); cursor:pointer; font-family:inherit; font-weight:700;
+    font-size:calc(var(--k)*14px); padding:calc(var(--k)*14px) calc(var(--k)*6px); background:#2a2a2a; color:#fff;
+  }
+  .kam-sec.gonder{ background:var(--accent); color:#1a1a1a; }
   .kam-flas{ position:absolute; inset:0; background:#fff; opacity:0; pointer-events:none; }
   .kam-flas.on{ animation:kamFlas .3s ease-out; }
   @keyframes kamFlas{ 0%{ opacity:.85; } 100%{ opacity:0; } }
@@ -1030,7 +1011,7 @@ if(!document.documentElement.classList.contains('tel')){
   html.tel .ust-btn{ padding:8px 10px; font-size:.78rem; }
   html.tel #addDataBtn{ display:none; }
   html.tel .sadece-masa{ display:none !important; }
-  html.tel .kirik-slots{ grid-template-columns:repeat(3, 1fr); }
+  html.tel .kirik-slots, html.tel .kirik-slots.tr-slots{ grid-template-columns:repeat(3, 1fr); }
   html.tel .masa-metin{ display:none; }
   html.tel .tel-ikon{
     display:block; width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:1.9;
@@ -1410,75 +1391,26 @@ if(!document.documentElement.classList.contains('tel')){
 
 <div class="transfer-page" id="transferPage" style="display:none;">
   <div class="tr-wrap" id="transferWrap">
-    <div class="tr-seg">
-      <button class="tr-seg-btn active" id="trSegKirik" type="button" onclick="transferAltSekmeSec('kirik')">🔧 Kırık</button>
-      <button class="tr-seg-btn" id="trSegGenel" type="button" onclick="transferAltSekmeSec('genel')">📝 Genel</button>
-    </div>
-
-    <div id="trKirikView">
-      <div class="tr-card">
-        <div class="tr-card-title">Kırık kaydı</div>
-        <div class="tr-irs">
-          <input class="tr-irs-input" id="kirikIrs4" type="text" autocomplete="off" autocapitalize="characters"
-                 placeholder="İrsaliye 1-4 (ör. 1-S-4-7738681 ya da 7738681)">
-          <div class="tr-irs-sonuc" id="kirikIrsSonuc"></div>
-        </div>
-        <div class="tr-card-title" style="margin-top:12px;">Fotoğraflar <span class="tr-hint" id="kirikIpucu"></span></div>
-        <div class="kirik-slots" id="kirikSlots"></div>
-        <div class="tr-foto-row">
-          <button class="tr-foto-btn" type="button" onclick="kirikGaleridenEkle()">🖼️ Galeriden sırayla ekle</button>
-        </div>
-        <textarea class="tr-text" id="kirikNot" placeholder="Not (isteğe bağlı)"></textarea>
-        <div class="tr-actions">
-          <button class="btn tr-big" type="button" onclick="kirikTemizle()">Temizle</button>
-          <button class="btn tr-big tr-go" id="kirikGonderBtn" type="button" onclick="kirikGonder()">📤 Gönder</button>
-        </div>
+    <div class="tr-card">
+      <div class="tr-card-title">Fotoğraf gönder <span class="tr-hint">— en fazla 5 fotoğraf, tek tek ya da hepsi birden</span></div>
+      <div class="kirik-slots tr-slots" id="trSlots"></div>
+      <div class="tr-foto-row">
+        <button class="tr-foto-btn" id="trCekBtn" type="button" onclick="trKameraAc()">📷 Fotoğraf çek</button>
+        <button class="tr-foto-btn" type="button" onclick="trGaleriAc()">🖼️ Galeriden ekle</button>
       </div>
-      <div class="tr-card sadece-masa">
-        <div class="tr-card-title">Bekleyen deposu ve tutanak</div>
-        <div class="bk-bilgi" id="bekleyenBilgi"></div>
-        <div class="tr-araclar">
-          <button class="btn tr-big tr-go" type="button" onclick="document.getElementById('bekleyenFile').click()">📊 Bekleyen deposu Excel'i yükle</button>
-          <button class="btn tr-big" type="button" onclick="tutanakAc({})">🖨 Kırık tutanağı</button>
-          <button class="btn tr-big" type="button" onclick="mailImzaDuzenle()">✍️ Mail imzası</button>
-        </div>
-      </div>
-      <div class="tr-card">
-        <div class="tr-card-head">
-          <div class="tr-card-title">Gelen kırık kayıtları</div>
-          <div class="tr-klasor" id="kirikKlasorBilgi"></div>
-        </div>
-        <div id="kirikListe"></div>
-        <div class="tr-actions">
-          <button class="btn tr-big tr-go" id="kirikHepsiBtn" type="button" onclick="kirikHepsiniIndir()">⬇ Hepsini masaüstüne indir</button>
-        </div>
+      <textarea class="tr-text" id="trNot" placeholder="Not (isteğe bağlı)"></textarea>
+      <div class="tr-actions">
+        <button class="btn tr-big" type="button" onclick="trTemizle()">Temizle</button>
+        <button class="btn tr-big tr-go" id="trGonderBtn" type="button" onclick="trGonder()">📤 Gönder</button>
       </div>
     </div>
-
-    <div id="trGenelView" style="display:none;">
-      <div class="tr-card">
-        <div class="tr-foto-row">
-          <button class="tr-foto-btn" type="button" onclick="document.getElementById('genelKameraInput').click()">📷 Fotoğraf çek</button>
-          <button class="tr-foto-btn" type="button" onclick="document.getElementById('genelGaleriInput').click()">🖼️ Fotoğraf ekle</button>
-        </div>
-        <div class="genel-thumbs" id="genelThumbs"></div>
-        <textarea class="tr-text" id="genelText" placeholder="Metin yazın veya yapıştırın..."></textarea>
-        <div class="tr-actions">
-          <button class="btn tr-big" type="button" onclick="genelTemizle()">Temizle</button>
-          <button class="btn tr-big tr-go" id="genelGonderBtn" type="button" onclick="genelGonder()">📤 Gönder</button>
-        </div>
-      </div>
-      <div class="tr-card">
-        <div class="tr-card-head"><div class="tr-card-title">Gelenler</div></div>
-        <div id="genelListe"></div>
-      </div>
+    <div class="tr-card">
+      <div class="tr-card-head"><div class="tr-card-title">Gelenler</div></div>
+      <div id="trListe"></div>
     </div>
-
   </div>
-  <input type="file" id="kirikSlotInput" accept="image/*" style="display:none;">
-  <input type="file" id="kirikGaleriInput" accept="image/*" multiple style="display:none;">
-  <input type="file" id="genelKameraInput" accept="image/*" capture="environment" style="display:none;">
-  <input type="file" id="genelGaleriInput" accept="image/*" multiple style="display:none;">
+  <input type="file" id="trGaleriInput" accept="image/*" multiple style="display:none;">
+  <input type="file" id="trKameraInput" accept="image/*" capture="environment" style="display:none;">
   <input type="file" id="bekleyenFile" accept=".xlsx,.xls" style="display:none;">
 </div>
 
@@ -1489,7 +1421,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 50;
+const APP_SURUM = 51;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -5779,8 +5711,43 @@ function ortakSayfalariYerlestir(yer){
 const ARACLAR = [
   {id:'veri-kopyala', ikon:'📋', baslik:'Veri Kopyala',
    aciklama:'Ciro raporundaki verileri tek tıkla kopyalayan yer imi. Kurmak için butonu yer imleri çubuğuna sürükle.',
-   ciz: veriKopyalaCiz}
+   ciz: veriKopyalaCiz},
+  {id:'bekleyen-deposu', ikon:'📊', baslik:'Bekleyen deposu',
+   aciklama:"Bekleyen deposu Excel'ini yükle; Outlook'ta açılacak hazır mail iner, sadece Gönder'e basarsın.",
+   ciz: bekleyenAracCiz},
+  {id:'kirik-tutanagi', ikon:'🖨', baslik:'Kırık tutanağı',
+   aciklama:"EBA kırık formunu yapıştır, Hasarlı Ürün Tutanağı hazır yazdırılsın.",
+   ciz: tutanakAracCiz}
 ];
+
+// ---------- Bekleyen deposu ve Kırık tutanağı (kodları Transfer bölümünde) ----------
+function bekleyenAracCiz(kap){
+  kap.innerHTML = `
+    <div class="vk">
+      <div class="tr-card">
+        <div class="tr-card-title">Bekleyen deposu</div>
+        <div class="bk-bilgi" id="bekleyenBilgi"></div>
+        <div class="tr-araclar">
+          <button class="btn tr-big tr-go" type="button" onclick="document.getElementById('bekleyenFile').click()">📊 Bekleyen deposu Excel'i yükle</button>
+          <button class="btn tr-big" type="button" onclick="mailImzaDuzenle()">✍️ Mail imzası</button>
+        </div>
+      </div>
+    </div>`;
+  bekleyenBilgiCiz();
+}
+function tutanakAracCiz(kap){
+  kap.innerHTML = `
+    <div class="vk">
+      <div class="tr-card">
+        <div class="tr-card-title">Kırık tutanağı</div>
+        <div class="bk-bilgi">EBA'da kırık ürün formunu açın, Ctrl+A ile tümünü seçip Ctrl+C ile kopyalayın.
+          Sonra aşağıdaki butona basıp açılan pencereye yapıştırın. Bilgiler otomatik dolar, gerekirse düzeltip yazdırın.</div>
+        <div class="tr-araclar">
+          <button class="btn tr-big tr-go" type="button" onclick="tutanakAc({})">🖨 Tutanak hazırla</button>
+        </div>
+      </div>
+    </div>`;
+}
 
 // ---------- Veri Kopyala (yer imi) ----------
 // Bu fonksiyon uygulamada çalışmaz; metni yer iminin içine konur ve ciro raporu sayfasında çalışır.
@@ -6051,7 +6018,7 @@ const MR_KILAVUZ = `
 <li><a href="#" data-git="mr-geri">Geri al ve dışa aktar</a></li>
 <li><a href="#" data-git="mr-araclar">Araçlar</a></li>
 <li><a href="#" data-git="mr-hafiza">Kurumsal hafıza ve notlar</a></li>
-<li><a href="#" data-git="mr-transfer">Transfer (kırık ve genel)</a></li>
+<li><a href="#" data-git="mr-transfer">Transfer (telefondan fotoğraf)</a></li>
 <li><a href="#" data-git="mr-duz">Düzenleyici (PDF araçları)</a></li>
 <li><a href="#" data-git="mr-oneri">Sohbet ve duyurular</a></li>
 <li><a href="#" data-git="mr-bolge">Bölge paneli</a></li>
@@ -6064,7 +6031,7 @@ const MR_KILAVUZ = `
 <ul>
 <li>Mağazanın günlük satış verilerini (ciro, MDO, FBÜ, FBS, MGS, toplu satış) tek yerde tutar, haftalık ve aylık karşılaştırır.</li>
 <li>Bölge müdürüne gönderilen günlük mesajı ve RT tablosunun görselini hazırlar.</li>
-<li>Kırık ürün kayıtları, PDF işleri ve mağaza bilgileri gibi günlük işleri de aynı yerde toplar.</li>
+<li>Telefondan fotoğraf aktarma, PDF işleri ve mağaza bilgileri gibi günlük işleri de aynı yerde toplar.</li>
 <li>Veriler bulutta saklanır; bilgisayardan da telefondan da aynı veriler görünür. Bir yerde yapılan değişiklik diğerine anında gelir.</li>
 <li>Her mağaza yalnızca kendi verisini görür. Bölge müdürü kendisine bağlı mağazaları görür.</li>
 </ul>
@@ -6211,12 +6178,14 @@ const MR_KILAVUZ = `
   <li>Kartı açıp butonu yer imleri çubuğuna sürükleyerek kurulur.</li>
   <li>Kullanımı için 4. başlığa bakın.</li>
   </ul></li>
+<li><b>Bekleyen deposu:</b> haftalık Excel'i yükleyin; Outlook'ta açılan hazır bir mail iner (alıcı, bilgi, konu, metin ve ek hazır), Gönder'e basmanız yeter. Mail imzası <b>✍️ Mail imzası</b> ile değiştirilir.</li>
+<li><b>Kırık tutanağı:</b> EBA kırık formunu Ctrl+A ve Ctrl+C ile kopyalayıp açılan pencereye yapıştırın; ürünler ve bilgiler kendiliğinden dolar, yazdırıp imzalayın.</li>
 </ul>
 <a class="hk-yukari" href="#" data-git="mr-bas">↑ İçindekiler</a>
 
 <h3 id="mr-hafiza">11. Kurumsal hafıza ve notlar</h3>
 <ul>
-<li>Bölümler (süreçler, formlar, eğitim, SSS, kime sorulur) bütün mağazalarda ortaktır.</li>
+<li>Bölümler (Mağaza Rapor kılavuzu, Ön mal kabul) bütün mağazalarda ortaktır.</li>
 <li><b>Notlar:</b> sayfanın altındaki not alanı yalnızca o mağazaya özeldir.
   <ul>
   <li>"Not al..." kutusuna yazınca not eklenir.</li>
@@ -6226,38 +6195,24 @@ const MR_KILAVUZ = `
 <a class="hk-yukari" href="#" data-git="mr-bas">↑ İçindekiler</a>
 
 <h3 id="mr-transfer">12. Transfer</h3>
-<p>Telefonda çekilen fotoğraf ve yazıları bilgisayara aktarmak içindir.</p>
-<p><b>Kırık (telefonda):</b></p>
+<p>Telefonda çekilen fotoğrafları bilgisayara aktarmak içindir. Fotoğraflar tam çözünürlükte gider; tutanak gibi yazılı belgeler de okunur.</p>
+<p><b>Telefonda:</b></p>
 <ol>
-<li>İrsaliye 1-4 numarasını yazın (ör. 7738681). 1-6 numarası, depo ve tarih kendiliğinden bulunur.</li>
-<li>Fotoğrafları çekin: Kutu 1–4 ve Kırık. Kutu 1'e dokununca kamera açılır ve sırayla ilerler. İmzalı tutanak hazırsa onu da <b>Tutanak</b> kutusuna ekleyin; değilse kayıt onsuz gönderilebilir.</li>
-<li><b>📤 Gönder</b>'e basın.</li>
+<li><b>📷 Fotoğraf çek</b>'e basın; kamera açılır.</li>
+<li>Çektikten sonra üç seçenek çıkar:
+  <ul>
+  <li><b>↺ Tekrar çek:</b> fotoğraf beğenilmediyse yeniden çekilir.</li>
+  <li><b>📷 Devam et:</b> bir fotoğraf daha çekilir (en fazla 5).</li>
+  <li><b>📤 Gönder:</b> çekilenler hemen gönderilir. Tek fotoğraf da gönderilebilir.</li>
+  </ul></li>
+<li>Galerideki fotoğraflar <b>🖼️ Galeriden ekle</b> ile eklenir. İsterseniz kısa bir not da yazabilirsiniz.</li>
 </ol>
-<p><b>Kırık (bilgisayarda):</b></p>
+<p><b>Bilgisayarda:</b></p>
 <ul>
-<li>Gelen kayıtta 1-6 numarası 📋 ile kopyalanır.</li>
-<li><b>🖨 Tutanak:</b>
-  <ul>
-  <li>EBA kırık formunu Ctrl+A ve Ctrl+C ile kopyalayıp pencereye yapıştırın.</li>
-  <li>Ürünler ve bilgiler kendiliğinden dolar; yazdırıp imzalayın.</li>
-  </ul></li>
-<li>EBA'ya girince <b>EBA'ya işlendi</b> işaretlenir.</li>
-<li>Kayıt gönderildikten sonra fotoğraf eklenemez; sonradan çekilen tutanak fotoğrafı <b>Genel</b>'den gönderilir.</li>
-<li><b>⬇ İndir:</b> fotoğraflar seçtiğiniz klasöre "37 · 06.10.2026 · 1-S-6-…" adlı klasörle iner (kutu-1…4, kirik, tutanak). İndirilen kayıt listeden silinir.</li>
-</ul>
-<p><b>Bekleyen deposu</b> (bilgisayarda, haftalık):</p>
-<ul>
-<li><b>Bekleyen deposu Excel'i yükle</b>'ye basın.
-  <ul>
-  <li>1-4 → 1-6 eşleşmeleri kaydedilir.</li>
-  <li>Outlook'ta açılan hazır bir mail iner (alıcı, bilgi, konu, metin ve ek hazır); Gönder'e basmanız yeter.</li>
-  </ul></li>
-<li>Mail imzası <b>✍️ Mail imzası</b> ile değiştirilir.</li>
-</ul>
-<p><b>Genel:</b></p>
-<ul>
-<li>Telefondan istediğiniz fotoğraf ve yazıyı gönderin.</li>
-<li>Bilgisayarda yazı 📋 ile kopyalanır, fotoğraflar indirilir.</li>
+<li>Gönderilenler <b>Gelenler</b> listesinde görünür.</li>
+<li><b>⬇ İndir</b> fotoğrafların hepsini indirir ("foto-2026-10-11_1430-1.jpg" gibi). Tek fotoğraf için küçük resme tıklayın.</li>
+<li>İndirilen kayıtta <b>✓ İndirildi</b> yazar; işiniz bitince 🗑 ile silin.</li>
+<li>Not varsa <b>📋 Notu kopyala</b> ile kopyalanır.</li>
 </ul>
 <a class="hk-yukari" href="#" data-git="mr-bas">↑ İçindekiler</a>
 
@@ -6380,8 +6335,6 @@ Adres: <b style="word-break:break-all;">osmanonurmart.github.io/magazarapor/rapo
 <dd>Sol üstteki logoya dokunun; yeni sürüm varsa yüklenir.</dd>
 <dt>Telefonda "Veriler yükleniyor"da takılı kaldı.</dt>
 <dd>Birkaç saniye sonra çıkan <b>Sayfayı yenile</b>'ye basın. Düzelmezse internet bağlantısını kontrol edin.</dd>
-<dt>Kırık kaydında 1-6 bulunamadı.</dt>
-<dd>O haftanın bekleyen deposu Excel'i henüz yüklenmemiştir. Yine de gönderin; Excel bilgisayardan yüklenince 1-6 kendiliğinden tamamlanır.</dd>
 <dt>Veri Kopyala yer imini sürükleyemiyorum.</dt>
 <dd>Yer imleri çubuğu kapalı olabilir: Ctrl+Shift+B (Mac: Cmd+Shift+B). Olmazsa kartın altındaki "yer imi adresini kopyala" ile elle ekleyin.</dd>
 <dt>PDF'te yazıyı değiştiremiyorum.</dt>
@@ -6618,60 +6571,38 @@ function notAc(id){
 }
 
 // ==================== TRANSFER (Telefon → Bilgisayar) ====================
-// Telefonda çekilen fotoğraflar ve yazılan notlar küçültülüp buluta yazılır,
-// bilgisayarda aynı sekmeden indirilir. Firestore'da bir belge en fazla 1 MB
-// olabildiği için her fotoğraf ayrı belgede durur (transferFotos/{kayitId}_{sira}),
-// ana kayıtta (transfers) yalnızca küçük önizlemeler tutulur.
-// Kırık kayıtları masaüstünde seçilen klasörün altına "37 · 06.10.2026 · 1-S-6-…"
-// adlı klasörlere kaydedilir; son numara buluta yazılır (settings/transfer.kirikSayac).
-// Kutu 1-4 ve Kırık zorunlu sayılır; tutanak sonradan imzalandığı için isteğe bağlı.
-const KIRIK_FOTO_ADLARI = ['Kutu 1','Kutu 2','Kutu 3','Kutu 4','Kırık','Tutanak'];
-const KIRIK_DOSYA_ADLARI = ['kutu-1','kutu-2','kutu-3','kutu-4','kirik','tutanak'];
-const KIRIK_KISA = ['K1','K2','K3','K4','Kırık','Tut.'];
-const KIRIK_FOTO_SAYISI = KIRIK_FOTO_ADLARI.length;
-const KIRIK_ZORUNLU = 5;
-const FOTO_MAX_KENAR = 1600;
-const FOTO_MAX_BOYUT = 900000;   // dataURL uzunluğu; belge sınırının altında kalsın
-const THUMB_KENAR = 160;
-const KLASOR_DESTEGI = typeof window.showDirectoryPicker === 'function';
+// Telefonda çekilen en fazla 5 fotoğraf ve isteğe bağlı bir not buluta yazılır,
+// bilgisayarda aynı sekmeden tam çözünürlükte indirilir.
+// Firestore'da bir belge en fazla 1 MB olabildiği için her fotoğraf parçalara bölünür:
+// transferFotos/{kayitId}_{sira} ilk parça, {kayitId}_{sira}_{p} sonraki parçalar.
+// Ana kayıtta (transfers) parça sayıları ve küçük önizlemeler tutulur.
+const TR_MAX_FOTO = 5;
+const FOTO_MAX_KENAR = 3200;     // yazılar okunsun diye yüksek tutulur
+const FOTO_KALITE = 0.88;
+const FOTO_PARCA = 900000;       // dataURL parça uzunluğu; belge sınırının altında kalsın
+const FOTO_MAX_PARCA = 8;
+const THUMB_KENAR = 200;
 
-let transferCache = [];          // [{id, tip, text, siralar, thumbs, createdAtMs, by}]
-let transferAltSekme = 'kirik';
-let kirikSlotlar = new Array(KIRIK_FOTO_SAYISI).fill(null);   // {full, thumb}
-let kirikIrs = null;             // {kod4, kod6, depo, tarih} — formda seçilen irsaliye
-let kirikHedefSlot = 0;
-let genelFotolar = [];           // [{full, thumb}]
-let kirikSayac = null;           // en son oluşturulan klasör numarası
-let kirikKlasor = null;          // FileSystemDirectoryHandle (bu bilgisayarda hatırlanır)
+let transferCache = [];          // [{id, text, siralar, parcalar, thumbs, createdAtMs, by, indirildi}]
+let trFotolar = [];              // [{full, thumb}]
 let transferMesgul = false;
 
 function transferSifirla(){
   transferCache = [];
-  kirikSayac = null;
-  kirikSlotlar = new Array(KIRIK_FOTO_SAYISI).fill(null);
-  kirikIrs = null;
+  trFotolar = [];
   mailAyar = null;
-  genelFotolar = [];
-  const ki = document.getElementById('kirikIrs4');
-  if(ki) ki.value = '';
-  const kn = document.getElementById('kirikNot');
-  const gt = document.getElementById('genelText');
-  if(kn) kn.value = '';
-  if(gt) gt.value = '';
+  const n = document.getElementById('trNot');
+  if(n) n.value = '';
 }
 
 function listenTransferChanges(){
   cloudUnsubs.push(sdb('transfers').onSnapshot(snap=>{
     const liste = [];
     snap.forEach(d=> liste.push(Object.assign({id:d.id}, d.data())));
-    liste.sort((a,b)=> (a.createdAtMs||0) - (b.createdAtMs||0));
+    liste.sort((a,b)=> (b.createdAtMs||0) - (a.createdAtMs||0));
     transferCache = liste;
-    renderTransferListeleri();
+    renderTransferListesi();
   }, err=> setTransferDurum('Transferler okunamadı: ' + err.message, true)));
-  cloudUnsubs.push(sdb('settings').doc('transfer').onSnapshot(doc=>{
-    kirikSayac = doc.exists ? (Number(doc.data().kirikSayac) || 0) : 0;
-    renderKirikKlasorBilgi();
-  }, err=> setTransferDurum('Klasör sayacı okunamadı: ' + err.message, true)));
 }
 
 function setTransferDurum(msg, isError){
@@ -6700,22 +6631,10 @@ window.addEventListener('resize', ()=>{
   if(document.getElementById('transferPage').style.display !== 'none') transferMobilOlcek();
 });
 
-function transferAltSekmeSec(sekme){
-  transferAltSekme = sekme;
-  renderTransfer();
-}
-
 function renderTransfer(){
-  document.getElementById('trSegKirik').classList.toggle('active', transferAltSekme === 'kirik');
-  document.getElementById('trSegGenel').classList.toggle('active', transferAltSekme === 'genel');
-  document.getElementById('trKirikView').style.display = transferAltSekme === 'kirik' ? '' : 'none';
-  document.getElementById('trGenelView').style.display = transferAltSekme === 'genel' ? '' : 'none';
-  renderKirikSlotlar();
-  renderGenelThumbs();
-  renderKirikKlasorBilgi();
-  renderTransferListeleri();
-  renderIrsSonuc();
-  if(!TELEFON) bekleyenBilgiCiz();
+  document.getElementById('trCekBtn').style.display = telefonMu() ? '' : 'none';
+  renderTrSlotlar();
+  renderTransferListesi();
 }
 
 // ---------- Fotoğraf hazırlama ----------
@@ -6724,7 +6643,7 @@ function resmiAc(file){
     const url = URL.createObjectURL(file);
     const img = new Image();
     img.onload = ()=>{ URL.revokeObjectURL(url); res(img); };
-    img.onerror = ()=>{ URL.revokeObjectURL(url); rej(new Error('Fotoğraf açılamadı: ' + file.name)); };
+    img.onerror = ()=>{ URL.revokeObjectURL(url); rej(new Error('Fotoğraf açılamadı: ' + (file.name || ''))); };
     img.src = url;
   });
 }
@@ -6737,14 +6656,11 @@ function resmiKucult(kaynak, gen, yuk, maxKenar, kalite){
   return c.toDataURL('image/jpeg', kalite);
 }
 function kaynaktanFoto(kaynak, gen, yuk){
-  let kenar = FOTO_MAX_KENAR, kalite = 0.85;
+  let kenar = FOTO_MAX_KENAR, kalite = FOTO_KALITE;
   let full = resmiKucult(kaynak, gen, yuk, kenar, kalite);
-  while(full.length > FOTO_MAX_BOYUT && kalite > 0.5){
-    kalite -= 0.1;
-    full = resmiKucult(kaynak, gen, yuk, kenar, kalite);
-  }
-  while(full.length > FOTO_MAX_BOYUT && kenar > 400){
-    kenar = Math.round(kenar * 0.8);
+  // Çok ayrıntılı fotoğraflarda bile parça sayısı sınırı aşılmasın.
+  while(full.length > FOTO_PARCA * FOTO_MAX_PARCA && kenar > 1600){
+    kenar = Math.round(kenar * 0.85);
     full = resmiKucult(kaynak, gen, yuk, kenar, kalite);
   }
   return {full, thumb: resmiKucult(kaynak, gen, yuk, THUMB_KENAR, 0.7)};
@@ -6754,83 +6670,89 @@ async function fotoHazirla(file){
   return kaynaktanFoto(img, img.naturalWidth, img.naturalHeight);
 }
 
-// ---------- Kırık: telefon tarafı ----------
-function renderKirikSlotlar(){
-  const holder = document.getElementById('kirikSlots');
+// ---------- Telefon tarafı: en fazla 5 fotoğraf ----------
+function renderTrSlotlar(){
+  const holder = document.getElementById('trSlots');
   holder.innerHTML = '';
-  kirikSlotlar.forEach((foto, i)=>{
+  trFotolar.forEach((foto, i)=>{
     const slot = document.createElement('div');
-    slot.className = 'kirik-slot' + (foto ? ' dolu' : '');
-    if(foto){
-      slot.innerHTML = '<img alt=""><span class="ks-badge">' + KIRIK_FOTO_ADLARI[i] + '</span>' +
-                       '<button class="ks-sil" type="button" title="Kaldır">✕</button>';
-      slot.querySelector('img').src = foto.thumb;
-      slot.querySelector('.ks-sil').addEventListener('click', e=>{
-        e.stopPropagation();
-        kirikSlotlar[i] = null;
-        renderKirikSlotlar();
-      });
-    } else {
-      slot.innerHTML = '<span class="ks-no">📷</span><span class="ks-ad">' + KIRIK_FOTO_ADLARI[i] + '</span>';
-    }
-    slot.addEventListener('click', ()=> kirikSlotTikla(i));
+    slot.className = 'kirik-slot dolu';
+    slot.innerHTML = '<img alt=""><span class="ks-badge">' + (i+1) + '</span>' +
+                     '<button class="ks-sil" type="button" title="Kaldır">✕</button>';
+    slot.querySelector('img').src = foto.thumb;
+    slot.querySelector('.ks-sil').addEventListener('click', e=>{
+      e.stopPropagation();
+      trFotolar.splice(i, 1);
+      renderTrSlotlar();
+    });
     holder.appendChild(slot);
   });
-  const dolu = kirikSlotlar.filter(Boolean).length;
-  document.getElementById('kirikIpucu').textContent = telefonMu()
-    ? '— Kutu 1\'e dokunun, kutuları ve kırığı art arda çekin'
-    : '— Kutu 1-4, Kırık, Tutanak (imzalı)';
-  document.getElementById('kirikGonderBtn').textContent = '📤 Gönder (' + dolu + '/' + KIRIK_FOTO_SAYISI + ')';
+  if(trFotolar.length < TR_MAX_FOTO){
+    const ekle = document.createElement('div');
+    ekle.className = 'kirik-slot';
+    ekle.innerHTML = '<span class="ks-no">＋</span><span class="ks-ad">Fotoğraf ekle</span>';
+    ekle.addEventListener('click', trFotoEkleTikla);
+    holder.appendChild(ekle);
+  }
+  const btn = document.getElementById('trGonderBtn');
+  btn.textContent = '📤 Gönder (' + trFotolar.length + '/' + TR_MAX_FOTO + ')';
 }
 
-function kirikDosyadanSec(slot){
-  kirikHedefSlot = slot;
-  document.getElementById('kirikSlotInput').click();
+function trFotoEkleTikla(){
+  if(telefonMu()) trKameraAc();
+  else trGaleriAc();
+}
+function trGaleriAc(){
+  if(trFotolar.length >= TR_MAX_FOTO){ setTransferDurum(TR_MAX_FOTO + ' fotoğraf doldu.', true); return; }
+  document.getElementById('trGaleriInput').click();
 }
 
-// Boş kutu: telefonda kamera açılır ve boş kutular sırayla çekilir.
-// Dolu kutu: yeniden çekme / galeriden seçme / kaldırma seçenekleri.
-async function kirikSlotTikla(i){
-  if(!kirikSlotlar[i]){
-    if(telefonMu()) kameraAc(i, false);
-    else kirikDosyadanSec(i);
-    return;
+document.getElementById('trGaleriInput').addEventListener('change', async e=>{
+  const files = Array.from(e.target.files || []);
+  e.target.value = '';
+  const yer = TR_MAX_FOTO - trFotolar.length;
+  for(let i=0;i<Math.min(files.length, yer);i++){
+    setTransferDurum('Fotoğraf hazırlanıyor ' + (i+1) + '/' + Math.min(files.length, yer) + '...');
+    try{ trFotolar.push(await fotoHazirla(files[i])); }
+    catch(err){ setTransferDurum(err.message, true); return; }
+    renderTrSlotlar();
   }
-  const secim = await uiDialog({
-    ikon:'📷', baslik:KIRIK_FOTO_ADLARI[i], dikey:true,
-    butonlar:[
-      {metin:'📷  Yeniden çek', deger:'cek', tip:'birincil'},
-      {metin:'🖼️  Galeriden seç', deger:'galeri'},
-      {metin:'🗑  Kaldır', deger:'sil'},
-      {metin:'Vazgeç', deger:null, tip:'sade'}
-    ],
-    iptalDeger:null
-  });
-  if(secim === 'cek'){
-    if(telefonMu()) kameraAc(i, true);
-    else kirikDosyadanSec(i);
-  } else if(secim === 'galeri'){
-    kirikDosyadanSec(i);
-  } else if(secim === 'sil'){
-    kirikSlotlar[i] = null;
-    renderKirikSlotlar();
-  }
+  setTransferDurum(files.length > yer ? 'En fazla ' + TR_MAX_FOTO + ' fotoğraf; fazlası eklenmedi.' : '', files.length > yer);
+});
+document.getElementById('trKameraInput').addEventListener('change', async e=>{
+  const file = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if(!file || trFotolar.length >= TR_MAX_FOTO) return;
+  setTransferDurum('Fotoğraf hazırlanıyor...');
+  try{ trFotolar.push(await fotoHazirla(file)); }
+  catch(err){ setTransferDurum(err.message, true); return; }
+  setTransferDurum('');
+  renderTrSlotlar();
+});
+
+function trTemizle(){
+  trFotolar = [];
+  document.getElementById('trNot').value = '';
+  renderTrSlotlar();
+  setTransferDurum('');
 }
 
 // ---------- Uygulama içi kamera ----------
-let kamera = null;   // {ov, video, stream, aktif, tek, mesgul}
+// Her çekimden sonra fotoğraf gösterilir: Tekrar çek, Devam et (5'e kadar) ya da Gönder.
+let kamera = null;   // {ov, video, stream, mesgul}
 
-async function kameraAc(slot, tek){
+async function trKameraAc(){
   if(kamera) return;
-  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){ kameraYok(slot, null); return; }
+  if(trFotolar.length >= TR_MAX_FOTO){ setTransferDurum(TR_MAX_FOTO + ' fotoğraf doldu.', true); return; }
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){ kameraYok(null); return; }
   let stream;
   try{
     stream = await navigator.mediaDevices.getUserMedia({
       audio:false,
-      video:{facingMode:{ideal:'environment'}, width:{ideal:1920}, height:{ideal:1920}}
+      video:{facingMode:{ideal:'environment'}, width:{ideal:4096}, height:{ideal:4096}}
     });
   }catch(e){
-    kameraYok(slot, e);
+    kameraYok(e);
     return;
   }
   arayuzOlcek();
@@ -6839,78 +6761,104 @@ async function kameraAc(slot, tek){
   ov.innerHTML =
     '<div class="kam-goruntu">' +
       '<video autoplay playsinline muted></video>' +
+      '<img class="kam-onizleme" alt="">' +
       '<div class="kam-flas"></div>' +
       '<div class="kam-ust"><div class="kam-baslik"></div>' +
         '<button class="kam-kapat" type="button" title="Kapat">✕</button></div>' +
     '</div>' +
     '<div class="kam-alt">' +
       '<div class="kam-serit"></div>' +
-      '<div class="kam-kontrol">' +
-        '<button class="kam-yan" type="button" data-act="galeri">🖼️ Galeri</button>' +
+      '<div class="kam-kontrol kam-canli">' +
+        '<button class="kam-yan" type="button" data-act="kapat">Kapat</button>' +
         '<button class="kam-deklansor" type="button" title="Çek"></button>' +
-        '<button class="kam-yan bitti" type="button" data-act="bitti">Bitti</button>' +
+        '<span class="kam-yan"></span>' +
+      '</div>' +
+      '<div class="kam-kontrol kam-secim">' +
+        '<button class="kam-sec" type="button" data-act="tekrar">↺ Tekrar çek</button>' +
+        '<button class="kam-sec" type="button" data-act="devam">📷 Devam et</button>' +
+        '<button class="kam-sec gonder" type="button" data-act="gonder">📤 Gönder</button>' +
       '</div>' +
     '</div>';
   document.body.appendChild(ov);
   const video = ov.querySelector('video');
   video.srcObject = stream;
   try{ await video.play(); }catch(e){ /* autoplay ile zaten oynar */ }
-  kamera = {ov, video, stream, aktif:slot, tek, mesgul:false};
+  kamera = {ov, video, stream, mesgul:false};
   ov.querySelector('.kam-kapat').addEventListener('click', kameraKapat);
-  ov.querySelector('[data-act="bitti"]').addEventListener('click', kameraKapat);
-  ov.querySelector('[data-act="galeri"]').addEventListener('click', ()=>{
-    kirikHedefSlot = kamera.aktif;
-    document.getElementById('kirikSlotInput').click();
-  });
+  ov.querySelector('[data-act="kapat"]').addEventListener('click', kameraKapat);
   ov.querySelector('.kam-deklansor').addEventListener('click', kameraCek);
-  renderKamera();
+  ov.querySelector('[data-act="tekrar"]').addEventListener('click', ()=>{
+    trFotolar.pop();
+    renderTrSlotlar();
+    kameraCanli();
+  });
+  ov.querySelector('[data-act="devam"]').addEventListener('click', kameraCanli);
+  ov.querySelector('[data-act="gonder"]').addEventListener('click', ()=>{
+    kameraKapat();
+    trGonder();
+  });
+  kameraCanli();
 }
 
-function kameraYok(slot, hata){
+function kameraYok(hata){
   const izinYok = hata && (hata.name === 'NotAllowedError' || hata.name === 'SecurityError');
   uiDialog({
     ikon:'📷', baslik:'Kamera açılamadı',
     mesaj: izinYok
-      ? 'Tarayıcı kamera iznini vermedi. Adres çubuğundaki kilit simgesinden kameraya izin verebilir ya da fotoğrafı dosyadan seçebilirsiniz.'
+      ? 'Tarayıcı kamera iznini vermedi. Adres çubuğundaki kilit simgesinden kameraya izin verebilir ya da fotoğrafı telefonun kamerasıyla çekebilirsiniz.'
       : 'Bu cihazda uygulama içi kamera açılamadı. Fotoğrafı telefonun kendi kamerasıyla çekebilirsiniz.',
-    butonlar:[{metin:'Vazgeç', deger:false}, {metin:'Fotoğraf çek / seç', deger:true, tip:'birincil'}],
+    butonlar:[{metin:'Vazgeç', deger:false}, {metin:'Fotoğraf çek', deger:true, tip:'birincil'}],
     iptalDeger:false
-  }).then(evet=>{ if(evet) kirikDosyadanSec(slot); });
+  }).then(evet=>{ if(evet) document.getElementById('trKameraInput').click(); });
 }
 
-function renderKamera(){
+function renderKameraSerit(){
   if(!kamera) return;
-  const dolu = kirikSlotlar.filter(Boolean).length;
   kamera.ov.querySelector('.kam-baslik').innerHTML =
-    KIRIK_FOTO_ADLARI[kamera.aktif] + '<small>' + dolu + ' / ' + KIRIK_FOTO_SAYISI + ' hazır</small>';
+    'Fotoğraf ' + Math.min(trFotolar.length + (kamera.secim ? 0 : 1), TR_MAX_FOTO) +
+    '<small>' + trFotolar.length + ' / ' + TR_MAX_FOTO + ' hazır</small>';
   const serit = kamera.ov.querySelector('.kam-serit');
   serit.innerHTML = '';
-  kirikSlotlar.forEach((f, i)=>{
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'kam-mini' + (i === kamera.aktif ? ' aktif' : '');
-    if(f){
-      b.innerHTML = '<img alt=""><span class="km-no">' + KIRIK_KISA[i] + '</span>';
-      b.querySelector('img').src = f.thumb;
+  for(let i=0;i<TR_MAX_FOTO;i++){
+    const b = document.createElement('div');
+    b.className = 'kam-mini' + (i === trFotolar.length - (kamera.secim ? 1 : 0) ? ' aktif' : '');
+    if(trFotolar[i]){
+      b.innerHTML = '<img alt="">';
+      b.querySelector('img').src = trFotolar[i].thumb;
     } else {
-      b.textContent = KIRIK_KISA[i];
+      b.textContent = i + 1;
     }
-    // Şeritten bir kutuya dokunmak o fotoğrafı yeniden çekmeyi sağlar.
-    b.addEventListener('click', ()=>{ kamera.aktif = i; renderKamera(); });
     serit.appendChild(b);
-  });
+  }
 }
 
-// Sıradaki boş kutu: önce çekilenin sağına, yoksa baştan bakar.
-// Kutu/kırık çekerken tutanağa geçilmez; tutanak ayrıca çekilir.
-function siradakiBosSlot(sonra){
-  const ust = sonra < KIRIK_ZORUNLU ? KIRIK_ZORUNLU : KIRIK_FOTO_SAYISI;
-  for(let i=sonra+1;i<ust;i++) if(!kirikSlotlar[i]) return i;
-  for(let i=0;i<=Math.min(sonra, ust-1);i++) if(!kirikSlotlar[i]) return i;
-  return -1;
+// Canlı görüntü: deklanşör görünür.
+function kameraCanli(){
+  if(!kamera) return;
+  if(trFotolar.length >= TR_MAX_FOTO){ kameraSecim(); return; }
+  kamera.secim = false;
+  kamera.mesgul = false;
+  kamera.ov.querySelector('.kam-onizleme').style.display = 'none';
+  kamera.ov.querySelector('.kam-canli').style.display = '';
+  kamera.ov.querySelector('.kam-secim').style.display = 'none';
+  renderKameraSerit();
 }
 
-async function kameraCek(){
+// Çekimden sonra: çekilen fotoğraf ve Tekrar çek / Devam et / Gönder.
+function kameraSecim(){
+  if(!kamera) return;
+  kamera.secim = true;
+  const son = trFotolar[trFotolar.length - 1];
+  const on = kamera.ov.querySelector('.kam-onizleme');
+  if(son){ on.src = son.full; on.style.display = ''; }
+  kamera.ov.querySelector('.kam-canli').style.display = 'none';
+  kamera.ov.querySelector('.kam-secim').style.display = '';
+  kamera.ov.querySelector('[data-act="devam"]').style.display = trFotolar.length >= TR_MAX_FOTO ? 'none' : '';
+  kamera.ov.querySelector('[data-act="gonder"]').textContent = '📤 Gönder (' + trFotolar.length + ')';
+  renderKameraSerit();
+}
+
+function kameraCek(){
   if(!kamera || kamera.mesgul) return;
   const v = kamera.video;
   if(!v.videoWidth){ uiBildirim('Kamera henüz hazır değil', 'hata'); return; }
@@ -6921,22 +6869,9 @@ async function kameraCek(){
   c.width = v.videoWidth;
   c.height = v.videoHeight;
   c.getContext('2d').drawImage(v, 0, 0);
-  const cekilen = kamera.aktif;
-  kirikSlotlar[cekilen] = kaynaktanFoto(c, c.width, c.height);
-  renderKirikSlotlar();
-  const sonraki = kamera.tek ? -1 : siradakiBosSlot(cekilen);
-  if(sonraki < 0){
-    renderKamera();
-    setTimeout(()=>{
-      kameraKapat();
-      const dolu = kirikSlotlar.filter(Boolean).length;
-      if(kirikSlotlar.slice(0, KIRIK_ZORUNLU).every(Boolean)) uiBildirim('Kutu ve kırık fotoğrafları hazır, kontrol edip gönderebilirsiniz', 'basari');
-    }, 350);
-    return;
-  }
-  kamera.aktif = sonraki;
-  renderKamera();
-  kamera.mesgul = false;
+  trFotolar.push(kaynaktanFoto(c, c.width, c.height));
+  renderTrSlotlar();
+  kameraSecim();
 }
 
 function kameraKapat(){
@@ -6946,194 +6881,58 @@ function kameraKapat(){
   kamera = null;
 }
 
-function kirikGaleridenEkle(){
-  document.getElementById('kirikGaleriInput').click();
+// ---------- Gönderme ----------
+function fotoParcalari(full){
+  const parcalar = [];
+  for(let i=0;i<full.length;i+=FOTO_PARCA) parcalar.push(full.slice(i, i + FOTO_PARCA));
+  return parcalar;
+}
+function fotoBelgeId(tid, sira, p){
+  return tid + '_' + sira + (p ? '_' + p : '');
 }
 
-// Seçilen dosyaları, verilen slottan başlayarak boş slotlara sırayla yerleştirir.
-async function kirikSlotlaraYerlestir(files, baslangic){
-  let slot = baslangic, fazla = false;
-  for(const f of files){
-    while(slot < KIRIK_FOTO_SAYISI && kirikSlotlar[slot] && slot !== baslangic) slot++;
-    if(slot >= KIRIK_FOTO_SAYISI){ fazla = true; break; }
-    setTransferDurum('Fotoğraf hazırlanıyor (' + KIRIK_FOTO_ADLARI[slot] + ')...');
-    try{
-      kirikSlotlar[slot] = await fotoHazirla(f);
-    }catch(e){
-      setTransferDurum(e.message, true);
-      return;
-    }
-    renderKirikSlotlar();
-    slot++;
-  }
-  if(kamera){
-    const sonraki = siradakiBosSlot(Math.min(slot, KIRIK_FOTO_SAYISI) - 1);
-    if(sonraki < 0) kameraKapat();
-    else { kamera.aktif = sonraki; renderKamera(); }
-  }
-  setTransferDurum(fazla ? KIRIK_FOTO_SAYISI + ' fotoğraf doldu, fazlası eklenmedi.' : '', fazla);
-}
-
-document.getElementById('kirikSlotInput').addEventListener('change', async e=>{
-  const files = Array.from(e.target.files || []);
-  e.target.value = '';
-  if(files.length) await kirikSlotlaraYerlestir(files, kirikHedefSlot);
-});
-document.getElementById('kirikGaleriInput').addEventListener('change', async e=>{
-  const files = Array.from(e.target.files || []);
-  e.target.value = '';
-  const ilkBos = kirikSlotlar.findIndex(f=> !f);
-  if(ilkBos < 0){ setTransferDurum(KIRIK_FOTO_SAYISI + ' fotoğraf zaten dolu.', true); return; }
-  if(files.length) await kirikSlotlaraYerlestir(files, ilkBos);
-});
-
-function kirikTemizle(){
-  kirikSlotlar = new Array(KIRIK_FOTO_SAYISI).fill(null);
-  kirikIrs = null;
-  document.getElementById('kirikIrs4').value = '';
-  document.getElementById('kirikNot').value = '';
-  renderKirikSlotlar();
-  renderIrsSonuc();
-  setTransferDurum('');
-}
-
-async function transferKaydet(tip, fotolar, text, ek){
+async function transferKaydet(fotolar, text){
   const ref = sdb('transfers').doc();
+  const parcaSayilari = [];
   for(let i=0;i<fotolar.length;i++){
-    setTransferDurum('Gönderiliyor ' + (i+1) + '/' + fotolar.length + '...');
-    await sdb('transferFotos').doc(ref.id + '_' + fotolar[i].sira).set({
-      tid: ref.id, sira: fotolar[i].sira, data: fotolar[i].full
-    });
+    const parcalar = fotoParcalari(fotolar[i].full);
+    parcaSayilari.push(parcalar.length);
+    for(let p=0;p<parcalar.length;p++){
+      setTransferDurum('Gönderiliyor: fotoğraf ' + (i+1) + '/' + fotolar.length +
+        (parcalar.length > 1 ? ' (%' + Math.round((p+1) / parcalar.length * 100) + ')' : '') + '...');
+      await sdb('transferFotos').doc(fotoBelgeId(ref.id, i+1, p)).set({
+        tid: ref.id, sira: i+1, parca: p, data: parcalar[p]
+      });
+    }
   }
   // Ana kayıt en son yazılır; bilgisayar yarım kalmış bir kaydı görmez.
-  await ref.set(Object.assign({}, ek || {}, {
-    tip, text: text || '',
-    siralar: fotolar.map(f=> f.sira),
+  await ref.set({
+    tip: 'genel', text: text || '',
+    siralar: fotolar.map((f,i)=> i+1),
+    parcalar: parcaSayilari,
     thumbs: fotolar.map(f=> f.thumb),
     createdAtMs: Date.now(),
     by: guncelleyenAdi()
-  }));
+  });
 }
 
-async function kirikGonder(){
+async function trGonder(){
   if(transferMesgul) return;
-  const fotolar = [];
-  kirikSlotlar.forEach((f,i)=>{ if(f) fotolar.push({sira:i+1, full:f.full, thumb:f.thumb}); });
-  if(!fotolar.length){ setTransferDurum('Önce fotoğraf ekleyin.', true); return; }
-  const eksikler = KIRIK_FOTO_ADLARI.slice(0, KIRIK_ZORUNLU).filter((ad, i)=> !kirikSlotlar[i]);
-  if(eksikler.length &&
-     !await uiOnay('Eksik: ' + eksikler.join(', ') + '. Eksik haliyle gönderilsin mi?',
-                   {baslik:'Eksik fotoğraf', ikon:'📷', evet:'Gönder', hayir:'Geri dön'})) return;
-  const irs4Yazilan = irs4Normal(document.getElementById('kirikIrs4').value);
-  const ek = {};
-  if(kirikIrs && irs4Yazilan && (kirikIrs.kod4 === irs4Yazilan || kirikIrs.kod4Ana === irs4Yazilan)){
-    Object.assign(ek, {irs4: kirikIrs.kod4, irs6: kirikIrs.kod6 || '', depo: kirikIrs.depo || '', irsTarih: kirikIrs.tarih || ''});
-  } else if(irs4Yazilan){
-    ek.irs4 = irs4Yazilan;
-  } else if(!await uiOnay('İrsaliye 1-4 numarası girilmedi. Yine de gönderilsin mi?',
-                          {baslik:'İrsaliye yok', ikon:'🧾', evet:'Gönder', hayir:'Geri dön'})) return;
+  const text = document.getElementById('trNot').value.trim();
+  if(!trFotolar.length && !text){ setTransferDurum('Önce fotoğraf ekleyin.', true); return; }
   transferMesgul = true;
-  document.getElementById('kirikGonderBtn').disabled = true;
+  document.getElementById('trGonderBtn').disabled = true;
   try{
-    await transferKaydet('kirik', fotolar, document.getElementById('kirikNot').value.trim(), ek);
-    kirikTemizle();
-    setTransferDurum('✓ Kırık kaydı gönderildi.');
+    await transferKaydet(trFotolar, text);
+    trTemizle();
+    setTransferDurum('✓ Gönderildi.');
   }catch(e){
     setTransferDurum('Gönderilemedi: ' + e.message, true);
   }finally{
     transferMesgul = false;
-    document.getElementById('kirikGonderBtn').disabled = false;
-    renderTransferListeleri();
+    document.getElementById('trGonderBtn').disabled = false;
+    renderTransferListesi();
   }
-}
-
-// ---------- İrsaliye: 1-4 → 1-6 ----------
-// Bekleyen deposu Excel'i yüklendiğinde her satır stores/{m}/irsaliyeler/{1-6} olarak saklanır.
-// "Açıklama" sütunu 1-4 numarasıyla başlar (ör. "1-S-4-7738681 || ..." ya da "1-S-4-7735399-2,T...").
-function irs4Normal(v){
-  v = String(v || '').toUpperCase().replace(/\s+/g, '');
-  if(/^\d+(-\d+)?$/.test(v)) v = '1-S-4-' + v;
-  return v;
-}
-async function irsaliyeBul4(kod4){
-  let snap = await sdb('irsaliyeler').where('kod4', '==', kod4).limit(5).get();
-  if(snap.empty) snap = await sdb('irsaliyeler').where('kod4Ana', '==', kod4).limit(5).get();
-  return snap.docs.map(d=> d.data());
-}
-
-let irsSonuclar = null;    // null: aranmadı, []: bulunamadı
-let irsAramaNo = 0;
-let irsZamanlayici = null;
-document.getElementById('kirikIrs4').addEventListener('input', ()=>{
-  clearTimeout(irsZamanlayici);
-  kirikIrs = null;
-  irsSonuclar = null;
-  renderIrsSonuc();
-  irsZamanlayici = setTimeout(irsAra, 450);
-});
-
-async function irsAra(){
-  const kod4 = irs4Normal(document.getElementById('kirikIrs4').value);
-  if(!/^1-S-4-\d{4,}/.test(kod4)){ irsSonuclar = null; renderIrsSonuc(); return; }
-  const no = ++irsAramaNo;
-  document.getElementById('kirikIrsSonuc').textContent = 'Aranıyor...';
-  try{
-    const liste = await irsaliyeBul4(kod4);
-    if(no !== irsAramaNo) return;
-    irsSonuclar = liste;
-    kirikIrs = liste.length === 1 ? liste[0] : null;
-  }catch(e){
-    if(no !== irsAramaNo) return;
-    irsSonuclar = null;
-    document.getElementById('kirikIrsSonuc').innerHTML = '<span class="yok">Aranamadı: ' + escapeHtml(e.message) + '</span>';
-    return;
-  }
-  renderIrsSonuc();
-}
-
-function renderIrsSonuc(){
-  const el = document.getElementById('kirikIrsSonuc');
-  if(!el) return;
-  if(kirikIrs){
-    el.innerHTML = '<span class="ok">✓</span> 1-6: <b>' + escapeHtml(kirikIrs.kod6) + '</b>' +
-      (kirikIrs.depo ? ' · ' + escapeHtml(kirikIrs.depo) : '') +
-      (kirikIrs.tarih ? ' · ' + escapeHtml(kirikIrs.tarih) : '') +
-      ' <button class="tr-kopya" type="button">📋</button>';
-    el.querySelector('.tr-kopya').addEventListener('click', ()=> metniKopyala(kirikIrs.kod6));
-  } else if(irsSonuclar && irsSonuclar.length > 1){
-    el.innerHTML = 'Birden fazla irsaliye var, seçin:<br>';
-    irsSonuclar.forEach(r=>{
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'tr-irs-sec';
-      b.textContent = r.kod4 + ' → ' + r.kod6 + (r.depo ? ' · ' + r.depo : '');
-      b.addEventListener('click', ()=>{ kirikIrs = r; renderIrsSonuc(); });
-      el.appendChild(b);
-    });
-  } else if(irsSonuclar){
-    el.innerHTML = '<span class="yok">1-6 bulunamadı.</span> Yine de gönderebilirsiniz; bekleyen deposu yüklenince bilgisayarda tamamlanır.';
-  } else {
-    el.textContent = '';
-  }
-}
-
-// Telefonda 1-6 bulunamadan gönderilen kayıt, Excel sonradan yüklenince bilgisayarda tamamlanır.
-const irs6Denenen = new Set();
-async function kirikIrs6Tamamla(t){
-  const anahtar = t.id + '|' + (bekleyenSonYukleme || 0);
-  if(irs6Denenen.has(anahtar)) return;
-  irs6Denenen.add(anahtar);
-  try{
-    const liste = await irsaliyeBul4(t.irs4);
-    if(liste.length !== 1) return;
-    const r = liste[0];
-    await sdb('transfers').doc(t.id).update({irs4: r.kod4, irs6: r.kod6, depo: r.depo || '', irsTarih: r.tarih || ''});
-  }catch(e){ /* sonraki yüklemede yeniden denenir */ }
-}
-
-async function kirikEbaIsaretle(t){
-  try{ await sdb('transfers').doc(t.id).update({eba: !t.eba}); }
-  catch(e){ setTransferDurum('Kaydedilemedi: ' + e.message, true); }
 }
 
 // ---------- Bekleyen deposu: Excel → irsaliyeler + Outlook taslağı ----------
@@ -7248,7 +7047,6 @@ async function bekleyenYukle(file){
   mailAyar = Object.assign({}, a, {sonYukleme:simdi, sonAdet:kayitlar.length});
   bekleyenSonYukleme = simdi;
   bekleyenBilgiCiz();
-  renderTransferListeleri();   // 1-6'sı eksik kırık kayıtları tamamlansın
 
   let imza = mailAyar.imza;
   if(!imza){
@@ -7467,64 +7265,7 @@ function tutanakYazdir(v){
   }, 200);
 }
 
-// ---------- Genel: telefon tarafı ----------
-function renderGenelThumbs(){
-  const holder = document.getElementById('genelThumbs');
-  holder.innerHTML = '';
-  genelFotolar.forEach((f, i)=>{
-    const d = document.createElement('div');
-    d.className = 'kirik-slot dolu gt';
-    d.innerHTML = '<img alt=""><button class="ks-sil" type="button" title="Kaldır">✕</button>';
-    d.querySelector('img').src = f.thumb;
-    d.querySelector('.ks-sil').addEventListener('click', ()=>{
-      genelFotolar.splice(i, 1);
-      renderGenelThumbs();
-    });
-    holder.appendChild(d);
-  });
-}
-
-async function genelFotoEkle(e){
-  const files = Array.from(e.target.files || []);
-  e.target.value = '';
-  for(let i=0;i<files.length;i++){
-    setTransferDurum('Fotoğraf hazırlanıyor ' + (i+1) + '/' + files.length + '...');
-    try{ genelFotolar.push(await fotoHazirla(files[i])); }
-    catch(err){ setTransferDurum(err.message, true); return; }
-    renderGenelThumbs();
-  }
-  setTransferDurum('');
-}
-document.getElementById('genelKameraInput').addEventListener('change', genelFotoEkle);
-document.getElementById('genelGaleriInput').addEventListener('change', genelFotoEkle);
-
-function genelTemizle(){
-  genelFotolar = [];
-  document.getElementById('genelText').value = '';
-  renderGenelThumbs();
-  setTransferDurum('');
-}
-
-async function genelGonder(){
-  if(transferMesgul) return;
-  const text = document.getElementById('genelText').value.trim();
-  if(!text && !genelFotolar.length){ setTransferDurum('Gönderilecek bir şey yok.', true); return; }
-  transferMesgul = true;
-  document.getElementById('genelGonderBtn').disabled = true;
-  try{
-    await transferKaydet('genel', genelFotolar.map((f,i)=> ({sira:i+1, full:f.full, thumb:f.thumb})), text);
-    genelTemizle();
-    setTransferDurum('✓ Gönderildi.');
-  }catch(e){
-    setTransferDurum('Gönderilemedi: ' + e.message, true);
-  }finally{
-    transferMesgul = false;
-    document.getElementById('genelGonderBtn').disabled = false;
-    renderTransferListeleri();
-  }
-}
-
-// ---------- Bilgisayar tarafı: listeler ----------
+// ---------- Gelenler (bilgisayar ve telefon) ----------
 function transferZaman(ms){
   if(!ms) return '';
   const d = new Date(ms);
@@ -7533,12 +7274,11 @@ function transferZaman(ms){
 
 function transferKartiOlustur(t, butonlar){
   const item = document.createElement('div');
-  item.className = 'tr-item';
-  const bilgi = [transferZaman(t.createdAtMs), t.by, (t.siralar||[]).length ? (t.siralar.length + ' fotoğraf') : '']
-    .filter(Boolean).join(' · ');
-  if(t.tip === 'kirik' && t.eba) item.classList.add('eba-ok');
+  item.className = 'tr-item' + (t.indirildi ? ' indi' : '');
+  const bilgi = [transferZaman(t.createdAtMs), t.by, (t.siralar||[]).length ? (t.siralar.length + ' fotoğraf') : '',
+                 t.irs6 || t.irs4 || ''].filter(Boolean).join(' · ');
   item.innerHTML = '<div class="tr-item-head"><span>' + escapeHtml(bilgi) +
-    (t.tip === 'kirik' && t.eba ? ' <span class="tr-eba-etiket">EBA ✓</span>' : '') +
+    (t.indirildi ? ' <span class="tr-indi-etiket">✓ İndirildi</span>' : '') +
     '</span><span class="tr-item-acts"></span></div>';
   const acts = item.querySelector('.tr-item-acts');
   butonlar.forEach(b=>{
@@ -7551,26 +7291,15 @@ function transferKartiOlustur(t, butonlar){
     btn.addEventListener('click', b.fn);
     acts.appendChild(btn);
   });
-  if(t.tip === 'kirik' && (t.irs4 || t.irs6)){
-    const ir = document.createElement('div');
-    ir.className = 'tr-irs-satir';
-    ir.innerHTML = (t.irs4 ? '1-4: <b>' + escapeHtml(t.irs4) + '</b>' : '') +
-      (t.irs6 ? ' → 1-6: <b>' + escapeHtml(t.irs6) + '</b> <button class="tr-kopya" type="button">📋 Kopyala</button>'
-              : ' → <span style="color:var(--red);">1-6 bulunamadı (bekleyen deposu Excel\'ini yükleyin)</span>') +
-      (t.depo ? ' · ' + escapeHtml(t.depo) : '') + (t.irsTarih ? ' · ' + escapeHtml(t.irsTarih) : '');
-    const kb = ir.querySelector('.tr-kopya');
-    if(kb) kb.addEventListener('click', ()=> metniKopyala(t.irs6));
-    item.appendChild(ir);
-  }
   if((t.thumbs||[]).length){
     const row = document.createElement('div');
     row.className = 'tr-item-thumbs';
     t.thumbs.forEach((th, i)=>{
       const tn = document.createElement('div');
       tn.className = 'tn';
-      tn.innerHTML = '<img alt="" title="İndir"><span>' + (t.tip === 'kirik' ? (KIRIK_KISA[t.siralar[i]-1] || t.siralar[i]) : t.siralar[i]) + '</span>';
+      tn.innerHTML = '<img alt="" title="Bu fotoğrafı indir"><span>' + t.siralar[i] + '</span>';
       tn.querySelector('img').src = th;
-      tn.querySelector('img').addEventListener('click', ()=> tekFotoIndir(t, t.siralar[i]));
+      tn.querySelector('img').addEventListener('click', ()=> transferIndir(t, [i]));
       row.appendChild(tn);
     });
     item.appendChild(row);
@@ -7584,172 +7313,32 @@ function transferKartiOlustur(t, butonlar){
   return item;
 }
 
-function renderTransferListeleri(){
-  const kirikListe = document.getElementById('kirikListe');
-  const genelListe = document.getElementById('genelListe');
-  if(!kirikListe) return;
-  const kiriklar = transferCache.filter(t=> t.tip === 'kirik');
-  const geneller = transferCache.filter(t=> t.tip !== 'kirik').reverse();
-
-  kirikListe.innerHTML = '';
-  if(!kiriklar.length) kirikListe.innerHTML = '<div class="tr-empty">Bekleyen kırık kaydı yok.</div>';
-  kiriklar.forEach(t=>{
+function renderTransferListesi(){
+  const liste = document.getElementById('trListe');
+  if(!liste) return;
+  liste.innerHTML = '';
+  if(!transferCache.length) liste.innerHTML = '<div class="tr-empty">Gelen bir şey yok.</div>';
+  transferCache.forEach(t=>{
     const butonlar = [];
-    if(!TELEFON){
-      butonlar.push({ad: t.eba ? '✓ EBA\'ya işlendi' : 'EBA\'ya işlendi', sinif:'tr-eba' + (t.eba ? ' on' : ''),
-                     title:'EBA\'ya girildiyse işaretleyin', fn: ()=> kirikEbaIsaretle(t)});
-      butonlar.push({ad:'🖨 Tutanak', fn: ()=> tutanakAc({irs6:t.irs6, depo:t.depo, tarih:t.irsTarih})});
-    }
-    butonlar.push({ad:'⬇ İndir', fn: ()=> kirikIndir([t.id])});
-    butonlar.push({ad:'🗑', fn: ()=> transferSilOnayli(t)});
-    kirikListe.appendChild(transferKartiOlustur(t, butonlar));
-    if(!TELEFON && t.irs4 && !t.irs6) kirikIrs6Tamamla(t);
-  });
-  const hepsiBtn = document.getElementById('kirikHepsiBtn');
-  hepsiBtn.style.display = kiriklar.length > 1 ? '' : 'none';
-  hepsiBtn.disabled = transferMesgul;
-  hepsiBtn.textContent = '⬇ Hepsini masaüstüne indir (' + kiriklar.length + ')';
-
-  genelListe.innerHTML = '';
-  if(!geneller.length) genelListe.innerHTML = '<div class="tr-empty">Gelen bir şey yok.</div>';
-  geneller.forEach(t=>{
-    const butonlar = [];
-    if(t.text) butonlar.push({ad:'📋 Kopyala', fn: ()=> metniKopyala(t.text)});
-    if((t.siralar||[]).length) butonlar.push({ad:'⬇ Fotoğraflar', fn: ()=> genelFotolariIndir(t)});
-    butonlar.push({ad:'🗑', fn: ()=> transferSilOnayli(t)});
-    genelListe.appendChild(transferKartiOlustur(t, butonlar));
+    if(t.text) butonlar.push({ad:'📋 Notu kopyala', fn: ()=> metniKopyala(t.text)});
+    if((t.siralar||[]).length) butonlar.push({ad:'⬇ İndir', sinif:'tr-go', fn: ()=> transferIndir(t)});
+    butonlar.push({ad:'🗑', title:'Sil', fn: ()=> transferSilOnayli(t)});
+    liste.appendChild(transferKartiOlustur(t, butonlar));
   });
 }
 
-function renderKirikKlasorBilgi(){
-  const el = document.getElementById('kirikKlasorBilgi');
-  if(!el) return;
-  const sonraki = (kirikSayac === null) ? '…' : (kirikSayac + 1);
-  let html = 'Sıradaki klasör: <b>' + sonraki + '</b> <button class="tr-link" type="button" onclick="kirikSayacDegistir()">değiştir</button><br>';
-  if(KLASOR_DESTEGI){
-    html += 'Kayıt yeri: <b>' + (kirikKlasor ? escapeHtml(kirikKlasor.name) : 'seçilmedi') + '</b> ' +
-            '<button class="tr-link" type="button" onclick="kirikKlasorSec()">' + (kirikKlasor ? 'değiştir' : 'seç') + '</button>';
-  } else {
-    html += '<span style="color:#999;">Bu tarayıcı klasöre yazamıyor, dosyalar tek tek iner (ör. 7_06.10.2026_…_kutu-1.jpg)</span>';
-  }
-  el.innerHTML = html;
+// Fotoğrafın parçaları sırayla birleştirilir. Eski kayıtlarda parça bilgisi yoktur, tek parçadır.
+async function transferFotoGetir(t, i){
+  const sira = t.siralar[i];
+  const adet = (t.parcalar && t.parcalar[i]) || 1;
+  const docs = await Promise.all(Array.from({length:adet}, (_, p)=> sdb('transferFotos').doc(fotoBelgeId(t.id, sira, p)).get()));
+  if(!docs[0].exists) return null;
+  return {sira, data: docs.map(d=> d.exists ? d.data().data : '').join('')};
 }
 
-async function kirikSayacDegistir(){
-  const mevcut = kirikSayac || 0;
-  const v = await uiSor('Son oluşturulan klasör numarasını yazın. Bir sonraki kayıt bunun bir fazlası olur.', String(mevcut),
-                        {baslik:'Klasör numarası', ikon:'📁', tip:'number', evet:'Kaydet'});
-  if(v === null) return;
-  const n = parseInt(v, 10);
-  if(isNaN(n) || n < 0){ setTransferDurum('Geçerli bir sayı girin.', true); return; }
-  try{
-    await sdb('settings').doc('transfer').set({kirikSayac:n}, {merge:true});
-    kirikSayac = n;
-    renderKirikKlasorBilgi();
-  }catch(e){ setTransferDurum('Sayaç kaydedilemedi: ' + e.message, true); }
-}
-
-// ---------- Klasör erişimi (Chrome / Edge) ----------
-function idbAc(){
-  return new Promise((res, rej)=>{
-    const r = indexedDB.open('magazaRaporTransfer', 1);
-    r.onupgradeneeded = ()=> r.result.createObjectStore('kv');
-    r.onsuccess = ()=> res(r.result);
-    r.onerror = ()=> rej(r.error);
-  });
-}
-async function idbOku(k){
-  const idb = await idbAc();
-  return new Promise((res, rej)=>{
-    const q = idb.transaction('kv').objectStore('kv').get(k);
-    q.onsuccess = ()=> res(q.result);
-    q.onerror = ()=> rej(q.error);
-  });
-}
-async function idbYaz(k, v){
-  const idb = await idbAc();
-  return new Promise((res, rej)=>{
-    const tx = idb.transaction('kv', 'readwrite');
-    tx.objectStore('kv').put(v, k);
-    tx.oncomplete = ()=> res();
-    tx.onerror = ()=> rej(tx.error);
-  });
-}
-async function kayitliKlasoruYukle(){
-  if(!KLASOR_DESTEGI || kirikKlasor) return;
-  try{ kirikKlasor = (await idbOku('kirikKlasor')) || null; }catch(e){ /* IndexedDB yoksa her seferinde sorulur */ }
-  renderKirikKlasorBilgi();
-}
-kayitliKlasoruYukle();
-
-async function kirikKlasorSec(){
-  try{
-    kirikKlasor = await window.showDirectoryPicker({id:'kirik', mode:'readwrite', startIn:'desktop'});
-    try{ await idbYaz('kirikKlasor', kirikKlasor); }catch(e){ /* hatırlanamazsa bir dahakine yine sorulur */ }
-    renderKirikKlasorBilgi();
-    return kirikKlasor;
-  }catch(e){
-    if(e.name === 'AbortError') return null;
-    throw e;
-  }
-}
-
-async function kirikKlasorAl(){
-  await kayitliKlasoruYukle();
-  if(!kirikKlasor) return kirikKlasorSec();
-  const izin = {mode:'readwrite'};
-  if(await kirikKlasor.queryPermission(izin) === 'granted') return kirikKlasor;
-  if(await kirikKlasor.requestPermission(izin) === 'granted') return kirikKlasor;
-  throw new Error('Klasöre yazma izni verilmedi.');
-}
-
-// Klasör adları numarayla başlar ("37 · 06.10.2026 · 1-S-6-…"); aynı numarayla
-// başlayan bir klasör ya da dosya zaten varsa üzerine yazmamak için sonraki boş numarayı bulur.
-async function bosKlasorNo(ana, no){
-  const kullanilan = new Set();
-  for await (const ad of ana.keys()){
-    const m = String(ad).match(/^(\d+)(?!\d)/);
-    if(m) kullanilan.add(Number(m[1]));
-  }
-  while(kullanilan.has(no)) no++;
-  return no;
-}
-function kirikTarihi(t){
-  const d = new Date(t.createdAtMs || Date.now());
-  return pad(d.getDate()) + '.' + pad(d.getMonth()+1) + '.' + d.getFullYear();
-}
-function kirikKlasorAdi(no, t){
-  return [String(no), kirikTarihi(t), t.irs6 || t.irs4 || ''].filter(Boolean).join(' · ');
-}
-function kirikDosyaAdi(sira){
-  return KIRIK_DOSYA_ADLARI[sira-1] || String(sira);
-}
-
-async function dataUrlBlob(dataUrl){
-  return (await fetch(dataUrl)).blob();
-}
-async function dosyaYaz(klasor, ad, icerik){
-  const fh = await klasor.getFileHandle(ad, {create:true});
-  const w = await fh.createWritable();
-  await w.write(icerik);
-  await w.close();
-}
-
-async function transferFotolariGetir(t){
-  const docs = await Promise.all((t.siralar||[]).map(s=> sdb('transferFotos').doc(t.id + '_' + s).get()));
-  return docs.filter(d=> d.exists).map(d=> ({sira: d.data().sira, data: d.data().data}));
-}
-
-async function transferSil(t){
-  const batch = db.batch();
-  (t.siralar||[]).forEach(s=> batch.delete(sdb('transferFotos').doc(t.id + '_' + s)));
-  batch.delete(sdb('transfers').doc(t.id));
-  await batch.commit();
-}
-async function transferSilOnayli(t){
-  if(!await uiOnay('Bu kayıt ve fotoğrafları silinecek.', {baslik:'Kayıt silinsin mi?', tehlike:true, evet:'Sil'})) return;
-  try{ await transferSil(t); }
-  catch(e){ setTransferDurum('Silinemedi: ' + e.message, true); }
+function transferDosyaZamani(ms){
+  const d = new Date(ms || Date.now());
+  return dateStr(d) + '_' + pad(d.getHours()) + pad(d.getMinutes());
 }
 
 function dosyaIndir(href, ad){
@@ -7763,92 +7352,40 @@ function dosyaIndir(href, ad){
 
 const bekle = ms => new Promise(r=> setTimeout(r, ms));
 
-// Klasöre yazılamayan tarayıcılarda (ör. telefon) dosyalar tek tek iner:
-// 7-1.jpg, 7-2.jpg ... 7-not.txt. Art arda inişler tarayıcıda kaybolmasın diye aralıklı.
-async function dosyalariTekTekIndir(onEk, fotolar, not){
-  for(const f of fotolar){
-    dosyaIndir(f.data, onEk + f.sira + '.jpg');
-    await bekle(400);
-  }
-  if(not){
-    const url = URL.createObjectURL(new Blob([not], {type:'text/plain;charset=utf-8'}));
-    dosyaIndir(url, onEk + 'not.txt');
-    setTimeout(()=> URL.revokeObjectURL(url), 5000);
-    await bekle(400);
-  }
-}
-
-// ---------- Kırık: bilgisayar tarafı ----------
-function kirikHepsiniIndir(){
-  kirikIndir(transferCache.filter(t=> t.tip === 'kirik').map(t=> t.id));
-}
-
-async function kirikIndir(ids){
-  if(transferMesgul || !ids.length) return;
-  transferMesgul = true;
-  renderTransferListeleri();
-  let adet = 0, no = null, hedef = null;
+// Fotoğraflar tam çözünürlükte "foto-2026-10-11_1430-1.jpg" adıyla iner.
+// Art arda inişler tarayıcıda kaybolmasın diye aralıklı.
+async function transferIndir(t, hangileri){
+  const idx = hangileri || (t.siralar||[]).map((s, i)=> i);
+  const onEk = 'foto-' + transferDosyaZamani(t.createdAtMs) + '-';
   try{
-    if(KLASOR_DESTEGI){
-      hedef = await kirikKlasorAl();
-      if(!hedef){ setTransferDurum('Klasör seçilmedi.', true); return; }
+    for(let k=0;k<idx.length;k++){
+      setTransferDurum('İndiriliyor ' + (k+1) + '/' + idx.length + '...');
+      const f = await transferFotoGetir(t, idx[k]);
+      if(!f){ setTransferDurum('Fotoğraf bulunamadı.', true); return; }
+      const blob = await (await fetch(f.data)).blob();
+      const url = URL.createObjectURL(blob);
+      dosyaIndir(url, onEk + f.sira + '.jpg');
+      setTimeout(()=> URL.revokeObjectURL(url), 10000);
+      if(k < idx.length - 1) await bekle(400);
     }
-    const sayacDoc = await sdb('settings').doc('transfer').get();
-    no = sayacDoc.exists ? (Number(sayacDoc.data().kirikSayac) || 0) : 0;
-    for(const id of ids){
-      const t = transferCache.find(x=> x.id === id);
-      if(!t) continue;
-      setTransferDurum('İndiriliyor... (' + (adet+1) + '/' + ids.length + ')');
-      const fotolar = await transferFotolariGetir(t);
-      if(hedef){
-        no = await bosKlasorNo(hedef, no + 1);
-        const klasor = await hedef.getDirectoryHandle(kirikKlasorAdi(no, t), {create:true});
-        for(const f of fotolar) await dosyaYaz(klasor, kirikDosyaAdi(f.sira) + '.jpg', await dataUrlBlob(f.data));
-        if(t.text) await dosyaYaz(klasor, 'not.txt', t.text);
-      } else {
-        no = no + 1;
-        await dosyalariTekTekIndir(kirikKlasorAdi(no, t).replace(/ · /g, '_') + '_',
-          fotolar.map(f=> ({sira: kirikDosyaAdi(f.sira), data: f.data})), t.text);
-      }
-      await sdb('settings').doc('transfer').set({kirikSayac:no}, {merge:true});
-      kirikSayac = no;
-      await transferSil(t);
-      adet++;
-    }
-    setTransferDurum('✓ ' + adet + ' kayıt indirildi' +
-      (hedef ? ' → ' + hedef.name : '') + ' (son klasör: ' + no + ')');
-  }catch(e){
-    setTransferDurum('İndirilemedi: ' + e.message + (adet ? ' (' + adet + ' kayıt indirildi)' : ''), true);
-  }finally{
-    transferMesgul = false;
-    renderTransferListeleri();
-    renderKirikKlasorBilgi();
-  }
-}
-
-// ---------- Genel: bilgisayar tarafı ----------
-async function tekFotoIndir(t, sira){
-  try{
-    const d = await sdb('transferFotos').doc(t.id + '_' + sira).get();
-    if(!d.exists){ setTransferDurum('Fotoğraf bulunamadı.', true); return; }
-    const ad = t.tip === 'kirik'
-      ? kirikKlasorAdi(kirikSayac === null ? 0 : kirikSayac + 1, t).replace(/^\d+ · /, '').replace(/ · /g, '_') + '_' + kirikDosyaAdi(sira) + '.jpg'
-      : 'foto-' + transferDosyaZamani(t.createdAtMs) + '-' + sira + '.jpg';
-    dosyaIndir(d.data().data, ad);
+    setTransferDurum('✓ ' + idx.length + ' fotoğraf indirildi.');
+    if(!hangileri && !t.indirildi) sdb('transfers').doc(t.id).update({indirildi:true}).catch(()=>{});
   }catch(e){ setTransferDurum('İndirilemedi: ' + e.message, true); }
 }
 
-function transferDosyaZamani(ms){
-  const d = new Date(ms || Date.now());
-  return dateStr(d) + '_' + pad(d.getHours()) + pad(d.getMinutes());
+async function transferSil(t){
+  const batch = db.batch();
+  (t.siralar||[]).forEach((s, i)=>{
+    const adet = (t.parcalar && t.parcalar[i]) || 1;
+    for(let p=0;p<adet;p++) batch.delete(sdb('transferFotos').doc(fotoBelgeId(t.id, s, p)));
+  });
+  batch.delete(sdb('transfers').doc(t.id));
+  await batch.commit();
 }
-
-async function genelFotolariIndir(t){
-  try{
-    const fotolar = await transferFotolariGetir(t);
-    const zaman = transferDosyaZamani(t.createdAtMs);
-    await dosyalariTekTekIndir('foto-' + zaman + '-', fotolar, '');
-  }catch(e){ setTransferDurum('İndirilemedi: ' + e.message, true); }
+async function transferSilOnayli(t){
+  if(!await uiOnay('Bu kayıt ve fotoğrafları silinecek.', {baslik:'Kayıt silinsin mi?', tehlike:true, evet:'Sil'})) return;
+  try{ await transferSil(t); }
+  catch(e){ setTransferDurum('Silinemedi: ' + e.message, true); }
 }
 
 async function metniKopyala(text){
