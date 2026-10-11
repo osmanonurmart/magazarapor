@@ -35,6 +35,11 @@ Giriş ekranının arka plan fotoğrafı `giris-arka.jpg`.
 | `rapor.html` | Uygulamanın tamamı (HTML, CSS, JS tek dosyada) |
 | `firestore.rules` | Güvenlik kuralları |
 
+## Hedef kırılımı
+
+- Üstteki "🎯 Hedef gir": Excel'den ayın günlük hedef satırı yapıştırılır, her gün `stores/{m}/entries/{YYYY-MM-DD}.hedef` olarak yazılır (son güncelleyen bilgisi değişmez). Geri al hepsini eski haline getirir.
+- Sağ paneldeki günlük hedef, günün `hedef` alanı varsa onu kullanır.
+
 ## Transfer
 
 - Telefondan en fazla 5 fotoğraf gönderilir. Uygulama içi kamerada art arda çekilir, deklanşörün yanındaki Gönder ile gönderilir; şeritteki küçük resme dokununca o fotoğraf silinir.
