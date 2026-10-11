@@ -39,6 +39,11 @@ Giriş ekranının arka plan fotoğrafı `giris-arka.jpg`.
 
 - `SURUM_NOTLARI` (rapor.html) — her güncellemede en üste `{surum, tarih, kartlar:[{ikon, baslik, metin, gorseller, rol?}]}` eklenir; ekran görüntüleri `guncelleme/` klasöründe. Yeni sürüm ilk açılınca görülmemiş notlar bir kez pencere olarak çıkar (`localStorage.mr_surumGoruldu`), hepsi Sohbet → Duyurular'ın altında listelenir.
 
+## Bölge paneli
+
+- Dönem: Bugün / Son 1 hafta / Bu ay (varsayılan) / Geçen ay aynı dönem / Özel (`bp.secim`, `bp.ozelBas`, `bp.ozelSon`); `bpAraligi()` aralığı ve kıyas dönemini verir.
+- Günlük ciro tablosu (`bpGrafikCiz`): mağaza başına gün gün ciro, Gün %, Küm. %, yeşil renk skalası; altta toplam, dönem hedefi ve hedefe kalan.
+
 ## Hedef kırılımı
 
 - Üstteki "🎯 Hedef gir" (telefonda profil menüsünde; bölge panelinde mağaza seçilerek): Excel'den ayın günlük hedef satırı yapıştırılır, her gün `stores/{m}/entries/{YYYY-MM-DD}.hedef` olarak yazılır (son güncelleyen bilgisi değişmez). Geri al hepsini eski haline getirir.
