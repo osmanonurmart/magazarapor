@@ -401,6 +401,7 @@ if(!document.documentElement.classList.contains('tel')){
   .tr-klasor{ font-size:.72rem; color:#666; text-align:right; line-height:1.6; }
   .tr-klasor b{ color:var(--dark); }
   .tr-link{ background:none; border:none; color:var(--accent); cursor:pointer; font-size:.72rem; padding:0; text-decoration:underline; }
+  .tr-sil-bilgi{ font-size:.68rem; color:#999; }
   .tr-indi-etiket{ background:var(--green); color:#fff; border-radius:5px; padding:1px 6px; font-size:.68rem; font-weight:700; }
   .tr-foto-btn{
     flex:1; background:#fdf6ea; color:#8a6a3f; border:2px dashed var(--accent); border-radius:10px;
@@ -1429,7 +1430,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 52;
+const APP_SURUM = 53;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -6220,7 +6221,7 @@ const MR_KILAVUZ = `
 <li>Chrome ve Edge'de ilk indirmede bir ana klasör seçilir (ör. Masaüstü'nde "Transfer"); numaralı klasörler doğrudan onun içine açılır ve seçim hatırlanır. Yeri <b>Kayıt yeri → değiştir</b> ile değiştirilir.</li>
 <li>Klasöre yazamayan tarayıcılarda aynı içerik <b>12.zip</b> olarak iner.</li>
 <li>Numara gerekirse <b>Sıradaki klasör → değiştir</b> ile ayarlanır.</li>
-<li>İndirilen kayıtta <b>✓ İndirildi · klasör 12</b> yazar; işiniz bitince 🗑 ile silin.</li>
+<li>İndirilen kayıtta <b>✓ İndirildi · klasör 12</b> yazar. Kayıt indirildikten <b>7 gün sonra</b> buluttan kendiliğinden silinir; yanında kaç gün kaldığı yazar. Daha önce silmek için 🗑'e basın.</li>
 </ul>
 <a class="hk-yukari" href="#" data-git="mr-bas">↑ İçindekiler</a>
 
@@ -6585,6 +6586,7 @@ function notAc(id){
 // transferFotos/{kayitId}_{sira} ilk parça, {kayitId}_{sira}_{p} sonraki parçalar.
 // Ana kayıtta (transfers) parça sayıları ve küçük önizlemeler tutulur.
 const TR_MAX_FOTO = 5;
+const TR_SAKLAMA_GUN = 7;        // indirilen kayıt bu kadar gün sonra kendiliğinden silinir
 const FOTO_MAX_KENAR = 3200;     // yazılar okunsun diye yüksek tutulur
 const FOTO_KALITE = 0.88;
 const FOTO_PARCA = 900000;       // dataURL parça uzunluğu; belge sınırının altında kalsın
@@ -6612,6 +6614,7 @@ function listenTransferChanges(){
     liste.sort((a,b)=> (b.createdAtMs||0) - (a.createdAtMs||0));
     transferCache = liste;
     renderTransferListesi();
+    eskiTransferleriSil();
   }, err=> setTransferDurum('Transferler okunamadı: ' + err.message, true)));
   cloudUnsubs.push(sdb('settings').doc('transfer').onSnapshot(doc=>{
     klasorSayac = doc.exists ? (Number(doc.data().klasorSayac) || 0) : 0;
@@ -7268,7 +7271,8 @@ function transferKartiOlustur(t, butonlar){
   const bilgi = [transferZaman(t.createdAtMs), t.by, (t.siralar||[]).length ? (t.siralar.length + ' fotoğraf') : '',
                  t.irs6 || t.irs4 || ''].filter(Boolean).join(' · ');
   item.innerHTML = '<div class="tr-item-head"><span>' + escapeHtml(bilgi) +
-    (t.indirildi ? ' <span class="tr-indi-etiket">✓ İndirildi' + (t.klasorNo ? ' · klasör ' + t.klasorNo : '') + '</span>' : '') +
+    (t.indirildi ? ' <span class="tr-indi-etiket">✓ İndirildi' + (t.klasorNo ? ' · klasör ' + t.klasorNo : '') + '</span>' +
+                   ' <span class="tr-sil-bilgi">' + silinmeMetni(t) + '</span>' : '') +
     '</span><span class="tr-item-acts"></span></div>';
   const acts = item.querySelector('.tr-item-acts');
   butonlar.forEach(b=>{
@@ -7300,6 +7304,23 @@ function transferKartiOlustur(t, butonlar){
     item.appendChild(tx);
   }
   return item;
+}
+
+// İndirilen kayıtlar TR_SAKLAMA_GUN gün sonra buluttan silinir (uygulamayı açan herhangi bir cihaz siler).
+function silinmeZamani(t){
+  return (t.indirildiMs || t.createdAtMs || 0) + TR_SAKLAMA_GUN * 864e5;
+}
+function silinmeMetni(t){
+  const gun = Math.ceil((silinmeZamani(t) - Date.now()) / 864e5);
+  return gun <= 1 ? 'yarın silinecek' : gun + ' gün sonra silinecek';
+}
+const trSiliniyor = new Set();
+function eskiTransferleriSil(){
+  const simdi = Date.now();
+  transferCache.filter(t=> t.indirildi && silinmeZamani(t) <= simdi && !trSiliniyor.has(t.id)).forEach(t=>{
+    trSiliniyor.add(t.id);
+    transferSil(t).catch(()=>{}).finally(()=> trSiliniyor.delete(t.id));
+  });
 }
 
 function renderTransferListesi(){
@@ -7470,7 +7491,7 @@ async function transferIndir(t){
     await sdb('settings').doc('transfer').set({klasorSayac:no}, {merge:true});
     klasorSayac = no;
     renderTrKlasorBilgi();
-    sdb('transfers').doc(t.id).update({indirildi:true, klasorNo:no}).catch(()=>{});
+    sdb('transfers').doc(t.id).update({indirildi:true, klasorNo:no, indirildiMs:Date.now()}).catch(()=>{});
     setTransferDurum('✓ ' + fotolar.length + ' fotoğraf indirildi → ' + (hedef ? hedef.name + '/' : '') + no);
   }catch(e){
     setTransferDurum('İndirilemedi: ' + e.message, true);
