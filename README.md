@@ -53,9 +53,9 @@ Giriş ekranının arka plan fotoğrafı `giris-arka.jpg`.
 
 ## Transfer
 
-- Telefondan en fazla 5 fotoğraf gönderilir. Uygulama içi kamerada art arda çekilir, deklanşörün yanındaki Gönder ile gönderilir; şeritteki küçük resme dokununca o fotoğraf silinir.
+- Telefondan en fazla 25 fotoğraf gönderilir. Uygulama içi kamerada art arda çekilir, deklanşörün yanındaki Gönder ile gönderilir; şeritteki küçük resme dokununca o fotoğraf silinir.
 - Fotoğraflar en uzun kenar 3200 px, JPEG %88. 1 MB belge sınırı yüzünden parçalanır: `transferFotos/{id}_{sira}` ilk parça, `{id}_{sira}_{p}` sonrakiler; parça sayıları `transfers/{id}.parcalar`.
-- Bilgisayarda İndir: seçilen ana klasörün içine numaralı klasör (`12/1.jpg … 5.jpg`), klasöre yazılamayan tarayıcıda `12.zip`. Son numara `stores/{m}/settings/transfer.klasorSayac`; kayda `indirildi`, `klasorNo`, `indirildiMs` yazılır. İndirilen kayıt 7 gün sonra (uygulamayı açan ilk cihazda) fotoğraflarıyla birlikte silinir.
+- Bilgisayarda İndir: seçilen ana klasörün içine numaralı klasör (`12/1.jpg, 2.jpg …`), klasöre yazılamayan tarayıcıda `12.zip`. Son numara `stores/{m}/settings/transfer.klasorSayac`; kayda `indirildi`, `klasorNo`, `indirildiMs` yazılır. İndirilen kayıt 7 gün sonra (uygulamayı açan ilk cihazda) fotoğraflarıyla birlikte silinir.
 
 ## Araçlar · Bekleyen deposu ve Kırık tutanağı
 
