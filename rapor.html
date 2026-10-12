@@ -524,7 +524,7 @@ if(!document.documentElement.classList.contains('tel')){
   .kam-goruntu{ position:relative; flex:1; min-height:0; overflow:hidden; }
   .kam-goruntu video{ width:100%; height:100%; object-fit:cover; display:block; background:#000; }
   .kam-gonder{
-    width:calc(var(--k)*96px); border:none; border-radius:calc(var(--k)*12px); cursor:pointer; font-family:inherit;
+    width:calc(var(--k)*118px); white-space:nowrap; border:none; border-radius:calc(var(--k)*12px); cursor:pointer; font-family:inherit;
     font-weight:700; font-size:calc(var(--k)*14px); padding:calc(var(--k)*12px) 0; background:var(--accent); color:#1a1a1a;
   }
   .kam-gonder:disabled{ opacity:.35; }
@@ -547,7 +547,11 @@ if(!document.documentElement.classList.contains('tel')){
     background:rgba(255,255,255,.18); color:#fff; font-size:calc(var(--k)*18px);
   }
   .kam-alt{ background:#111; padding:calc(var(--k)*14px) calc(var(--k)*18px) calc(var(--k)*24px); }
-  .kam-serit{ display:flex; gap:calc(var(--k)*8px); justify-content:center; margin-bottom:calc(var(--k)*16px); }
+  .kam-serit{ display:flex; gap:calc(var(--k)*8px); margin-bottom:calc(var(--k)*16px); overflow-x:auto; padding:4px 2px; scrollbar-width:none; }
+  .kam-serit::-webkit-scrollbar{ display:none; }
+  .kam-serit > :first-child{ margin-left:auto; }
+  .kam-serit > :last-child{ margin-right:auto; }
+  .kam-mini{ flex:0 0 auto; }
   .kam-mini{
     position:relative; width:calc(var(--k)*52px); height:calc(var(--k)*52px); border-radius:calc(var(--k)*11px);
     border:2px solid rgba(255,255,255,.22); background:#222; overflow:hidden; cursor:pointer; padding:0;
@@ -1106,7 +1110,9 @@ if(!document.documentElement.classList.contains('tel')){
   html.tel .ust-btn{ padding:8px 10px; font-size:.78rem; }
   html.tel #addDataBtn{ display:none; }
   html.tel .sadece-masa{ display:none !important; }
-  html.tel .kirik-slots, html.tel .kirik-slots.tr-slots{ grid-template-columns:repeat(3, 1fr); }
+  html.tel .kirik-slots{ grid-template-columns:repeat(3, 1fr); }
+  html.tel .kirik-slots.tr-slots{ grid-template-columns:repeat(5, 1fr); gap:6px; }
+  html.tel .tr-slots .kirik-slot .ks-ad{ font-size:.58rem; text-align:center; }
   html.tel .masa-metin{ display:none; }
   html.tel .tel-ikon{
     display:block; width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:1.9;
@@ -1489,7 +1495,7 @@ if(!document.documentElement.classList.contains('tel')){
 <div class="transfer-page" id="transferPage" style="display:none;">
   <div class="tr-wrap" id="transferWrap">
     <div class="tr-card">
-      <div class="tr-card-title">Fotoğraf gönder <span class="tr-hint">— en fazla 5 fotoğraf, tek tek ya da hepsi birden</span></div>
+      <div class="tr-card-title">Fotoğraf gönder <span class="tr-hint">— en fazla 25 fotoğraf, tek tek ya da hepsi birden</span></div>
       <div class="kirik-slots tr-slots" id="trSlots"></div>
       <div class="tr-foto-row">
         <button class="tr-foto-btn" id="trCekBtn" type="button" onclick="trKameraAc()">📷 Fotoğraf çek</button>
@@ -1520,7 +1526,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 63;
+const APP_SURUM = 64;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -6368,7 +6374,7 @@ const MR_KILAVUZ = `
 <p><b>Telefonda:</b></p>
 <ol>
 <li><b>📷 Fotoğraf çek</b>'e basın; kamera açılır.</li>
-<li>Fotoğrafları art arda çekin (en fazla 5). Araya soru girmez.</li>
+<li>Fotoğrafları art arda çekin (en fazla 25). Araya soru girmez.</li>
 <li>Beğenmediğiniz fotoğrafın alttaki küçük resmine dokunun; silinir, yerine yenisini çekin.</li>
 <li>Deklanşörün yanındaki <b>📤 Gönder</b>'e basın. Tek fotoğraf çektiyseniz hemen, beş tane çekecekseniz en sonda basarsınız.</li>
 <li>Galerideki fotoğraflar <b>🖼️ Galeriden ekle</b> ile eklenip <b>Gönder</b>'le gönderilir.</li>
@@ -6377,7 +6383,7 @@ const MR_KILAVUZ = `
 <p><b>Bilgisayarda:</b></p>
 <ul>
 <li>Gönderilenler <b>Gelenler</b> listesinde görünür.</li>
-<li><b>⬇ İndir</b> fotoğrafları numaralı bir klasöre indirir: klasör <b>12</b> içinde <b>1.jpg, 2.jpg … 5.jpg</b>.</li>
+<li><b>⬇ İndir</b> fotoğrafları numaralı bir klasöre indirir: klasör <b>12</b> içinde <b>1.jpg, 2.jpg, 3.jpg …</b> (en fazla 25).</li>
 <li>Klasör numaraları 1, 2, 3… diye gider; son numara bulutta tutulur, aynı numara bir daha verilmez. Bilgisayar değişse de sıra devam eder.</li>
 <li>Chrome ve Edge'de ilk indirmede bir ana klasör seçilir (ör. Masaüstü'nde "Transfer"); numaralı klasörler doğrudan onun içine açılır ve seçim hatırlanır. Yeri <b>Kayıt yeri → değiştir</b> ile değiştirilir.</li>
 <li>Klasöre yazamayan tarayıcılarda aynı içerik <b>12.zip</b> olarak iner.</li>
@@ -6509,7 +6515,7 @@ Adres: <b style="word-break:break-all;">osmanonurmart.github.io/magazarapor/rapo
 <dt>Hedef girerken "fazla değer var" uyarısı çıktı.</dt>
 <dd>Yapıştırılan satırda ayın gün sayısından fazla değer var; toplam sütunu ya da başka bir satır da kopyalanmış olabilir. Sadece 1'inden ayın sonuna kadar olan hücreleri seçip tekrar kopyalayın.</dd>
 <dt>Transfer'de gönderdiğim fotoğraflar nereye iniyor?</dt>
-<dd>Bilgisayarda ⬇ İndir'e basınca seçtiğiniz ana klasörün içine numaralı bir klasör açılır (ör. 12 → 1.jpg … 5.jpg). Numaralar hiç tekrarlanmaz. Yeri Gelenler'in sağ üstündeki <b>Kayıt yeri → değiştir</b> ile değişir.</dd>
+<dd>Bilgisayarda ⬇ İndir'e basınca seçtiğiniz ana klasörün içine numaralı bir klasör açılır (ör. 12 → 1.jpg, 2.jpg …). Numaralar hiç tekrarlanmaz. Yeri Gelenler'in sağ üstündeki <b>Kayıt yeri → değiştir</b> ile değişir.</dd>
 <dt>Transfer'deki fotoğraflar ne kadar kalır?</dt>
 <dd>İndirilmeyen kayıt siz silene kadar kalır. İndirilen kayıt 7 gün sonra buluttan kendiliğinden silinir; bilgisayara inen dosyalar silinmez.</dd>
 <dt>Kamerada yanlış fotoğraf çektim.</dt>
@@ -6758,12 +6764,12 @@ function notAc(id){
 }
 
 // ==================== TRANSFER (Telefon → Bilgisayar) ====================
-// Telefonda çekilen en fazla 5 fotoğraf ve isteğe bağlı bir not buluta yazılır,
+// Telefonda çekilen en fazla 25 fotoğraf ve isteğe bağlı bir not buluta yazılır,
 // bilgisayarda aynı sekmeden tam çözünürlükte indirilir.
 // Firestore'da bir belge en fazla 1 MB olabildiği için her fotoğraf parçalara bölünür:
 // transferFotos/{kayitId}_{sira} ilk parça, {kayitId}_{sira}_{p} sonraki parçalar.
 // Ana kayıtta (transfers) parça sayıları ve küçük önizlemeler tutulur.
-const TR_MAX_FOTO = 5;
+const TR_MAX_FOTO = 25;
 const TR_SAKLAMA_GUN = 7;        // indirilen kayıt bu kadar gün sonra kendiliğinden silinir
 const FOTO_MAX_KENAR = 3200;     // yazılar okunsun diye yüksek tutulur
 const FOTO_KALITE = 0.88;
@@ -6866,7 +6872,7 @@ async function fotoHazirla(file){
   return kaynaktanFoto(img, img.naturalWidth, img.naturalHeight);
 }
 
-// ---------- Telefon tarafı: en fazla 5 fotoğraf ----------
+// ---------- Telefon tarafı: en fazla 25 fotoğraf ----------
 function renderTrSlotlar(){
   const holder = document.getElementById('trSlots');
   holder.innerHTML = '';
@@ -7009,7 +7015,8 @@ function renderKamera(){
   g.textContent = '📤 Gönder' + (n ? ' (' + n + ')' : '');
   const serit = kamera.ov.querySelector('.kam-serit');
   serit.innerHTML = '';
-  for(let i=0;i<TR_MAX_FOTO;i++){
+  // Şeritte çekilenler ve sıradaki boş kutu durur; çok fotoğrafta yana kayar.
+  for(let i=0;i<Math.min(n + 1, TR_MAX_FOTO);i++){
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'kam-mini' + (i === n ? ' aktif' : '');
@@ -7027,6 +7034,7 @@ function renderKamera(){
     }
     serit.appendChild(b);
   }
+  serit.scrollLeft = serit.scrollWidth;
 }
 
 function kameraCek(){
@@ -7726,10 +7734,10 @@ const SURUM_NOTLARI = [
      metin:'Sağ üstte mağaza adına dokunun, menüden 🎯 Hedef gir\'i seçin. Kutuya basılı tutup Yapıştır deyin.',
      gorseller:['guncelleme/hedef-telefon-menu.jpg']},
     {ikon:'📤', baslik:'Transfer: art arda çekim', rol:'magaza',
-     metin:'Kamera açılınca fotoğrafları art arda çekin (en fazla 5). Beğenmediğinizin küçük resmine dokunup silin. Deklanşörün yanındaki Gönder ile istediğiniz an gönderin. Fotoğraflar net, tam çözünürlükte gider.',
+     metin:'Kamera açılınca fotoğrafları art arda çekin (en fazla 25). Beğenmediğinizin küçük resmine dokunup silin. Deklanşörün yanındaki Gönder ile istediğiniz an gönderin. Fotoğraflar net, tam çözünürlükte gider.',
      gorseller:['guncelleme/transfer-kamera.jpg']},
     {ikon:'📁', baslik:'Transfer: numaralı klasör', rol:'magaza',
-     metin:'Bilgisayarda İndir fotoğrafları seçtiğiniz yerde numaralı klasöre (12 → 1.jpg … 5.jpg) kaydeder. Numaralar hiç tekrarlanmaz. İndirilen kayıt 7 gün sonra kendiliğinden silinir.',
+     metin:'Bilgisayarda İndir fotoğrafları seçtiğiniz yerde numaralı klasöre (12 → 1.jpg, 2.jpg …) kaydeder. Numaralar hiç tekrarlanmaz. İndirilen kayıt 7 gün sonra kendiliğinden silinir.',
      gorseller:['guncelleme/transfer-gelenler.jpg']},
     {ikon:'🧰', baslik:'Bekleyen deposu ve Kırık tutanağı Araçlar\'da',
      metin:'İkisi de artık Araçlar sekmesinde ayrı birer kart.',
