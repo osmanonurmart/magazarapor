@@ -1208,7 +1208,6 @@ if(!document.documentElement.classList.contains('tel')){
   }
   html.tel .tel-buyuk-btn:disabled{ opacity:.6; }
   html.tel .wp-btn{ background:#1f8a4c; }
-  html.tel #copyMsgBtn{ display:none; }
 
   /* Veri girişi penceresi */
   html.tel .tvf-arka{
@@ -1526,7 +1525,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 64;
+const APP_SURUM = 65;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -5490,8 +5489,7 @@ function renderReportPanel(){
   <div class="msg-area">
     <span class="msg-label">Yorum (mesaja eklenecek):</span>
     <textarea id="yorumBox" placeholder="Yorumunuzu buraya yazın..."></textarea>
-    <button class="send-btn" id="copyMsgBtn">📋 Mesajı Kopyala</button>
-    <button class="send-btn wp-btn sadece-tel" id="ikisiBtn">📤 Görsel + mesajı gönder</button>
+    <button class="send-btn wp-btn" id="ikisiBtn">${TELEFON ? '📤 Görsel + mesajı gönder' : '📋 Görsel + mesajı kopyala'}</button>
   </div>
   ${(function(){
     const now = getNow();
@@ -5628,27 +5626,31 @@ function renderReportPanel(){
     yorumBox.addEventListener('input', function(){ setYorumDraft(this.value); });
   }
 
-  const copyMsgBtn = document.getElementById('copyMsgBtn');
-  if(copyMsgBtn){
-    copyMsgBtn.addEventListener('click', async function(){
-      const originalText = copyMsgBtn.textContent;
-      copyMsgBtn.classList.remove('success','error');
-      copyMsgBtn.disabled = true;
-      const ok = await copyTextToClipboard(buildDailyMessage());
-      if(ok){
-        setStatus('Mesaj panoya kopyalandı — WhatsApp\'a Ctrl+V / uzun basıp yapıştır ile gönderebilirsiniz.');
-        copyMsgBtn.classList.add('success');
-        copyMsgBtn.textContent = '✅ Kopyalandı';
-      } else {
-        setStatus('Mesaj panoya kopyalanamadı, metni elle seçip kopyalayın.', true);
-        copyMsgBtn.classList.add('error');
-        copyMsgBtn.textContent = '❌ Kopyalanamadı';
+  // Bilgisayarda görsel ve mesaj tek tıkla birlikte panoya kopyalanır (telefondaki tek düğme gibi).
+  // Görsel birkaç saniyede hazırlandığı için panoya söz (Promise) olarak verilir; tıklama izni bu sırada düşmez.
+  const ikisiBtn = document.getElementById('ikisiBtn');
+  if(ikisiBtn && !TELEFON){
+    ikisiBtn.addEventListener('click', async function(){
+      const ilk = ikisiBtn.textContent;
+      ikisiBtn.classList.remove('success','error');
+      ikisiBtn.disabled = true;
+      ikisiBtn.textContent = 'Hazırlanıyor...';
+      const metin = buildDailyMessage();
+      try{
+        const gorsel = generateReportCanvas().then(c=> new Promise((res, rej)=> c.toBlob(b=> b ? res(b) : rej(new Error('görsel oluşmadı')), 'image/png')));
+        await navigator.clipboard.write([new ClipboardItem({
+          'image/png': gorsel,
+          'text/plain': new Blob([metin], {type:'text/plain'})
+        })]);
+        setStatus('Görsel ve mesaj birlikte kopyalandı — WhatsApp\'ta Ctrl+V ile yapıştırın.');
+        ikisiBtn.classList.add('success');
+        ikisiBtn.textContent = '✅ Kopyalandı';
+      }catch(e){
+        setStatus('Kopyalanamadı (' + e.message + ').', true);
+        ikisiBtn.classList.add('error');
+        ikisiBtn.textContent = '❌ Kopyalanamadı';
       }
-      setTimeout(()=>{
-        copyMsgBtn.classList.remove('success','error');
-        copyMsgBtn.textContent = originalText;
-        copyMsgBtn.disabled = false;
-      }, 2500);
+      setTimeout(()=>{ ikisiBtn.classList.remove('success','error'); ikisiBtn.textContent = ilk; ikisiBtn.disabled = false; }, 2500);
     });
   }
 }
@@ -6311,11 +6313,10 @@ const MR_KILAVUZ = `
   </ul></li>
 <li><b>📷 Fotoğrafını Al:</b> RT tablosunun görselini hazırlar.</li>
 <li><b>Yorum kutusu:</b> buraya yazılan, mesajın "Yorum" kısmına eklenir.</li>
-<li><b>📋 Mesajı Kopyala</b> (bilgisayar):
+<li><b>📋 Görsel + mesajı kopyala</b> (bilgisayar): RT görselini ve hazır mesajı tek tıkla birlikte panoya kopyalar; WhatsApp'ta Ctrl+V ile yapıştırıp gönderin.
   <ul>
-  <li>Bugünü dünle karşılaştıran hazır mesajı kopyalar: ciro, MDO, MGS, FBÜ, FBS artış/düşüş yüzdeleri ve toplu satış.</li>
+  <li>Mesaj bugünü dünle karşılaştırır: ciro, MDO, MGS, FBÜ, FBS artış/düşüş yüzdeleri ve toplu satış.</li>
   <li>Pazartesi günü karşılaştırma geçen haftanın aynı günüyle yapılır.</li>
-  <li>WhatsApp'a yapıştırıp gönderin.</li>
   </ul></li>
 <li><b>📤 Görsel + mesajı gönder</b> (telefon): önce mesajı kopyalar ve görseli hazırlar, ikinci dokunuşta paylaşma ekranını açar. WhatsApp'ı seçip gönderin.</li>
 </ul>
