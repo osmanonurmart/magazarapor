@@ -738,6 +738,8 @@ if(!document.documentElement.classList.contains('tel')){
   table.grid thead th{ background:var(--dark); color:#fff; font-weight:600; font-size:.58rem; }
   table.grid thead th.gh{ background:var(--accent); }
   table.grid tbody th{ text-align:left; background:#faf8f5; font-weight:600; white-space:nowrap; font-size:.6rem; padding-left:5px; }
+  table.grid td.gh-ek{ background:#eef0f4; color:#555; }
+  table.grid thead th.gh-ek-bas{ background:#6b7280; }
   table.grid td.gh-cell{ background:#fbf3e6; font-weight:600; }
   table.grid td.computed{ background:#f5f5f0; font-weight:600; color:#555; }
   table.grid td.today-col{ box-shadow: inset 0 0 0 1.5px rgba(178,122,58,.55); font-weight:700; }
@@ -1525,7 +1527,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 65;
+const APP_SURUM = 66;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -4778,6 +4780,25 @@ function buildWeekBlock(monday){
   block.dataset.weekkey = weekKey;
   block.dataset.monday = dateStr(monday);
   const sunday = days[6];
+  // Telefonda bu haftanın tablosunda: Pazartesi günü en solda geçen haftanın Pazartesi'si (GH Pzt),
+  // Pazar günü en sağda geçen haftanın toplamları (GH Top.) gösterilir.
+  const bugunT = getNow();
+  const buHaftaMi = TELEFON && dateStr(monday) === dateStr(mondayOf(bugunT));
+  const ghPztGoster = buHaftaMi && bugunT.getDay() === 1;
+  const ghTopGoster = buHaftaMi && bugunT.getDay() === 0;
+  const ghPazartesi = new Date(monday); ghPazartesi.setDate(ghPazartesi.getDate() - 7);
+  const ghPztKayit = ghPztGoster ? (getRecord(dateStr(ghPazartesi)) || null) : null;
+  const ghHafta = ghTopGoster ? computeWeekDerived(ghPazartesi) : null;
+  const ghPztHucre = (field, kind)=>{
+    if(!ghPztGoster) return '';
+    const v = ghPztKayit ? ghPztKayit[field] : null;
+    let s = '-';
+    if(v !== null && v !== undefined && v !== ''){
+      s = kind === 'TL' ? (fmtTL(v) || v) : kind === 'K' ? (fmtK(v) || v) : kind === 'NUM' ? (fmtNum(v) || v) : v;
+    }
+    return `<td class="gh-ek">${s}</td>`;
+  };
+  const ghTopHucre = html => ghTopGoster ? `<td class="gh-ek">${html}</td>` : '';
   const badgeClass = (haftaOranPct!==null && haftaOranPct>=85) ? 'hedef-badge good' : 'hedef-badge';
   block.innerHTML = `
     <div class="week-head">
@@ -4818,7 +4839,12 @@ function buildWeekBlock(monday){
              `<select class="izinli-sel${izinli?' dolu':''}" data-date="${dk}" title="İzinli personel">${opts}</select>` +
              `</th>`;
     }).join('') +
-    `<th class="gh">${TELEFON ? 'Top.' : 'Formüller'}<br><span id="fml-total-${weekKey}" style="font-weight:400;">${ciroToplam?fmtTL(ciroToplam):'-'}</span></th>`;
+    `<th class="gh">${TELEFON ? 'Top.' : 'Formüller'}<br><span id="fml-total-${weekKey}" style="font-weight:400;">${ciroToplam?fmtTL(ciroToplam):'-'}</span></th>` +
+    (ghTopGoster ? `<th class="gh-ek-bas">GH<br><span style="font-weight:400;">Top.</span></th>` : '');
+  if(ghPztGoster){
+    headRow.firstElementChild.insertAdjacentHTML('afterend',
+      `<th class="gh-ek-bas">GH<br><span style="font-weight:400;">${pad(ghPazartesi.getDate())}</span></th>`);
+  }
 
   headRow.querySelectorAll('.izinli-sel').forEach(sel=>{
     sel.addEventListener('change', function(){
@@ -4839,8 +4865,26 @@ function buildWeekBlock(monday){
   const etiket = l => TELEFON ? (KISA_ETIKET[l] || l) : l;
   function row(label, field, kind, ghValueHtml, ghId){
     const cells = days.map((d,i) => cellHtml(d, field, records[i] ? records[i][field] : null, kind)).join('');
-    return `<tr><th>${etiket(label)}</th>${cells}<td class="gh-cell" id="${ghId}">${ghValueHtml}</td></tr>`;
+    return `<tr><th>${etiket(label)}</th>${ghPztHucre(field, kind)}${cells}<td class="gh-cell" id="${ghId}">${ghValueHtml}</td>${ghTopHucre(ghTopDeger[field] || '-')}</tr>`;
   }
+  const ghTopDeger = {};
+  if(ghHafta){
+    const g = ghHafta;
+    ghTopDeger.ciro = g.ciroToplam ? fmtTL(g.ciroToplam) : '-';
+    ghTopDeger.mdo = g.mdoAvg !== null ? ('% ' + g.mdoAvg.toFixed(2).replace('.', ',')) : '-';
+    ghTopDeger.fbu = g.fbuAvg !== null ? fmtNum(g.fbuAvg) : '-';
+    ghTopDeger.mgs = `<div style="font-size:.5rem;line-height:1.2;">O:${g.mgsAvg!==null?fmtNum(g.mgsAvg):'-'}</div><div style="font-size:.5rem;line-height:1.2;">T:${g.mgsTotal!==null?fmtNum(g.mgsTotal):'-'}</div>`;
+    ghTopDeger.fbs = g.fbsAvg !== null ? fmtTL(g.fbsAvg) : '-';
+    ghTopDeger.hedef = g.hedefToplam ? fmtTL(g.hedefToplam) : '-';
+    ghTopDeger.oran = g.haftaOranPct !== null ? fmtPctInt(g.haftaOranPct) : '-';
+    ghTopDeger.toplu_satis = g.topluToplam !== null ? fmtK(g.topluToplam) : '-';
+  }
+  const ghPztOran = ()=>{
+    if(!ghPztGoster) return '';
+    const r = ghPztKayit;
+    return `<td class="gh-ek">${r && r.ciro ? fmtPct(r.ciro / effectiveHedef(r) * 100) : '-'}</td>`;
+  };
+  const ghPztHedef = ()=> ghPztGoster ? `<td class="gh-ek">${fmtTL(effectiveHedef(ghPztKayit))}</td>` : '';
 
   const hedefCells = days.map((d,i)=>{
     const r = records[i];
@@ -4867,8 +4911,8 @@ function buildWeekBlock(monday){
     row('Fbü','fbu', 'NUM', fbuAvg!==null ? fmtNum(fbuAvg) : '-', `gh-fbu-${weekKey}`),
     row('Mgs','mgs', 'NUM', mgsGhHtml, `gh-mgs-${weekKey}`),
     row('Fbs','fbs', 'TL', fbsAvg!==null ? fmtTL(fbsAvg) : '-', `gh-fbs-${weekKey}`),
-    `<tr><th>${etiket('Hedef')}</th>${hedefCells}<td class="gh-cell" id="gh-hedef-${weekKey}">${hedefToplam?fmtTL(hedefToplam):'-'}</td></tr>`,
-    `<tr id="oranrow-${weekKey}"><th>${etiket('Oran')}</th>${oranCells}<td class="gh-cell">${haftaOranPct!==null?fmtPctInt(haftaOranPct):'-'}</td></tr>`,
+    `<tr><th>${etiket('Hedef')}</th>${ghPztHedef()}${hedefCells}<td class="gh-cell" id="gh-hedef-${weekKey}">${hedefToplam?fmtTL(hedefToplam):'-'}</td>${ghTopHucre(ghTopDeger.hedef || '-')}</tr>`,
+    `<tr id="oranrow-${weekKey}"><th>${etiket('Oran')}</th>${ghPztOran()}${oranCells}<td class="gh-cell">${haftaOranPct!==null?fmtPctInt(haftaOranPct):'-'}</td>${ghTopHucre(ghTopDeger.oran || '-')}</tr>`,
     row('Toplu S.','toplu_satis', 'K', topluToplam!==null?fmtK(topluToplam):'-', `gh-toplu-${weekKey}`)
   ].join('');
 
@@ -4940,8 +4984,7 @@ function renderMonth(){
   if(TELEFON){
     // Telefonda yalnızca bu hafta ve geçen hafta gösterilir.
     const bu = mondayOf(getNow());
-    const gecen = new Date(bu); gecen.setDate(gecen.getDate() - 7);
-    weeks = [bu, gecen];
+    weeks = [bu];
   } else {
     weeks = weeksInMonth(getMonthVal());
   }
@@ -5489,7 +5532,7 @@ function renderReportPanel(){
   <div class="msg-area">
     <span class="msg-label">Yorum (mesaja eklenecek):</span>
     <textarea id="yorumBox" placeholder="Yorumunuzu buraya yazın..."></textarea>
-    <button class="send-btn wp-btn" id="ikisiBtn">${TELEFON ? '📤 Görsel + mesajı gönder' : '📋 Görsel + mesajı kopyala'}</button>
+    <button class="send-btn wp-btn" id="ikisiBtn">${TELEFON ? '📤 Görsel + mesajı gönder' : '📋 Mesajı kopyala + görseli indir'}</button>
   </div>
   ${(function(){
     const now = getNow();
@@ -5626,33 +5669,35 @@ function renderReportPanel(){
     yorumBox.addEventListener('input', function(){ setYorumDraft(this.value); });
   }
 
-  // Bilgisayarda görsel ve mesaj tek tıkla birlikte panoya kopyalanır (telefondaki tek düğme gibi).
-  // Görsel birkaç saniyede hazırlandığı için panoya söz (Promise) olarak verilir; tıklama izni bu sırada düşmez.
+  // Bilgisayarda tek tıkla: mesaj panoya kopyalanır, RT görseli bilgisayara iner.
+  // WhatsApp Web panoda görsel varsa yazıyı almadığı için ikisi birlikte panoya konmaz:
+  // mesaj Ctrl+V ile yapıştırılır, görsel ataçla (ya da sürükleyerek) yüklenir.
   const ikisiBtn = document.getElementById('ikisiBtn');
   if(ikisiBtn && !TELEFON){
     ikisiBtn.addEventListener('click', async function(){
       const ilk = ikisiBtn.textContent;
       ikisiBtn.classList.remove('success','error');
       ikisiBtn.disabled = true;
-      ikisiBtn.textContent = 'Hazırlanıyor...';
-      const metin = buildDailyMessage();
+      const kopyalandi = await copyTextToClipboard(buildDailyMessage());
+      ikisiBtn.textContent = 'Görsel hazırlanıyor...';
+      let indi = false;
       try{
-        const gorsel = generateReportCanvas().then(c=> new Promise((res, rej)=> c.toBlob(b=> b ? res(b) : rej(new Error('görsel oluşmadı')), 'image/png')));
-        await navigator.clipboard.write([new ClipboardItem({
-          'image/png': gorsel,
-          'text/plain': new Blob([metin], {type:'text/plain'})
-        })]);
-        setStatus('Görsel ve mesaj birlikte kopyalandı — WhatsApp\'ta Ctrl+V ile yapıştırın.');
+        downloadCanvasAsPng(await generateReportCanvas(), 'rapor-' + todayStr(0) + '.png');
+        indi = true;
+      }catch(e){ /* aşağıda bildirilir */ }
+      if(kopyalandi && indi){
+        setStatus('Mesaj kopyalandı ve görsel indirildi — WhatsApp Web\'te Ctrl+V ile mesajı yapıştırın, görseli ataçla yükleyin.');
         ikisiBtn.classList.add('success');
-        ikisiBtn.textContent = '✅ Kopyalandı';
-      }catch(e){
-        setStatus('Kopyalanamadı (' + e.message + ').', true);
+        ikisiBtn.textContent = '✅ Kopyalandı + indi';
+      } else {
+        setStatus((kopyalandi ? '' : 'Mesaj kopyalanamadı. ') + (indi ? '' : 'Görsel indirilemedi.'), true);
         ikisiBtn.classList.add('error');
-        ikisiBtn.textContent = '❌ Kopyalanamadı';
+        ikisiBtn.textContent = '❌ Olmadı';
       }
       setTimeout(()=>{ ikisiBtn.classList.remove('success','error'); ikisiBtn.textContent = ilk; ikisiBtn.disabled = false; }, 2500);
     });
   }
+
 }
 
 async function captureElementWithPadding(el, padding=18){
@@ -6252,7 +6297,8 @@ const MR_KILAVUZ = `
 
 <h3 id="mr-hafta">5. Haftalık tablolar</h3>
 <ul>
-<li>Her hafta Pazartesi–Pazar tablosudur. Bilgisayarda ayın haftaları, telefonda bu hafta ve geçen hafta görünür.</li>
+<li>Her hafta Pazartesi–Pazar tablosudur. Bilgisayarda ayın haftaları görünür; telefonda yalnızca bu hafta görünür, altında yorum kutusu vardır.</li>
+<li>Telefonda <b>Pazartesi</b> günü tablonun en solunda gri <b>GH</b> sütunu çıkar: geçen haftanın Pazartesi değerleri. <b>Pazar</b> günü en sağda gri <b>GH Top.</b> sütunu çıkar: geçen haftanın toplam ve ortalamaları.</li>
 <li><b>Satırlar:</b>
   <ul>
   <li>Ciro, Mdo, Fbü, Mgs, Fbs.</li>
@@ -6313,7 +6359,7 @@ const MR_KILAVUZ = `
   </ul></li>
 <li><b>📷 Fotoğrafını Al:</b> RT tablosunun görselini hazırlar.</li>
 <li><b>Yorum kutusu:</b> buraya yazılan, mesajın "Yorum" kısmına eklenir.</li>
-<li><b>📋 Görsel + mesajı kopyala</b> (bilgisayar): RT görselini ve hazır mesajı tek tıkla birlikte panoya kopyalar; WhatsApp'ta Ctrl+V ile yapıştırıp gönderin.
+<li><b>📋 Mesajı kopyala + görseli indir</b> (bilgisayar): tek tıkla hazır mesaj panoya kopyalanır ve RT görseli bilgisayara iner. WhatsApp Web'te Ctrl+V ile mesajı yapıştırın, görseli ataçla yükleyin.
   <ul>
   <li>Mesaj bugünü dünle karşılaştırır: ciro, MDO, MGS, FBÜ, FBS artış/düşüş yüzdeleri ve toplu satış.</li>
   <li>Pazartesi günü karşılaştırma geçen haftanın aynı günüyle yapılır.</li>
