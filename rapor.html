@@ -684,6 +684,10 @@ if(!document.documentElement.classList.contains('tel')){
   .qr-gecis button{ border:none; background:none; padding:5px 16px; font-size:.78rem; font-weight:600; cursor:pointer; color:#555; font-family:inherit; }
   .qr-gecis button + button{ border-left:1px solid #cfc9bf; }
   .qr-gecis button.on{ background:var(--dark); color:#fff; }
+  .ciro-bagla{ margin-left:auto; font-size:.74rem; padding:5px 12px; }
+  .ciro-durum{ font-size:.72rem; font-weight:600; color:#999; }
+  .ciro-durum.canli{ color:#2e7d32; }
+  .ciro-durum.eski{ color:#c62828; }
   .qr-ayar{ border:none; background:none; color:#9a7438; font-size:.74rem; cursor:pointer; text-decoration:underline; font-family:inherit; }
   .left-col{ position:relative; }
   .qr-gorunum{ position:absolute; z-index:5; display:flex; gap:8px; }
@@ -1472,6 +1476,8 @@ if(!document.documentElement.classList.contains('tel')){
     <div class="qr-bar sadece-masa" id="qrBar">
       <div class="qr-gecis" id="qrGecis"><button type="button" data-g="qr">QR</button><button type="button" data-g="tablo">Tablo</button></div>
       <button type="button" class="qr-ayar" onclick="qrAdresleriDuzenle()">⚙ QR adresleri</button>
+      <button type="button" class="btn ciro-bagla" onclick="canliCiroBagla()">📊 Ciroyu canlı bağla</button>
+      <span class="ciro-durum" id="ciroDurum"></span>
     </div>
     <div class="qr-gorunum sadece-masa" id="qrGorunum"></div>
     <div class="month-grid" id="monthContainer"></div>
@@ -1565,7 +1571,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 68;
+const APP_SURUM = 69;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -5962,7 +5968,10 @@ const ARACLAR = [
    ciz: bekleyenAracCiz},
   {id:'kirik-tutanagi', ikon:'🖨', baslik:'Kırık tutanağı',
    aciklama:"EBA kırık formunu yapıştır, Hasarlı Ürün Tutanağı hazır yazdırılsın.",
-   ciz: tutanakAracCiz}
+   ciz: tutanakAracCiz},
+  {id:'canli-ciro', ikon:'📡', baslik:'Canlı Ciro', rol:'magaza',
+   aciklama:"Ciro sitesindeki değerler 5 dakikada bir kendiliğinden tabloya yazılsın (Tampermonkey kurulumu).",
+   ciz: canliCiroAracCiz}
 ];
 
 // ---------- Bekleyen deposu ve Kırık tutanağı (kodları Transfer bölümünde) ----------
@@ -7951,7 +7960,7 @@ function qrAdresleriDuzenle(){
       siteler.push({ad, url, kutular: kutular[i]});
     }
     try{
-      await sdb('settings').doc('qrSiteleri').set({siteler});
+      await sdb('settings').doc('qrSiteleri').set({siteler}, {merge:true});
       kapat();
       qrSekme = 'qr';
       uiBildirim('QR ayarları kaydedildi', 'basari');
@@ -8010,6 +8019,205 @@ function qrKirpAc(url, mevcut, bitti){
   ov.querySelector('[data-act="kapat"]').addEventListener('click', kapat);
   ov.querySelector('[data-act="tamam"]').addEventListener('click', ()=>{ bitti(kutular); kapat(); });
   document.body.appendChild(ov);
+}
+
+// ==================== CANLI CİRO (Tampermonkey) ====================
+// Ciro sitesi http olduğu için uygulamanın içinde açılamaz. Uygulama siteyi ayrı bir pencerede açar;
+// o pencerede çalışan Tampermonkey betiği 5 dakikada bir sitenin Yenile düğmesine basar, değerleri okur
+// ve bu pencereye (window.opener) postMessage ile gönderir. Uygulama site değerlerini esas alıp yazar.
+// Sitenin adresi kodda değil, mağaza ayarında durur (settings/qrSiteleri.ciroUrl).
+const CANLI_CIRO_ARALIK_DK = 5;
+let canliCiroSon = 0;
+let canliCiroPencere = null;
+
+function canliCiroUrl(){ return (qrAyar && qrAyar.ciroUrl) || ''; }
+function canliCiroKaynak(){ try{ return new URL(canliCiroUrl()).origin; }catch(e){ return null; } }
+
+function canliCiroDurumCiz(){
+  const el = document.getElementById('ciroDurum');
+  if(!el) return;
+  if(!canliCiroSon){ el.textContent = ''; el.className = 'ciro-durum'; return; }
+  const d = new Date(canliCiroSon);
+  const eski = Date.now() - canliCiroSon > (CANLI_CIRO_ARALIK_DK * 2 + 2) * 60000;
+  el.className = 'ciro-durum' + (eski ? ' eski' : ' canli');
+  el.textContent = (eski ? '● Bağlantı yok · son ' : '● Canlı · ') + pad(d.getHours()) + ':' + pad(d.getMinutes());
+}
+setInterval(canliCiroDurumCiz, 60000);
+
+async function canliCiroBagla(){
+  if(!canliCiroUrl()){
+    const v = await uiSor('Ciro sitesinin (Performans sayfası) adresini yazın.', '', {baslik:'Ciro sitesi', ikon:'📊', evet:'Kaydet'});
+    if(v === null) return;
+    const url = v.trim();
+    if(!/^https?:\/\//i.test(url)){ uiBildirim('Adres http:// ya da https:// ile başlamalı.', 'hata'); return; }
+    try{ await sdb('settings').doc('qrSiteleri').set({ciroUrl: url}, {merge:true}); qrAyar = Object.assign({}, qrAyar, {ciroUrl: url}); }
+    catch(e){ uiBildirim('Kaydedilemedi: ' + e.message, 'hata'); return; }
+  }
+  // Pencere uygulamadan açılmalı: betik veriyi bu pencereye (açan pencere) gönderir.
+  canliCiroPencere = window.open(canliCiroUrl(), 'mrCanliCiro', 'popup,width=1150,height=850');
+  if(!canliCiroPencere){ uiBildirim('Pencere açılamadı: tarayıcı açılır pencereyi engelledi. Adres çubuğundan izin verin.', 'hata', 6000); return; }
+  uiBildirim('Ciro sitesi açıldı. Tampermonkey betiği kuruluysa 5 dakikada bir kendiliğinden güncellenir.', 'basari', 5000);
+}
+
+// Site değerleri esastır: bugünün değerleri (ve dünün kesinleşmiş cirosu/MDO'su) siteye göre yazılır.
+// Değişmeyen değerler yeniden yazılmaz.
+function canliCiroUygula(data){
+  if(!data || data.ciro_bugun === null || data.ciro_bugun === undefined) return;
+  const today = todayStr(0), yest = todayStr(-1);
+  if(data.tarih && data.tarih !== today) return;
+  const t = Object.assign({date: today}, getRecord(today) || {});
+  const yeni = {ciro: data.ciro_bugun, mdo: data.mdo_bugun || t.mdo, mgs: data.mgs_bugun, fbu: data.fbu_bugun, fbs: data.fbs_bugun};
+  if(data.ciro_hafta_bu !== undefined && data.ciro_hafta_bu !== null){ yeni.ciro_hafta_bu = data.ciro_hafta_bu; yeni.ciro_hafta_gecen = data.ciro_hafta_gecen; }
+  if(Array.isArray(data.buyuk_faturalar)){
+    const top = data.buyuk_faturalar.reduce((s, f)=> s + (Number(f.tutar) || 0), 0);
+    yeni.toplu_satis = data.buyuk_faturalar.length ? Math.floor(top / 1000) : null;
+  }
+  let degisti = false;
+  Object.keys(yeni).forEach(k=>{ if(yeni[k] !== undefined && t[k] !== yeni[k]){ t[k] = yeni[k]; degisti = true; } });
+  if(degisti){ t.final = false; setRecord(today, t); }
+  if(data.ciro_dun !== null && data.ciro_dun !== undefined){
+    const y = Object.assign({date: yest}, getRecord(yest) || {});
+    if(y.ciro !== data.ciro_dun || (data.mdo_dun && y.mdo !== data.mdo_dun) || !y.final){
+      y.ciro = data.ciro_dun; if(data.mdo_dun) y.mdo = data.mdo_dun; y.final = true;
+      setRecord(yest, y); degisti = true;
+    }
+  }
+  canliCiroSon = Date.now();
+  canliCiroDurumCiz();
+  if(degisti){ renderAll(); setStatus('Canlı ciro güncellendi: ' + bpfTL(data.ciro_bugun)); }
+}
+
+window.addEventListener('message', e=>{
+  const m = e.data;
+  if(!m || m.tip !== 'mrCanliCiro') return;
+  const kaynak = canliCiroKaynak();
+  if(!kaynak || e.origin !== kaynak) return;
+  canliCiroUygula(m.data);
+});
+
+// Tampermonkey betiği: sitenin adresine göre üretilir (adres kodda tutulmaz).
+function canliCiroBetigi(url){
+  let kaynak = '';
+  try{ kaynak = new URL(url).origin; }catch(e){ return ''; }
+  const hedef = location.origin;
+  return `// ==UserScript==
+// @name         Mağaza Rapor · Canlı Ciro
+// @namespace    magaza-rapor
+// @version      1
+// @description  Ciro sitesindeki değerleri 5 dakikada bir Mağaza Rapor'a gönderir.
+// @match        ${kaynak}/*
+// @grant        none
+// @run-at       document-idle
+// ==/UserScript==
+(function(){
+  'use strict';
+  var HEDEF = '${hedef}';
+  var ARALIK = ${CANLI_CIRO_ARALIK_DK} * 60 * 1000, ESIK = 2900;
+  function num(s){ if(!s) return null; s = s.replace(/\\./g, '').replace(',', '.').replace(/[^\\d.\\-]/g, ''); var n = parseFloat(s); return isNaN(n) ? null : n; }
+  function txt(s){ return s ? s.trim() : null; }
+  function bekle(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
+  function pad(n){ return n < 10 ? '0' + n : '' + n; }
+  function bugun(){ var d = new Date(); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+  function rozet(metin, ok){
+    var r = document.getElementById('mr-canli-rozet');
+    if(!r){ r = document.createElement('div'); r.id = 'mr-canli-rozet'; document.body.appendChild(r); }
+    r.style.cssText = 'position:fixed;left:12px;bottom:40px;z-index:2147483647;padding:6px 12px;border-radius:8px;font:12px/1.4 Arial,sans-serif;color:#fff;box-shadow:0 3px 12px rgba(0,0,0,.25);background:' + (ok ? '#2e7d32' : '#c62828');
+    r.textContent = 'Mağaza Rapor · ' + metin;
+  }
+  function oku(){
+    var data = {};
+    document.querySelectorAll('.mc-summary-table tbody tr').forEach(function(tr){
+      var tds = tr.querySelectorAll('td'); if(!tds.length) return;
+      var l = txt(tds[0].innerText);
+      if(l === 'Ciro'){ data.ciro_bugun = num(tds[1].innerText); data.ciro_dun = num(tds[2].innerText); }
+      if(l === 'MDO'){ data.mdo_bugun = txt(tds[1].innerText); data.mdo_dun = txt(tds[2].innerText); }
+      if(l === 'FBS') data.fbs_bugun = num(tds[1].innerText);
+      if(l === 'FBU') data.fbu_bugun = num(tds[1].innerText);
+      if(l === 'MGS') data.mgs_bugun = num(tds[1].innerText);
+    });
+    document.querySelectorAll('.mc-kpi-box').forEach(function(box){
+      var l = box.querySelector('.label'), v = box.querySelector('.value'); if(!l || !v) return;
+      var t = txt(l.innerText).toUpperCase();
+      if((t.indexOf('ZİYARET') !== -1 || t.indexOf('ZIYARET') !== -1) && (data.mgs_bugun === undefined || data.mgs_bugun === null)) data.mgs_bugun = num(v.innerText);
+    });
+    document.querySelectorAll('.mc-trend-composite tbody tr').forEach(function(tr){
+      var tds = tr.querySelectorAll('td'); if(!tds.length) return;
+      var l = txt(tds[0].innerText);
+      if((l === 'Satis' || l === 'Satış') && tds.length > 9){ data.ciro_hafta_gecen = num(tds[8].innerText); data.ciro_hafta_bu = num(tds[9].innerText); }
+    });
+    var buyuk = [], tablo = document.querySelector('.mc-expandable-table');
+    if(tablo) tablo.querySelectorAll('tbody tr.mc-row-header').forEach(function(tr){
+      var tds = tr.querySelectorAll('td'); if(tds.length < 4) return;
+      var tutar = num(tds[3].textContent);
+      if(tutar !== null && tutar >= ESIK) buyuk.push({fatura: txt(tds[0].textContent), tutar: tutar});
+    });
+    data.buyuk_faturalar = buyuk;
+    data.tarih = bugun();
+    return data;
+  }
+  var calisiyor = false;
+  async function tur(){
+    if(calisiyor) return; calisiyor = true;
+    try{
+      if(!document.querySelector('.mc-summary-table')){ rozet('Performans sayfasını açın', false); return; }
+      if(!window.opener || window.opener.closed){ rozet('Bu pencereyi uygulamadaki "Ciroyu canlı bağla" ile açın', false); return; }
+      var tarih = document.getElementById('performance-date');
+      if(tarih && tarih.value && tarih.max && tarih.value !== tarih.max){ rozet('Tarih bugün değil, gönderilmedi', false); return; }
+      var yenile = document.querySelector('button[aria-label="Yenile"]');
+      if(yenile){ yenile.click(); await bekle(4000); }
+      var sec = Array.prototype.find.call(document.querySelectorAll('select'), function(s){ return Array.prototype.some.call(s.options, function(o){ return o.value === 'InvoiceNumber'; }); });
+      var faturaNo = false;
+      if(sec){
+        if(sec.value !== 'InvoiceNumber'){ sec.value = 'InvoiceNumber'; sec.dispatchEvent(new Event('change', {bubbles: true})); await bekle(3000); }
+        faturaNo = sec.value === 'InvoiceNumber';
+      }
+      var data = oku();
+      // Toplu satış yalnızca liste gerçekten fatura numarasına göre gruplanmışsa gönderilir.
+      var gruplar = Array.prototype.map.call(document.querySelectorAll('.mc-expandable-table tbody tr.mc-row-header td:first-child'), function(td){ return (td.textContent || '').replace(/\\s/g, ''); });
+      var faturaListesi = faturaNo && gruplar.length > 0 && gruplar.every(function(g){ return /^[A-Za-z]{0,5}[\\d\\-\\/]{6,}$/.test(g); });
+      if(!faturaListesi && gruplar.length) delete data.buyuk_faturalar;
+      if(data.ciro_bugun === null || data.ciro_bugun === undefined){ rozet('Ciro okunamadı', false); return; }
+      window.opener.postMessage({tip: 'mrCanliCiro', surum: 1, data: data}, HEDEF);
+      var d = new Date();
+      rozet('Gönderildi ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ' · ' + Math.round(data.ciro_bugun).toLocaleString('tr-TR') + ' TL', true);
+    }catch(e){ rozet('Hata: ' + e.message, false); }
+    finally{ calisiyor = false; }
+  }
+  setTimeout(tur, 6000);
+  setInterval(tur, ARALIK);
+})();
+`;
+}
+
+function canliCiroAracCiz(kap){
+  const url = canliCiroUrl();
+  kap.innerHTML = `
+    <div class="vk">
+      <p class="vk-giris">Ciro sitesindeki değerler (ciro, MDO, FBU, FBS, ziyaretçi/MGS, haftalık ciro, toplu satış) ${CANLI_CIRO_ARALIK_DK} dakikada bir kendiliğinden tabloya yazılır. Site değerleri esastır.</p>
+      <ol class="vk-adim">
+        <li>Bu bilgisayarda Chrome'a <b>Tampermonkey</b> eklentisini kurun (Chrome Web Mağazası → "Tampermonkey" → Chrome'a ekle).</li>
+        <li>Tampermonkey simgesi → <b>Yeni betik oluştur</b>. Açılan sayfadaki her şeyi silin.</li>
+        <li>Aşağıdaki <b>Betiği kopyala</b>'ya basın, Tampermonkey'deki boş sayfaya yapıştırın ve <b>Ctrl+S</b> ile kaydedin.</li>
+        <li>Chrome'da eklentiler sayfasında (chrome://extensions) Tampermonkey için <b>"Kullanıcı komut dosyalarına izin ver"</b> açık olmalı (Chrome istiyorsa).</li>
+        <li>Mağaza Rapor'da haftalık tabloların üstündeki <b>📊 Ciroyu canlı bağla</b>'ya basın. Ciro sitesi ayrı pencerede açılır; giriş yapıp Performans sayfasında bırakın. Pencere açık kaldıkça sol altta yeşil "Gönderildi" yazar.</li>
+      </ol>
+      <div class="vk-not">Ciro sitesi adresi: <b>${url ? escapeHtml(url) : 'girilmedi'}</b> <button class="vk-link" type="button" id="ccAdres">${url ? 'değiştir' : 'gir'}</button></div>
+      <div class="tr-actions" style="justify-content:flex-start;margin-top:12px;">
+        <button class="btn tr-big tr-go" type="button" id="ccKopyala" ${url ? '' : 'disabled'}>📋 Betiği kopyala</button>
+      </div>
+      <div class="vk-not">Pencere kapanırsa ya da bilgisayar yeniden açılırsa <b>📊 Ciroyu canlı bağla</b>'ya yeniden basın. Betik, adres değişirse yeniden kopyalanmalıdır.</div>
+    </div>`;
+  kap.querySelector('#ccAdres').addEventListener('click', async ()=>{
+    const v = await uiSor('Ciro sitesinin (Performans sayfası) adresini yazın.', url, {baslik:'Ciro sitesi', ikon:'📊', evet:'Kaydet'});
+    if(v === null) return;
+    if(!/^https?:\/\//i.test(v.trim())){ uiBildirim('Adres http:// ya da https:// ile başlamalı.', 'hata'); return; }
+    try{ await sdb('settings').doc('qrSiteleri').set({ciroUrl: v.trim()}, {merge:true}); qrAyar = Object.assign({}, qrAyar, {ciroUrl: v.trim()}); canliCiroAracCiz(kap); }
+    catch(e){ uiBildirim('Kaydedilemedi: ' + e.message, 'hata'); }
+  });
+  kap.querySelector('#ccKopyala').addEventListener('click', async ()=>{
+    const ok = await copyTextToClipboard(canliCiroBetigi(canliCiroUrl()));
+    uiBildirim(ok ? 'Betik kopyalandı — Tampermonkey\'e yapıştırıp kaydedin.' : 'Kopyalanamadı.', ok ? 'basari' : 'hata');
+  });
 }
 
 // ==================== YENİLİKLER ====================
