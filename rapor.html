@@ -685,15 +685,31 @@ if(!document.documentElement.classList.contains('tel')){
   .qr-gecis button + button{ border-left:1px solid #cfc9bf; }
   .qr-gecis button.on{ background:var(--dark); color:#fff; }
   .qr-ayar{ border:none; background:none; color:#9a7438; font-size:.74rem; cursor:pointer; text-decoration:underline; font-family:inherit; }
-  .qr-gorunum{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-  .qr-panel{ background:#fff; border:1px solid var(--line); border-radius:12px; padding:8px; min-width:0; }
-  .qr-panel-ust{ display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:.78rem; font-weight:700; color:var(--dark); margin:0 2px 6px; }
+  .left-col{ position:relative; }
+  .qr-gorunum{ position:absolute; z-index:5; display:flex; gap:8px; }
+  .qr-panel{ flex:1 1 0; background:#fff; border:1px solid var(--line); border-radius:12px; padding:6px; min-width:0; overflow:hidden; }
+  .qr-panel-ust{ display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:.74rem; font-weight:700; color:var(--dark); margin:0 2px 4px; height:18px; }
+  .qr-duzen{ display:flex; gap:6px; align-items:flex-start; }
+  .qr-sag{ display:flex; flex-direction:column; gap:6px; }
+  .qr-kesit{ position:relative; overflow:hidden; border-radius:6px; background:#f6f4ef; flex:0 0 auto; }
+  .qr-kesit iframe{ position:absolute; left:0; top:0; border:0; transform-origin:0 0; background:#fff; pointer-events:none; }
+  .qr-ipucu{ font-size:.66rem; color:#999; margin-top:3px; }
+  .qr-site{ border-top:1px solid var(--line); margin-top:10px; padding-top:4px; }
+  .qr-kirp-satir{ display:flex; align-items:center; gap:10px; margin-top:8px; font-size:.74rem; color:#777; }
+  .qr-kirp-ov{ z-index:2100; }
+  .qr-kirp-dlg{ background:#fff; border-radius:14px; padding:14px; box-shadow:0 20px 50px rgba(0,0,0,.3); text-align:left; }
+  .qr-kirp-ust{ display:flex; flex-direction:column; gap:3px; font-size:.8rem; color:#555; margin-bottom:10px; max-width:900px; }
+  .qr-kirp-alan{ position:relative; overflow:hidden; border:1px solid #ddd; border-radius:8px; }
+  .qr-kirp-alan iframe{ position:absolute; left:0; top:0; border:0; transform-origin:0 0; }
+  .qr-kirp-katman{ position:absolute; inset:0; cursor:crosshair; touch-action:none; }
+  .qr-kirp-kutu{ position:absolute; border:2px solid #e5322d; background:rgba(229,50,45,.08); border-radius:4px; }
+  .qr-kirp-kutu.qr{ border-color:#1f7a3a; background:rgba(31,122,58,.08); }
+  .qr-kirp-kutu.cizim{ border-style:dashed; }
+  .qr-kirp-kutu span{ position:absolute; left:0; top:-18px; background:#e5322d; color:#fff; font-size:11px; font-weight:700; padding:1px 6px; border-radius:4px; }
+  .qr-kirp-kutu.qr span{ background:#1f7a3a; }
   .qr-panel-ust span{ display:flex; gap:10px; font-weight:400; }
   .qr-panel-ust a, .qr-panel-ust button{ color:#9a7438; font-size:.72rem; background:none; border:none; cursor:pointer; padding:0; font-family:inherit; }
-  .qr-kap{ position:relative; overflow:hidden; border-radius:8px; background:#f6f4ef; }
-  .qr-kap iframe{ position:absolute; left:0; top:0; border:0; transform-origin:0 0; background:#fff; }
-  .qr-bos{ grid-column:1 / -1; background:#fff; border:1px dashed #cfc9bf; border-radius:12px; padding:22px; text-align:center; color:#777; font-size:.85rem; }
-  .qr-not{ grid-column:1 / -1; font-size:.72rem; color:#999; }
+  .qr-bos{ flex:1; background:#fff; border:1px dashed #cfc9bf; border-radius:12px; padding:22px; text-align:center; color:#777; font-size:.85rem; display:flex; flex-direction:column; align-items:center; justify-content:center; }
   .qr-dlg label{ display:flex; flex-direction:column; gap:3px; font-size:.74rem; color:#777; margin-top:8px; }
   .qr-dlg input{ padding:7px 9px; border:1px solid #ddd; border-radius:7px; font-family:inherit; font-size:.82rem; }
   .month-grid{ display:grid; grid-template-columns:1fr 1fr; grid-template-rows:repeat(3, auto); grid-auto-flow:column; gap:10px; }
@@ -1549,7 +1565,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 67;
+const APP_SURUM = 68;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -7790,12 +7806,14 @@ async function metniKopyala(text){
 }
 
 // ==================== QR SİTELERİ (bilgisayar) ====================
-// Giriş-çıkış QR siteleri tabloların yerinde, site içinde site (iframe) olarak gösterilir.
+// Giriş-çıkış QR siteleri, sol üstteki ilk haftalık tablonun yerinde site içinde site (iframe) olarak gösterilir.
+// Her site için "Kırp" ekranında kutular çizilir: ilk kutu QR, sonrakiler sayılar. Her kutu sitenin o bölgesini
+// gösteren ayrı bir penceredir. Kutu çizilmemişse sitenin tamamı küçültülerek gösterilir.
 // Adresler erişim anahtarı içerdiği için kodda değil, mağazanın ayarlarında durur (settings/qrSiteleri).
-// Bir site başka sayfanın içinde gösterilmeye izin vermiyorsa pencere boş ya da hata olarak görünür.
-const QR_SAYFA_GEN = 1100, QR_SAYFA_YUK = 720;
+const QR_SAYFA_GEN = 1000, QR_SAYFA_YUK = 900;
+const QR_MAX_KUTU = 4;
 let qrSekme = 'qr';
-let qrAyar = null;   // {siteler:[{ad, url}]}
+let qrAyar = null;   // {siteler:[{ad, url, kutular:[{x,y,w,h}]}]}
 
 function qrAyarDinle(){
   cloudUnsubs.push(sdb('settings').doc('qrSiteleri').onSnapshot(doc=>{
@@ -7808,68 +7826,116 @@ function qrSiteleri(){
   return ((qrAyar && qrAyar.siteler) || []).filter(s=> s && s.url);
 }
 
-function qrOlcekle(){
-  document.querySelectorAll('#qrGorunum .qr-kap').forEach(kap=>{
-    const s = kap.clientWidth / QR_SAYFA_GEN;
-    kap.style.height = Math.round(QR_SAYFA_YUK * s) + 'px';
-    const fr = kap.querySelector('iframe');
-    if(fr) fr.style.transform = 'scale(' + s + ')';
-  });
+// Sayfanın (x,y,w,h) bölgesini verilen genişlik/yükseklikteki kutuya sığdıran pencere.
+function qrKesitHtml(url, k, gen, yuk, baslik){
+  const s = Math.min(gen / k.w, yuk / k.h);
+  return '<div class="qr-kesit" style="width:' + Math.floor(k.w * s) + 'px;height:' + Math.floor(k.h * s) + 'px">' +
+    '<iframe title="' + escapeHtml(baslik) + '" referrerpolicy="no-referrer" data-src="' + escapeHtml(url) + '" ' +
+    'style="width:' + QR_SAYFA_GEN + 'px;height:' + QR_SAYFA_YUK + 'px;transform:scale(' + s + ') translate(' + (-k.x) + 'px,' + (-k.y) + 'px)"></iframe></div>';
+}
+
+// QR görünümü ilk haftalık tablonun üstüne, onun ölçüsünde yerleşir; tablo yerini korur ama görünmez.
+function qrYerlestir(){
+  if(TELEFON) return;
+  const gor = document.getElementById('qrGorunum');
+  const ilk = document.querySelector('#monthContainer .week-block');
+  document.querySelectorAll('#monthContainer .week-block').forEach(b=> b.style.visibility = '');
+  if(!gor) return;
+  if(qrSekme !== 'qr' || !ilk){ gor.style.display = 'none'; return; }
+  gor.style.display = '';
+  const kok = gor.offsetParent || document.body;
+  const a = ilk.getBoundingClientRect(), b = kok.getBoundingClientRect();
+  gor.style.display = '';
+  gor.style.left = (a.left - b.left) + 'px';
+  gor.style.top = (a.top - b.top) + 'px';
+  gor.style.width = a.width + 'px';
+  gor.style.height = a.height + 'px';
+  ilk.style.visibility = 'hidden';
 }
 
 function qrGorunumCiz(){
   if(TELEFON) return;
   const gor = document.getElementById('qrGorunum');
-  const ay = document.getElementById('monthContainer');
-  if(!gor || !ay) return;
+  if(!gor) return;
   document.querySelectorAll('#qrGecis button').forEach(b=> b.classList.toggle('on', b.dataset.g === qrSekme));
-  const qr = qrSekme === 'qr';
-  ay.style.display = qr ? 'none' : '';
-  gor.style.display = qr ? '' : 'none';
-  if(!qr){ gor.innerHTML = ''; return; }
+  qrYerlestir();
+  if(qrSekme !== 'qr'){ gor.innerHTML = ''; gor.dataset.anahtar = ''; return; }
   const siteler = qrSiteleri();
   if(!siteler.length){
-    gor.innerHTML = '<div class="qr-bos">Giriş-çıkış QR sitelerinin adresi girilmemiş.<br><br>' +
+    gor.dataset.anahtar = '';
+    gor.innerHTML = '<div class="qr-bos">QR sitelerinin adresi girilmemiş.<br><br>' +
       '<button type="button" class="btn tr-go" onclick="qrAdresleriDuzenle()">⚙ QR adreslerini gir</button></div>';
     return;
   }
-  // Aynı adresler zaten açıksa pencereler yeniden yüklenmez (QR sayacı sıfırlanmasın).
-  const anahtar = siteler.map(s=> s.url).join('|');
-  if(gor.dataset.anahtar === anahtar && gor.querySelector('iframe')){ qrOlcekle(); return; }
+  const W = gor.clientWidth, H = gor.clientHeight;
+  // Aynı ayar ve ölçüde pencereler yeniden yüklenmez (QR sayacı sıfırlanmasın).
+  const anahtar = JSON.stringify(siteler) + '|' + W + 'x' + H;
+  if(gor.dataset.anahtar === anahtar && gor.querySelector('iframe')) return;
   gor.dataset.anahtar = anahtar;
-  gor.innerHTML = siteler.map((s, i)=>
-    '<div class="qr-panel"><div class="qr-panel-ust">' + escapeHtml(s.ad || ('QR ' + (i+1))) +
-      '<span><button type="button" data-yenile="' + i + '">⟳ Yenile</button>' +
-      '<a href="' + escapeHtml(s.url) + '" target="_blank" rel="noopener noreferrer">Yeni sekmede aç ↗</a></span></div>' +
-    '<div class="qr-kap"><iframe title="' + escapeHtml(s.ad || 'QR') + '" referrerpolicy="no-referrer" ' +
-      'style="width:' + QR_SAYFA_GEN + 'px;height:' + QR_SAYFA_YUK + 'px"></iframe></div></div>').join('') +
-    '<div class="qr-not">Pencerede site görünmüyorsa (boş sayfa, hata ya da giriş ekranı) o site başka bir sayfanın içinde gösterilmeye izin vermiyor demektir; "Yeni sekmede aç" ile açılır.</div>';
-  gor.querySelectorAll('iframe').forEach((fr, i)=>{ fr.src = siteler[i].url; });
+  const panelGen = Math.floor((W - 8 * (siteler.length - 1)) / siteler.length) - 12;
+  const panelYuk = H - 34;
+  gor.innerHTML = siteler.map((s, i)=>{
+    const ad = s.ad || ('QR ' + (i+1));
+    const kutular = (s.kutular || []).filter(k=> k && k.w > 4 && k.h > 4);
+    let govde;
+    if(!kutular.length){
+      govde = qrKesitHtml(s.url, {x:0, y:0, w:QR_SAYFA_GEN, h:QR_SAYFA_YUK}, panelGen, panelYuk, ad) +
+        '<div class="qr-ipucu">Alanları seçmek için ⚙ → Kırp</div>';
+    } else {
+      // İlk kutu (QR) solda büyük; diğerleri (sayılar) sağda alt alta.
+      const digerler = kutular.slice(1);
+      const qrGen = digerler.length ? Math.floor(panelGen * 0.64) : panelGen;
+      const sagGen = panelGen - qrGen - 6;
+      govde = '<div class="qr-duzen">' + qrKesitHtml(s.url, kutular[0], qrGen, panelYuk, ad + ' QR') +
+        (digerler.length ? '<div class="qr-sag">' + digerler.map(k=>
+          qrKesitHtml(s.url, k, sagGen, Math.floor((panelYuk - 6 * (digerler.length - 1)) / digerler.length), ad)).join('') + '</div>' : '') +
+        '</div>';
+    }
+    return '<div class="qr-panel"><div class="qr-panel-ust">' + escapeHtml(ad) +
+      '<span><button type="button" data-yenile="' + i + '" title="Yenile">⟳</button>' +
+      '<a href="' + escapeHtml(s.url) + '" target="_blank" rel="noopener noreferrer" title="Yeni sekmede aç">↗</a></span></div>' + govde + '</div>';
+  }).join('');
+  gor.querySelectorAll('iframe').forEach(fr=>{ fr.src = fr.dataset.src; });
   gor.querySelectorAll('[data-yenile]').forEach(b=> b.addEventListener('click', ()=>{
-    const fr = gor.querySelectorAll('iframe')[Number(b.dataset.yenile)];
-    if(fr) fr.src = siteler[Number(b.dataset.yenile)].url;
+    b.closest('.qr-panel').querySelectorAll('iframe').forEach(fr=>{ fr.src = fr.dataset.src; });
   }));
-  qrOlcekle();
 }
 
 document.querySelectorAll('#qrGecis button').forEach(b=> b.addEventListener('click', ()=>{ qrSekme = b.dataset.g; qrGorunumCiz(); }));
-window.addEventListener('resize', ()=>{ if(qrSekme === 'qr') qrOlcekle(); });
+window.addEventListener('resize', ()=>{ if(qrSekme === 'qr') qrGorunumCiz(); });
+// Haftalık tablolar yeniden çizilince QR görünümü ilk tablonun yerine yeniden oturtulur.
+(function(){
+  const asil = window.renderMonth;
+  if(typeof asil === 'function') window.renderMonth = function(){ const r = asil.apply(this, arguments); qrGorunumCiz(); return r; };
+})();
 
 function qrAdresleriDuzenle(){
-  const s = (qrAyar && qrAyar.siteler) || [];
+  const kayitli = JSON.parse(JSON.stringify((qrAyar && qrAyar.siteler) || []));
   const ov = document.createElement('div');
   ov.className = 'ui-ov';
   ov.innerHTML =
-    '<div class="tt-dlg qr-dlg" style="width:560px">' +
+    '<div class="tt-dlg qr-dlg" style="width:580px">' +
       '<h3>⚙ QR adresleri</h3>' +
-      '<div class="tt-ipucu">Giriş-çıkış QR sayfalarını tarayıcıda açın, adres çubuğundaki adresin tamamını kopyalayıp buraya yapıştırın. Adresler yalnızca bu mağazanın ayarlarında saklanır.</div>' +
-      [0, 1].map(i=> '<label>' + (i+1) + '. sitenin adı<input data-f="ad' + i + '" placeholder="ör. Pop-up Cadde"></label>' +
-        '<label>' + (i+1) + '. sitenin adresi<input data-f="url' + i + '" placeholder="https://..."></label>').join('') +
+      '<div class="tt-ipucu">QR sayfalarını tarayıcıda açın, adres çubuğundaki adresin tamamını kopyalayıp yapıştırın. Sonra <b>✂ Kırp</b> ile görünecek alanları seçin: önce QR, sonra sayılar. Adresler yalnızca bu mağazanın ayarlarında saklanır.</div>' +
+      [0, 1].map(i=> '<div class="qr-site"><label>' + (i+1) + '. sitenin adı<input data-f="ad' + i + '" placeholder="ör. Pop-up Cadde"></label>' +
+        '<label>' + (i+1) + '. sitenin adresi<input data-f="url' + i + '" placeholder="https://..."></label>' +
+        '<div class="qr-kirp-satir"><button type="button" class="btn" data-kirp="' + i + '">✂ Kırp</button><span data-kd="' + i + '"></span></div></div>').join('') +
       '<div class="tt-btns"><button class="btn" type="button" data-act="kapat">Vazgeç</button>' +
         '<button class="btn tr-go" type="button" data-act="kaydet">Kaydet</button></div>' +
     '</div>';
   const f = k=> ov.querySelector('[data-f="' + k + '"]');
-  [0, 1].forEach(i=>{ f('ad' + i).value = (s[i] && s[i].ad) || ''; f('url' + i).value = (s[i] && s[i].url) || ''; });
+  const kutular = [0, 1].map(i=> (kayitli[i] && kayitli[i].kutular) || []);
+  const durumCiz = ()=> [0, 1].forEach(i=>{
+    ov.querySelector('[data-kd="' + i + '"]').textContent = kutular[i].length
+      ? kutular[i].length + ' alan seçili (1. QR' + (kutular[i].length > 1 ? ', diğerleri sayılar' : '') + ')' : 'Alan seçilmedi: sitenin tamamı görünür';
+  });
+  [0, 1].forEach(i=>{ f('ad' + i).value = (kayitli[i] && kayitli[i].ad) || ''; f('url' + i).value = (kayitli[i] && kayitli[i].url) || ''; });
+  durumCiz();
+  ov.querySelectorAll('[data-kirp]').forEach(b=> b.addEventListener('click', ()=>{
+    const i = Number(b.dataset.kirp), url = f('url' + i).value.trim();
+    if(!/^https:\/\//i.test(url)){ uiBildirim('Önce https:// ile başlayan adresi yazın.', 'hata'); return; }
+    qrKirpAc(url, kutular[i], yeni=>{ kutular[i] = yeni; durumCiz(); });
+  }));
   const kapat = ()=> ov.remove();
   ov.addEventListener('click', e=>{ if(e.target === ov) kapat(); });
   ov.querySelector('[data-act="kapat"]').addEventListener('click', kapat);
@@ -7882,17 +7948,68 @@ function qrAdresleriDuzenle(){
         uiBildirim((i+1) + '. adres https:// ile başlamalı. http:// siteler bu sayfanın içinde gösterilemez.', 'hata', 5000);
         return;
       }
-      siteler.push({ad, url});
+      siteler.push({ad, url, kutular: kutular[i]});
     }
     try{
       await sdb('settings').doc('qrSiteleri').set({siteler});
       kapat();
       qrSekme = 'qr';
-      uiBildirim('QR adresleri kaydedildi', 'basari');
+      uiBildirim('QR ayarları kaydedildi', 'basari');
     }catch(e){ uiBildirim('Kaydedilemedi: ' + e.message, 'hata'); }
   });
   document.body.appendChild(ov);
-  f('url0').focus();
+}
+
+// Kırpma ekranı: site küçültülmüş açılır, üstüne fareyle kutular çizilir (en fazla QR_MAX_KUTU).
+function qrKirpAc(url, mevcut, bitti){
+  let kutular = (mevcut || []).map(k=> Object.assign({}, k));
+  const s = Math.min((window.innerWidth - 80) / QR_SAYFA_GEN, (window.innerHeight - 170) / QR_SAYFA_YUK, 1);
+  const ov = document.createElement('div');
+  ov.className = 'ui-ov qr-kirp-ov';
+  ov.innerHTML =
+    '<div class="qr-kirp-dlg">' +
+      '<div class="qr-kirp-ust"><b>✂ Alanları seçin</b><span>Fareyle sürükleyerek kutu çizin: <b>1. kutu QR</b>, sonrakiler sayılar (Aktif çalışan, Çıkış/Giriş beklenen). En fazla ' + QR_MAX_KUTU + ' kutu. ' +
+        'QR yenilenene kadar sayfa boşsa birkaç saniye bekleyin.</span></div>' +
+      '<div class="qr-kirp-alan" style="width:' + Math.floor(QR_SAYFA_GEN * s) + 'px;height:' + Math.floor(QR_SAYFA_YUK * s) + 'px">' +
+        '<iframe referrerpolicy="no-referrer" style="width:' + QR_SAYFA_GEN + 'px;height:' + QR_SAYFA_YUK + 'px;transform:scale(' + s + ')"></iframe>' +
+        '<div class="qr-kirp-katman"></div></div>' +
+      '<div class="tt-btns"><button class="btn" type="button" data-act="temizle">Kutuları sil</button>' +
+        '<button class="btn" type="button" data-act="kapat">Vazgeç</button>' +
+        '<button class="btn tr-go" type="button" data-act="tamam">Tamam</button></div>' +
+    '</div>';
+  ov.querySelector('iframe').src = url;
+  const katman = ov.querySelector('.qr-kirp-katman');
+  const ciz = ()=>{
+    katman.innerHTML = kutular.map((k, i)=> '<div class="qr-kirp-kutu' + (i === 0 ? ' qr' : '') + '" style="left:' + k.x * s + 'px;top:' + k.y * s + 'px;width:' + k.w * s + 'px;height:' + k.h * s + 'px">' +
+      '<span>' + (i === 0 ? 'QR' : 'Sayı ' + i) + '</span></div>').join('');
+  };
+  ciz();
+  let bas = null, gecici = null;
+  const nokta = e=>{ const r = katman.getBoundingClientRect(); return {x: Math.max(0, Math.min(QR_SAYFA_GEN, (e.clientX - r.left) / s)), y: Math.max(0, Math.min(QR_SAYFA_YUK, (e.clientY - r.top) / s))}; };
+  katman.addEventListener('pointerdown', e=>{
+    if(kutular.length >= QR_MAX_KUTU){ uiBildirim('En fazla ' + QR_MAX_KUTU + ' kutu. Yeniden çizmek için "Kutuları sil".', 'hata'); return; }
+    bas = nokta(e); katman.setPointerCapture(e.pointerId);
+    gecici = document.createElement('div'); gecici.className = 'qr-kirp-kutu cizim'; katman.appendChild(gecici);
+  });
+  katman.addEventListener('pointermove', e=>{
+    if(!bas) return;
+    const n = nokta(e);
+    Object.assign(gecici.style, {left: Math.min(bas.x, n.x) * s + 'px', top: Math.min(bas.y, n.y) * s + 'px',
+      width: Math.abs(n.x - bas.x) * s + 'px', height: Math.abs(n.y - bas.y) * s + 'px'});
+  });
+  katman.addEventListener('pointerup', e=>{
+    if(!bas) return;
+    const n = nokta(e);
+    const k = {x: Math.round(Math.min(bas.x, n.x)), y: Math.round(Math.min(bas.y, n.y)), w: Math.round(Math.abs(n.x - bas.x)), h: Math.round(Math.abs(n.y - bas.y))};
+    bas = null;
+    if(k.w > 10 && k.h > 10) kutular.push(k);
+    ciz();
+  });
+  const kapat = ()=> ov.remove();
+  ov.querySelector('[data-act="temizle"]').addEventListener('click', ()=>{ kutular = []; ciz(); });
+  ov.querySelector('[data-act="kapat"]').addEventListener('click', kapat);
+  ov.querySelector('[data-act="tamam"]').addEventListener('click', ()=>{ bitti(kutular); kapat(); });
+  document.body.appendChild(ov);
 }
 
 // ==================== YENİLİKLER ====================
