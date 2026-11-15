@@ -679,6 +679,23 @@ if(!document.documentElement.classList.contains('tel')){
   html.tel .grafik-kart{ margin-top:10px; padding:12px 12px 8px; }
   html.tel .gr-seg button{ padding:6px 8px; font-size:.74rem; }
 
+  .qr-bar{ display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+  .qr-gecis{ display:inline-flex; border:1px solid #cfc9bf; border-radius:8px; overflow:hidden; background:#fff; }
+  .qr-gecis button{ border:none; background:none; padding:5px 16px; font-size:.78rem; font-weight:600; cursor:pointer; color:#555; font-family:inherit; }
+  .qr-gecis button + button{ border-left:1px solid #cfc9bf; }
+  .qr-gecis button.on{ background:var(--dark); color:#fff; }
+  .qr-ayar{ border:none; background:none; color:#9a7438; font-size:.74rem; cursor:pointer; text-decoration:underline; font-family:inherit; }
+  .qr-gorunum{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .qr-panel{ background:#fff; border:1px solid var(--line); border-radius:12px; padding:8px; min-width:0; }
+  .qr-panel-ust{ display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:.78rem; font-weight:700; color:var(--dark); margin:0 2px 6px; }
+  .qr-panel-ust span{ display:flex; gap:10px; font-weight:400; }
+  .qr-panel-ust a, .qr-panel-ust button{ color:#9a7438; font-size:.72rem; background:none; border:none; cursor:pointer; padding:0; font-family:inherit; }
+  .qr-kap{ position:relative; overflow:hidden; border-radius:8px; background:#f6f4ef; }
+  .qr-kap iframe{ position:absolute; left:0; top:0; border:0; transform-origin:0 0; background:#fff; }
+  .qr-bos{ grid-column:1 / -1; background:#fff; border:1px dashed #cfc9bf; border-radius:12px; padding:22px; text-align:center; color:#777; font-size:.85rem; }
+  .qr-not{ grid-column:1 / -1; font-size:.72rem; color:#999; }
+  .qr-dlg label{ display:flex; flex-direction:column; gap:3px; font-size:.74rem; color:#777; margin-top:8px; }
+  .qr-dlg input{ padding:7px 9px; border:1px solid #ddd; border-radius:7px; font-family:inherit; font-size:.82rem; }
   .month-grid{ display:grid; grid-template-columns:1fr 1fr; grid-template-rows:repeat(3, auto); grid-auto-flow:column; gap:10px; }
   @media (max-width: 900px){ .page-layout{ flex-direction:column; } .month-grid{ grid-template-columns:1fr; grid-auto-flow:row; } .right-col{ flex:1 1 auto; width:100%; } }
 
@@ -1436,6 +1453,11 @@ if(!document.documentElement.classList.contains('tel')){
 
 <div class="page-layout" id="raporPage">
   <div class="left-col">
+    <div class="qr-bar sadece-masa" id="qrBar">
+      <div class="qr-gecis" id="qrGecis"><button type="button" data-g="qr">QR</button><button type="button" data-g="tablo">Tablo</button></div>
+      <button type="button" class="qr-ayar" onclick="qrAdresleriDuzenle()">⚙ QR adresleri</button>
+    </div>
+    <div class="qr-gorunum sadece-masa" id="qrGorunum"></div>
     <div class="month-grid" id="monthContainer"></div>
     <div class="grafik-kart" id="grafikKart"></div>
     <div class="status-msg" id="statusMsg">Buraya yapıştırın, otomatik işlenir.</div>
@@ -1527,7 +1549,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 66;
+const APP_SURUM = 67;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -6832,6 +6854,9 @@ let trKlasor = null;             // FileSystemDirectoryHandle (bu bilgisayarda h
 const KLASOR_DESTEGI = typeof window.showDirectoryPicker === 'function';
 
 function transferSifirla(){
+  qrAyar = null;
+  const qrG = document.getElementById('qrGorunum');
+  if(qrG){ qrG.dataset.anahtar = ''; qrG.innerHTML = ''; }
   transferCache = [];
   trFotolar = [];
   klasorSayac = null;
@@ -6839,6 +6864,7 @@ function transferSifirla(){
 }
 
 function listenTransferChanges(){
+  qrAyarDinle();
   cloudUnsubs.push(sdb('transfers').onSnapshot(snap=>{
     const liste = [];
     snap.forEach(d=> liste.push(Object.assign({id:d.id}, d.data())));
@@ -7761,6 +7787,112 @@ async function metniKopyala(text){
     ta.remove();
   }
   setTransferDurum('✓ Metin kopyalandı.');
+}
+
+// ==================== QR SİTELERİ (bilgisayar) ====================
+// Giriş-çıkış QR siteleri tabloların yerinde, site içinde site (iframe) olarak gösterilir.
+// Adresler erişim anahtarı içerdiği için kodda değil, mağazanın ayarlarında durur (settings/qrSiteleri).
+// Bir site başka sayfanın içinde gösterilmeye izin vermiyorsa pencere boş ya da hata olarak görünür.
+const QR_SAYFA_GEN = 1100, QR_SAYFA_YUK = 720;
+let qrSekme = 'qr';
+let qrAyar = null;   // {siteler:[{ad, url}]}
+
+function qrAyarDinle(){
+  cloudUnsubs.push(sdb('settings').doc('qrSiteleri').onSnapshot(doc=>{
+    qrAyar = doc.exists ? doc.data() : {siteler:[]};
+    qrGorunumCiz();
+  }, ()=>{ qrAyar = {siteler:[]}; qrGorunumCiz(); }));
+}
+
+function qrSiteleri(){
+  return ((qrAyar && qrAyar.siteler) || []).filter(s=> s && s.url);
+}
+
+function qrOlcekle(){
+  document.querySelectorAll('#qrGorunum .qr-kap').forEach(kap=>{
+    const s = kap.clientWidth / QR_SAYFA_GEN;
+    kap.style.height = Math.round(QR_SAYFA_YUK * s) + 'px';
+    const fr = kap.querySelector('iframe');
+    if(fr) fr.style.transform = 'scale(' + s + ')';
+  });
+}
+
+function qrGorunumCiz(){
+  if(TELEFON) return;
+  const gor = document.getElementById('qrGorunum');
+  const ay = document.getElementById('monthContainer');
+  if(!gor || !ay) return;
+  document.querySelectorAll('#qrGecis button').forEach(b=> b.classList.toggle('on', b.dataset.g === qrSekme));
+  const qr = qrSekme === 'qr';
+  ay.style.display = qr ? 'none' : '';
+  gor.style.display = qr ? '' : 'none';
+  if(!qr){ gor.innerHTML = ''; return; }
+  const siteler = qrSiteleri();
+  if(!siteler.length){
+    gor.innerHTML = '<div class="qr-bos">Giriş-çıkış QR sitelerinin adresi girilmemiş.<br><br>' +
+      '<button type="button" class="btn tr-go" onclick="qrAdresleriDuzenle()">⚙ QR adreslerini gir</button></div>';
+    return;
+  }
+  // Aynı adresler zaten açıksa pencereler yeniden yüklenmez (QR sayacı sıfırlanmasın).
+  const anahtar = siteler.map(s=> s.url).join('|');
+  if(gor.dataset.anahtar === anahtar && gor.querySelector('iframe')){ qrOlcekle(); return; }
+  gor.dataset.anahtar = anahtar;
+  gor.innerHTML = siteler.map((s, i)=>
+    '<div class="qr-panel"><div class="qr-panel-ust">' + escapeHtml(s.ad || ('QR ' + (i+1))) +
+      '<span><button type="button" data-yenile="' + i + '">⟳ Yenile</button>' +
+      '<a href="' + escapeHtml(s.url) + '" target="_blank" rel="noopener noreferrer">Yeni sekmede aç ↗</a></span></div>' +
+    '<div class="qr-kap"><iframe title="' + escapeHtml(s.ad || 'QR') + '" referrerpolicy="no-referrer" ' +
+      'style="width:' + QR_SAYFA_GEN + 'px;height:' + QR_SAYFA_YUK + 'px"></iframe></div></div>').join('') +
+    '<div class="qr-not">Pencerede site görünmüyorsa (boş sayfa, hata ya da giriş ekranı) o site başka bir sayfanın içinde gösterilmeye izin vermiyor demektir; "Yeni sekmede aç" ile açılır.</div>';
+  gor.querySelectorAll('iframe').forEach((fr, i)=>{ fr.src = siteler[i].url; });
+  gor.querySelectorAll('[data-yenile]').forEach(b=> b.addEventListener('click', ()=>{
+    const fr = gor.querySelectorAll('iframe')[Number(b.dataset.yenile)];
+    if(fr) fr.src = siteler[Number(b.dataset.yenile)].url;
+  }));
+  qrOlcekle();
+}
+
+document.querySelectorAll('#qrGecis button').forEach(b=> b.addEventListener('click', ()=>{ qrSekme = b.dataset.g; qrGorunumCiz(); }));
+window.addEventListener('resize', ()=>{ if(qrSekme === 'qr') qrOlcekle(); });
+
+function qrAdresleriDuzenle(){
+  const s = (qrAyar && qrAyar.siteler) || [];
+  const ov = document.createElement('div');
+  ov.className = 'ui-ov';
+  ov.innerHTML =
+    '<div class="tt-dlg qr-dlg" style="width:560px">' +
+      '<h3>⚙ QR adresleri</h3>' +
+      '<div class="tt-ipucu">Giriş-çıkış QR sayfalarını tarayıcıda açın, adres çubuğundaki adresin tamamını kopyalayıp buraya yapıştırın. Adresler yalnızca bu mağazanın ayarlarında saklanır.</div>' +
+      [0, 1].map(i=> '<label>' + (i+1) + '. sitenin adı<input data-f="ad' + i + '" placeholder="ör. Pop-up Cadde"></label>' +
+        '<label>' + (i+1) + '. sitenin adresi<input data-f="url' + i + '" placeholder="https://..."></label>').join('') +
+      '<div class="tt-btns"><button class="btn" type="button" data-act="kapat">Vazgeç</button>' +
+        '<button class="btn tr-go" type="button" data-act="kaydet">Kaydet</button></div>' +
+    '</div>';
+  const f = k=> ov.querySelector('[data-f="' + k + '"]');
+  [0, 1].forEach(i=>{ f('ad' + i).value = (s[i] && s[i].ad) || ''; f('url' + i).value = (s[i] && s[i].url) || ''; });
+  const kapat = ()=> ov.remove();
+  ov.addEventListener('click', e=>{ if(e.target === ov) kapat(); });
+  ov.querySelector('[data-act="kapat"]').addEventListener('click', kapat);
+  ov.querySelector('[data-act="kaydet"]').addEventListener('click', async ()=>{
+    const siteler = [];
+    for(const i of [0, 1]){
+      const url = f('url' + i).value.trim(), ad = f('ad' + i).value.trim();
+      if(!url) continue;
+      if(!/^https:\/\//i.test(url)){
+        uiBildirim((i+1) + '. adres https:// ile başlamalı. http:// siteler bu sayfanın içinde gösterilemez.', 'hata', 5000);
+        return;
+      }
+      siteler.push({ad, url});
+    }
+    try{
+      await sdb('settings').doc('qrSiteleri').set({siteler});
+      kapat();
+      qrSekme = 'qr';
+      uiBildirim('QR adresleri kaydedildi', 'basari');
+    }catch(e){ uiBildirim('Kaydedilemedi: ' + e.message, 'hata'); }
+  });
+  document.body.appendChild(ov);
+  f('url0').focus();
 }
 
 // ==================== YENİLİKLER ====================
