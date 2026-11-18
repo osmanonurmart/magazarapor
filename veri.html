@@ -127,6 +127,17 @@ const ikChip=()=>ikL.length?ikL.filter(x=>!x.irs).length+" açık sevk":"Sevk yo
 let ikStream=null,ikTimer=null,ikRd=null;
 function ikStop(){if(ikTimer){clearInterval(ikTimer);ikTimer=null}if(ikRd){try{ikRd.reset()}catch(e){}ikRd=null}if(ikStream){ikStream.getTracks().forEach(t=>t.stop());ikStream=null}ik.scan=false}
 const ikLoadZ=()=>window.ZXing?Promise.resolve():new Promise((r,j)=>{const e=document.createElement("script");e.src="https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js";e.onload=r;e.onerror=()=>j(new Error("Barkod kütüphanesi yüklenemedi"));document.head.appendChild(e)});
+// Telefonda arama ve kırık kutularına kamera ile barkod okutma. Okunan barkod kutuya yazılıp Enter'a basılmış gibi işlenir.
+const kamBtn=h=>matchMedia("(pointer:coarse)").matches?`<button data-act="kam" data-h="${h}" aria-label="Kamera ile barkod okut" title="Kamera ile okut">📷 Okut</button>`:"";
+let kmStream=null,kmTimer=null,kmRd=null;
+function kamKapat(){if(kmTimer){clearInterval(kmTimer);kmTimer=null}if(kmRd){try{kmRd.reset()}catch(e){}kmRd=null}if(kmStream){kmStream.getTracks().forEach(t=>t.stop());kmStream=null}const o=document.getElementById("kamOv");if(o)o.remove()}
+async function kamOku(hedef){kamKapat();const o=document.createElement("div");o.id="kamOv";o.style.cssText="position:fixed;inset:0;z-index:9999;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px";
+ o.innerHTML='<video id="kamV" playsinline muted style="width:100%;max-width:520px;border-radius:12px;background:#111"></video><div id="kamN" style="color:#fff;font-size:15px;text-align:center">Barkodu kameraya göster</div><button id="kamX" style="font-size:16px;padding:10px 28px">Kapat</button>';
+ document.body.appendChild(o);o.querySelector("#kamX").onclick=kamKapat;const v=o.querySelector("#kamV");let bitti=false;
+ const got=c=>{if(bitti||!c)return;bitti=true;kamKapat();if(navigator.vibrate)navigator.vibrate(80);const i=document.getElementById(hedef);if(!i)return;i.value=String(c).trim();i.dispatchEvent(new KeyboardEvent("keydown",{key:"Enter",bubbles:true}))};
+ try{if("BarcodeDetector" in window){const d=new BarcodeDetector({formats:["ean_13","ean_8","code_128","code_39","upc_a","upc_e"]});kmStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}});v.srcObject=kmStream;await v.play();kmTimer=setInterval(async()=>{try{const x=await d.detect(v);if(x.length)got(x[0].rawValue)}catch(e){}},250)}
+  else{await ikLoadZ();kmRd=new ZXing.BrowserMultiFormatReader();await kmRd.decodeFromConstraints({video:{facingMode:"environment"}},v,x=>{if(x)got(x.getText())})}}
+ catch(e){const n=document.getElementById("kamN");if(n)n.textContent="Kamera açılamadı: "+e.message+". Tarayıcıda kamera iznini ver ya da barkodu elle yaz."}}
 function ikGot(c){ik.draft.bar=c;ikStop();render()}
 async function ikScanStart(){const v=document.getElementById("ikv");if(!v)return;try{
  if("BarcodeDetector" in window){const d=new BarcodeDetector({formats:["ean_13","ean_8","code_128","code_39","upc_a","upc_e"]});ikStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}});v.srcObject=ikStream;await v.play();ikTimer=setInterval(async()=>{try{const r=await d.detect(v);if(r.length)ikGot(r[0].rawValue)}catch(e){}},300)}
@@ -203,7 +214,7 @@ async function kAct(a,b){
  if(a==="kdec"){const x=kirik.list.find(y=>y.id===b.dataset.id);if(x){x.adet--;if(x.adet<1)kirik.list=kirik.list.filter(y=>y!==x)}await kSave();render();return}
  if(a==="kback"){const i=kirik.hist.findIndex(x=>x.id===b.dataset.id);if(i>=0){const h=kirik.hist.splice(i,1)[0];kAdd(h.bar,h.adet)}await kSave();render();return}}
 function kView(){const I=kbi();let h=`<div class="ov"><div class="dlg" style="max-width:900px"><div class="top"><span class="ttl">Mevcut kırıklar</span><span class="chip">${kChip()}</span><span class="sp"></span><button data-act="kview">${kv==="liste"?"Geçmiş ("+kirik.hist.length+")":"Mevcut liste"}</button><button data-act="close">Kapat</button></div>`;
- if(kv==="liste"){h+=`<div class="top"><input type="search" id="kib" placeholder="Barkodu okut, Enter" aria-label="Barkod" style="flex:1;min-width:240px"><button class="dk" data-act="kout"${ksel.size?"":" disabled"}>Seçilenleri çıkış yap (${ksel.size})</button></div>${kmsg?`<div class="date" style="margin-bottom:8px">${esc(kmsg)}</div>`:""}`;
+ if(kv==="liste"){h+=`<div class="top"><input type="search" id="kib" placeholder="Barkodu okut, Enter" aria-label="Barkod" style="flex:1;min-width:240px">${kamBtn("kib")}<button class="dk" data-act="kout"${ksel.size?"":" disabled"}>Seçilenleri çıkış yap (${ksel.size})</button></div>${kmsg?`<div class="date" style="margin-bottom:8px">${esc(kmsg)}</div>`:""}`;
   h+=kirik.list.length?`<div class="box"><table style="min-width:0"><tr><th></th><th>Barkod</th><th>Ürün kodu</th><th class="n">Adet</th><th></th></tr>${kirik.list.map(x=>{const v=I.get(x.bar);return`<tr><td><input type="checkbox" data-ks="${x.id}"${ksel.has(x.id)?" checked":""} aria-label="Seç"></td><td>${esc(x.bar)}</td><td>${v?esc(v.kod):'<span class="chip w">envanterde yok</span>'}</td><td class="n">${x.adet}</td><td><button class="sm" data-act="kdec" data-id="${x.id}">−1</button> <button class="sm" data-act="kout" data-id="${x.id}">Çıkış yapıldı</button></td></tr>`}).join("")}</table></div>`:'<div class="empty">Kırık yok. Barkodu okutunca burada listelenir.</div>'}
  else h+=kirik.hist.length?`<div class="box"><table style="min-width:0"><tr><th>Çıkış tarihi</th><th>Barkod</th><th>Ürün kodu</th><th class="n">Adet</th><th></th></tr>${kirik.hist.map(x=>`<tr><td>${hm(x.cikis)}</td><td>${esc(x.bar)}</td><td>${esc(x.kod)}</td><td class="n">${x.adet}</td><td><button class="sm" data-act="kback" data-id="${x.id}">Listeye geri al</button></td></tr>`).join("")}</table></div>`:'<div class="empty">Geçmiş boş.</div>';
  return h+`</div></div>`}
@@ -235,9 +246,9 @@ async function pickDir(){
  imgCache=new Map();render()}
 function render(){
  const tab=location.hash==="#veri"?"veri":"araclar";
- let h=`<div class="top"><button data-act="tab" data-t="araclar" class="${tab==="araclar"?"on":""}">Araçlar</button><button data-act="tab" data-t="veri" class="${tab==="veri"?"on":""}">Veri</button><input type="search" id="bs" placeholder="Barkod okut veya ürün kodu yaz, Enter" aria-label="Barkod ara" style="min-width:300px"><span class="sp"></span>`;
+ let h=`<div class="top"><button data-act="tab" data-t="araclar" class="${tab==="araclar"?"on":""}">Araçlar</button><button data-act="tab" data-t="veri" class="${tab==="veri"?"on":""}">Veri</button><input type="search" id="bs" placeholder="Barkod okut veya ürün kodu yaz, Enter" aria-label="Barkod ara" style="min-width:300px">${kamBtn("bs")}<span class="sp"></span>`;
  if(data){const old=Date.now()-data.meta.fileDate>864e5;h+=`<span class="date">${data.meta.rep?"Envanter tarihi: <b>"+data.meta.rep+"</b> · ":""}Dosya: ${fmt(data.meta.fileDate)} · Yüklendi: ${fmt(data.meta.uploadedAt)} · ${data.rows.length} satır</span>`}
- h+=`${imgPerm?'<button data-act="perm">Resim iznini ver</button>':`<button data-act="pick">${imgOn()?"Resim klasörünü değiştir":"Resim klasörü seç"}</button>`}<span class="date">s.26</span><input id="fd" type="file" webkitdirectory hidden><label class="btn dk">Envanter dosyası yükle<input id="f" type="file" accept=".xlsx,.xls,.xlsb,.csv" hidden></label></div>`;
+ h+=`<span class="date">s.27</span><input id="fd" type="file" webkitdirectory hidden><label class="btn dk">Envanter dosyası yükle<input id="f" type="file" accept=".xlsx,.xls,.xlsb,.csv" hidden></label></div>`;
  if(msg)h+=`<div class="msg"><span>${esc(msg)}</span><span class="sp"></span><button data-act="rep">Hata raporunu kopyala</button></div>${repTxt?`<textarea readonly style="width:100%;height:140px;margin-bottom:16px">${esc(repTxt)}</textarea>`:""}`;
  if(pending)h+=`<div class="msg"><span>${pending.w.map(esc).join(" ")}</span><span class="sp"></span><button data-act="rep">Raporu kopyala</button><button data-act="yes">Yine de yükle</button><button data-act="no">Vazgeç</button></div>${repTxt?`<textarea readonly style="width:100%;height:140px;margin-bottom:16px">${esc(repTxt)}</textarea>`:""}`;
  if(bn)h+=`<div class="msg" style="background:var(--chip);color:var(--fg)"><span>${esc(bn)}</span><span class="sp"></span><button data-act="bnx">Tamam</button></div>`;
@@ -276,7 +287,7 @@ async function copyDiag(){const t=JSON.stringify({...(diag||{}),ekran:msg,bulut_
  try{await navigator.clipboard.writeText(t);ok=true}catch(e){}
  if(!ok){try{const a=document.createElement("textarea");a.value=t;a.style.cssText="position:fixed;opacity:0";document.body.appendChild(a);a.select();ok=document.execCommand("copy");a.remove()}catch(e){}}
  if(!ok){repTxt=t;render()}return ok}
-async function onFile(f){diag={v:"s.26",file:{name:f.name,size:f.size,mod:fmt(f.lastModified)},xlsx:typeof XLSX};repTxt="";
+async function onFile(f){diag={v:"s.27",file:{name:f.name,size:f.size,mod:fmt(f.lastModified)},xlsx:typeof XLSX};repTxt="";
  try{if(typeof XLSX==="undefined")throw new Error("Excel kütüphanesi yüklenemedi (cdnjs engelli olabilir).");
   const wb=XLSX.read(await f.arrayBuffer(),{type:"array"});let raw=[],seen="",rep="";diag.sheets=wb.SheetNames;
   for(const sn of wb.SheetNames){const A=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,defval:""});diag.firstRows=diag.firstRows||A.slice(0,8).map(r=>r.map(String).filter(Boolean).join(" | ").slice(0,300));seen+=sn+" ["+(A[0]||[]).filter(String).slice(0,8).join(" | ")+"] ";
@@ -300,6 +311,7 @@ document.addEventListener("input",e=>{if(e.target.dataset&&e.target.dataset.ik){
 document.addEventListener("click",async e=>{
  const iz=e.target.closest("img[data-iz]");if(iz){big={u:iz.src,k:iz.dataset.iz};render();return}const im=e.target.closest("img[data-img]");if(im&&im.getAttribute("src")){big={u:im.src,k:im.dataset.img};render();return}if(e.target.closest("[data-rz]"))return;const vb=e.target.closest("[data-vf]");if(vb){vp={k:vb.dataset.vf,q:"",sel:new Set(vs[vb.dataset.vf]||[])};render();return}const kb=e.target.closest("[data-kf]");if(kb){kf=!kf;render();return}const rb=e.target.closest("[data-rf]");if(rb){const v=rb.dataset.rf;rf.has(v)?rf.delete(v):rf.add(v);render();return}const sb=e.target.closest("[data-sf]");if(sb){const n=+sb.dataset.sf;sf.has(n)?sf.delete(n):sf.add(n);render();return}const tr=e.target.closest("tr[data-pk]");if(tr&&!e.target.closest("input,button,label,img,.rz")){prod=tr.dataset.pk;hl=null;render();return}const th=e.target.closest("th[data-sort]");if(th&&!modal&&!dgDone){const k=th.dataset.sort;sort=[k,sort[0]===k?-sort[1]:1];render();return}
  const b=e.target.closest("[data-act]");if(!b)return;const a=b.dataset.act;
+ if(a==="kam"){kamOku(b.dataset.h);return}
  if(a==="tab"){location.hash=b.dataset.t==="veri"?"#veri":"#araclar";return}
  if(a==="open"){modal=b.dataset.id;kv="liste";render();if(modal==="kirik"){const i=$("#kib");if(i)i.focus()}}
  if(a==="close"){modal=null;ikStop();render()}
