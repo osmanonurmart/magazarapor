@@ -6,8 +6,35 @@
   "background_color": "#f6f4f1",
   "theme_color": "#2d2d2d",
   "icons": [
-    { "src": "simge-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "simge-512.png", "sizes": "512x512", "type": "image/png" },
-    { "src": "simge.svg", "sizes": "any", "type": "image/svg+xml" }
+    {
+      "src": "simge-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "simge-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "simge.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Transfer fotoğrafı çek",
+      "short_name": "Fotoğraf çek",
+      "description": "Transfer sekmesinde kamerayı doğrudan açar",
+      "url": "rapor.html?kisayol=transfer-kamera",
+      "icons": [
+        {
+          "src": "simge-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
   ]
 }
