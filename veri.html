@@ -47,7 +47,9 @@ th.dl{box-shadow:inset 3px 0 0 var(--ac)}th.dr{box-shadow:inset -3px 0 0 var(--a
 @media (pointer:coarse){button,.btn,input[type=search],select,.ik input[type=text],.ik input[type=number]{min-height:38px;font-size:13px}input[type=search]{min-width:0;flex:1 1 180px}}
 @media (max-width:600px){.top{gap:8px;margin-bottom:10px}button,.btn{padding:0 11px;font-size:12.5px}.date{font-size:11px}}
 /* Mağaza Raporu içinde: araçlar ayrı pencere değil, sayfanın kendisi gibi açılır */
-html.gomulu body{padding:14px 14px 64px}
+html.gomulu body{padding:14px 14px 16px}
+/* Alttaki siyah toplam çubuğu yok: toplamlar tablonun altında küçük gri satır */
+html.gomulu .tot{position:static;background:none;color:var(--mut);padding:8px 2px 0;font-size:12px;gap:4px 16px;z-index:auto}html.gomulu .tot b{color:var(--fg)}
 #vuSabit{display:flex;flex-direction:column;gap:10px;max-width:640px;margin-bottom:10px}
 .vu-ara{width:100%;min-width:0!important;height:44px;min-height:44px!important;font-size:15px!important;flex:none!important}
 .vu-kam{justify-content:center;width:100%}
@@ -55,7 +57,7 @@ html.gomulu body{padding:14px 14px 64px}
 @media (max-width:600px){.vu-tarih span{display:none}}
 html.gomulu .ov{background:var(--bg);align-items:flex-start;padding:14px}
 html.gomulu .dlg{box-shadow:none;padding:0;max-width:1100px!important;margin:0 auto}
-@media (max-width:600px){body{padding:10px 10px 64px}.dlg{padding:12px}}
+@media (max-width:600px){body{padding:10px 10px 64px}html.gomulu body{padding-bottom:16px}.dlg{padding:12px}}
 </style>
 </head>
 <body>
