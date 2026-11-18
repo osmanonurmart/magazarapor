@@ -43,6 +43,7 @@ tr[data-pk]{cursor:pointer}tr[data-pk]:hover td{background:var(--chip)}
 th.dl{box-shadow:inset 3px 0 0 var(--ac)}th.dr{box-shadow:inset -3px 0 0 var(--ac)}
 .ik input[type=text],.ik input[type=number]{min-height:34px;padding:0 12px;border:1px solid var(--bd2);border-radius:8px;background:var(--card);color:var(--fg);font:13px 'Segoe UI',system-ui,sans-serif}
 .empty{padding:48px 16px;text-align:center;color:var(--mut)}
+.yuk{display:flex;align-items:center;justify-content:center;gap:12px;padding:48px 16px;color:var(--mut);font-size:14px}.yuk i{width:24px;height:24px;border:3px solid var(--bd2);border-top-color:var(--ac);border-radius:50%;animation:don .8s linear infinite;flex:none}@keyframes don{to{transform:rotate(360deg)}}
 /* Telefonda dokunma alanları büyük kalır */
 @media (pointer:coarse){button,.btn,input[type=search],select,.ik input[type=text],.ik input[type=number]{min-height:38px;font-size:13px}input[type=search]{min-width:0;flex:1 1 180px}}
 @media (max-width:600px){.top{gap:8px;margin-bottom:10px}button,.btn{padding:0 11px;font-size:12.5px}.date{font-size:11px}}
@@ -65,7 +66,7 @@ html.gomulu .dlg{box-shadow:none;padding:0;max-width:1100px!important;margin:0 a
 </style>
 </head>
 <body>
-<div id="app"></div>
+<div id="app"><div class="yuk"><i></i>Envanter yükleniyor…</div></div>
 <script>try{if(window.parent!==window&&typeof window.parent.sdb==="function")document.documentElement.classList.add("gomulu")}catch(e){}</script>
 <script>
 const $=s=>document.querySelector(s);
@@ -74,7 +75,7 @@ const norm=s=>String(s).toLocaleLowerCase("tr").normalize("NFD").replace(/[̀-ͯ
 const fmt=t=>new Date(t).toLocaleString("tr-TR",{dateStyle:"medium",timeStyle:"short"});
 const MAP={kod:"ürün kodu",bar:"barkod",rk:"renk kodu",ad:"ürün adı",renk:"renk açıklaması",beden:"beden",env:"envanter",sevk:"onaylanmamış sevkler",grup:"ürün ana grubu",marka:"marka açıklama",sezon:"yıl-sezon açıklama",mkod:"mağaza kodu"};
 for(const n in MAP)MAP[n]=norm(MAP[n]);
-let mem={},data=null,counted={},pending=null,msg="",modal=null,q="",fl={},imgDir=null,imgMap=null,imgPerm=false,imgCache=new Map(),big=null,cw={},vs={},vp=null,diag=null,repTxt="",cp={order:[],on:{}},cpop=false,prod=null,hl=null,nf="",prev=null,h1b=true,sf=new Set(),custom=[],forms={},ik={v:"liste",draft:{bar:"",foto:null,ger:"",adet:1}},ikL=[],ikS=null,defter={e:{},a:{}},bn="",kirik={list:[],hist:[]},kv="liste",ksel=new Set(),kmsg="",kf=false,pa=false,pcode="",perr="",rf=new Set(),limv=20,sort=["kod",1],page=0;
+let yukMsg="Envanter yükleniyor…",mem={},data=null,counted={},pending=null,msg="",modal=null,q="",fl={},imgDir=null,imgMap=null,imgPerm=false,imgCache=new Map(),big=null,cw={},vs={},vp=null,diag=null,repTxt="",cp={order:[],on:{}},cpop=false,prod=null,hl=null,nf="",prev=null,h1b=true,sf=new Set(),custom=[],forms={},ik={v:"liste",draft:{bar:"",foto:null,ger:"",adet:1}},ikL=[],ikS=null,defter={e:{},a:{}},bn="",kirik={list:[],hist:[]},kv="liste",ksel=new Set(),kmsg="",kf=false,pa=false,pcode="",perr="",rf=new Set(),limv=20,sort=["kod",1],page=0;
 const idb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open("env",1);r.onupgradeneeded=()=>r.result.createObjectStore("kv");r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}catch(e){rej(e)}});
 async function idbGet(k){try{const d=await idb();return await new Promise((res,rej)=>{const g=d.transaction("kv").objectStore("kv").get(k);g.onsuccess=()=>res(g.result);g.onerror=()=>rej(g.error)})}catch(e){return mem[k]}}
 async function idbPut(k,v){try{const d=await idb();await new Promise((res,rej)=>{const t=d.transaction("kv","readwrite");t.objectStore("kv").put(v,k);t.oncomplete=res;t.onerror=()=>rej(t.error)})}catch(e){}}
@@ -294,7 +295,7 @@ function render(){
  if(bn)h+=`<div class="msg" style="background:var(--chip);color:var(--fg)"><span>${esc(bn)}</span><span class="sp"></span><button data-act="bnx">Tamam</button></div>`;
  if(nf)h+=`<div class="msg"><span>Bulunamadı: ${esc(nf)}</span></div>`;
  if(!data&&!B)h+=`<div class="top"><button class="dk" data-act="ikopen">İkinci kalite sevki</button><button class="dk" data-act="kopen">Mevcut kırıklar</button></div>`;
- if(!data)h+=`<div class="empty">Başlamak için Nebim’den aldığın envanter Excel dosyasını yükle. Sütun sırası karışık olsa da başlıklara göre okunur.</div>`;
+ if(yukMsg)h+=`<div class="yuk"><i></i>${esc(yukMsg)}</div>`;else if(!data)h+=`<div class="empty">Başlamak için Nebim’den aldığın envanter Excel dosyasını yükle. Sütun sırası karışık olsa da başlıklara göre okunur.</div>`;
  else if(tab==="araclar"){const P=groups();h+=`<div class="grid">`+allTools().map(T=>{const n=T.hata?0:T.f(P).length;return`<div class="card"><div><div class="ttl">${T.t}</div><p class="dsc">${T.d}</p></div><div class="row"><span class="chip ${T.w&&n?"w":""}">${T.kr?kChip():T.ik?ikChip():T.html?"Form":n+" ürün"+(T.u?" "+T.u:"")}</span>${T.cust?`<button class="sm" data-act="cdel" data-id="${T.id}">Sil</button>`:""}<button data-act="open" data-id="${T.id}">Formu aç</button></div>${T.hata?`<div class="date" style="color:var(--warn)">Hata: ${esc(T.hata)}</div>`:""}</div>`}).join("")+`<button class="card add" data-act="plus" aria-label="Yeni araç ekle">+</button></div>`}
  else{kSet();let R=data.rows;const s=norm(q);if(s)R=R.filter(r=>norm([r.kod,r.bar,r.ad,r.renk,r.grup,r.marka].join(" ")).includes(s));
   for(const[k2,v]of Object.entries(fl)){const t=v.trim();if(!t)continue;const m=t.match(/^(<=|>=|<|>|=)\s*(-?\d+(?:[.,]\d+)?)$/);
@@ -318,7 +319,7 @@ function render(){
  if(pa){h+=`<div class="ov"><div class="dlg" style="max-width:720px"><div class="top"><span class="ttl">Yeni araç ekle</span><span class="sp"></span><button data-act="padx">Kapat</button></div><div class="date" style="margin-bottom:8px">Benim yazdığım HTML formunu (< ile başlar) veya fonksiyon kodunu yapıştır. Fonksiyon kodu şunu döndürmeli: {baslik, aciklama, kolonlar:[[alan,başlık,"n"]], satirlar:[...]}. Kullanılabilir: satirlar, urunler, onceki. Kaynağını bilmediğin kodu yapıştırma, kod sayfadaki tüm verilere erişebilir.</div><textarea id="pc" aria-label="Fonksiyon kodu" style="width:100%;height:260px;font:12px monospace;background:var(--card);color:var(--fg);border:1px solid var(--bd);border-radius:8px;padding:8px">${esc(pcode)}</textarea>${perr?`<div class="msg" style="margin-top:8px">${esc(perr)}</div>`:""}<div class="top" style="margin-top:12px"><span class="sp"></span><button class="dk" data-act="pok">Ekle</button></div></div></div>`}
  if(big)h+=`<div class="ov" data-act="bigx"><div class="dlg" style="max-width:720px;text-align:center"><img src="${big.u}" alt="" style="max-width:100%;max-height:70vh"><div class="ttl">${esc(big.k)}</div></div></div>`;const ae=document.activeElement,fo=ae&&(ae.id==="q"||ae.id==="vq"?"#"+ae.id:ae.dataset&&ae.dataset.f?`[data-f="${ae.dataset.f}"]`:"");$("#app").innerHTML=h;if(fo){const e=$(fo);if(e){e.focus();e.setSelectionRange(e.value.length,e.value.length)}}loadImgs();disBildir();const qi=document.getElementById("q");if(B&&qi&&document.activeElement!==qi&&qi.value!==q)qi.value=q}
 function gomuluUst(){const n=data?data.rows.length.toLocaleString("tr-TR"):"";
- return `<div class="vu-tarih">${data?`Son güncelleme: <b>${esc(data.meta.rep||fmt(data.meta.fileDate))}</b> <span>· yüklendi ${fmt(data.meta.uploadedAt)} · ${n} satır</span>`:"Envanter dosyası henüz yüklenmedi."}<span class="sp"></span><label class="btn ${data?"":"dk"}">Envanter dosyası yükle<input id="f" type="file" accept=".xlsx,.xls,.xlsb,.csv" hidden></label></div>`}
+ return `<div class="vu-tarih">${data?`Son güncelleme: <b>${esc(data.meta.rep||fmt(data.meta.fileDate))}</b> <span>· yüklendi ${fmt(data.meta.uploadedAt)} · ${n} satır</span>`:yukMsg?"":"Envanter dosyası henüz yüklenmedi."}<span class="sp"></span><label class="btn ${data?"":"dk"}">Envanter dosyası yükle<input id="f" type="file" accept=".xlsx,.xls,.xlsb,.csv" hidden></label></div>`}
 // Veri sekmesinin üstünde sabit duran arama kutusu ve kamera: tablo yenilense de kamera kapanmaz.
 // Kamera bir kez açılır (izin bir kez sorulur); kapatınca akış durdurulmaz, sadece duraklatılır.
 let vkS=null,vkCalis=false,vkSon="",vkSonT=0;
@@ -350,7 +351,8 @@ async function copyDiag(){const t=JSON.stringify({...(diag||{}),ekran:msg,bulut_
  try{await navigator.clipboard.writeText(t);ok=true}catch(e){}
  if(!ok){try{const a=document.createElement("textarea");a.value=t;a.style.cssText="position:fixed;opacity:0";document.body.appendChild(a);a.select();ok=document.execCommand("copy");a.remove()}catch(e){}}
  if(!ok){repTxt=t;render()}return ok}
-async function onFile(f){diag={v:"s.27",file:{name:f.name,size:f.size,mod:fmt(f.lastModified)},xlsx:typeof XLSX};repTxt="";
+async function onFile(f){yukMsg="Dosya okunuyor…";render();await new Promise(z=>setTimeout(z,40));try{await onFile0(f)}finally{yukMsg="";render()}}
+async function onFile0(f){diag={v:"s.27",file:{name:f.name,size:f.size,mod:fmt(f.lastModified)},xlsx:typeof XLSX};repTxt="";
  try{if(typeof XLSX==="undefined")throw new Error("Excel kütüphanesi yüklenemedi (cdnjs engelli olabilir).");
   const wb=XLSX.read(await f.arrayBuffer(),{type:"array"});let raw=[],seen="",rep="";diag.sheets=wb.SheetNames;
   for(const sn of wb.SheetNames){const A=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,defval:""});diag.firstRows=diag.firstRows||A.slice(0,8).map(r=>r.map(String).filter(Boolean).join(" | ").slice(0,300));seen+=sn+" ["+(A[0]||[]).filter(String).slice(0,8).join(" | ")+"] ";
@@ -421,6 +423,8 @@ document.addEventListener("pointermove",e=>{if(!dg)return;if(!dg.on&&Math.abs(e.
 document.addEventListener("pointerup",()=>{if(!dg)return;const d=dg;dg=null;document.body.style.cursor="";document.querySelectorAll("th.dt").forEach(x=>x.classList.remove("dt","dl","dr"));if(d.on){dgDone=true;setTimeout(()=>dgDone=false,80);if(d.t)moveCol(d.k,d.t,d.after)}});
 window.addEventListener("hashchange",render);
 async function veriYukle(){data=await kvGet("data")||null;if(data)data.rows=data.rows.filter(r=>String(r.kod).trim()!=="");counted=await kvGet("counted")||{};cw=await kvGet("cw")||{};cp=await kvGet("cp")||{order:[],on:{}};prev=await kvGet("prev")||null;h1b=(await kvGet("h1b"))!==false;custom=(await kvGet("custom"))||[];forms=(await kvGet("forms"))||{};ikL=(await kvGet("svidx"))||[];defter=(await kvGet("defter"))||{e:{},a:{}};kirik=(await kvGet("kirik"))||{list:[],hist:[]};imgDir=await kvGet("imgdir")||null;if(imgDir){try{if(await imgDir.queryPermission({mode:"read"})!=="granted")imgPerm=true}catch(e){imgDir=null}}kbiC=null;gcFor=null;render()}
+// Envanter buluttan gelirken "yükleniyor" göstergesi
+const veriYukle0=veriYukle;veriYukle=async()=>{if(!data){yukMsg="Envanter yükleniyor…";render()}try{await veriYukle0()}finally{yukMsg="";render()}};
 vkKur();veriYukle();
 </script>
 </body>
