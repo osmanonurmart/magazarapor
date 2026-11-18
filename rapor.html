@@ -1128,7 +1128,8 @@ if(!document.documentElement.classList.contains('tel')){
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
   html.tel .tab-btn{ font-size:0; }
-  html.tel .tab-btn::after{ content:attr(data-kisa); font-size:.7rem; }
+  html.tel .tab-btn::after{ content:attr(data-kisa); font-size:.58rem; letter-spacing:-.2px; white-space:nowrap; }
+  @media (max-width:360px){ html.tel .tab-btn::after{ font-size:.5rem; letter-spacing:-.3px; } }
   html.tel .tab-btn{ color:#8b857c; }
   html.tel .tab-btn .tab-ikon{
     display:block; width:23px; height:23px; fill:none; stroke:currentColor; stroke-width:1.7;
