@@ -81,11 +81,12 @@ async function bulutYazHemen(k,v){try{const ham=JSON.stringify(await paketle(v==
  catch(e){bulutHata("Buluta yazılamadı ("+k+"): "+(e.code?e.code+" — ":"")+e.message)}}
 function bulutYaz(k,v){clearTimeout(bZam[k]);bZam[k]=setTimeout(()=>bulutYazHemen(k,v),600)}
 async function bulutOku(k){const s=bSurum[k],col=bCol(),id=bId(k),D=await Promise.all([col.doc(id).get(),...Array.from({length:Math.max(0,(s.n||1)-1)},(_,i)=>col.doc(id+"~"+(i+1)).get())]);if(!D[0].exists)return undefined;const j=D.map(d=>d.exists?d.data().v:"").join("");return ac(JSON.parse(D[0].data().z?await ac64(j):j))}
-function bulutHata(m){msg=m;if(diag)diag.bulut=m;try{render()}catch(e){}}
+const bLog=[];function bulutHata(m){msg=m;bLog.push(new Date().toLocaleTimeString("tr-TR")+" "+m);if(bLog.length>20)bLog.shift();if(diag)diag.bulut=m;try{render()}catch(e){}}
 const bHazir=B?bCol().doc("_surum").get().then(d=>{const o=d.exists?d.data():{};for(const x of Object.values(o))if(x&&x.k)bSurum[x.k]=x}).catch(e=>bulutHata("Buluttan okunamadı: "+e.message)):Promise.resolve();
 async function kvGet(k){if(!B||BULUT_HARIC.has(k))return idbGet(k);await bHazir;if(k in mem)return mem[k];
- if(bSurum[k]){try{const v=await bulutOku(k);mem[k]=v;idbPut(k,v);return v}catch(e){bulutHata("Buluttan okunamadı: "+e.message)}}
- const v=await idbGet(k);if(v!==undefined&&v!==null&&!bSurum[k])bulutYaz(k,v);mem[k]=v;return v}
+ let bozuk=false;if(bSurum[k]){try{const v=await bulutOku(k);if(v!==undefined){mem[k]=v;idbPut(k,v);return v}bozuk=true}catch(e){bozuk=true;bLog.push("okuma ("+k+"): "+(e.code?e.code+" — ":"")+e.message)}}
+ // Buluttaki kayıt eksik/bozuksa bu cihazdaki kopya kullanılır ve buluta yeniden yazılır.
+ const v=await idbGet(k);if(v!==undefined&&v!==null&&(!bSurum[k]||bozuk))bulutYaz(k,v);mem[k]=v;return v}
 async function kvSet(k,v){mem[k]=v;await idbPut(k,v);if(B&&!BULUT_HARIC.has(k))bulutYaz(k,v)}
 // Başka cihaz yazınca: değişen kayıtlar yeniden okunur, sayfa yenilenir.
 if(B)bHazir.then(()=>{bUnsub=bCol().doc("_surum").onSnapshot(d=>{const o=d.exists?d.data():{},deg=[];for(const x of Object.values(o)){if(!x||!x.k)continue;const e=bSurum[x.k];if((!e||e.t!==x.t)&&!bBen.has(x.k+"@"+x.t))deg.push(x.k);bSurum[x.k]=x}
@@ -271,7 +272,7 @@ function findTbl(A){for(let i=0;i<Math.min(50,A.length);i++){const N=A[i].map(no
  const W=Math.max(0,...A.slice(0,300).map(r=>r.length));let best=-1,bc=0;for(let c=0;c<W;c++){let n=0,t=0;for(const r of A.slice(0,400)){const v=String(r[c]??"").trim();if(v){t++;if(SKU.test(v))n++}}if(n>=3&&n>=t*0.5&&n>bc){bc=n;best=c}}
  if(best<0)return null;const fr=A.findIndex(r=>SKU.test(String(r[best]??"").trim()));let hi=fr-1;while(hi>=0&&A[hi].filter(x=>String(x).trim()!=="").length<3)hi--;
  const N=hi>=0?A[hi].map(norm):[],e1=N.indexOf("envanter"),ei=e1>=0?e1:N.findIndex(c=>EA.includes(c));if(ei<0)return null;return{hi,ki:best,ei,how:"içerik"}}
-async function copyDiag(){const t=JSON.stringify(diag||{note:"rapor yok"},null,1);let ok=false;
+async function copyDiag(){const t=JSON.stringify({...(diag||{}),ekran:msg,bulut_kayit:bLog,bulut_bagli:!!B,surum:"s.27"},null,1);let ok=false;
  try{await navigator.clipboard.writeText(t);ok=true}catch(e){}
  if(!ok){try{const a=document.createElement("textarea");a.value=t;a.style.cssText="position:fixed;opacity:0";document.body.appendChild(a);a.select();ok=document.execCommand("copy");a.remove()}catch(e){}}
  if(!ok){repTxt=t;render()}return ok}
