@@ -283,6 +283,8 @@ if(!document.documentElement.classList.contains('tel')){
   }
   .hk-kart.ekle b{ font-size:1.5rem; font-weight:400; }
   .hk-kart.ekle:hover{ color:#2d2d2d; box-shadow:none; }
+  .vk-chip{ display:inline-block; margin-top:10px; font-size:.7rem; font-weight:600; background:#f3ede3; color:#6b5634; padding:3px 9px; border-radius:99px; }
+  .vk-chip.uyari{ background:#f8e3e3; color:var(--red); }
   .hk-bos{ grid-column:1/-1; color:#888; font-size:.82rem; padding:18px 2px; }
   .hk-detay{
     max-width:900px; margin:0 auto; background:#fff; border:1px solid #cfc9bf; border-radius:10px;
@@ -1502,6 +1504,7 @@ if(!document.documentElement.classList.contains('tel')){
   <div id="toolsGridView">
     <div class="sayfa-baslik"><h2>Araçlar</h2><span id="araclarAlt"></span></div>
     <div class="hk-grid" id="toolsGrid"></div>
+    <div id="veriAracBolum"></div>
   </div>
   <div id="toolViewerView" style="display:none;">
     <div class="tool-viewer-bar">
@@ -1576,7 +1579,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 75;
+const APP_SURUM = 76;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -6262,6 +6265,49 @@ function renderToolsGrid(){
     </div>`).join('')
     : '<div class="hk-bos">Henüz araç eklenmedi.</div>';
   grid.querySelectorAll('.hk-kart').forEach(k=> k.addEventListener('click', ()=> openTool(k.dataset.id)));
+  veriAraclariCiz();
+}
+
+// Envanter araçları (veri.html içindeki araçlar) Araçlar sayfasında kart olarak görünür.
+// Kart tıklanınca Veri sekmesi açılır ve araç orada açılır; kapatınca Araçlar'a dönülür.
+const VERI_IKON = {sayim:'🗒', eksi:'➖', renk:'🎨', bden:'📏', bcel:'🏷', kirik:'💔', ikinci:'♻️', degisim:'🔄', yol:'🚚'};
+function veriPencere(){
+  const fr = document.getElementById('veriFrame');
+  try{ const w = fr && fr.contentWindow; return (w && typeof w.veriAraclari === 'function') ? w : null; }catch(e){ return null; }
+}
+function veriAraclariCiz(){
+  const kutu = document.getElementById('veriAracBolum');
+  if(!kutu) return;
+  const w = veriPencere();
+  if(!w){
+    kutu.innerHTML = '<div class="sayfa-baslik" style="margin-top:26px"><h2>Envanter araçları</h2><span>Yükleniyor…</span></div>';
+    veriAc();
+    return;
+  }
+  let liste = [];
+  try{ liste = w.veriAraclari(); }catch(e){ liste = []; }
+  const alt = w.veriDurum ? w.veriDurum() : '';
+  kutu.innerHTML = `<div class="sayfa-baslik" style="margin-top:26px"><h2>Envanter araçları</h2><span>${escapeHtml(alt)}</span></div>
+    <div class="hk-grid">${liste.map(t=>`
+      <div class="hk-kart vk-kart" data-vid="${escapeHtml(t.id)}">
+        <div class="hk-ust"><span class="hk-ikon">${VERI_IKON[t.id] || '🧩'}</span>${t.cust ? `<span class="hk-islem"><button class="sil" data-vsil="${escapeHtml(t.id)}" title="Sil">✕</button></span>` : ''}</div>
+        <div class="hk-baslik">${escapeHtml(t.t)}</div>
+        <div class="hk-aciklama">${escapeHtml(t.d || '')}</div>
+        ${t.chip ? `<span class="vk-chip${t.w ? ' uyari' : ''}">${escapeHtml(t.chip)}</span>` : ''}
+      </div>`).join('')}
+      <div class="hk-kart ekle" data-vyeni="1"><b>+</b>Yeni araç ekle</div>
+    </div>`;
+  kutu.querySelectorAll('[data-vid]').forEach(k=> k.addEventListener('click', e=>{
+    const sil = e.target.closest('[data-vsil]');
+    if(sil){ e.stopPropagation(); if(confirm('Bu araç silinsin mi?')) w.veriAracSil(sil.dataset.vsil); return; }
+    showTab('veri'); w.veriAracAc(k.dataset.vid);
+  }));
+  kutu.querySelector('[data-vyeni]').addEventListener('click', ()=>{ showTab('veri'); w.veriYeniArac(); });
+}
+let veriAracZam = null;
+function veriAraclariGuncel(){
+  clearTimeout(veriAracZam);
+  veriAracZam = setTimeout(()=>{ const sp = document.getElementById('araclarPage'); if(sp && sp.style.display !== 'none') veriAraclariCiz(); }, 150);
 }
 
 function escapeHtml(s){
