@@ -56,8 +56,38 @@ const MAP={kod:"ürün kodu",bar:"barkod",rk:"renk kodu",ad:"ürün adı",renk:"
 for(const n in MAP)MAP[n]=norm(MAP[n]);
 let mem={},data=null,counted={},pending=null,msg="",modal=null,q="",fl={},imgDir=null,imgMap=null,imgPerm=false,imgCache=new Map(),big=null,cw={},vs={},vp=null,diag=null,repTxt="",cp={order:[],on:{}},cpop=false,prod=null,hl=null,nf="",prev=null,h1b=true,sf=new Set(),custom=[],forms={},ik={v:"liste",draft:{bar:"",foto:null,ger:"",adet:1}},ikL=[],ikS=null,defter={e:{},a:{}},bn="",kirik={list:[],hist:[]},kv="liste",ksel=new Set(),kmsg="",kf=false,pa=false,pcode="",perr="",rf=new Set(),limv=20,sort=["kod",1],page=0;
 const idb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open("env",1);r.onupgradeneeded=()=>r.result.createObjectStore("kv");r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}catch(e){rej(e)}});
-async function kvGet(k){try{const d=await idb();return await new Promise((res,rej)=>{const g=d.transaction("kv").objectStore("kv").get(k);g.onsuccess=()=>res(g.result);g.onerror=()=>rej(g.error)})}catch(e){return mem[k]}}
-async function kvSet(k,v){mem[k]=v;try{const d=await idb();await new Promise((res,rej)=>{const t=d.transaction("kv","readwrite");t.objectStore("kv").put(v,k);t.oncomplete=res;t.onerror=()=>rej(t.error)})}catch(e){}}
+async function idbGet(k){try{const d=await idb();return await new Promise((res,rej)=>{const g=d.transaction("kv").objectStore("kv").get(k);g.onsuccess=()=>res(g.result);g.onerror=()=>rej(g.error)})}catch(e){return mem[k]}}
+async function idbPut(k,v){try{const d=await idb();await new Promise((res,rej)=>{const t=d.transaction("kv","readwrite");t.objectStore("kv").put(v,k);t.oncomplete=res;t.onerror=()=>rej(t.error)})}catch(e){}}
+// ---- Firebase eşitleme ----
+// Sayfa Mağaza Rapor'un Veri sekmesinde açıldığında kayıtlar mağazanın altına yazılır: stores/{mağaza}/veriKv.
+// Büyük kayıtlar (envanter dosyası, fotoğraflı sevkler) 1 MB belge sınırı için parçalara bölünür: {id}, {id}~1, {id}~2...
+// _surum belgesi her kaydın son yazılma zamanını tutar; başka cihaz yazınca bu sayfa kendini yeniler.
+// IndexedDB yerel önbellek olarak kalır. Resim klasörü (imgdir) bilgisayara özel olduğu için buluta gitmez.
+const B=(()=>{try{const P=window.parent;if(P&&P!==window&&typeof P.sdb==="function"){P.sdb("veriKv");return P}}catch(e){}return null})();
+const BULUT_HARIC=new Set(["imgdir"]),PARCA=300000;
+let bSurum={},bZam={},bBen=new Set(),bUnsub=null;
+const bCol=()=>B.sdb("veriKv"),bId=k=>encodeURIComponent(k);
+const b64=b=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=()=>rej(r.error);r.readAsDataURL(b)});
+async function paketle(v){if(v instanceof Blob)return{__blob:await b64(v)};if(Array.isArray(v)){const o=[];for(const x of v)o.push(await paketle(x));return o}if(v&&typeof v==="object"){const o={};for(const[a,x]of Object.entries(v))o[a]=await paketle(x);return o}return v}
+function ac(v){if(Array.isArray(v))return v.map(ac);if(v&&typeof v==="object"){if(typeof v.__blob==="string"){const[bas,veri]=v.__blob.split(","),tip=(bas.match(/data:([^;]*)/)||[])[1]||"",ik=atob(veri),u=new Uint8Array(ik.length);for(let i=0;i<ik.length;i++)u[i]=ik.charCodeAt(i);return new Blob([u],{type:tip})}const o={};for(const[a,x]of Object.entries(v))o[a]=ac(x);return o}return v}
+async function bulutYazHemen(k,v){try{const j=JSON.stringify(await paketle(v===undefined?null:v)),n=Math.max(1,Math.ceil(j.length/PARCA)),t=Date.now(),col=bCol(),id=bId(k);
+ for(let i=1;i<n;i++)await col.doc(id+"~"+i).set({v:j.slice(i*PARCA,(i+1)*PARCA)});
+ await col.doc(id).set({k,v:j.slice(0,PARCA),n,t});
+ const eski=(bSurum[k]&&bSurum[k].n)||0;for(let i=n;i<eski;i++)col.doc(id+"~"+i).delete().catch(()=>{});
+ bSurum[k]={k,t,n};bBen.add(k+"@"+t);await col.doc("_surum").set({[id]:{k,t,n}},{merge:true})}
+ catch(e){bulutHata("Buluta yazılamadı: "+e.message)}}
+function bulutYaz(k,v){clearTimeout(bZam[k]);bZam[k]=setTimeout(()=>bulutYazHemen(k,v),600)}
+async function bulutOku(k){const s=bSurum[k],col=bCol(),id=bId(k),D=await Promise.all([col.doc(id).get(),...Array.from({length:Math.max(0,(s.n||1)-1)},(_,i)=>col.doc(id+"~"+(i+1)).get())]);if(!D[0].exists)return undefined;return ac(JSON.parse(D.map(d=>d.exists?d.data().v:"").join("")))}
+function bulutHata(m){msg=m;try{render()}catch(e){}}
+const bHazir=B?bCol().doc("_surum").get().then(d=>{const o=d.exists?d.data():{};for(const x of Object.values(o))if(x&&x.k)bSurum[x.k]=x}).catch(e=>bulutHata("Buluttan okunamadı: "+e.message)):Promise.resolve();
+async function kvGet(k){if(!B||BULUT_HARIC.has(k))return idbGet(k);await bHazir;if(k in mem)return mem[k];
+ if(bSurum[k]){try{const v=await bulutOku(k);mem[k]=v;idbPut(k,v);return v}catch(e){bulutHata("Buluttan okunamadı: "+e.message)}}
+ const v=await idbGet(k);if(v!==undefined&&v!==null&&!bSurum[k])bulutYaz(k,v);mem[k]=v;return v}
+async function kvSet(k,v){mem[k]=v;await idbPut(k,v);if(B&&!BULUT_HARIC.has(k))bulutYaz(k,v)}
+// Başka cihaz yazınca: değişen kayıtlar yeniden okunur, sayfa yenilenir.
+if(B)bHazir.then(()=>{bUnsub=bCol().doc("_surum").onSnapshot(d=>{const o=d.exists?d.data():{},deg=[];for(const x of Object.values(o)){if(!x||!x.k)continue;const e=bSurum[x.k];if((!e||e.t!==x.t)&&!bBen.has(x.k+"@"+x.t))deg.push(x.k);bSurum[x.k]=x}
+ if(!deg.length)return;deg.forEach(k=>delete mem[k]);(async()=>{if(ikS&&deg.includes("sv:"+ikS.id))ikS=await kvGet("sv:"+ikS.id);await veriYukle()})()},()=>{})});
+window.addEventListener("pagehide",()=>{if(bUnsub){try{bUnsub()}catch(e){}bUnsub=null}});
 const isCounted=k=>counted[k]&&Date.now()-counted[k]<28*864e5;
 function groups(){const g=new Map();for(const r of data.rows){let p=g.get(r.kod);if(!p){p={kod:r.kod,ad:r.ad,grup:r.grup,tot:0,sevk:0,neg:false,col:{},sz:{}};g.set(r.kod,p)}p.tot+=r.env;p.sevk+=r.sevk;if(r.env<0)p.neg=true;p.col[r.renk]=(p.col[r.renk]||0)+r.env;const s=p.sz[r.renk]=p.sz[r.renk]||{};s[r.beden]=(s[r.beden]||0)+r.env}
 return[...g.values()].map(p=>({...p,ren:Object.entries(p.col).map(([k,v])=>k+": "+v).join(" · "),yor:p.tot===0?"Toplam 0, geçişme olası":"Kontrol et",...analyze(p)}))}
@@ -309,7 +339,8 @@ document.addEventListener("pointerdown",e=>{const th=e.target.closest("th[data-s
 document.addEventListener("pointermove",e=>{if(!dg)return;if(!dg.on&&Math.abs(e.clientX-dg.x)>8){dg.on=true;document.body.style.cursor="grabbing"}if(!dg.on)return;document.querySelectorAll("th.dt").forEach(x=>x.classList.remove("dt","dl","dr"));const el=document.elementFromPoint(e.clientX,e.clientY),th=el&&el.closest?el.closest("th[data-sort]"):null;if(th&&th.dataset.sort!==dg.k){const r=th.getBoundingClientRect();dg.t=th.dataset.sort;dg.after=e.clientX>r.left+r.width/2;th.classList.add("dt",dg.after?"dr":"dl")}else dg.t=null});
 document.addEventListener("pointerup",()=>{if(!dg)return;const d=dg;dg=null;document.body.style.cursor="";document.querySelectorAll("th.dt").forEach(x=>x.classList.remove("dt","dl","dr"));if(d.on){dgDone=true;setTimeout(()=>dgDone=false,80);if(d.t)moveCol(d.k,d.t,d.after)}});
 window.addEventListener("hashchange",render);
-(async()=>{data=await kvGet("data")||null;if(data)data.rows=data.rows.filter(r=>String(r.kod).trim()!=="");counted=await kvGet("counted")||{};cw=await kvGet("cw")||{};cp=await kvGet("cp")||{order:[],on:{}};prev=await kvGet("prev")||null;h1b=(await kvGet("h1b"))!==false;custom=(await kvGet("custom"))||[];forms=(await kvGet("forms"))||{};ikL=(await kvGet("svidx"))||[];defter=(await kvGet("defter"))||{e:{},a:{}};kirik=(await kvGet("kirik"))||{list:[],hist:[]};imgDir=await kvGet("imgdir")||null;if(imgDir){try{if(await imgDir.queryPermission({mode:"read"})!=="granted")imgPerm=true}catch(e){imgDir=null}}render()})();
+async function veriYukle(){data=await kvGet("data")||null;if(data)data.rows=data.rows.filter(r=>String(r.kod).trim()!=="");counted=await kvGet("counted")||{};cw=await kvGet("cw")||{};cp=await kvGet("cp")||{order:[],on:{}};prev=await kvGet("prev")||null;h1b=(await kvGet("h1b"))!==false;custom=(await kvGet("custom"))||[];forms=(await kvGet("forms"))||{};ikL=(await kvGet("svidx"))||[];defter=(await kvGet("defter"))||{e:{},a:{}};kirik=(await kvGet("kirik"))||{list:[],hist:[]};imgDir=await kvGet("imgdir")||null;if(imgDir){try{if(await imgDir.queryPermission({mode:"read"})!=="granted")imgPerm=true}catch(e){imgDir=null}}kbiC=null;gcFor=null;render()}
+veriYukle();
 </script>
 </body>
 </html>
