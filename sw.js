@@ -25,6 +25,8 @@ self.addEventListener('fetch', e=>{
   const ayniKaynak = url.origin === self.location.origin;
 
   // Sayfa: önce internet (en fazla 6 sn), olmazsa önbellek.
+  // veri.html (Veri sekmesinin iframe'i) önbelleğe alınmaz, her zaman internetten gelir.
+  if(ayniKaynak && url.pathname.endsWith('/veri.html')) return;
   if(ayniKaynak && (istek.mode === 'navigate' || url.pathname.endsWith('/rapor.html'))){
     e.respondWith((async ()=>{
       const c = await caches.open(ONBELLEK);
