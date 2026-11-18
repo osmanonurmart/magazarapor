@@ -1581,7 +1581,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 84;
+const APP_SURUM = 85;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -5925,6 +5925,8 @@ function showTab(tab){
   document.getElementById('veriPage').style.display = tab === 'veri' ? '' : 'none';
   document.getElementById('tabVeriBtn').classList.toggle('active', tab === 'veri');
   veriViewport(tab === 'veri');
+  // Veri'den çıkınca açık kamera durdurulur.
+  if(tab !== 'veri'){ const vw = veriPencere(); if(vw && vw.veriKamDurdur) vw.veriKamDurdur(); }
 
   if(tab === 'araclar'){
     closeToolViewer();
@@ -6285,7 +6287,7 @@ function renderToolsGrid(){
 
 // Envanter araçları (veri.html içindeki araçlar) Araçlar sayfasında kart olarak görünür.
 // Kart tıklanınca Veri sekmesi açılır ve araç orada açılır; kapatınca Araçlar'a dönülür.
-const VERI_IKON = {sayim:'🗒', eksi:'➖', renk:'🎨', bden:'📏', bcel:'🏷', kirik:'💔', ikinci:'♻️', degisim:'🔄', yol:'🚚'};
+const VERI_IKON = {sayimk:'📷', sayim:'🗒', eksi:'➖', renk:'🎨', bden:'📏', bcel:'🏷', kirik:'💔', ikinci:'♻️', degisim:'🔄', yol:'🚚'};
 function veriPencere(){
   const fr = document.getElementById('veriFrame');
   try{ const w = fr && fr.contentWindow; return (w && typeof w.veriAraclari === 'function') ? w : null; }catch(e){ return null; }
