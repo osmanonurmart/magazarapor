@@ -64,21 +64,24 @@ async function idbPut(k,v){try{const d=await idb();await new Promise((res,rej)=>
 // _surum belgesi her kaydın son yazılma zamanını tutar; başka cihaz yazınca bu sayfa kendini yeniler.
 // IndexedDB yerel önbellek olarak kalır. Resim klasörü (imgdir) bilgisayara özel olduğu için buluta gitmez.
 const B=(()=>{try{const P=window.parent;if(P&&P!==window&&typeof P.sdb==="function"){P.sdb("veriKv");return P}}catch(e){}return null})();
-const BULUT_HARIC=new Set(["imgdir"]),PARCA=300000;
+const BULUT_HARIC=new Set(["imgdir"]),PARCA=900000;
 let bSurum={},bZam={},bBen=new Set(),bUnsub=null;
 const bCol=()=>B.sdb("veriKv"),bId=k=>encodeURIComponent(k);
 const b64=b=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=()=>rej(r.error);r.readAsDataURL(b)});
 async function paketle(v){if(v instanceof Blob)return{__blob:await b64(v)};if(Array.isArray(v)){const o=[];for(const x of v)o.push(await paketle(x));return o}if(v&&typeof v==="object"){const o={};for(const[a,x]of Object.entries(v))o[a]=await paketle(x);return o}return v}
 function ac(v){if(Array.isArray(v))return v.map(ac);if(v&&typeof v==="object"){if(typeof v.__blob==="string"){const[bas,veri]=v.__blob.split(","),tip=(bas.match(/data:([^;]*)/)||[])[1]||"",ik=atob(veri),u=new Uint8Array(ik.length);for(let i=0;i<ik.length;i++)u[i]=ik.charCodeAt(i);return new Blob([u],{type:tip})}const o={};for(const[a,x]of Object.entries(v))o[a]=ac(x);return o}return v}
-async function bulutYazHemen(k,v){try{const j=JSON.stringify(await paketle(v===undefined?null:v)),n=Math.max(1,Math.ceil(j.length/PARCA)),t=Date.now(),col=bCol(),id=bId(k);
- for(let i=1;i<n;i++)await col.doc(id+"~"+i).set({v:j.slice(i*PARCA,(i+1)*PARCA)});
- await col.doc(id).set({k,v:j.slice(0,PARCA),n,t});
+// Büyük kayıtlar gzip ile sıkıştırılıp base64 yazılır (envanter dosyası ~10 kat küçülür).
+async function sikistir(s){if(typeof CompressionStream==="undefined")return null;const b=await new Response(new Blob([s]).stream().pipeThrough(new CompressionStream("gzip"))).blob();return(await b64(b)).split(",")[1]}
+async function ac64(z){const ik=atob(z),u=new Uint8Array(ik.length);for(let i=0;i<ik.length;i++)u[i]=ik.charCodeAt(i);return await new Response(new Blob([u]).stream().pipeThrough(new DecompressionStream("gzip"))).text()}
+async function bulutYazHemen(k,v){try{const ham=JSON.stringify(await paketle(v===undefined?null:v)),gz=ham.length>20000?await sikistir(ham):null,j=gz||ham,z=gz?1:0,n=Math.max(1,Math.ceil(j.length/PARCA)),t=Date.now(),col=bCol(),id=bId(k);
+ await Promise.all(Array.from({length:n-1},(_,x)=>col.doc(id+"~"+(x+1)).set({v:j.slice((x+1)*PARCA,(x+2)*PARCA)})));
+ await col.doc(id).set({k,v:j.slice(0,PARCA),n,t,z});
  const eski=(bSurum[k]&&bSurum[k].n)||0;for(let i=n;i<eski;i++)col.doc(id+"~"+i).delete().catch(()=>{});
  bSurum[k]={k,t,n};bBen.add(k+"@"+t);await col.doc("_surum").set({[id]:{k,t,n}},{merge:true})}
- catch(e){bulutHata("Buluta yazılamadı: "+e.message)}}
+ catch(e){bulutHata("Buluta yazılamadı ("+k+"): "+(e.code?e.code+" — ":"")+e.message)}}
 function bulutYaz(k,v){clearTimeout(bZam[k]);bZam[k]=setTimeout(()=>bulutYazHemen(k,v),600)}
-async function bulutOku(k){const s=bSurum[k],col=bCol(),id=bId(k),D=await Promise.all([col.doc(id).get(),...Array.from({length:Math.max(0,(s.n||1)-1)},(_,i)=>col.doc(id+"~"+(i+1)).get())]);if(!D[0].exists)return undefined;return ac(JSON.parse(D.map(d=>d.exists?d.data().v:"").join("")))}
-function bulutHata(m){msg=m;try{render()}catch(e){}}
+async function bulutOku(k){const s=bSurum[k],col=bCol(),id=bId(k),D=await Promise.all([col.doc(id).get(),...Array.from({length:Math.max(0,(s.n||1)-1)},(_,i)=>col.doc(id+"~"+(i+1)).get())]);if(!D[0].exists)return undefined;const j=D.map(d=>d.exists?d.data().v:"").join("");return ac(JSON.parse(D[0].data().z?await ac64(j):j))}
+function bulutHata(m){msg=m;if(diag)diag.bulut=m;try{render()}catch(e){}}
 const bHazir=B?bCol().doc("_surum").get().then(d=>{const o=d.exists?d.data():{};for(const x of Object.values(o))if(x&&x.k)bSurum[x.k]=x}).catch(e=>bulutHata("Buluttan okunamadı: "+e.message)):Promise.resolve();
 async function kvGet(k){if(!B||BULUT_HARIC.has(k))return idbGet(k);await bHazir;if(k in mem)return mem[k];
  if(bSurum[k]){try{const v=await bulutOku(k);mem[k]=v;idbPut(k,v);return v}catch(e){bulutHata("Buluttan okunamadı: "+e.message)}}
