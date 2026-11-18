@@ -318,7 +318,7 @@ function gomuluUst(){const n=data?data.rows.length.toLocaleString("tr-TR"):"";
 let vkS=null,vkCalis=false,vkSon="",vkSonT=0;
 function vkKur(){if(!B||document.getElementById("vuSabit"))return;const d=document.createElement("div");d.id="vuSabit";
  d.innerHTML=`<input type="search" id="q" class="vu-ara" aria-label="Ara" placeholder="Barkod, ürün kodu veya ürün adı" autocomplete="off"><div id="vkAlan" hidden>${kamKutu("vkV")}<div id="vkN" class="date" style="text-align:center;margin-top:6px">Barkodu kırmızı çizgiye denk getir</div></div><button id="vkBtn" type="button" class="dk vu-kam">📷 Kamera aç</button>`;
- document.getElementById("app").before(d);d.querySelector("#vkBtn").onclick=()=>vkCalis?vkKapat():vkAc()}
+ document.getElementById("app").before(d);if(!matchMedia("(pointer:coarse)").matches){d.querySelector("#vkBtn").remove();d.querySelector("#vkAlan").remove();return}d.querySelector("#vkBtn").onclick=()=>vkCalis?vkKapat():vkAc()}
 async function vkAc(){const al=document.getElementById("vkAlan"),v=document.getElementById("vkV"),b=document.getElementById("vkBtn"),nt=document.getElementById("vkN");al.hidden=false;b.textContent="Kamerayı kapat";b.classList.remove("dk");vkCalis=true;
  try{if(!vkS||!vkS.getVideoTracks().some(t=>t.readyState==="live")){vkS=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"},width:{ideal:1920},height:{ideal:1080}}});try{const tr=vkS.getVideoTracks()[0],cap=tr.getCapabilities?tr.getCapabilities():{};if(cap.focusMode&&cap.focusMode.includes("continuous"))await tr.applyConstraints({advanced:[{focusMode:"continuous"}]})}catch(e){}}
   vkS.getTracks().forEach(t=>t.enabled=true);if(v.srcObject!==vkS)v.srcObject=vkS;await v.play();const coz=await barkodCozucu();
