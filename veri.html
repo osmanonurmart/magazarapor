@@ -289,7 +289,7 @@ function render(){
  const tab=B||location.hash==="#veri"?"veri":"araclar";
  let h=B?gomuluUst():`<div class="top">${B?"":`<button data-act="tab" data-t="araclar" class="${tab==="araclar"?"on":""}">Araçlar</button><button data-act="tab" data-t="veri" class="${tab==="veri"?"on":""}">Veri</button>`}<input type="search" id="bs" placeholder="Barkod okut veya ürün kodu yaz, Enter" aria-label="Barkod ara" style="flex:1 1 260px;min-width:0;max-width:420px">${kamBtn("bs")}<span class="sp"></span>`;
  if(data&&!B){const old=Date.now()-data.meta.fileDate>864e5;h+=`<span class="date">${data.meta.rep?"Envanter tarihi: <b>"+data.meta.rep+"</b> · ":""}Dosya: ${fmt(data.meta.fileDate)} · Yüklendi: ${fmt(data.meta.uploadedAt)} · ${data.rows.length} satır</span>`}
- if(!B)h+=`<span class="date">s.27</span><input id="fd" type="file" webkitdirectory hidden><label class="btn dk">Envanter dosyası yükle<input id="f" type="file" accept=".xlsx,.xls,.xlsb,.csv" hidden></label></div>`;
+ if(!B)h+=`<span class="date">s.27</span><input id="fd" type="file" webkitdirectory hidden><label class="btn dk">Envanter dosyası yükle<input id="f" type="file" accept=".xlsx,.xls,.xlsb,.csv,.txt" hidden></label></div>`;
  if(msg)h+=`<div class="msg"><span>${esc(msg)}</span><span class="sp"></span><button data-act="rep">Hata raporunu kopyala</button></div>${repTxt?`<textarea readonly style="width:100%;height:140px;margin-bottom:16px">${esc(repTxt)}</textarea>`:""}`;
  if(pending)h+=`<div class="msg"><span>${pending.w.map(esc).join(" ")}</span><span class="sp"></span><button data-act="rep">Raporu kopyala</button><button data-act="yes">Yine de yükle</button><button data-act="no">Vazgeç</button></div>${repTxt?`<textarea readonly style="width:100%;height:140px;margin-bottom:16px">${esc(repTxt)}</textarea>`:""}`;
  if(bn)h+=`<div class="msg" style="background:var(--chip);color:var(--fg)"><span>${esc(bn)}</span><span class="sp"></span><button data-act="bnx">Tamam</button></div>`;
@@ -319,7 +319,7 @@ function render(){
  if(pa){h+=`<div class="ov"><div class="dlg" style="max-width:720px"><div class="top"><span class="ttl">Yeni araç ekle</span><span class="sp"></span><button data-act="padx">Kapat</button></div><div class="date" style="margin-bottom:8px">Benim yazdığım HTML formunu (< ile başlar) veya fonksiyon kodunu yapıştır. Fonksiyon kodu şunu döndürmeli: {baslik, aciklama, kolonlar:[[alan,başlık,"n"]], satirlar:[...]}. Kullanılabilir: satirlar, urunler, onceki. Kaynağını bilmediğin kodu yapıştırma, kod sayfadaki tüm verilere erişebilir.</div><textarea id="pc" aria-label="Fonksiyon kodu" style="width:100%;height:260px;font:12px monospace;background:var(--card);color:var(--fg);border:1px solid var(--bd);border-radius:8px;padding:8px">${esc(pcode)}</textarea>${perr?`<div class="msg" style="margin-top:8px">${esc(perr)}</div>`:""}<div class="top" style="margin-top:12px"><span class="sp"></span><button class="dk" data-act="pok">Ekle</button></div></div></div>`}
  if(big)h+=`<div class="ov" data-act="bigx"><div class="dlg" style="max-width:720px;text-align:center"><img src="${big.u}" alt="" style="max-width:100%;max-height:70vh"><div class="ttl">${esc(big.k)}</div></div></div>`;const ae=document.activeElement,fo=ae&&(ae.id==="q"||ae.id==="vq"?"#"+ae.id:ae.dataset&&ae.dataset.f?`[data-f="${ae.dataset.f}"]`:"");$("#app").innerHTML=h;if(fo){const e=$(fo);if(e){e.focus();e.setSelectionRange(e.value.length,e.value.length)}}loadImgs();disBildir();const qi=document.getElementById("q");if(B&&qi&&document.activeElement!==qi&&qi.value!==q)qi.value=q}
 function gomuluUst(){const n=data?data.rows.length.toLocaleString("tr-TR"):"";
- return `<div class="vu-tarih">${data?`Son güncelleme: <b>${esc(data.meta.rep||fmt(data.meta.fileDate))}</b> <span>· yüklendi ${fmt(data.meta.uploadedAt)} · ${n} satır</span>`:yukMsg?"":"Envanter dosyası henüz yüklenmedi."}<span class="sp"></span><label class="btn ${data?"":"dk"}">Envanter dosyası yükle<input id="f" type="file" accept=".xlsx,.xls,.xlsb,.csv" hidden></label></div>`}
+ return `<div class="vu-tarih">${data?`Son güncelleme: <b>${esc(data.meta.rep||fmt(data.meta.fileDate))}</b> <span>· yüklendi ${fmt(data.meta.uploadedAt)} · ${n} satır</span>`:yukMsg?"":"Envanter dosyası henüz yüklenmedi."}<span class="sp"></span><label class="btn ${data?"":"dk"}">Envanter dosyası yükle<input id="f" type="file" accept=".xlsx,.xls,.xlsb,.csv,.txt" hidden></label></div>`}
 // Veri sekmesinin üstünde sabit duran arama kutusu ve kamera: tablo yenilense de kamera kapanmaz.
 // Kamera bir kez açılır (izin bir kez sorulur); kapatınca akış durdurulmaz, sadece duraklatılır.
 let vkS=null,vkCalis=false,vkSon="",vkSonT=0;
@@ -352,9 +352,14 @@ async function copyDiag(){const t=JSON.stringify({...(diag||{}),ekran:msg,bulut_
  if(!ok){try{const a=document.createElement("textarea");a.value=t;a.style.cssText="position:fixed;opacity:0";document.body.appendChild(a);a.select();ok=document.execCommand("copy");a.remove()}catch(e){}}
  if(!ok){repTxt=t;render()}return ok}
 async function onFile(f){yukMsg="Dosya okunuyor…";render();await new Promise(z=>setTimeout(z,40));try{await onFile0(f)}finally{yukMsg="";render()}}
+// CSV/TXT: Türkçe karakterler için önce UTF-8, olmazsa Windows-1254 (ERP'nin Türkçe kodlaması) ile okunur.
+async function dosyaOku(f){const ab=await f.arrayBuffer();if(!/\.(csv|txt)$/i.test(f.name))return XLSX.read(ab,{type:"array"});
+ let t;try{t=new TextDecoder("utf-8",{fatal:true}).decode(ab)}catch(e){t=new TextDecoder("windows-1254").decode(ab)}t=t.replace(/^\uFEFF/,"");
+ const ilk=t.split("\n").slice(0,20).join("\n"),say=c=>ilk.split(c).length-1,ayr=[["\t",say("\t")],[";",say(";")],[",",say(",")],["|",say("|")]].sort((a,b)=>b[1]-a[1])[0][0];
+ return XLSX.read(t,{type:"string",FS:ayr,raw:true})}
 async function onFile0(f){diag={v:"s.27",file:{name:f.name,size:f.size,mod:fmt(f.lastModified)},xlsx:typeof XLSX};repTxt="";
  try{if(typeof XLSX==="undefined")throw new Error("Excel kütüphanesi yüklenemedi (cdnjs engelli olabilir).");
-  const wb=XLSX.read(await f.arrayBuffer(),{type:"array"});let raw=[],seen="",rep="";diag.sheets=wb.SheetNames;
+  const wb=await dosyaOku(f);let raw=[],seen="",rep="";diag.sheets=wb.SheetNames;
   for(const sn of wb.SheetNames){const A=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,defval:""});diag.firstRows=diag.firstRows||A.slice(0,8).map(r=>r.map(String).filter(Boolean).join(" | ").slice(0,300));seen+=sn+" ["+(A[0]||[]).filter(String).slice(0,8).join(" | ")+"] ";
    const T0=findTbl(A),hi=T0?T0.hi:-2;
    if(!T0)continue;
