@@ -1588,7 +1588,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 87;
+const APP_SURUM = 88;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -8143,27 +8143,8 @@ const CANLI_CIRO_ARALIK_DK = 5;
 let canliCiroSon = 0;
 // ---- Telefonu bul ----
 // Mağaza telefonundaki uygulama (APK) Firebase Realtime Database'e sinyal (hb) yazar ve komut (cmd) dinler.
-// Veritabanı adresi ve anahtar kodda değil, mağazanın kendi ayarında durur: stores/{m}/settings/telefonBul.
-let tbAyar = null, tbZam = null;
-async function tbAyarOku(){
-  if(tbAyar) return tbAyar;
-  try{ const d = await sdb('settings').doc('telefonBul').get(); if(d.exists) tbAyar = d.data(); }catch(e){}
-  return tbAyar;
-}
-async function tbAyarlariDuzenle(){
-  const eski = tbAyar || {};
-  const db = await uiSor('Telefon uygulamasının Firebase veritabanı adresi', eski.db || '', {baslik:'Telefonu bul · ayar', ikon:'📱', placeholder:'https://…-default-rtdb.firebaseio.com'});
-  if(db === null) return false;
-  const dbT = db.trim().replace(/\/+$/, '');
-  if(!/^https:\/\/[a-z0-9-]+(-default-rtdb)?\.(firebaseio\.com|[a-z0-9-]+\.firebasedatabase\.app)$/i.test(dbT)){ uiUyari('Adres https:// ile başlamalı ve firebaseio.com ya da firebasedatabase.app ile bitmeli.', {ikon:'⚠️'}); return false; }
-  const key = await uiSor('Uygulamadaki anahtar (APK’daki ile aynı)', eski.key || '', {baslik:'Telefonu bul · ayar', ikon:'🔑'});
-  if(key === null) return false;
-  const keyT = key.trim();
-  if(!/^[A-Za-z0-9_-]{6,80}$/.test(keyT)){ uiUyari('Anahtar yalnızca harf, rakam, - ve _ içerebilir.', {ikon:'⚠️'}); return false; }
-  tbAyar = {db: dbT, key: keyT};
-  try{ await sdb('settings').doc('telefonBul').set(tbAyar); }catch(e){ uiUyari('Kaydedilemedi: ' + e.message, {ikon:'⚠️'}); return false; }
-  return true;
-}
+// Veritabanı adresi ve anahtar sabit (APK'daki ile aynı).
+let tbAyar = {db:'https://el-terminali-bb248-default-rtdb.firebaseio.com', key:'Deha56Magaza7Kx92Qp'}, tbZam = null;
 function tbYol(p){ return tbAyar.db + '/' + encodeURIComponent(tbAyar.key) + '/' + p + '.json'; }
 async function tbKomut(a){
   try{ const r = await fetch(tbYol('cmd'), {method:'PUT', body: JSON.stringify({a, t: Date.now()})}); if(!r.ok) throw new Error('HTTP ' + r.status); uiBildirim(a === 'ring' ? 'Telefon çaldırılıyor…' : 'Durdur komutu gönderildi', 'basari', 2500); }
@@ -8178,22 +8159,19 @@ async function tbDurumOku(el){
   }catch(e){ el.textContent = 'Bağlantı hatası'; }
 }
 async function telefonBulAc(){
-  await tbAyarOku();
-  if(!tbAyar && !(await tbAyarlariDuzenle())) return;
   const ov = document.createElement('div');
   ov.className = 'ui-ov';
   ov.innerHTML = `<div class="ui-dlg tb-panel"><div class="ui-ikon">📱</div><div class="ui-baslik">Mağaza telefonu</div>
     <div class="tb-durum" id="tbDurum">Durum okunuyor…</div>
     <button type="button" class="tb-calar" data-k="ring">🔔 Çaldır</button>
     <button type="button" class="tb-calar tb-dur" data-k="stop">Durdur</button>
-    <div class="tb-alt"><button type="button" data-k="ayar">⚙ Ayarlar</button><button type="button" data-k="kapat">Kapat</button></div></div>`;
+    <div class="tb-alt"><span></span><button type="button" data-k="kapat">Kapat</button></div></div>`;
   const kapat = ()=>{ clearInterval(tbZam); tbZam = null; ov.remove(); };
   ov.addEventListener('click', async e=>{
     if(e.target === ov) return kapat();
     const b = e.target.closest('[data-k]'); if(!b) return;
     const k = b.dataset.k;
     if(k === 'kapat') return kapat();
-    if(k === 'ayar'){ kapat(); if(await tbAyarlariDuzenle()) telefonBulAc(); return; }
     tbKomut(k);
   });
   document.body.appendChild(ov);
