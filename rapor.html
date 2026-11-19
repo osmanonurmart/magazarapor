@@ -1588,7 +1588,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 91;
+const APP_SURUM = 92;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -6081,15 +6081,25 @@ function a24Bos(){
   return {tarih: d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()), irsaliye: '', urunler: [{sku:'', ad:'', adet:''}],
           u1: 'ANAHTAR SORUMLUSU', n1: '', u2: 'SATIŞ DANIŞMANI', n2: '', iki: false};
 }
+// EBA formunda yalnızca "Personel" (kırığı çıkan kişi) var. Kayıtlı anahtar sorumlularından biriyse tek imza;
+// değilse satış danışmanıdır: sorumlu + satış danışmanı iki imza.
+let a24Sorumlular = null;
+async function a24SorumluOku(){
+  if(a24Sorumlular !== null) return a24Sorumlular;
+  a24Sorumlular = '';
+  try{ const d = await sdb('settings').doc('a24').get(); if(d.exists) a24Sorumlular = d.data().sorumlular || ''; }catch(e){}
+  return a24Sorumlular;
+}
+function a24SorumluYaz(v){ a24Sorumlular = v; try{ sdb('settings').doc('a24').set({sorumlular: v}, {merge:true}); }catch(e){} }
+const a24Liste = ()=> String(a24Sorumlular || '').split(',').map(x=> x.trim().toLocaleUpperCase('tr-TR')).filter(Boolean);
 function a24Uygula(v){
   const k = a24Bos();
   k.irsaliye = v.irsaliye || '';
   const U = (v.urunler || []).filter(u=> u && (u.sku || u.ad));
   if(U.length) k.urunler = U.map(u=>({sku: String(u.sku || ''), ad: String(u.ad || ''), adet: String(u.adet || '')}));
-  k.n1 = (v.sorumlu || '').toLocaleUpperCase('tr-TR');
-  k.n2 = (v.danisman || '').toLocaleUpperCase('tr-TR');
-  const kirici = (v.kirici || '').toLocaleLowerCase('tr-TR');
-  k.iki = !!k.n2 && !/sorumlu/.test(kirici) || /danışman/.test(kirici);
+  const P = String(v.personel || '').trim().toLocaleUpperCase('tr-TR'), L = a24Liste();
+  if(!P || !L.length || L.includes(P)){ k.n1 = P || L[0] || ''; k.iki = false; }
+  else { k.n1 = L[0]; k.n2 = P; k.iki = true; }
   a24 = k;
 }
 async function a24Yapistir(kap){
@@ -6100,6 +6110,7 @@ async function a24Yapistir(kap){
       input:{tip:'textarea', deger:''}, butonlar:[{metin:'Vazgeç', deger:null}, {metin:'Aktar', deger:'__input', tip:'birincil'}], iptalDeger:null});
     if(t === null) return;
   }
+  await a24SorumluOku();
   try{ const v = JSON.parse(t); if(v.tur !== 'a24') throw 0; a24Uygula(v); uiBildirim('A24 bilgileri aktarıldı', 'basari', 2500); }
   catch(e){ uiUyari('Panodaki bilgi A24 formundan değil. EBA’da A24 formu açıkken Veri Kopyala yer imine basın.', {ikon:'⚠️'}); return; }
   a24AracCiz(kap);
@@ -6155,6 +6166,8 @@ function a24AracCiz(kap){
       <label>Ürünler (SKU · ürün adı · adet)</label>
       ${k.urunler.map((u, i)=>`<div class="a24-ur"><input data-u="${i}" data-k="sku" value="${e(u.sku)}" placeholder="SKU"><input data-u="${i}" data-k="ad" value="${e(u.ad)}" placeholder="Ürün adı"><input data-u="${i}" data-k="adet" value="${e(u.adet)}" placeholder="Adet" inputmode="numeric"><button type="button" data-sil="${i}" title="Sil">✕</button></div>`).join('')}
       <button class="btn" type="button" data-a="ekle">+ Ürün ekle</button>
+      <label>Anahtar sorumluları (virgülle; EBA’daki personel bunlardan biri değilse satış danışmanı sayılır)</label>
+      <input type="text" data-sor="1" value="${e(a24Sorumlular || '')}" placeholder="OSMAN ONUR MART">
       <label>1. imza (sorumlu)</label>
       <div class="a24-ur" style="grid-template-columns:1fr 1fr"><input data-f="u1" value="${e(k.u1)}"><input data-f="n1" value="${e(k.n1)}" placeholder="İsim"></div>
       <label class="a24-iki"><input type="checkbox" data-f="iki" ${k.iki ? 'checked' : ''} style="width:auto"> Satış danışmanı da imzalasın</label>
@@ -6168,6 +6181,9 @@ function a24AracCiz(kap){
     if(i.type === 'checkbox'){ a24.iki = i.checked; a24AracCiz(kap); return; }
     a24[i.dataset.f] = i.value; onIzle();
   }));
+  const sor = kap.querySelector('[data-sor]');
+  sor.addEventListener('change', ()=> a24SorumluYaz(sor.value.trim()));
+  if(a24Sorumlular === null) a24SorumluOku().then(v=>{ if(document.body.contains(sor) && !sor.value) sor.value = v; });
   kap.querySelectorAll('[data-u]').forEach(i=> i.addEventListener('input', ()=>{ a24.urunler[+i.dataset.u][i.dataset.k] = i.value; onIzle(); }));
   kap.querySelectorAll('[data-sil]').forEach(b=> b.addEventListener('click', ()=>{ a24.urunler.splice(+b.dataset.sil, 1); if(!a24.urunler.length) a24.urunler.push({sku:'', ad:'', adet:''}); a24AracCiz(kap); }));
   kap.querySelector('[data-a=ekle]').addEventListener('click', ()=>{ a24.urunler.push({sku:'', ad:'', adet:''}); a24AracCiz(kap); });
@@ -6253,8 +6269,24 @@ function veriKopyalaKodu(){
       });
       return bulunan;
     };
+    var bul = function(sec){ var v = ''; a24Belgeler.some(function(d){ var el = d.querySelector(sec); if(el){ v = deger(el); } return !!v; }); return v; };
     var urunler = [];
     a24Belgeler.forEach(function(d){
+      var tb = d.querySelector('[id$="tblUrunBilgileri"] table');
+      if(!tb) return;
+      var satir = tb.querySelectorAll('tr');
+      if(!satir.length) return;
+      var hs = Array.prototype.map.call(satir[0].children, function(c){ return kucuk(c.textContent); });
+      var iS = hs.indexOf('sku'), iA = hs.findIndex(function(h){ return /\u00fcr\u00fcn ad/.test(h); }), iK = hs.findIndex(function(h){ return /k\u0131r\u0131k adet/.test(h); });
+      for(var j = 1; j < satir.length; j++){
+        var c = satir[j].children, kut = satir[j].querySelector('input[type=checkbox]');
+        var kirik = iK >= 0 && c[iK] ? deger(c[iK]) : '';
+        if(kut ? !kut.checked && !(parseFloat(kirik) > 0) : !(parseFloat(kirik) > 0)) continue;
+        var sku = iS >= 0 && c[iS] ? deger(c[iS]).replace(/\.+$/, '') : '';
+        if(sku) urunler.push({sku: sku, ad: iA >= 0 && c[iA] ? deger(c[iA]) : '', adet: kirik});
+      }
+    });
+    if(!urunler.length)     a24Belgeler.forEach(function(d){
       d.querySelectorAll('table').forEach(function(tb){
         var bas = tb.querySelector('thead tr') || tb.querySelector('tr');
         if(!bas) return;
@@ -6274,11 +6306,11 @@ function veriKopyalaKodu(){
       });
     });
     if(!urunler.length){ var tekS = alan(/sku|\u00fcr\u00fcn kodu|stok kodu/); if(tekS) urunler.push({sku: tekS, ad: alan(/\u00fcr\u00fcn ad/), adet: alan(/adet|miktar/)}); }
-    var a24 = {tur: 'a24', irsaliye: alan(/irsaliye/), urunler: urunler, sorumlu: alan(/sorumlu/), danisman: alan(/sat\u0131\u015f dan\u0131\u015fman|dan\u0131\u015fman/), kirici: alan(/k\u0131r\u0131\u011f\u0131|k\u0131ran|kim taraf/)};
+    var a24 = {tur: 'a24', irsaliye: bul('[id$="txtIrsaliyeKodu"]') || alan(/irsaliye/), urunler: urunler, personel: bul('input[name$="cmbPersonel$ctl00"]') || alan(/^personel/)};
     var a24Eksik = [];
     if(!a24.irsaliye) a24Eksik.push('\u0130rsaliye');
     if(!urunler.length) a24Eksik.push('\u00dcr\u00fcn');
-    if(!a24.sorumlu && !a24.danisman) a24Eksik.push('Ki\u015fi');
+    if(!a24.personel) a24Eksik.push('Personel');
     kopyala(JSON.stringify(a24), function(ok){
       if(!ok){ goster(false, 'Kopyalanamad\u0131', ['Taray\u0131c\u0131 panoya yazmaya izin vermedi.']); return; }
       if(a24Eksik.length){ goster(false, 'A24 kopyaland\u0131 ama eksik var', ['Bulunamayan: ' + a24Eksik.join(', '), 'Ma\u011faza Rapor > Ara\u00e7lar > A24 i\u00e7inde elle tamamlay\u0131n.']); return; }
