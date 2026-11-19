@@ -1588,7 +1588,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 93;
+const APP_SURUM = 94;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -6091,7 +6091,7 @@ async function a24SorumluOku(){
   return a24Sorumlular;
 }
 function a24SorumluYaz(v){ a24Sorumlular = v; try{ sdb('settings').doc('a24').set({sorumlular: v}, {merge:true}); }catch(e){} }
-const a24Liste = ()=> String(a24Sorumlular || '').split(',').map(x=> x.trim().toLocaleUpperCase('tr-TR')).filter(Boolean);
+const a24Liste = ()=>{ const L = String(a24Sorumlular || '').split(',').map(x=> x.trim().toLocaleUpperCase('tr-TR')).filter(Boolean); return L.length ? L : ['OSMAN ONUR MART']; };
 function a24Uygula(v){
   const k = a24Bos();
   k.irsaliye = v.irsaliye || '';
