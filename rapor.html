@@ -1588,7 +1588,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 92;
+const APP_SURUM = 93;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -6128,14 +6128,14 @@ function a24SayfaHtml(k){
     ${k.iki ? `<div class="a24-imza a24-sol"><div>${e(k.u2 || '')}</div><div>${e(k.n2 || '')}</div></div>` : ''}
   </div>`;
 }
-const A24_CSS = `.a24-sayfa{position:relative;width:210mm;height:296.5mm;background:#fff;color:#000;font:11pt Calibri,Carlito,Arial,sans-serif;overflow:hidden;box-sizing:border-box}
+const A24_CSS = `.a24-sayfa{position:relative;width:210mm;height:296.5mm;background:#fff;color:#000;font:14pt Calibri,Carlito,Arial,sans-serif;overflow:hidden;box-sizing:border-box}
   .a24-tarih{position:absolute;top:25mm;right:25mm}
-  .a24-baslik{position:absolute;top:36mm;left:0;right:0;text-align:center;font-size:14pt;font-weight:700}
-  .a24-metin{position:absolute;top:50mm;left:25mm;right:25mm;margin:0;line-height:1.35}
-  .a24-urunler{position:absolute;top:92mm;left:25mm;right:25mm}
+  .a24-baslik{position:absolute;top:36mm;left:0;right:0;text-align:center;font-size:17pt;font-weight:700}
+  .a24-metin{position:absolute;top:66mm;left:25mm;right:25mm;margin:0;line-height:1.35}
+  .a24-urunler{position:absolute;top:118mm;left:25mm;right:25mm}
   .a24-urun{display:grid;grid-template-columns:1fr 1.4fr .5fr;gap:6mm;margin-bottom:4mm}
   .a24-urun span:last-child{text-align:center}
-  .a24-imza{position:absolute;bottom:40mm;width:70mm;line-height:1.9;text-align:right}
+  .a24-imza{position:absolute;bottom:40mm;width:85mm;line-height:1.9;text-align:right}
   .a24-sag{right:25mm}.a24-sol{left:25mm;text-align:left}`;
 function a24Yazdir(){
   const w = window.open('', '_blank');
