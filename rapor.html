@@ -1588,7 +1588,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 88;
+const APP_SURUM = 89;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -2154,6 +2154,8 @@ function ekranGoster(ad){
   document.getElementById('bolgePaneli').style.display = ad === 'panel' ? '' : 'none';
   document.getElementById('appRoot').style.display = ad === 'uygulama' ? '' : 'none';
   if(ad === 'uygulama') kisayolCalistir();
+  // Veri sekmesi arka planda önceden yüklenir; tıklayınca beklemeden açılır.
+  if(ad === 'uygulama') setTimeout(()=>{ try{ veriAc(); }catch(e){} }, 2500);
 }
 // Ana ekran kısayolu (uzun basınca çıkan menü): rapor.html?kisayol=transfer-kamera
 // uygulama açılınca Transfer sekmesine geçip kamerayı doğrudan açar.
