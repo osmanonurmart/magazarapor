@@ -1588,7 +1588,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 94;
+const APP_SURUM = 95;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -6079,7 +6079,7 @@ let a24 = null;
 function a24Bos(){
   const d = new Date();
   return {tarih: d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()), irsaliye: '', urunler: [{sku:'', ad:'', adet:''}],
-          u1: 'ANAHTAR SORUMLUSU', n1: '', u2: 'SATIŞ DANIŞMANI', n2: '', iki: false};
+          u1: 'ANAHTAR SORUMLUSU', n1: a24Liste()[0], u2: 'SATIŞ DANIŞMANI', n2: '', iki: false};
 }
 // EBA formunda yalnızca "Personel" (kırığı çıkan kişi) var. Kayıtlı anahtar sorumlularından biriyse tek imza;
 // değilse satış danışmanıdır: sorumlu + satış danışmanı iki imza.
@@ -6167,7 +6167,7 @@ function a24AracCiz(kap){
       ${k.urunler.map((u, i)=>`<div class="a24-ur"><input data-u="${i}" data-k="sku" value="${e(u.sku)}" placeholder="SKU"><input data-u="${i}" data-k="ad" value="${e(u.ad)}" placeholder="Ürün adı"><input data-u="${i}" data-k="adet" value="${e(u.adet)}" placeholder="Adet" inputmode="numeric"><button type="button" data-sil="${i}" title="Sil">✕</button></div>`).join('')}
       <button class="btn" type="button" data-a="ekle">+ Ürün ekle</button>
       <label>Anahtar sorumluları (virgülle; EBA’daki personel bunlardan biri değilse satış danışmanı sayılır)</label>
-      <input type="text" data-sor="1" value="${e(a24Sorumlular || '')}" placeholder="OSMAN ONUR MART">
+      <input type="text" data-sor="1" value="${e(a24Sorumlular || 'OSMAN ONUR MART')}">
       <label>1. imza (sorumlu)</label>
       <div class="a24-ur" style="grid-template-columns:1fr 1fr"><input data-f="u1" value="${e(k.u1)}"><input data-f="n1" value="${e(k.n1)}" placeholder="İsim"></div>
       <label class="a24-iki"><input type="checkbox" data-f="iki" ${k.iki ? 'checked' : ''} style="width:auto"> Satış danışmanı da imzalasın</label>
@@ -6183,7 +6183,7 @@ function a24AracCiz(kap){
   }));
   const sor = kap.querySelector('[data-sor]');
   sor.addEventListener('change', ()=> a24SorumluYaz(sor.value.trim()));
-  if(a24Sorumlular === null) a24SorumluOku().then(v=>{ if(document.body.contains(sor) && !sor.value) sor.value = v; });
+  if(a24Sorumlular === null) a24SorumluOku().then(v=>{ if(document.body.contains(sor) && v) sor.value = v; });
   kap.querySelectorAll('[data-u]').forEach(i=> i.addEventListener('input', ()=>{ a24.urunler[+i.dataset.u][i.dataset.k] = i.value; onIzle(); }));
   kap.querySelectorAll('[data-sil]').forEach(b=> b.addEventListener('click', ()=>{ a24.urunler.splice(+b.dataset.sil, 1); if(!a24.urunler.length) a24.urunler.push({sku:'', ad:'', adet:''}); a24AracCiz(kap); }));
   kap.querySelector('[data-a=ekle]').addEventListener('click', ()=>{ a24.urunler.push({sku:'', ad:'', adet:''}); a24AracCiz(kap); });
