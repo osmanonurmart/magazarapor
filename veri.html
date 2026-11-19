@@ -4,7 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Envanter Araçları</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root{--bg:#f6f4f1;--fg:#222;--mut:#666;--card:#fff;--bd:#cfc9bf;--bd2:#e2ddd4;--ac:#C8A066;--acs:#f3e9d7;--act:#9a7438;--chip:#f3ede3;--warn:#a34141;--warnbg:#f8e3e3;--th:#2d2d2d;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
@@ -86,6 +85,8 @@ async function idbPut(k,v){try{const d=await idb();await new Promise((res,rej)=>
 // _surum belgesi her kaydın son yazılma zamanını tutar; başka cihaz yazınca bu sayfa kendini yeniler.
 // IndexedDB yerel önbellek olarak kalır. Resim klasörü (imgdir) bilgisayara özel olduğu için buluta gitmez.
 const B=(()=>{try{const P=window.parent;if(P&&P!==window&&typeof P.sdb==="function"){P.sdb("veriKv");return P}}catch(e){}return null})();
+// Excel kütüphanesi (~1 MB) sayfa açılışında değil, dosya yüklerken / Excel indirirken yüklenir.
+let xlsxS=null;const xlsxYukle=()=>window.XLSX?Promise.resolve():xlsxS||(xlsxS=new Promise((ok,no)=>{const e=document.createElement("script");e.src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";e.onload=ok;e.onerror=()=>{xlsxS=null;no(new Error("Excel kütüphanesi yüklenemedi (cdnjs engelli olabilir)."))};document.head.appendChild(e)}));
 const BULUT_HARIC=new Set(["imgdir"]),PARCA=900000;
 let bSurum={},bZam={},bBen=new Set(),bUnsub=null;
 const bCol=()=>B.sdb("veriKv"),bId=k=>encodeURIComponent(k);
@@ -101,14 +102,17 @@ async function bulutYazHemen(k,v){try{const ham=JSON.stringify(await paketle(v==
  await Promise.all(Array.from({length:n-1},(_,x)=>col.doc(id+"~"+(x+1)).set(bNes({v:j.slice((x+1)*PARCA,(x+2)*PARCA)}))));
  await col.doc(id).set(bNes({k,v:j.slice(0,PARCA),n,t,z}));
  const eski=(bSurum[k]&&bSurum[k].n)||0;for(let i=n;i<eski;i++)col.doc(id+"~"+i).delete().catch(()=>{});
- bSurum[k]={k,t,n};bBen.add(k+"@"+t);await col.doc("_surum").set(bNes({[id]:{k,t,n}}),bNes({merge:true}))}
+ bSurum[k]={k,t,n};bBen.add(k+"@"+t);ySYaz(k,t);await col.doc("_surum").set(bNes({[id]:{k,t,n}}),bNes({merge:true}))}
  catch(e){bulutHata("Buluta yazılamadı ("+k+"): "+(e.code?e.code+" — ":"")+e.message)}}
 function bulutYaz(k,v){clearTimeout(bZam[k]);bZam[k]=setTimeout(()=>bulutYazHemen(k,v),600)}
 async function bulutOku(k){const s=bSurum[k],col=bCol(),id=bId(k),D=await Promise.all([col.doc(id).get(),...Array.from({length:Math.max(0,(s.n||1)-1)},(_,i)=>col.doc(id+"~"+(i+1)).get())]);if(!D[0].exists)return undefined;const j=D.map(d=>d.exists?d.data().v:"").join("");return ac(JSON.parse(D[0].data().z?await ac64(j):j))}
 const bLog=[];function bulutHata(m){msg=m;bLog.push(new Date().toLocaleTimeString("tr-TR")+" "+m);if(bLog.length>20)bLog.shift();if(diag)diag.bulut=m;try{render()}catch(e){}}
 const bHazir=B?bCol().doc("_surum").get().then(d=>{const o=d.exists?d.data():{};for(const x of Object.values(o))if(x&&x.k)bSurum[x.k]=x}).catch(e=>bulutHata("Buluttan okunamadı: "+e.message)):Promise.resolve();
-async function kvGet(k){if(!B||BULUT_HARIC.has(k))return idbGet(k);await bHazir;if(k in mem)return mem[k];
- let bozuk=false;if(bSurum[k]){try{const v=await bulutOku(k);if(v!==undefined){mem[k]=v;idbPut(k,v);return v}bozuk=true}catch(e){bozuk=true;bLog.push("okuma ("+k+"): "+(e.code?e.code+" — ":"")+e.message)}}
+// Bu cihazdaki kopyanın hangi bulut sürümü olduğu (_ys) tutulur; aynıysa buluttan yeniden indirilmez.
+let yS=null;const ySHazir=idbGet("_ys").then(v=>{yS=v||{}}).catch(()=>{yS={}});const ySYaz=(k,t)=>{yS[k]=t;idbPut("_ys",yS)};
+async function kvGet(k){if(!B||BULUT_HARIC.has(k))return idbGet(k);await Promise.all([bHazir,ySHazir]);if(k in mem)return mem[k];
+ if(bSurum[k]&&yS[k]===bSurum[k].t){const y=await idbGet(k);if(y!==undefined){mem[k]=y;return y}}
+ let bozuk=false;if(bSurum[k]){try{const v=await bulutOku(k);if(v!==undefined){mem[k]=v;idbPut(k,v);ySYaz(k,bSurum[k].t);return v}bozuk=true}catch(e){bozuk=true;bLog.push("okuma ("+k+"): "+(e.code?e.code+" — ":"")+e.message)}}
  // Buluttaki kayıt eksik/bozuksa bu cihazdaki kopya kullanılır ve buluta yeniden yazılır.
  const v=await idbGet(k);if(v!==undefined&&v!==null&&(!bSurum[k]||bozuk))bulutYaz(k,v);mem[k]=v;return v}
 async function kvSet(k,v){mem[k]=v;await idbPut(k,v);if(B&&!BULUT_HARIC.has(k))bulutYaz(k,v)}
@@ -358,7 +362,7 @@ function skView(){const mob=matchMedia("(pointer:coarse)").matches,top=Object.va
 function skKamYerlestir(){const yer=document.getElementById("skKamYer");if(!yer||!skCalis){if(skKamEl&&skKamEl.parentNode&&!yer)skKamEl.remove();return}if(!skKamEl){skKamEl=document.createElement("div");skKamEl.innerHTML=kamKutu("skV")}yer.appendChild(skKamEl);const v=skKamEl.querySelector("video");if(v.srcObject!==vkS)v.srcObject=vkS;v.play().catch(()=>{})}
 async function skKamAc(){try{await kamAkis();skCalis=true;render();const coz=await barkodCozucu();const tur=async()=>{if(!skCalis)return;const v=skKamEl&&skKamEl.querySelector("video");const k=v?await coz(v):"";if(k&&skCalis&&(k!==skSonK||Date.now()-skSonT>1500)){skSonK=k;skSonT=Date.now();if(navigator.vibrate)navigator.vibrate(50);skEkle(k,1);render()}else if(k===skSonK)skSonT=Date.now()-1000;setTimeout(tur,150)};tur()}catch(e){skCalis=false;skMsg="Kamera açılamadı: "+e.message;render()}}
 function skKamKapat(){if(!skCalis)return;skCalis=false;if(vkS&&!vkCalis)vkS.getTracks().forEach(t=>t.enabled=false);if(skKamEl)skKamEl.remove()}
-function skXls(){const F=skFark(),ws=XLSX.utils.aoa_to_sheet([["Barkod","Ürün kodu","Ürün adı","Renk","Beden","Sayılan","Sistem","Fark"],...F.map(x=>[x.bar,x.kod,x.ad,x.renk,x.beden,x.say,x.sis,x.fark])]),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Sayım farkı");XLSX.writeFile(wb,"sayim-farki-"+new Date().toISOString().slice(0,10)+".xlsx")}
+async function skXls(){try{await xlsxYukle()}catch(e){alert(e.message);return}const F=skFark(),ws=XLSX.utils.aoa_to_sheet([["Barkod","Ürün kodu","Ürün adı","Renk","Beden","Sayılan","Sistem","Fark"],...F.map(x=>[x.bar,x.kod,x.ad,x.renk,x.beden,x.say,x.sis,x.fark])]),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Sayım farkı");XLSX.writeFile(wb,"sayim-farki-"+new Date().toISOString().slice(0,10)+".xlsx")}
 document.addEventListener("keydown",e=>{if(e.key!=="Enter"||e.target.id!=="skb")return;const v=e.target.value.trim();if(!v)return;skEkle(v,1);render();const i=$("#skb");if(i){i.value="";i.focus()}});
 function vkKapat(){vkCalis=false;if(vkS)vkS.getTracks().forEach(t=>t.enabled=false);document.getElementById("vkAlan").hidden=true;const b=document.getElementById("vkBtn");b.textContent="📷 Kamera aç";b.classList.add("dk")}
 window.veriKamDurdur=()=>{if(skCalis){skKamKapat();render()}if(vkCalis)vkKapat()};
@@ -388,7 +392,7 @@ async function dosyaOku(f){const ab=await f.arrayBuffer();if(!/\.(csv|txt)$/i.te
  const ilk=t.split("\n").slice(0,20).join("\n"),say=c=>ilk.split(c).length-1,ayr=[["\t",say("\t")],[";",say(";")],[",",say(",")],["|",say("|")]].sort((a,b)=>b[1]-a[1])[0][0];
  return XLSX.read(t,{type:"string",FS:ayr,raw:true})}
 async function onFile0(f){diag={v:"s.27",file:{name:f.name,size:f.size,mod:fmt(f.lastModified)},xlsx:typeof XLSX};repTxt="";
- try{if(typeof XLSX==="undefined")throw new Error("Excel kütüphanesi yüklenemedi (cdnjs engelli olabilir).");
+ try{await xlsxYukle();
   const wb=await dosyaOku(f);let raw=[],seen="",rep="";diag.sheets=wb.SheetNames;
   for(const sn of wb.SheetNames){const A=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,defval:""});diag.firstRows=diag.firstRows||A.slice(0,8).map(r=>r.map(String).filter(Boolean).join(" | ").slice(0,300));seen+=sn+" ["+(A[0]||[]).filter(String).slice(0,8).join(" | ")+"] ";
    const T0=findTbl(A),hi=T0?T0.hi:-2;
@@ -462,7 +466,7 @@ document.addEventListener("pointerdown",e=>{const th=e.target.closest("th[data-s
 document.addEventListener("pointermove",e=>{if(!dg)return;if(!dg.on&&Math.abs(e.clientX-dg.x)>8){dg.on=true;document.body.style.cursor="grabbing"}if(!dg.on)return;document.querySelectorAll("th.dt").forEach(x=>x.classList.remove("dt","dl","dr"));const el=document.elementFromPoint(e.clientX,e.clientY),th=el&&el.closest?el.closest("th[data-sort]"):null;if(th&&th.dataset.sort!==dg.k){const r=th.getBoundingClientRect();dg.t=th.dataset.sort;dg.after=e.clientX>r.left+r.width/2;th.classList.add("dt",dg.after?"dr":"dl")}else dg.t=null});
 document.addEventListener("pointerup",()=>{if(!dg)return;const d=dg;dg=null;document.body.style.cursor="";document.querySelectorAll("th.dt").forEach(x=>x.classList.remove("dt","dl","dr"));if(d.on){dgDone=true;setTimeout(()=>dgDone=false,80);if(d.t)moveCol(d.k,d.t,d.after)}});
 window.addEventListener("hashchange",render);
-async function veriYukle(){data=await kvGet("data")||null;if(data)data.rows=data.rows.filter(r=>String(r.kod).trim()!=="");counted=await kvGet("counted")||{};cw=await kvGet("cw")||{};cp=await kvGet("cp")||{order:[],on:{}};prev=await kvGet("prev")||null;h1b=(await kvGet("h1b"))!==false;custom=(await kvGet("custom"))||[];forms=(await kvGet("forms"))||{};ikL=(await kvGet("svidx"))||[];defter=(await kvGet("defter"))||{e:{},a:{}};kirik=(await kvGet("kirik"))||{list:[],hist:[]};sk=(await kvGet("sayimk"))||{bas:0,say:{},son:[]};imgDir=await kvGet("imgdir")||null;if(imgDir){try{if(await imgDir.queryPermission({mode:"read"})!=="granted")imgPerm=true}catch(e){imgDir=null}}kbiC=null;gcFor=null;render()}
+async function veriYukle(){await Promise.all(["data","counted","cw","cp","prev","h1b","custom","forms","svidx","defter","kirik","sayimk"].map(k=>kvGet(k)));data=await kvGet("data")||null;if(data)data.rows=data.rows.filter(r=>String(r.kod).trim()!=="");counted=await kvGet("counted")||{};cw=await kvGet("cw")||{};cp=await kvGet("cp")||{order:[],on:{}};prev=await kvGet("prev")||null;h1b=(await kvGet("h1b"))!==false;custom=(await kvGet("custom"))||[];forms=(await kvGet("forms"))||{};ikL=(await kvGet("svidx"))||[];defter=(await kvGet("defter"))||{e:{},a:{}};kirik=(await kvGet("kirik"))||{list:[],hist:[]};sk=(await kvGet("sayimk"))||{bas:0,say:{},son:[]};imgDir=await kvGet("imgdir")||null;if(imgDir){try{if(await imgDir.queryPermission({mode:"read"})!=="granted")imgPerm=true}catch(e){imgDir=null}}kbiC=null;gcFor=null;render()}
 // Envanter buluttan gelirken "yükleniyor" göstergesi
 const veriYukle0=veriYukle;veriYukle=async()=>{if(!data){yukMsg="Envanter yükleniyor…";render()}try{await veriYukle0()}finally{yukMsg="";render()}};
 vkKur();veriYukle();
