@@ -691,6 +691,13 @@ if(!document.documentElement.classList.contains('tel')){
   .qr-gecis button + button{ border-left:1px solid #cfc9bf; }
   .qr-gecis button.on{ background:var(--dark); color:#fff; }
   .ciro-bagla{ margin-left:auto; font-size:.74rem; padding:5px 12px; }
+  html.tel .tb-tel.sadece-tel{ display:inline-flex !important; }
+  .tb-tel{ align-items:center; gap:4px; border:1px solid var(--line); background:#fff; color:#3a3a3a; border-radius:18px; padding:6px 12px; font:600 .78rem inherit; font-family:inherit; cursor:pointer; }
+  .tb-panel .tb-durum{ margin:6px 0 14px; color:#555; font-size:.9rem; min-height:1.3em; }
+  .tb-panel .tb-calar{ width:100%; padding:16px; font-size:1.05rem; border:0; border-radius:12px; color:#fff; background:#d32f2f; font-weight:700; cursor:pointer; font-family:inherit; margin-bottom:8px; }
+  .tb-panel .tb-dur{ background:#455a64; }
+  .tb-panel .tb-alt{ display:flex; justify-content:space-between; margin-top:8px; }
+  .tb-panel .tb-alt button{ border:none; background:none; color:#777; font-size:.78rem; cursor:pointer; font-family:inherit; padding:6px; }
   .ciro-durum{ font-size:.72rem; font-weight:600; color:#999; }
   .ciro-durum.canli{ color:#2e7d32; }
   .ciro-durum.eski{ color:#c62828; }
@@ -1434,6 +1441,7 @@ if(!document.documentElement.classList.contains('tel')){
   <div class="ust-bar">
     <div class="ust-sol">
       <img class="ust-logo" src="simge.svg?v=2" alt="" width="30" height="30">
+      <button type="button" class="tb-tel sadece-tel" onclick="telefonBulAc()">📱 Telefonu bul</button>
       <span class="surum-rozet" id="surumRozet" title="Güncelleme kontrol et" onclick="guncellemeKontrol()"></span>
       <nav class="tab-bar">
         <button class="tab-btn active" id="tabRaporBtn" data-kisa="Ana Sayfa" type="button" onclick="showTab('rapor')"><svg class="tab-ikon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5.5h4V20"/></svg>Ana Sayfa</button>
@@ -1484,8 +1492,7 @@ if(!document.documentElement.classList.contains('tel')){
     <div class="qr-bar sadece-masa" id="qrBar">
       <div class="qr-gecis" id="qrGecis"><button type="button" data-g="qr">QR</button><button type="button" data-g="tablo">Tablo</button></div>
       <button type="button" class="qr-ayar" onclick="qrAdresleriDuzenle()">⚙ QR adresleri</button>
-      <button type="button" class="btn ciro-bagla" onclick="canliCiroBagla()">📊 Ciroyu canlı bağla</button>
-      <span class="ciro-durum" id="ciroDurum"></span>
+      <button type="button" class="btn ciro-bagla" onclick="telefonBulAc()">📱 Telefonu bul</button>
     </div>
     <div class="qr-gorunum sadece-masa" id="qrGorunum"></div>
     <div class="month-grid" id="monthContainer"></div>
@@ -1581,7 +1588,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 86;
+const APP_SURUM = 87;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -6031,10 +6038,7 @@ const ARACLAR = [
    ciz: bekleyenAracCiz},
   {id:'kirik-tutanagi', ikon:'🖨', baslik:'Kırık tutanağı',
    aciklama:"EBA kırık formunu yapıştır, Hasarlı Ürün Tutanağı hazır yazdırılsın.",
-   ciz: tutanakAracCiz},
-  {id:'canli-ciro', ikon:'📡', baslik:'Canlı Ciro', rol:'magaza',
-   aciklama:"Ciro sitesindeki değerler 5 dakikada bir kendiliğinden tabloya yazılsın (Tampermonkey kurulumu).",
-   ciz: canliCiroAracCiz}
+   ciz: tutanakAracCiz}
 ];
 
 // ---------- Bekleyen deposu ve Kırık tutanağı (kodları Transfer bölümünde) ----------
@@ -8137,6 +8141,68 @@ function qrKirpAc(url, mevcut, bitti){
 // Sitenin adresi kodda değil, mağaza ayarında durur (settings/qrSiteleri.ciroUrl).
 const CANLI_CIRO_ARALIK_DK = 5;
 let canliCiroSon = 0;
+// ---- Telefonu bul ----
+// Mağaza telefonundaki uygulama (APK) Firebase Realtime Database'e sinyal (hb) yazar ve komut (cmd) dinler.
+// Veritabanı adresi ve anahtar kodda değil, mağazanın kendi ayarında durur: stores/{m}/settings/telefonBul.
+let tbAyar = null, tbZam = null;
+async function tbAyarOku(){
+  if(tbAyar) return tbAyar;
+  try{ const d = await sdb('settings').doc('telefonBul').get(); if(d.exists) tbAyar = d.data(); }catch(e){}
+  return tbAyar;
+}
+async function tbAyarlariDuzenle(){
+  const eski = tbAyar || {};
+  const db = await uiSor('Telefon uygulamasının Firebase veritabanı adresi', eski.db || '', {baslik:'Telefonu bul · ayar', ikon:'📱', placeholder:'https://…-default-rtdb.firebaseio.com'});
+  if(db === null) return false;
+  const dbT = db.trim().replace(/\/+$/, '');
+  if(!/^https:\/\/[a-z0-9-]+(-default-rtdb)?\.(firebaseio\.com|[a-z0-9-]+\.firebasedatabase\.app)$/i.test(dbT)){ uiUyari('Adres https:// ile başlamalı ve firebaseio.com ya da firebasedatabase.app ile bitmeli.', {ikon:'⚠️'}); return false; }
+  const key = await uiSor('Uygulamadaki anahtar (APK’daki ile aynı)', eski.key || '', {baslik:'Telefonu bul · ayar', ikon:'🔑'});
+  if(key === null) return false;
+  const keyT = key.trim();
+  if(!/^[A-Za-z0-9_-]{6,80}$/.test(keyT)){ uiUyari('Anahtar yalnızca harf, rakam, - ve _ içerebilir.', {ikon:'⚠️'}); return false; }
+  tbAyar = {db: dbT, key: keyT};
+  try{ await sdb('settings').doc('telefonBul').set(tbAyar); }catch(e){ uiUyari('Kaydedilemedi: ' + e.message, {ikon:'⚠️'}); return false; }
+  return true;
+}
+function tbYol(p){ return tbAyar.db + '/' + encodeURIComponent(tbAyar.key) + '/' + p + '.json'; }
+async function tbKomut(a){
+  try{ const r = await fetch(tbYol('cmd'), {method:'PUT', body: JSON.stringify({a, t: Date.now()})}); if(!r.ok) throw new Error('HTTP ' + r.status); uiBildirim(a === 'ring' ? 'Telefon çaldırılıyor…' : 'Durdur komutu gönderildi', 'basari', 2500); }
+  catch(e){ uiBildirim('Komut gönderilemedi: ' + e.message, 'hata', 4000); }
+}
+async function tbDurumOku(el){
+  try{
+    const r = await (await fetch(tbYol('hb'))).json();
+    if(!r || !r.t){ el.textContent = 'Henüz sinyal yok'; return; }
+    const sn = (Date.now() - r.t) / 1000;
+    el.textContent = sn < 30 ? '🟢 Çevrimiçi' + (r.b !== undefined ? ' · pil %' + r.b : '') : '🔴 Son görülme ' + (sn < 3600 ? Math.round(sn / 60) + ' dk' : Math.round(sn / 3600) + ' saat') + ' önce';
+  }catch(e){ el.textContent = 'Bağlantı hatası'; }
+}
+async function telefonBulAc(){
+  await tbAyarOku();
+  if(!tbAyar && !(await tbAyarlariDuzenle())) return;
+  const ov = document.createElement('div');
+  ov.className = 'ui-ov';
+  ov.innerHTML = `<div class="ui-dlg tb-panel"><div class="ui-ikon">📱</div><div class="ui-baslik">Mağaza telefonu</div>
+    <div class="tb-durum" id="tbDurum">Durum okunuyor…</div>
+    <button type="button" class="tb-calar" data-k="ring">🔔 Çaldır</button>
+    <button type="button" class="tb-calar tb-dur" data-k="stop">Durdur</button>
+    <div class="tb-alt"><button type="button" data-k="ayar">⚙ Ayarlar</button><button type="button" data-k="kapat">Kapat</button></div></div>`;
+  const kapat = ()=>{ clearInterval(tbZam); tbZam = null; ov.remove(); };
+  ov.addEventListener('click', async e=>{
+    if(e.target === ov) return kapat();
+    const b = e.target.closest('[data-k]'); if(!b) return;
+    const k = b.dataset.k;
+    if(k === 'kapat') return kapat();
+    if(k === 'ayar'){ kapat(); if(await tbAyarlariDuzenle()) telefonBulAc(); return; }
+    tbKomut(k);
+  });
+  document.body.appendChild(ov);
+  const el = ov.querySelector('#tbDurum');
+  tbDurumOku(el);
+  clearInterval(tbZam);
+  tbZam = setInterval(()=>{ if(!document.body.contains(ov)){ clearInterval(tbZam); return; } tbDurumOku(el); }, 5000);
+}
+
 let canliCiroPencere = null;
 
 function canliCiroUrl(){ return (qrAyar && qrAyar.ciroUrl) || ''; }
