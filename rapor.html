@@ -285,6 +285,9 @@ if(!document.documentElement.classList.contains('tel')){
   }
   .hk-kart.ekle b{ font-size:1.5rem; font-weight:400; }
   .hk-kart.ekle:hover{ color:#2d2d2d; box-shadow:none; }
+  .arac-hayalet{ opacity:.35; }
+  .arac-secili{ box-shadow:0 8px 24px rgba(0,0,0,.18); transform:scale(1.02); }
+  #aracIzgara .vk-kart{ -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }
   .vk-chip{ display:inline-block; margin-top:10px; font-size:.7rem; font-weight:600; background:#f3ede3; color:#6b5634; padding:3px 9px; border-radius:99px; }
   .vk-chip.uyari{ background:#f8e3e3; color:var(--red); }
   .hk-bos{ grid-column:1/-1; color:#888; font-size:.82rem; padding:18px 2px; }
@@ -1588,7 +1591,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 100;
+const APP_SURUM = 101;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -6032,12 +6035,6 @@ function ortakSayfalariYerlestir(yer){
 //   {id:'ornek', ikon:'🧮', baslik:'Araç adı', aciklama:'Kartta görünen kısa açıklama', html:`<!doctype html>...`}
 // Araçlar kodun içinde tanımlıdır; "ciz" verilen araçlar iframe yerine doğrudan sayfaya çizilir.
 const ARACLAR = [
-  {id:'veri-kopyala', ikon:'📋', baslik:'Veri Kopyala', rol:'magaza',
-   aciklama:'Ciro raporundaki verileri tek tıkla kopyalayan yer imi. Kurmak için butonu yer imleri çubuğuna sürükle.',
-   ciz: veriKopyalaCiz},
-  {id:'bekleyen-deposu', ikon:'📊', baslik:'Bekleyen deposu',
-   aciklama:"Bekleyen deposu Excel'ini yükle; Outlook'ta açılacak hazır mail iner, sadece Gönder'e basarsın.",
-   ciz: bekleyenAracCiz},
   {id:'a24', ikon:'🖨', baslik:'A24',
    aciklama:"EBA A24 kırık formundan Hasarlı Ürün Tespit Tutanağı hazırlanır, yazdırılır.",
    ciz: a24AracCiz}
@@ -6473,7 +6470,10 @@ function veriKopyalaCiz(kap){
 let currentToolId = null;
 
 function renderToolsGrid(){
-  document.getElementById('araclarAlt').textContent = 'Tüm mağazalarda ortak';
+  // Üstteki ortak araçlar bölümü kaldırıldı; A24 dahil bütün araçlar tek ızgarada (veriAraclariCiz).
+  const bas = document.querySelector('#toolsGridView > .sayfa-baslik');
+  if(bas) bas.style.display = 'none';
+  document.getElementById('toolsGrid').style.display = 'none';
   const grid = document.getElementById('toolsGrid');
   // rol verilen araç yalnızca o role görünür (ör. Veri Kopyala bölge müdürüne görünmez).
   const araclar = ARACLAR.filter(t=> !t.rol || !oturum || t.rol === oturum.rol);
@@ -6495,22 +6495,40 @@ function veriPencere(){
   const fr = document.getElementById('veriFrame');
   try{ const w = fr && fr.contentWindow; return (w && typeof w.veriAraclari === 'function') ? w : null; }catch(e){ return null; }
 }
+// Araç sırası: basılı tutup sürükleyerek değiştirilir, mağaza ayarına kaydedilir (settings/aracSira).
+let aracSira = null, aracSuruk = false, aracSortable = null;
+async function aracSiraOku(){
+  if(aracSira !== null) return aracSira;
+  aracSira = [];
+  try{ const d = await sdb('settings').doc('aracSira').get(); if(d.exists && Array.isArray(d.data().sira)) aracSira = d.data().sira; }catch(e){}
+  return aracSira;
+}
+function aracSiraYaz(L){ aracSira = L; try{ sdb('settings').doc('aracSira').set({sira: L}); }catch(e){} }
+let sortableYuk = null;
+const sortableYukle = ()=> window.Sortable ? Promise.resolve() : sortableYuk || (sortableYuk = new Promise((ok, no)=>{
+  const e = document.createElement('script'); e.src = 'https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js';
+  e.onload = ok; e.onerror = ()=>{ sortableYuk = null; no(); }; document.head.appendChild(e); }));
 function veriAraclariCiz(){
   const kutu = document.getElementById('veriAracBolum');
-  if(!kutu) return;
+  if(!kutu || aracSuruk) return;
   const w = veriPencere();
   if(!w){
-    kutu.innerHTML = '<div class="sayfa-baslik" style="margin-top:26px"><h2>Envanter araçları</h2><span>Yükleniyor…</span></div>';
+    kutu.innerHTML = '<div class="sayfa-baslik"><h2>Araçlar</h2><span>Yükleniyor…</span></div>';
     veriAc();
     return;
   }
+  if(aracSira === null){ aracSiraOku().then(()=> veriAraclariCiz()); return; }
   let liste = [];
   try{ liste = w.veriAraclari(); }catch(e){ liste = []; }
+  // A24 (uygulamanın kendi aracı) envanter araçlarının sonuna eklenir.
+  ARACLAR.filter(t=> !t.rol || !oturum || t.rol === oturum.rol).forEach(t=> liste.push({id: t.id, t: t.baslik, d: t.aciklama, ikon: t.ikon, uyg: true}));
+  const yer = id=>{ const i = aracSira.indexOf(id); return i < 0 ? 1e6 : i; };
+  liste = liste.map((t, i)=>({t, i})).sort((a, b)=> (yer(a.t.id) - yer(b.t.id)) || (a.i - b.i)).map(x=> x.t);
   const alt = w.veriDurum ? w.veriDurum() : '';
-  kutu.innerHTML = `<div class="sayfa-baslik" style="margin-top:26px"><h2>Envanter araçları</h2><span>${escapeHtml(alt)}</span></div>
-    <div class="hk-grid">${liste.map(t=>`
-      <div class="hk-kart vk-kart" data-vid="${escapeHtml(t.id)}">
-        <div class="hk-ust"><span class="hk-ikon">${VERI_IKON[t.id] || '🧩'}</span>${t.cust ? `<span class="hk-islem"><button class="sil" data-vsil="${escapeHtml(t.id)}" title="Sil">✕</button></span>` : ''}</div>
+  kutu.innerHTML = `<div class="sayfa-baslik"><h2>Araçlar</h2><span>${escapeHtml(alt)} · sıralamak için kartı basılı tutup sürükle</span></div>
+    <div class="hk-grid" id="aracIzgara">${liste.map(t=>`
+      <div class="hk-kart vk-kart" data-vid="${escapeHtml(t.id)}"${t.uyg ? ' data-uyg="1"' : ''}>
+        <div class="hk-ust"><span class="hk-ikon">${t.ikon || VERI_IKON[t.id] || '🧩'}</span>${t.cust ? `<span class="hk-islem"><button class="sil" data-vsil="${escapeHtml(t.id)}" title="Sil">✕</button></span>` : ''}</div>
         <div class="hk-baslik">${escapeHtml(t.t)}</div>
         <div class="hk-aciklama">${escapeHtml(t.d || '')}</div>
         ${t.chip ? `<span class="vk-chip${t.w ? ' uyari' : ''}">${escapeHtml(t.chip)}</span>` : ''}
@@ -6518,11 +6536,23 @@ function veriAraclariCiz(){
       <div class="hk-kart ekle" data-vyeni="1"><b>+</b>Yeni araç ekle</div>
     </div>`;
   kutu.querySelectorAll('[data-vid]').forEach(k=> k.addEventListener('click', e=>{
+    if(aracSuruk) return;
     const sil = e.target.closest('[data-vsil]');
     if(sil){ e.stopPropagation(); if(confirm('Bu araç silinsin mi?')) w.veriAracSil(sil.dataset.vsil); return; }
+    if(k.dataset.uyg){ openTool(k.dataset.vid); return; }
     showTab('veri'); w.veriAracAc(k.dataset.vid);
   }));
   kutu.querySelector('[data-vyeni]').addEventListener('click', ()=>{ showTab('veri'); w.veriYeniArac(); });
+  sortableYukle().then(()=>{
+    const iz = document.getElementById('aracIzgara');
+    if(!iz || iz._sortable) return;
+    iz._sortable = Sortable.create(iz, {
+      animation: 150, delay: 350, delayOnTouchOnly: false, touchStartThreshold: 6,
+      draggable: '.vk-kart', filter: '.ekle', ghostClass: 'arac-hayalet', chosenClass: 'arac-secili',
+      onStart(){ aracSuruk = true; },
+      onEnd(){ aracSiraYaz([...iz.querySelectorAll('[data-vid]')].map(k=> k.dataset.vid)); setTimeout(()=>{ aracSuruk = false; }, 50); }
+    });
+  }).catch(()=>{});
 }
 let veriAracZam = null;
 function veriAraclariGuncel(){
