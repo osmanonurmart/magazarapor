@@ -52,7 +52,7 @@ html.gomulu body{padding:14px 14px 16px}
 .ok-bas{font-size:13px;margin-bottom:8px}.ok-say{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .ok-say div{background:var(--bg);border-radius:8px;padding:8px;text-align:center}.ok-say span{display:block;font-size:11px;color:var(--mut)}.ok-say b{font-size:20px}
 .sk-kam{width:100%;justify-content:center;margin-top:10px}.sk-son{background:var(--card);border:1px solid var(--bd);border-left:4px solid var(--ac);border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:13px}
-tr.lk-s{position:relative}tr.lk-s:hover td{background:var(--chip)}
+tr.lk-s{position:relative}tr.lk-neg td{background:rgba(245,140,20,.22)}tr.lk-s:hover td{background:var(--chip)}
 .lk-ip{position:fixed;z-index:50;max-width:min(420px,90vw);background:#2d2d2d;color:#fff;font-size:12px;line-height:1.4;padding:6px 10px;border-radius:7px;box-shadow:0 4px 14px rgba(0,0,0,.25);pointer-events:none;white-space:normal}
 .ok-kirik{width:100%;justify-content:center;background:#f8e3e3;color:var(--warn);border-color:#efc9c9}
 /* Alttaki siyah toplam çubuğu yok: toplamlar tablonun altında küçük gri satır */
@@ -291,13 +291,13 @@ function lkSonuc(){if(!data)return[];return lkKalemler().map(q=>{let R;
  const V=new Map();let yol=0;for(const x of R){const k=x.kod+"|"+x.renk+"|"+x.beden;const v=V.get(k)||{ad:(String(x.kod).length>q.length&&/^1K/i.test(x.kod)?String(x.kod).slice(-3)+" ":"")+(x.renk||"")+(x.beden&&x.beden!=="."?" "+x.beden:""),env:0};v.env+=Number(x.env)||0;V.set(k,v);yol+=Number(x.sevk)||0}
  const A=[...V.values()],pos=A.filter(v=>v.env>0),neg=A.filter(v=>v.env<0),top=pos.reduce((t,v)=>t+v.env,0);
  const ip=(pos.length?pos.map(v=>v.ad.trim()+": "+v.env).join(" · "):"Stoğu olan renk yok")+(neg.length?"  |  Sayılmayan eksi: "+neg.map(v=>v.ad.trim()+": "+v.env).join(" · "):"")+(yol?"  |  Yolda: "+yol:"");
- return{q,ad:R[0].ad,durum:top>0?"Var":"Yok",top,ip}})}
+ return{q,ad:R[0].ad,durum:top>0?"Var":"Yok",top,ip,neg:neg.length>0}})}
 const lkChip=()=>{const L=lkSonuc();if(!L.length)return"Liste yok";const v=L.filter(x=>x.durum==="Var").length;return v+" var · "+(L.length-v)+" yok"};
 function lkView(){const L=lkSonuc(),v=L.filter(x=>x.durum==="Var").length,y=L.filter(x=>x.durum==="Yok").length,e=L.length-v-y;
  return`<div class="ov"><div class="dlg" style="max-width:900px"><div class="top"><span class="ttl">Liste kontrolü</span>${L.length?`<span class="chip">${L.length} kalem · ${v} var · ${y} yok${e?" · "+e+" envanterde yok":""}</span>`:""}<span class="sp"></span><button data-act="close">Kapat</button></div>
  <textarea id="lkt" aria-label="Kod listesi" placeholder="Kodları ya da barkodları yapıştır (alt alta, virgül ya da boşlukla)" style="width:100%;height:120px;font:13px monospace;background:var(--card);color:var(--fg);border:1px solid var(--bd);border-radius:8px;padding:8px;box-sizing:border-box">${esc(lkMetin)}</textarea>
- <div class="top" style="margin-top:8px"><button class="dk" data-act="lkok">Kontrol et</button>${L.length?`<button data-act="lkkop">Sonucu kopyala</button><button data-act="lkxls">Excel indir</button>`:""}<span class="sp"></span><span class="date">Satırın üzerine gel: renk dağılımı</span></div>
- ${L.length?`<div class="box"><table style="min-width:0"><tr><th>Kod / barkod</th><th>Ürün adı</th><th class="n">Stok</th><th>Durum</th></tr>${L.map(x=>`<tr class="lk-s" data-ip="${esc(x.ip)}"><td>${esc(x.q)}</td><td style="white-space:normal">${esc(x.ad)}</td><td class="n">${x.top}</td><td><span class="chip ${x.durum==="Var"?"":"w"}">${x.durum}</span></td></tr>`).join("")}</table></div>`:'<div class="empty">Listeyi yapıştırıp Kontrol et\'e bas.</div>'}
+ <div class="top" style="margin-top:8px"><button class="dk" data-act="lkok">Kontrol et</button>${L.length?`<button data-act="lkkop">Sonucu kopyala</button><button data-act="lkxls">Excel indir</button>`:""}<span class="sp"></span><span class="date"><b style="color:#e8830c">■</b> Eksi renk var · Satırın üzerine gel: renk dağılımı</span></div>
+ ${L.length?`<div class="box"><table style="min-width:0"><tr><th>Kod / barkod</th><th>Ürün adı</th><th class="n">Stok</th><th>Durum</th></tr>${L.map(x=>`<tr class="lk-s${x.neg?" lk-neg":""}" data-ip="${esc(x.ip)}"><td>${esc(x.q)}</td><td style="white-space:normal">${esc(x.ad)}</td><td class="n">${x.top}</td><td><span class="chip ${x.durum==="Var"?"":"w"}">${x.durum}</span></td></tr>`).join("")}</table></div>`:'<div class="empty">Listeyi yapıştırıp Kontrol et\'e bas.</div>'}
  </div></div>`}
 function lkTsv(){return[["Kod","Ürün adı","Stok","Durum","Renkler"],...lkSonuc().map(x=>[x.q,x.ad,x.top,x.durum,x.ip])].map(r=>r.join("\t")).join("\n")}
 function urunKirik(){const KM=kmap(),m=new Map();if(!KM.size)return m;for(const r of data.rows){const v=KM.get(rkey(r));if(v)m.set(r.kod,(m.get(r.kod)||0)+v)}return m}
