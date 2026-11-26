@@ -551,6 +551,9 @@ if(!document.documentElement.classList.contains('tel')){
   }
   .kam-baslik{ font-size:calc(var(--k)*16px); font-weight:700; }
   .kam-baslik small{ display:block; font-size:calc(var(--k)*12px); font-weight:400; opacity:.75; margin-top:2px; }
+  .kam-sag{ display:flex; gap:calc(var(--k)*8px); align-items:center; }
+  .kam-genis{ height:calc(var(--k)*40px); min-width:calc(var(--k)*52px); border-radius:calc(var(--k)*20px); border:none; cursor:pointer; background:rgba(255,255,255,.18); color:#fff; font-weight:700; font-size:calc(var(--k)*15px); }
+  .kam-genis.acik{ background:#ffd54f; color:#222; }
   .kam-kapat{
     width:calc(var(--k)*40px); height:calc(var(--k)*40px); border-radius:50%; border:none; cursor:pointer;
     background:rgba(255,255,255,.18); color:#fff; font-size:calc(var(--k)*18px);
@@ -1591,7 +1594,7 @@ if(!document.documentElement.classList.contains('tel')){
 
 // Uygulama sürümü: her güncellemede bir artırılır. Sürüm rozetine tıklayınca
 // sunucudaki sayfanın sürümüyle karşılaştırılır, yenisi varsa sayfa yenilenir.
-const APP_SURUM = 101;
+const APP_SURUM = 102;
 
 // ==================== ARAYÜZ: pencere, onay, bildirim ====================
 // Tarayıcının alert/confirm/prompt pencereleri yerine uygulamaya ait pencereler.
@@ -2157,6 +2160,7 @@ function ekranGoster(ad){
   document.getElementById('bolgePaneli').style.display = ad === 'panel' ? '' : 'none';
   document.getElementById('appRoot').style.display = ad === 'uygulama' ? '' : 'none';
   if(ad === 'uygulama') kisayolCalistir();
+  if(ad === 'uygulama') setTimeout(trBekleyenKontrol, 1500);
   // Veri sekmesi arka planda önceden yüklenir; tıklayınca beklemeden açılır.
   if(ad === 'uygulama') setTimeout(()=>{ try{ veriAc(); }catch(e){} }, 2500);
 }
@@ -7405,7 +7409,8 @@ async function trKameraAc(){
       '<video autoplay playsinline muted></video>' +
       '<div class="kam-flas"></div>' +
       '<div class="kam-ust"><div class="kam-baslik"></div>' +
-        '<button class="kam-kapat" type="button" title="Kapat">✕</button></div>' +
+        '<span class="kam-sag"><button class="kam-genis" type="button" hidden>0.5×</button>' +
+        '<button class="kam-kapat" type="button" title="Kapat">✕</button></span></div>' +
     '</div>' +
     '<div class="kam-alt">' +
       '<div class="kam-serit"></div>' +
@@ -7419,8 +7424,10 @@ async function trKameraAc(){
   const video = ov.querySelector('video');
   video.srcObject = stream;
   try{ await video.play(); }catch(e){ /* autoplay ile zaten oynar */ }
-  kamera = {ov, video, stream, mesgul:false};
+  kamera = {ov, video, stream, mesgul:false, genis:false, sira:0};
   ov.querySelector('.kam-kapat').addEventListener('click', kameraKapat);
+  ov.querySelector('.kam-genis').addEventListener('click', kamGenisDegistir);
+  kamGenisHazirla();
   ov.querySelector('[data-act="kapat"]').addEventListener('click', kameraKapat);
   ov.querySelector('.kam-deklansor').addEventListener('click', kameraCek);
   ov.querySelector('[data-act="gonder"]').addEventListener('click', ()=>{
@@ -7494,6 +7501,48 @@ function kameraCek(){
   kamera.mesgul = false;
 }
 
+// Geniş açı: cihaz zoom < 1 destekliyorsa zoom ile, yoksa arka kameralar arasında geçiş (iPhone'da "Ultra Wide").
+async function kamGenisHazirla(){
+  if(!kamera) return;
+  const b = kamera.ov.querySelector('.kam-genis');
+  try{
+    const tr = kamera.stream.getVideoTracks()[0], cap = tr.getCapabilities ? tr.getCapabilities() : {};
+    if(cap.zoom && cap.zoom.min < 1){ kamera.zoom = {min: cap.zoom.min, normal: Math.max(1, cap.zoom.min)}; b.textContent = cap.zoom.min.toFixed(1).replace('.0', '') + '×'; b.hidden = false; return; }
+    const cihazlar = (await navigator.mediaDevices.enumerateDevices()).filter(d=> d.kind === 'videoinput');
+    const arka = cihazlar.filter(d=> !/front|ön|user|facetime/i.test(d.label));
+    if(arka.length < 2) return;
+    const genis = arka.find(d=> /ultra|geniş|0[.,]5/i.test(d.label));
+    kamera.arka = arka; kamera.genisId = genis ? genis.deviceId : null;
+    kamera.normalId = tr.getSettings ? tr.getSettings().deviceId : null;
+    b.textContent = genis ? '0.5×' : '🔄';
+    b.title = genis ? 'Geniş kamera' : 'Arka kamerayı değiştir';
+    b.hidden = false;
+  }catch(e){}
+}
+async function kamAkisDegistir(deviceId){
+  const yeni = await navigator.mediaDevices.getUserMedia({audio:false, video:{deviceId:{exact:deviceId}, width:{ideal:4096}, height:{ideal:4096}}});
+  kamera.stream.getTracks().forEach(t=> t.stop());
+  kamera.stream = yeni; kamera.video.srcObject = yeni;
+  try{ await kamera.video.play(); }catch(e){}
+}
+async function kamGenisDegistir(){
+  if(!kamera || kamera.mesgul) return;
+  const b = kamera.ov.querySelector('.kam-genis');
+  try{
+    if(kamera.zoom){
+      kamera.genis = !kamera.genis;
+      await kamera.stream.getVideoTracks()[0].applyConstraints({advanced:[{zoom: kamera.genis ? kamera.zoom.min : kamera.zoom.normal}]});
+    } else if(kamera.genisId){
+      kamera.genis = !kamera.genis;
+      await kamAkisDegistir(kamera.genis ? kamera.genisId : (kamera.normalId || kamera.arka[0].deviceId));
+    } else if(kamera.arka){
+      kamera.sira = (kamera.sira + 1) % kamera.arka.length;
+      await kamAkisDegistir(kamera.arka[kamera.sira].deviceId);
+    }
+    b.classList.toggle('acik', !!kamera.genis);
+  }catch(e){ setTransferDurum('Kamera değiştirilemedi: ' + e.message, true); }
+}
+
 function kameraKapat(){
   if(!kamera) return;
   kamera.stream.getTracks().forEach(t=> t.stop());
@@ -7511,39 +7560,52 @@ function fotoBelgeId(tid, sira, p){
   return tid + '_' + sira + (p ? '_' + p : '');
 }
 
-async function transferKaydet(fotolar){
+// Bütün parçalar ve ana kayıt BAŞTAN sıraya konur (beklemeden). Firestore yazmaları cihazda saklar ve sırayla gönderir:
+// uygulama arka plana atılsa ya da kapatılsa bile kuyruk kaybolmaz, uygulama tekrar açılınca kaldığı yerden devam eder.
+// Ana kayıt en son sıraya konduğu için bilgisayar yarım kalmış bir kaydı görmez.
+function transferKaydet(fotolar){
   const ref = sdb('transfers').doc();
-  const parcaSayilari = [];
+  const parcaSayilari = [], isler = [];
   for(let i=0;i<fotolar.length;i++){
     const parcalar = fotoParcalari(fotolar[i].full);
     parcaSayilari.push(parcalar.length);
-    for(let p=0;p<parcalar.length;p++){
-      setTransferDurum('Gönderiliyor: fotoğraf ' + (i+1) + '/' + fotolar.length +
-        (parcalar.length > 1 ? ' (%' + Math.round((p+1) / parcalar.length * 100) + ')' : '') + '...');
-      await sdb('transferFotos').doc(fotoBelgeId(ref.id, i+1, p)).set({
-        tid: ref.id, sira: i+1, parca: p, data: parcalar[p]
-      });
-    }
+    for(let p=0;p<parcalar.length;p++)
+      isler.push(sdb('transferFotos').doc(fotoBelgeId(ref.id, i+1, p)).set({tid: ref.id, sira: i+1, parca: p, data: parcalar[p]}));
   }
-  // Ana kayıt en son yazılır; bilgisayar yarım kalmış bir kaydı görmez.
-  await ref.set({
+  isler.push(ref.set({
     tip: 'genel',
     siralar: fotolar.map((f,i)=> i+1),
     parcalar: parcaSayilari,
     thumbs: fotolar.map(f=> f.thumb),
     createdAtMs: Date.now(),
     by: guncelleyenAdi()
-  });
+  }));
+  return isler;
 }
 
+// Uygulama yarım kalmış bir gönderimle açıldıysa: Firestore kuyruğu kendiliğinden devam eder, bitince haber verilir.
+function trBekleyenKontrol(){
+  let v = null; try{ v = localStorage.getItem('trBekleyen'); }catch(e){}
+  if(!v || typeof db === 'undefined' || !db.waitForPendingWrites) return;
+  uiBildirim('Yarım kalan transfer gönderiliyor…', '', 0);
+  db.waitForPendingWrites().then(()=>{ try{ localStorage.removeItem('trBekleyen'); }catch(e){} uiBildirim('✓ Yarım kalan transfer gönderildi', 'basari', 4000); if(typeof renderTransferListesi === 'function') renderTransferListesi(); }).catch(()=>{});
+}
 async function trGonder(){
   if(transferMesgul) return;
   if(!trFotolar.length){ setTransferDurum('Önce fotoğraf ekleyin.', true); return; }
   transferMesgul = true;
   document.getElementById('trGonderBtn').disabled = true;
   try{
-    await transferKaydet(trFotolar);
+    const isler = transferKaydet(trFotolar), n = trFotolar.length;
+    try{ localStorage.setItem('trBekleyen', String(Date.now())); }catch(e){}
+    // Fotoğraflar kuyruğa alındı; ekran hemen temizlenir, yeni fotoğraf çekilebilir.
     trTemizle();
+    let biten = 0;
+    const yaz = ()=> setTransferDurum('Gönderiliyor %' + Math.round(biten / isler.length * 100) + ' (' + n + ' fotoğraf)... Uygulamadan çıkabilirsiniz, açınca kaldığı yerden devam eder.');
+    yaz();
+    isler.forEach(p=> p.then(()=>{ biten++; yaz(); }));
+    await Promise.all(isler);
+    try{ localStorage.removeItem('trBekleyen'); }catch(e){}
     setTransferDurum('✓ Gönderildi.');
   }catch(e){
     setTransferDurum('Gönderilemedi: ' + e.message, true);
